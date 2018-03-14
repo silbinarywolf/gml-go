@@ -1,0 +1,14 @@
+language: go
+
+go:
+  - 1.10.x
+  - master
+
+matrix:
+  # It's ok if our code fails on unstable development versions of Go.
+  allow_failures: 
+    - go: master
+
+script:
+  - go test ./...
+  - go vet ./...

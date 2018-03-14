@@ -9,6 +9,7 @@ func (e *Entity) PlaceFree(position Vec) bool {
 			continue
 		}
 		// todo: actually detect collision with another entity
+		panic("todo(Jake): Actually detect collision with another entity")
 	}
 	return true
 }

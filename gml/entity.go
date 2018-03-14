@@ -6,9 +6,11 @@ import (
 	"github.com/hajimehoshi/ebiten"
 )
 
+type EntityID int
+
 type EntityType interface {
 	BaseEntity() *Entity
-	ID() int
+	ID() EntityID
 	Create()
 	Update()
 	Draw()
