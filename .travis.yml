@@ -1,14 +1,31 @@
 language: go
 
 go:
-  - 1.10.x
-  - master
+  - "1.10"
 
-matrix:
-  # It's ok if our code fails on unstable development versions of Go.
-  allow_failures: 
-    - go: master
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - libasound2-dev
+      - libglew-dev # required by headless-gl.
+      - libgles2-mesa-dev
+      - libalut-dev
+      - libxcursor-dev
+      - libxi-dev
+      - libxinerama-dev
+      - libxrandr-dev
+      - libxxf86vm-dev
+
+install:
+  - go get -t -v github.com/hajimehoshi/ebiten/...
+
+before_script:
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - sleep 3
 
 script:
-  - go test ./...
-  - go vet ./...
+  - go build -v ./...
+  - go test -v ./...
