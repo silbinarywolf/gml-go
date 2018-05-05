@@ -43,5 +43,6 @@ func Run(gameStartFunc func(), updateFunc func(), width int, height int, title s
 	g_customFunc.update = updateFunc
 
 	g_customFunc.gameStart()
+	ebiten.SetRunnableInBackground(true)
 	ebiten.Run(update, width, height, 2, title)
 }

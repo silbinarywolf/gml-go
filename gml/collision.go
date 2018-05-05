@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-var DEBUG_COLLISION = true
+var DEBUG_COLLISION = false
 
 func (e *Entity) PlaceFree(position Vec) bool {
 	entities := g_entityManager.entities
