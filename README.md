@@ -1,6 +1,6 @@
 # Game Maker Language Go
 
-[![Build Status](https://travis-ci.org/silbinarywolf/gml-go.svg?branch=master)](https://travis-ci.org/symbiote/silverstripe-gridfieldextensions)
+[![Build Status](https://travis-ci.org/silbinarywolf/gml-go.svg?branch=master)](https://travis-ci.org/silbinarywolf/gml-go)
 
 **NOTE: This is currently a hobby project and not meant for any use other than my own. If you are interested in this or use this, please let me know so I can improve documentation, tagging, etc**
 
