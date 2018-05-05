@@ -55,39 +55,68 @@ const (
 	VkSubtract // subtract key on the numeric keypad
 	VkDecimal  // decimal dot keys on the numeric keypad
 
+	// The following in GML are letters keys, handled like: keyboard_check(ord("R")), however we'll just use VK
+	VkA
+	VkB
+	VkC
+	VkD
+	VkE
+	VkF
+	VkG
+	VkH
+	VkI
+	VkJ
+	VkK
+	VkL
+	VkM
+	VkN
+	VkO
+	VkP
+	VkQ
+	VkR
+	VkS
+	VkT
+	VkU
+	VkV
+	VkW
+	VkX
+	VkY
+	VkZ
+
 	// The following constants can only be used with keyboard_check_direct()
-	VkLShift
-	VkLControl
-	VkLAlt
-	VkRShift
-	VkRControl
-	VkRAlt
+	// Therefore, they are not supported.
+	//VkLShift
+	//VkLControl
+	//VkLAlt
+	//VkRShift
+	//VkRControl
+	//VkRAlt
 )
 
 var g_vkToKey = []ebiten.Key{
-	VkNoKey:       -1,                    // keycode representing that no key is pressed
-	VkAnykey:      0,                     // keycode representing that any key is pressed
-	VkLeft:        ebiten.KeyLeft,        // keycode for left arrow key
-	VkRight:       ebiten.KeyRight,       // keycode for right arrow key
-	VkUp:          ebiten.KeyUp,          // keycode for up arrow key
-	VkDown:        ebiten.KeyDown,        // keycode for down arrow key
-	VkEnter:       ebiten.KeyEnter,       // enter key
-	VkEscape:      ebiten.KeyEscape,      // escape key
-	VkSpace:       ebiten.KeySpace,       // space key
-	VkShift:       ebiten.KeyShift,       // either of the shift keys
-	VkControl:     ebiten.KeyControl,     // either of the control keys
-	VkAlt:         ebiten.KeyAlt,         // alt key
-	VkBackspace:   ebiten.KeyBackslash,   // backspace key
-	VkTab:         ebiten.KeyTab,         // tab key
-	VkHome:        ebiten.KeyHome,        // home key
-	VkEnd:         ebiten.KeyEnd,         // end key
-	VkDelete:      ebiten.KeyDelete,      // delete key
-	VkInsert:      ebiten.KeyInsert,      // insert key
-	VkPageUp:      ebiten.KeyPageUp,      // pageup key
-	VkPageDown:    ebiten.KeyPageDown,    // pagedown key
-	VkPause:       0,                     // pause/break key
-	VkPrintScreen: ebiten.KeyLeftBracket, // printscreen/sysrq key
-	VkF1:          ebiten.KeyF1,          // keycode for the function keys F1 to F12
+	VkNoKey:       -1,                  // keycode representing that no key is pressed
+	VkAnykey:      0,                   // keycode representing that any key is pressed
+	VkLeft:        ebiten.KeyLeft,      // keycode for left arrow key
+	VkRight:       ebiten.KeyRight,     // keycode for right arrow key
+	VkUp:          ebiten.KeyUp,        // keycode for up arrow key
+	VkDown:        ebiten.KeyDown,      // keycode for down arrow key
+	VkEnter:       ebiten.KeyEnter,     // enter key
+	VkEscape:      ebiten.KeyEscape,    // escape key
+	VkSpace:       ebiten.KeySpace,     // space key
+	VkShift:       ebiten.KeyShift,     // either of the shift keys
+	VkControl:     ebiten.KeyControl,   // either of the control keys
+	VkAlt:         ebiten.KeyAlt,       // alt key
+	VkBackspace:   ebiten.KeyBackslash, // backspace key
+	VkTab:         ebiten.KeyTab,       // tab key
+	VkHome:        ebiten.KeyHome,      // home key
+	VkEnd:         ebiten.KeyEnd,       // end key
+	VkDelete:      ebiten.KeyDelete,    // delete key
+	VkInsert:      ebiten.KeyInsert,    // insert key
+	VkPageUp:      ebiten.KeyPageUp,    // pageup key
+	VkPageDown:    ebiten.KeyPageDown,  // pagedown key
+	VkPause:       0,                   // pause/break key
+	VkPrintScreen: 0,                   // printscreen/sysrq key
+	VkF1:          ebiten.KeyF1,        // keycode for the function keys F1 to F12
 	VkF2:          ebiten.KeyF2,
 	VkF3:          ebiten.KeyF3,
 	VkF4:          ebiten.KeyF4,
@@ -115,12 +144,41 @@ var g_vkToKey = []ebiten.Key{
 	VkSubtract:    ebiten.KeyMinus, // subtract key on the numeric keypad
 	VkDecimal:     0,               // decimal dot keys on
 
-	VkLShift:   0,
-	VkLControl: 0,
-	VkLAlt:     0,
-	VkRShift:   0,
-	VkRControl: 0,
-	VkRAlt:     0,
+	// The following in GML are letters keys, handled like: keyboard_check(ord("R")), however we'll just use VK
+	VkA: ebiten.KeyA,
+	VkB: ebiten.KeyB,
+	VkC: ebiten.KeyC,
+	VkD: ebiten.KeyD,
+	VkE: ebiten.KeyE,
+	VkF: ebiten.KeyF,
+	VkG: ebiten.KeyG,
+	VkH: ebiten.KeyH,
+	VkI: ebiten.KeyI,
+	VkJ: ebiten.KeyJ,
+	VkK: ebiten.KeyK,
+	VkL: ebiten.KeyL,
+	VkM: ebiten.KeyM,
+	VkN: ebiten.KeyN,
+	VkO: ebiten.KeyO,
+	VkP: ebiten.KeyP,
+	VkQ: ebiten.KeyQ,
+	VkR: ebiten.KeyR,
+	VkS: ebiten.KeyS,
+	VkT: ebiten.KeyT,
+	VkU: ebiten.KeyU,
+	VkV: ebiten.KeyV,
+	VkW: ebiten.KeyW,
+	VkX: ebiten.KeyX,
+	VkY: ebiten.KeyY,
+	VkZ: ebiten.KeyZ,
+
+	// Not supported by Game Maker outside of Windows platform.
+	//VkLShift:   0,
+	//VkLControl: 0,
+	//VkLAlt:     0,
+	//VkRShift:   0,
+	//VkRControl: 0,
+	//VkRAlt:     0,
 }
 
 func KeyboardCheck(key int16) bool {

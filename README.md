@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/silbinarywolf/gml-go.svg?branch=master)](https://travis-ci.org/symbiote/silverstripe-gridfieldextensions)
 
+**NOTE: This is currently a hobby project and not meant for any use other than my own. If you are interested in this or use this, please let me know so I can improve documentation, tagging, etc**
+
 This is a library / framework that aims to create workflow like Game Maker, but utilizing the Go programming language.
 
 ## Install

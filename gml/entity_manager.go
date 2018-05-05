@@ -4,8 +4,12 @@ import "reflect"
 
 var g_entityManager entityManager
 
+type entityManagerResettableData struct {
+	entities []EntityType
+}
+
 type entityManager struct {
-	entities       []EntityType
+	entityManagerResettableData
 	idToEntityData []EntityType
 }
 
@@ -20,6 +24,10 @@ func InstanceCreate(position Vec, entityID int) {
 	be.init()
 	e.Create()
 	be.Vec = position
+}
+
+func (manager *entityManager) reset() {
+	manager.entityManagerResettableData = entityManagerResettableData{}
 }
 
 func (manager *entityManager) update() {

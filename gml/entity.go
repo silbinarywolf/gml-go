@@ -19,6 +19,7 @@ type EntityType interface {
 type Entity struct {
 	SpriteState               // Sprite (contains SetSprite)
 	Vec                       // Position (contains X,Y)
+	Size              Vec     // Size (X,Y)
 	imageAngleRadians float64 // Image Angle
 	imageScale        Vec
 }
@@ -32,6 +33,19 @@ func (e *Entity) BaseEntity() *Entity        { return e }
 func (e *Entity) ImageAngleRadians() float64 { return e.imageAngleRadians }
 func (e *Entity) ImageAngle() float64        { return e.imageAngleRadians * (180 / math.Pi) }
 func (e *Entity) ImageScale() Vec            { return e.imageScale }
+
+func (e *Entity) SetSprite(sprite *Sprite) {
+	e.SpriteState.SetSprite(sprite)
+
+	// Infer width and height if they aren't manually set
+	// (This might be a bad idea, too magic! But feels like Game Maker, so...)
+	if e.Size.X == 0 {
+		e.Size.X = sprite.size.X
+	}
+	if e.Size.Y == 0 {
+		e.Size.Y = sprite.size.Y
+	}
+}
 
 func (e *Entity) SetImageAngle(angleInDegrees float64) {
 	e.imageAngleRadians = angleInDegrees * (math.Pi / 180)

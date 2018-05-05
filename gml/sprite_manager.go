@@ -58,8 +58,7 @@ func LoadSprite(name string) *Sprite {
 		frames = append(frames, sheet)
 	}
 
-	result := new(Sprite)
-	result.frames = frames
+	result := newSprite(name, frames)
 	manager.assetMap[name] = result
 	return result
 }
