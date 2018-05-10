@@ -13,7 +13,7 @@ type entityManager struct {
 	idToEntityData []EntityType
 }
 
-func InstanceCreate(position Vec, entityID int) {
+func InstanceCreate(position Vec, entityID int) EntityType {
 	if entityID == 0 {
 		panic("Cannot pass 0 as 2nd parameter to InstanceCreate(position, entityID)")
 	}
@@ -24,6 +24,7 @@ func InstanceCreate(position Vec, entityID int) {
 	be.init()
 	e.Create()
 	be.Vec = position
+	return e
 }
 
 func (manager *entityManager) reset() {
