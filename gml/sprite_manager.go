@@ -3,9 +3,9 @@ package gml
 import (
 	"fmt"
 	"image"
-	"os"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/ebitenutil"
 )
 
 var g_spriteManager = newSpriteManager()
@@ -39,7 +39,7 @@ func LoadSprite(name string) *Sprite {
 	frames := make([]*ebiten.Image, 0, 10)
 	for i := 0; true; i++ {
 		path := fmt.Sprintf("%s%d.png", folderPath, i)
-		imageFileData, err := os.Open(path)
+		imageFileData, err := ebitenutil.OpenFile(path)
 		if err != nil {
 			if i == 0 {
 				panic(fmt.Errorf("Unable to find image: %s", path))

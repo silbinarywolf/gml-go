@@ -20,6 +20,7 @@ type Entity struct {
 	SpriteState               // Sprite (contains SetSprite)
 	Vec                       // Position (contains X,Y)
 	Size              Vec     // Size (X,Y)
+	index             int     // index in the 'entities' array
 	imageAngleRadians float64 // Image Angle
 	imageScale        Vec
 }
