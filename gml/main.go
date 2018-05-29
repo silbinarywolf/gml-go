@@ -29,8 +29,9 @@ func update(s *ebiten.Image) error {
 	return nil
 }
 
-func Init(idToEntityData []EntityType) {
+func Init(idToEntityData []EntityType, nameToID map[string]EntityID) {
 	g_entityManager.idToEntityData = idToEntityData
+	g_entityManager.nameToID = nameToID
 }
 
 func Update() {

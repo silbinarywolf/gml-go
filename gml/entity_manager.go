@@ -11,13 +11,19 @@ type entityManagerResettableData struct {
 type entityManager struct {
 	entityManagerResettableData
 	idToEntityData []EntityType
+	nameToID       map[string]EntityID
+}
+
+func GetEntityIDFromName(name string) (EntityID, bool) {
+	res, ok := g_entityManager.nameToID[name]
+	return res, ok
 }
 
 func Instances() []EntityType {
 	return g_entityManager.entities
 }
 
-func InstanceCreate(position Vec, entityID int) EntityType {
+func InstanceCreate(position Vec, entityID EntityID) EntityType {
 	if entityID == 0 {
 		panic("Cannot pass 0 as 2nd parameter to InstanceCreate(position, entityID)")
 	}

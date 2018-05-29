@@ -6,7 +6,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 )
 
-type EntityID int
+type EntityID int32
 
 type EntityType interface {
 	BaseEntity() *Entity

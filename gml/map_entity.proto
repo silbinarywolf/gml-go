@@ -1,0 +1,8 @@
+syntax = "proto3";
+package gml;
+
+message MapEntity {
+    int32 EntityID = 1;
+    int64 X = 2;
+    int64 Y = 3;
+}
