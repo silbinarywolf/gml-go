@@ -10,10 +10,22 @@ import (
 	"path/filepath"
 )
 
+var (
+	workingDirectory string
+)
+
 func currentDirectory() string {
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	return workingDirectory
+}
+
+func WorkingDirectory() string {
+	return workingDirectory
+}
+
+func init() {
+	var err error
+	workingDirectory, err = filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		panic(err)
 	}
-	return dir
 }

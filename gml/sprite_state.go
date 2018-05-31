@@ -19,8 +19,8 @@ func (state *SpriteState) SetSprite(sprite *Sprite) {
 	// todo(Jake): 2018-03-12 - Reset to config.json sprite_speed
 }
 
-func (state *SpriteState) SetImageIndex(newImageIndex float64) {
-	state.imageIndex = newImageIndex
+func (state *SpriteState) SetImageIndex(imageIndex float64) {
+	state.imageIndex = imageIndex
 	if state.imageIndex > state.imageNumber {
 		state.imageIndex = 0
 	}

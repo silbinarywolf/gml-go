@@ -15,7 +15,7 @@ func DrawText(position Vec, message string) {
 	if !g_fontManager.hasFontSet() {
 		panic("Must call DrawSetFont() before calling DrawText.")
 	}
-	text.Draw(g_screen, message, g_fontManager.currentFont.font, int(position.X), int(position.Y), color.White)
+	text.Draw(gScreen, message, g_fontManager.currentFont.font, int(position.X), int(position.Y), color.White)
 }
 
 func DrawSetFont(font *Font) {

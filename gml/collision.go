@@ -8,23 +8,22 @@ import (
 
 var DEBUG_COLLISION = false
 
-func (e *Entity) PlaceFree(position Vec) bool {
-	entities := g_entityManager.entities
+func (inst *Object) PlaceFree(position Vec) bool {
+	entities := gInstanceManager.entities
 
 	r1Left := position.X
-	r1Right := r1Left + e.Size.X
+	r1Right := r1Left + inst.Size.X
 	r1Top := position.Y
-	r1Bottom := r1Top + e.Size.Y
+	r1Bottom := r1Top + inst.Size.Y
 
 	hasCollision := false
 	var debugString string
 	for _, other := range entities {
-		other := other.BaseEntity()
-		if e == other {
+		other := other.BaseObject()
+		if inst == other {
 			// Skip self
 			continue
 		}
-		//fmt.Printf("Entity \"%s\"\n", other.Sprite().name)
 		r2Left := other.X
 		r2Right := r2Left + other.Size.X
 		r2Top := other.Y
@@ -58,7 +57,7 @@ func (e *Entity) PlaceFree(position Vec) bool {
 				callIndex++
 			}
 		}
-		fmt.Printf("PlaceFree: collision between %s:\n%s%s\n\n", e.Sprite().name, debugString, message)
+		//fmt.Printf("PlaceFree: collision between %s:\n%s%s\n\n", e.Sprite().name, debugString, message)
 	}
 	//fmt.Printf("EndPlaceFree\n\n")
 	return !hasCollision

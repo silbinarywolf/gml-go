@@ -68,15 +68,15 @@ func (m *Map) readEntity(entityFilepath string) {
 		log.Printf("Error parsing entity, error: %s.\n", err)
 		return
 	}
-	entityID, ok := GetEntityIDFromName(entityName)
+	objectIndex, ok := ObjectGetIndex(entityName)
 	if !ok {
 		log.Printf("Missing mapping of name \"%s\" to entity ID. Is this name defined in your gml.Init()?", entityName)
 		return
 	}
 	m.Entities = append(m.Entities, &MapEntity{
-		EntityID: int32(entityID),
-		X:        x,
-		Y:        y,
+		ObjectIndex: int32(objectIndex),
+		X:           x,
+		Y:           y,
 	})
 }
 

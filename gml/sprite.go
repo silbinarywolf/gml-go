@@ -38,5 +38,5 @@ func (sprite *Sprite) DrawSprite(subimage float64, position Vec) {
 
 	op := ebiten.DrawImageOptions{}
 	op.GeoM.Translate(position.X, position.Y)
-	g_screen.DrawImage(frame, &op)
+	gScreen.DrawImage(frame, &op)
 }
