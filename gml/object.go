@@ -8,7 +8,7 @@ type ObjectIndex int32
 
 type ObjectType interface {
 	BaseObject() *Object
-	ID() ObjectIndex
+	ObjectIndex() ObjectIndex
 	Create()
 	Update()
 	Draw()
