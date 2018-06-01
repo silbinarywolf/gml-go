@@ -1,8 +1,0 @@
-syntax = "proto3";
-package gml;
-
-import "map_entity.proto";
-
-message Map {
-    repeated MapEntity Entities = 1;
-}

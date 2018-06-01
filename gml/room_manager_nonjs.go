@@ -19,26 +19,26 @@ import (
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 )
 
-func (m *Map) writeDataFile(mapDir string) error {
-	data, err := m.Marshal()
+func (room *Room) writeDataFile(roomPath string) error {
+	data, err := room.Marshal()
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(mapDir+".data", data, 0644)
+	err = ioutil.WriteFile(roomPath+".data", data, 0644)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m *Map) readEntity(entityFilepath string) {
-	fmt.Printf("Loading %s...\n", entityFilepath)
-	entityFileData, err := ebitenutil.OpenFile(entityFilepath)
+func (room *Room) readInstance(instancePath string) {
+	println("Loading ", instancePath, "...")
+	instanceFileData, err := ebitenutil.OpenFile(instancePath)
 	if err != nil {
 		panic(fmt.Errorf("Unable to find map entity file: %s", err))
 	}
-	bytesData, err := ioutil.ReadAll(entityFileData)
-	entityFileData.Close()
+	bytesData, err := ioutil.ReadAll(instanceFileData)
+	instanceFileData.Close()
 	if err != nil {
 		panic(fmt.Errorf("Unable to find map entity file: Read all: %s\n", err))
 	}
@@ -73,15 +73,15 @@ func (m *Map) readEntity(entityFilepath string) {
 		log.Printf("Missing mapping of name \"%s\" to entity ID. Is this name defined in your gml.Init()?", entityName)
 		return
 	}
-	m.Entities = append(m.Entities, &MapEntity{
+	room.Instances = append(room.Instances, &RoomInstance{
 		ObjectIndex: int32(objectIndex),
 		X:           x,
 		Y:           y,
 	})
 }
 
-func LoadMap(name string) *Map {
-	manager := g_mapManager
+func LoadRoom(name string) *Room {
+	manager := gRoomManager
 
 	// Use already loaded asset
 	if res, ok := manager.assetMap[name]; ok {
@@ -94,19 +94,19 @@ func LoadMap(name string) *Map {
 	//	return mapDataFile
 	//}
 
-	mapDir := currentDirectory() + "/assets/map/" + name
+	roomPath := WorkingDirectory() + "/assets/room/" + name
 
 	// Read entities
-	entityFilepaths := make([]string, 0, 1000)
-	err := filepath.Walk(mapDir, func(path string, info os.FileInfo, err error) error {
+	instancePathList := make([]string, 0, 1000)
+	err := filepath.Walk(roomPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", mapDir, err)
+			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", roomPath, err)
 			return err
 		}
 		if info.IsDir() {
 			return nil
 		}
-		entityFilepaths = append(entityFilepaths, path)
+		instancePathList = append(instancePathList, path)
 		return nil
 	})
 	if err != nil {
@@ -114,12 +114,12 @@ func LoadMap(name string) *Map {
 	}
 
 	//
-	m := new(Map)
-	m.Entities = make([]*MapEntity, 0, 10)
-	for _, entity := range entityFilepaths {
-		m.readEntity(entity)
+	room := new(Room)
+	room.Instances = make([]*RoomInstance, 0, 10)
+	for _, instance := range instancePathList {
+		room.readInstance(instance)
 	}
-	manager.assetMap[name] = m
+	manager.assetMap[name] = room
 
 	// NOTE(Jake): 2018-05-29
 	//
@@ -128,10 +128,10 @@ func LoadMap(name string) *Map {
 	//
 	// Write out *.data file (for browsers / fast client loading)
 	go func() {
-		err := m.writeDataFile(mapDir)
+		err := room.writeDataFile(roomPath)
 		if err != nil {
-			log.Printf("Failed writing %s\nerror: %s", mapDir, err)
+			log.Printf("Failed writing %s\nerror: %s", roomPath, err)
 		}
 	}()
-	return m
+	return room
 }

@@ -2,8 +2,8 @@
 
 package gml
 
-func LoadMap(name string) *Map {
-	manager := g_mapManager
+func LoadRoom(name string) *Map {
+	manager := gRoomManager
 
 	// Use already loaded asset
 	if res, ok := manager.assetMap[name]; ok {
@@ -11,7 +11,7 @@ func LoadMap(name string) *Map {
 	}
 
 	// Load from *.data file if it exists
-	result, err := loadMapFromData(name)
+	result, err := loadRoomFromDataFile(name)
 	if err != nil {
 		panic(err)
 	}
