@@ -20,12 +20,11 @@ type RoomManager struct {
 func newRoomManager() *RoomManager {
 	return &RoomManager{
 		assetMap: make(map[string]*Room),
-		assetDir: WorkingDirectory() + "/assets/room/",
 	}
 }
 
 func loadRoomFromDataFile(name string) (*Room, error) {
-	roomDataPath := gRoomManager.assetDir + name + ".data"
+	roomDataPath := WorkingDirectory() + "/assets/room/" + name + ".data"
 	dataFile, err := ebitenutil.OpenFile(roomDataPath)
 	if err != nil {
 		return nil, err

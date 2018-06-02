@@ -2,7 +2,7 @@
 
 package gml
 
-func LoadRoom(name string) *Map {
+func LoadRoom(name string) *Room {
 	manager := gRoomManager
 
 	// Use already loaded asset
