@@ -31,10 +31,15 @@ func keyboardStringUpdate() {
 		keyboardString.WriteRune(char)
 	}
 
+	// NOTE(Jake): 2018-06-02
+	//
+	// We don't do this as it renders an ugly square character by default.
+	// Also we just don't need to retain the newline for our use-case.
+	//
 	// If the enter key is pressed, add a line break.
-	if repeatingKeyPressed(ebiten.KeyEnter) || repeatingKeyPressed(ebiten.KeyKPEnter) {
-		keyboardString.WriteByte('\n')
-	}
+	//if repeatingKeyPressed(ebiten.KeyEnter) || repeatingKeyPressed(ebiten.KeyKPEnter) {
+	//	keyboardString.WriteByte('\n')
+	//}
 
 	// If the backspace key is pressed, remove one character.
 	if repeatingKeyPressed(ebiten.KeyBackspace) {

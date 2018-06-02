@@ -9,7 +9,7 @@ import (
 	"golang.org/x/image/font"
 )
 
-var g_fontManager FontManager = newFontManager()
+var g_fontManager = newFontManager()
 
 type FontManager struct {
 	currentFont *Font
@@ -20,10 +20,10 @@ func (manager *FontManager) hasFontSet() bool {
 	return manager.currentFont != nil && manager.currentFont.font != nil
 }
 
-func newFontManager() FontManager {
-	manager := FontManager{}
-	manager.assetMap = make(map[string]*Font)
-	return manager
+func newFontManager() *FontManager {
+	return &FontManager{
+		assetMap: make(map[string]*Font),
+	}
 }
 
 type FontSettings struct {

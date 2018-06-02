@@ -91,32 +91,34 @@ const (
 	//VkRShift
 	//VkRControl
 	//VkRAlt
+
+	vkSize
 )
 
 var keyboardVkToEbiten = []ebiten.Key{
-	VkNoKey:       -1,                  // keycode representing that no key is pressed
-	VkAnykey:      0,                   // keycode representing that any key is pressed
-	VkLeft:        ebiten.KeyLeft,      // keycode for left arrow key
-	VkRight:       ebiten.KeyRight,     // keycode for right arrow key
-	VkUp:          ebiten.KeyUp,        // keycode for up arrow key
-	VkDown:        ebiten.KeyDown,      // keycode for down arrow key
-	VkEnter:       ebiten.KeyEnter,     // enter key
-	VkEscape:      ebiten.KeyEscape,    // escape key
-	VkSpace:       ebiten.KeySpace,     // space key
-	VkShift:       ebiten.KeyShift,     // either of the shift keys
-	VkControl:     ebiten.KeyControl,   // either of the control keys
-	VkAlt:         ebiten.KeyAlt,       // alt key
-	VkBackspace:   ebiten.KeyBackslash, // backspace key
-	VkTab:         ebiten.KeyTab,       // tab key
-	VkHome:        ebiten.KeyHome,      // home key
-	VkEnd:         ebiten.KeyEnd,       // end key
-	VkDelete:      ebiten.KeyDelete,    // delete key
-	VkInsert:      ebiten.KeyInsert,    // insert key
-	VkPageUp:      ebiten.KeyPageUp,    // pageup key
-	VkPageDown:    ebiten.KeyPageDown,  // pagedown key
-	VkPause:       0,                   // pause/break key
-	VkPrintScreen: 0,                   // printscreen/sysrq key
-	VkF1:          ebiten.KeyF1,        // keycode for the function keys F1 to F12
+	VkNoKey:       -1,                    // keycode representing that no key is pressed
+	VkAnykey:      0,                     // keycode representing that any key is pressed
+	VkLeft:        ebiten.KeyLeft,        // keycode for left arrow key
+	VkRight:       ebiten.KeyRight,       // keycode for right arrow key
+	VkUp:          ebiten.KeyUp,          // keycode for up arrow key
+	VkDown:        ebiten.KeyDown,        // keycode for down arrow key
+	VkEnter:       ebiten.KeyEnter,       // enter key
+	VkEscape:      ebiten.KeyEscape,      // escape key
+	VkSpace:       ebiten.KeySpace,       // space key
+	VkShift:       ebiten.KeyShift,       // either of the shift keys
+	VkControl:     ebiten.KeyControl,     // either of the control keys
+	VkAlt:         ebiten.KeyAlt,         // alt key
+	VkBackspace:   ebiten.KeyBackslash,   // backspace key
+	VkTab:         ebiten.KeyTab,         // tab key
+	VkHome:        ebiten.KeyHome,        // home key
+	VkEnd:         ebiten.KeyEnd,         // end key
+	VkDelete:      ebiten.KeyDelete,      // delete key
+	VkInsert:      ebiten.KeyInsert,      // insert key
+	VkPageUp:      ebiten.KeyPageUp,      // pageup key
+	VkPageDown:    ebiten.KeyPageDown,    // pagedown key
+	VkPause:       ebiten.KeyPause,       // pause/break key
+	VkPrintScreen: ebiten.KeyPrintScreen, // printscreen/sysrq key
+	VkF1:          ebiten.KeyF1,          // keycode for the function keys F1 to F12
 	VkF2:          ebiten.KeyF2,
 	VkF3:          ebiten.KeyF3,
 	VkF4:          ebiten.KeyF4,
