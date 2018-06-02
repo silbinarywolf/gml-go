@@ -1,8 +1,9 @@
 package gml
 
 import (
-	"fmt"
+	"errors"
 	"image"
+	"strconv"
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
@@ -38,22 +39,22 @@ func LoadSprite(name string) *Sprite {
 	folderPath := WorkingDirectory() + "/assets/sprites/" + name + "/"
 	frames := make([]*ebiten.Image, 0, 10)
 	for i := 0; true; i++ {
-		path := fmt.Sprintf("%s%d.png", folderPath, i)
+		path := folderPath + strconv.Itoa(i) + ".png" //fmt.Sprintf("%s%d.png", folderPath, i)
 		imageFileData, err := ebitenutil.OpenFile(path)
 		if err != nil {
 			if i == 0 {
-				panic(fmt.Errorf("Unable to find image: %s", path))
+				panic(errors.New("Unable to find image: " + path))
 			}
 			break
 		}
 		image, _, err := image.Decode(imageFileData)
 		imageFileData.Close()
 		if err != nil {
-			panic(fmt.Errorf("Unable to decode image: %s", path))
+			panic(errors.New("Unable to decode image: " + path))
 		}
 		sheet, err := ebiten.NewImageFromImage(image, ebiten.FilterDefault)
 		if err != nil {
-			panic(fmt.Errorf("Unable to use image with ebiten.NewImageFromImage: %s", path))
+			panic(errors.New("Unable to use image with ebiten.NewImageFromImage: " + path))
 		}
 		frames = append(frames, sheet)
 	}

@@ -93,7 +93,7 @@ const (
 	//VkRAlt
 )
 
-var g_vkToKey = []ebiten.Key{
+var keyboardVkToEbiten = []ebiten.Key{
 	VkNoKey:       -1,                  // keycode representing that no key is pressed
 	VkAnykey:      0,                   // keycode representing that any key is pressed
 	VkLeft:        ebiten.KeyLeft,      // keycode for left arrow key
@@ -179,8 +179,4 @@ var g_vkToKey = []ebiten.Key{
 	//VkRShift:   0,
 	//VkRControl: 0,
 	//VkRAlt:     0,
-}
-
-func KeyboardCheck(key int16) bool {
-	return ebiten.IsKeyPressed(g_vkToKey[key])
 }

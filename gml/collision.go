@@ -1,12 +1,14 @@
 package gml
 
 import (
-	"fmt"
 	"runtime"
+	"strconv"
 	"strings"
 )
 
-var DEBUG_COLLISION = false
+var (
+	DEBUG_COLLISION = false
+)
 
 func (inst *Object) PlaceFree(position Vec) bool {
 	entities := gInstanceManager.entities
@@ -34,7 +36,7 @@ func (inst *Object) PlaceFree(position Vec) bool {
 			hasCollision = true
 			// Debug
 			if DEBUG_COLLISION {
-				debugString += fmt.Sprintf("- %s\n", other.Sprite().name)
+				debugString += "- " + other.Sprite().name + "\n"
 			}
 		}
 	}
@@ -52,7 +54,7 @@ func (inst *Object) PlaceFree(position Vec) bool {
 					if len(fileParts) >= 3 {
 						file = fileParts[len(fileParts)-3] + "/" + fileParts[len(fileParts)-2] + "/" + fileParts[len(fileParts)-1]
 					}
-					message = fmt.Sprintf("%s%s(%d)", message, file, line)
+					message = message + file + "(" + strconv.Itoa(line) + ")"
 				}
 				callIndex++
 			}

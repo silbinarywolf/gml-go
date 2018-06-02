@@ -7,7 +7,7 @@ import (
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 )
 
-func ReadBytesAsString(path string) (string, error) {
+func ReadFileAsString(path string) (string, error) {
 	path = WorkingDirectory() + "/assets/" + path
 	fileData, err := ebitenutil.OpenFile(path)
 	if err != nil {

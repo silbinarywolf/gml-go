@@ -1,7 +1,7 @@
 package gml
 
 import (
-	"fmt"
+	"errors"
 	"io/ioutil"
 
 	"github.com/golang/freetype/truetype"
@@ -39,19 +39,19 @@ func LoadFont(name string, settings FontSettings) *Font {
 		return result
 	}
 
-	path := fmt.Sprintf("%s/assets/fonts/%s.ttf", currentDirectory(), name)
+	path := WorkingDirectory() + "/assets/fonts/" + name + ".ttf"
 	fileData, err := ebitenutil.OpenFile(path)
 	if err != nil {
-		panic(fmt.Errorf("Unable to find font: %s. Error: %v", path, err))
+		panic(errors.New("Unable to find font: " + path + ". Error: " + err.Error()))
 	}
 	defer fileData.Close()
 	b, err := ioutil.ReadAll(fileData)
 	if err != nil {
-		panic(fmt.Errorf("Unable to read font file into bytes: %s", path))
+		panic(errors.New("Unable to read font file into bytes: " + path))
 	}
 	tt, err := truetype.Parse(b)
 	if err != nil {
-		panic(fmt.Errorf("Unable to parse true type font file: %s", path))
+		panic(errors.New("Unable to parse true type font file: " + path + ", err: " + err.Error()))
 	}
 
 	// Setup defaults
@@ -59,7 +59,7 @@ func LoadFont(name string, settings FontSettings) *Font {
 		settings.DPI = 72
 	}
 	if settings.Size == 0 {
-		settings.Size = 16
+		settings.Size = 12 // 12pt == 16px
 	}
 	font := truetype.NewFace(tt, &truetype.Options{
 		Size:    settings.Size,

@@ -15,6 +15,7 @@ var gScreen *ebiten.Image
 
 func update(s *ebiten.Image) error {
 	gScreen = s
+	keyboardStringUpdate()
 	gMainFunctions.update()
 	if g_game.hasGameRestarted {
 		gInstanceManager.reset()
