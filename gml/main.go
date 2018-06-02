@@ -36,7 +36,13 @@ func Init(idToEntityData []ObjectType, nameToID map[string]ObjectIndex) {
 func Update() {
 	manager := gInstanceManager
 	manager.update()
+	for _, roomInst := range roomInstances {
+		roomInst.update()
+	}
 	manager.draw()
+	for _, roomInst := range roomInstances {
+		roomInst.draw()
+	}
 }
 
 func Run(gameStartFunc func(), updateFunc func(), width int, height int, title string) {

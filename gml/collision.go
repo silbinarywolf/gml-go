@@ -11,7 +11,12 @@ var (
 )
 
 func (inst *Object) PlaceFree(position Vec) bool {
-	entities := gInstanceManager.entities
+	var entities []ObjectType
+	if inst.room == nil {
+		entities = gInstanceManager.entities
+	} else {
+		entities = inst.room.instanceManager.entities
+	}
 
 	r1Left := position.X
 	r1Right := r1Left + inst.Size.X

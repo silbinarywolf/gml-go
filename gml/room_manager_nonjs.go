@@ -73,7 +73,38 @@ func (room *Room) readInstance(instancePath string) {
 		log.Printf("Missing mapping of name \"%s\" to entity ID. Is this name defined in your gml.Init()?", entityName)
 		return
 	}
-	room.Instances = append(room.Instances, &RoomInstance{
+
+	// Set room dimensions
+	{
+		// NOTE(Jake): 2018-06-02
+		//
+		// Probably a slow hack to get the entity size
+		// for building map data on-fly, but whatever!
+		//
+		inst := newInstance(objectIndex).BaseObject()
+		x := int32(x)
+		y := int32(y)
+		width := int32(inst.Size.X)
+		height := int32(inst.Size.Y)
+
+		if x < room.Left {
+			room.Left = x
+		}
+		right := x + width
+		if right > room.Right {
+			room.Right = right
+		}
+		if y < room.Top {
+			room.Top = y
+		}
+		bottom := y + height
+		if bottom > room.Bottom {
+			room.Bottom = bottom + height
+		}
+		//println("Left", room.Left, "Right", room.Right, "Top", room.Top, "Bottom", room.Bottom)
+	}
+
+	room.Instances = append(room.Instances, &RoomObject{
 		ObjectIndex: int32(objectIndex),
 		X:           x,
 		Y:           y,
@@ -100,7 +131,7 @@ func LoadRoom(name string) *Room {
 	instancePathList := make([]string, 0, 1000)
 	err := filepath.Walk(roomPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", roomPath, err)
+			println("prevent panic by handling failure accessing a path " + roomPath + ": " + err.Error())
 			return err
 		}
 		if info.IsDir() {
@@ -115,7 +146,7 @@ func LoadRoom(name string) *Room {
 
 	//
 	room := new(Room)
-	room.Instances = make([]*RoomInstance, 0, 10)
+	room.Instances = make([]*RoomObject, 0, len(instancePathList))
 	for _, instance := range instancePathList {
 		room.readInstance(instance)
 	}
@@ -130,7 +161,7 @@ func LoadRoom(name string) *Room {
 	go func() {
 		err := room.writeDataFile(roomPath)
 		if err != nil {
-			log.Printf("Failed writing %s\nerror: %s", roomPath, err)
+			panic("Failed writing " + roomPath + ", error: " + err.Error())
 		}
 	}()
 	return room

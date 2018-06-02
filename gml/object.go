@@ -15,10 +15,11 @@ type ObjectType interface {
 }
 
 type Object struct {
-	SpriteState               // Sprite (contains SetSprite)
-	Vec                       // Position (contains X,Y)
-	Size              Vec     // Size (X,Y)
-	index             int     // index in the 'entities' array
+	SpriteState           // Sprite (contains SetSprite)
+	Vec                   // Position (contains X,Y)
+	Size              Vec // Size (X,Y)
+	index             int // index in the 'entities' array
+	room              *RoomInstance
 	imageAngleRadians float64 // Image Angle
 	imageScale        Vec
 }
@@ -29,6 +30,7 @@ func (inst *Object) Create() {
 }
 
 func (inst *Object) BaseObject() *Object        { return inst }
+func (inst *Object) Pos() Vec                   { return inst.Vec }
 func (inst *Object) ImageAngleRadians() float64 { return inst.imageAngleRadians }
 func (inst *Object) ImageAngle() float64        { return inst.imageAngleRadians * (180 / math.Pi) }
 func (inst *Object) ImageScale() Vec            { return inst.imageScale }

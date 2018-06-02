@@ -1,8 +1,12 @@
 syntax = "proto3";
 package gml;
 
-import "room_instance.proto";
+import "room_object.proto";
 
 message Room {
-    repeated RoomInstance Instances = 1;
+	int32 Left = 1;
+	int32 Right = 2;
+	int32 Top = 3;
+	int32 Bottom = 4;
+    repeated RoomObject instances = 5;
 }

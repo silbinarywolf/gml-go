@@ -12,6 +12,11 @@ func (manager *instanceManager) reset() {
 
 type instanceManager struct {
 	instanceManagerResettableData
+
+	// todo(Jake): 2018-06-02
+	//
+	// Move these to an objectManager struct
+	//
 	idToEntityData []ObjectType
 	nameToID       map[string]ObjectIndex
 }
@@ -36,25 +41,7 @@ func ObjectGetIndex(name string) (ObjectIndex, bool) {
 //}
 
 func InstanceCreate(position Vec, entityID ObjectIndex) ObjectType {
-	if entityID == 0 {
-		panic("Cannot pass 0 as 2nd parameter to InstanceCreate(position, entityID)")
-	}
-	valToCopy := gInstanceManager.idToEntityData[entityID]
-
-	// Create and add to entity list
-	inst := reflect.New(reflect.ValueOf(valToCopy).Elem().Type()).Interface().(ObjectType)
-	index := len(gInstanceManager.entities)
-	gInstanceManager.entities = append(gInstanceManager.entities, inst)
-
-	// Initialize object
-	baseObj := inst.BaseObject()
-	baseObj.index = index
-	baseObj.Create()
-	inst.Create()
-
-	// Set at instance create position
-	baseObj.Vec = position
-	return inst
+	return gInstanceManager.InstanceCreate(position, entityID)
 }
 
 func InstanceDestroy(entity ObjectType) {
@@ -73,6 +60,32 @@ func InstanceDestroy(entity ObjectType) {
 	//
 }
 
+func (manager *instanceManager) InstanceCreate(position Vec, objectIndex ObjectIndex) ObjectType {
+	// Create and add to entity list
+	inst := newInstance(objectIndex)
+	baseObj := inst.BaseObject()
+	baseObj.index = len(manager.entities)
+	manager.entities = append(manager.entities, inst)
+	return inst
+}
+
+// NOTE(Jake): 2018-06-02
+//
+// Kinda hacky way to get width of instances to calculate room bounds
+//
+func newInstance(entityID ObjectIndex) ObjectType {
+	// Create
+	valToCopy := gInstanceManager.idToEntityData[entityID]
+	inst := reflect.New(reflect.ValueOf(valToCopy).Elem().Type()).Interface().(ObjectType)
+
+	// Initialize object
+	baseObj := inst.BaseObject()
+	baseObj.Create()
+	inst.Create()
+
+	return inst
+}
+
 func (manager *instanceManager) update() {
 	entities := manager.entities
 	for _, inst := range entities {
@@ -89,10 +102,18 @@ func (manager *instanceManager) update() {
 }
 
 func (manager *instanceManager) draw() {
-	for _, inst := range manager.entities {
-		if inst == nil {
+	for i := 0; i < len(cameraList); i++ {
+		currentCamera = &cameraList[i]
+		if !currentCamera.enabled {
 			continue
 		}
-		inst.Draw()
+		currentCamera.update()
+		for _, inst := range manager.entities {
+			if inst == nil {
+				continue
+			}
+			inst.Draw()
+		}
 	}
+	currentCamera = nil
 }
