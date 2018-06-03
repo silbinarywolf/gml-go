@@ -10,28 +10,26 @@ import (
 )
 
 var (
-	workingDirectory string
+	programDirectory string = calculateProgramDir()
 )
 
-func currentDirectory() string {
-	return workingDirectory
+func ProgramDirectory() string {
+	return programDirectory
 }
 
-func WorkingDirectory() string {
-	return workingDirectory
-}
-
-func init() {
-	// Setup working directory
+func calculateProgramDir() string {
+	// Setup program dir
 	location := js.Global.Get("location")
 	result := location.Get("href").String()
 	result = filepath.Dir(result)
 	result = strings.TrimPrefix(result, "file:/")
-	// todo(Jake): 2018-05-31
-	//
-	// Detect https and account for it
-	//
-	result = strings.TrimPrefix(result, "http:/")
-	result = "http://" + result
-	workingDirectory = result
+	if strings.HasPrefix(result, "http:/") {
+		result = strings.TrimPrefix(result, "http:/")
+		result = "http://" + result
+	}
+	if strings.HasPrefix(result, "https:/") {
+		result = strings.TrimPrefix(result, "https:/")
+		result = "https://" + result
+	}
+	return result
 }

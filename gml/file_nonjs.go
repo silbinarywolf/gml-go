@@ -6,26 +6,32 @@
 package gml
 
 import (
-	"os"
 	"path/filepath"
+	"runtime"
 )
 
 var (
-	workingDirectory string
+	programDirectory string = calculateProgramDir()
 )
 
-func currentDirectory() string {
-	return workingDirectory
+func ProgramDirectory() string {
+	return programDirectory
 }
 
-func WorkingDirectory() string {
-	return workingDirectory
-}
+func calculateProgramDir() string {
+	// NOTE(Jake): 2018-06-03
+	//
+	// Using runtime.Caller(2) to get program directory.
+	// We do this so `go test` just works OOTB.
+	//
+	// Source: https://stackoverflow.com/questions/18537257/how-to-get-the-directory-of-the-currently-running-file#comment59595931_18537792
+	//
+	_, filename, _, _ := runtime.Caller(2)
 
-func init() {
 	var err error
-	workingDirectory, err = filepath.Abs(filepath.Dir(os.Args[0]))
+	programDirectory, err := filepath.Abs(filepath.Dir(filename))
 	if err != nil {
 		panic(err)
 	}
+	return programDirectory
 }

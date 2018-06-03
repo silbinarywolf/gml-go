@@ -7,8 +7,16 @@ import (
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 )
 
+var (
+	assetsDirectory string = "▲not-set▲"
+)
+
+func AssetsDirectory() string {
+	return assetsDirectory
+}
+
 func ReadFileAsString(path string) (string, error) {
-	path = WorkingDirectory() + "/assets/" + path
+	path = AssetsDirectory() + "/" + path
 	fileData, err := ebitenutil.OpenFile(path)
 	if err != nil {
 		return "", err
@@ -19,4 +27,8 @@ func ReadFileAsString(path string) (string, error) {
 		return "", err
 	}
 	return strings.TrimSpace(string(bytesData)), nil
+}
+
+func init() {
+	assetsDirectory = ProgramDirectory() + "/assets"
 }

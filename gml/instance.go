@@ -66,6 +66,10 @@ func (manager *instanceManager) InstanceCreate(position Vec, objectIndex ObjectI
 	baseObj := inst.BaseObject()
 	baseObj.index = len(manager.entities)
 	manager.entities = append(manager.entities, inst)
+
+	// Init and set position
+	inst.Create()
+	baseObj.Vec = position
 	return inst
 }
 
@@ -81,7 +85,6 @@ func newInstance(entityID ObjectIndex) ObjectType {
 	// Initialize object
 	baseObj := inst.BaseObject()
 	baseObj.Create()
-	inst.Create()
 
 	return inst
 }

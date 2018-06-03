@@ -24,7 +24,7 @@ func newRoomManager() *RoomManager {
 }
 
 func loadRoomFromDataFile(name string) (*Room, error) {
-	roomDataPath := WorkingDirectory() + "/assets/room/" + name + ".data"
+	roomDataPath := AssetsDirectory() + "/room/" + name + ".data"
 	dataFile, err := ebitenutil.OpenFile(roomDataPath)
 	if err != nil {
 		return nil, err

@@ -36,7 +36,7 @@ func LoadSprite(name string) *Sprite {
 	// This is slow but makes managing assets simpler. Will most likely add something to pack
 	// everything into a texture page for "production" builds.
 	//
-	folderPath := WorkingDirectory() + "/assets/sprites/" + name + "/"
+	folderPath := AssetsDirectory() + "/sprites/" + name + "/"
 	frames := make([]*ebiten.Image, 0, 10)
 	for i := 0; true; i++ {
 		path := folderPath + strconv.Itoa(i) + ".png" //fmt.Sprintf("%s%d.png", folderPath, i)

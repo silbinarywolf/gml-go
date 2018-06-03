@@ -81,11 +81,14 @@ func (room *Room) readInstance(instancePath string) {
 		// Probably a slow hack to get the entity size
 		// for building map data on-fly, but whatever!
 		//
-		inst := newInstance(objectIndex).BaseObject()
+		inst := newInstance(objectIndex)
+		inst.Create()
+
+		baseObj := inst.BaseObject()
 		x := int32(x)
 		y := int32(y)
-		width := int32(inst.Size.X)
-		height := int32(inst.Size.Y)
+		width := int32(baseObj.Size.X)
+		height := int32(baseObj.Size.Y)
 
 		if x < room.Left {
 			room.Left = x
@@ -125,7 +128,7 @@ func LoadRoom(name string) *Room {
 	//	return mapDataFile
 	//}
 
-	roomPath := WorkingDirectory() + "/assets/room/" + name
+	roomPath := AssetsDirectory() + "/room/" + name
 
 	// Read entities
 	instancePathList := make([]string, 0, 1000)

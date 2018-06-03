@@ -1,32 +1,21 @@
 package gml
 
-import "reflect"
-
 type RoomInstance struct {
 	room            *Room
 	instanceManager instanceManager
 }
 
-func (roomInst *RoomInstance) InstanceCreate(position Vec, entityID ObjectIndex) ObjectType {
-	if entityID == 0 {
-		panic("Cannot pass 0 as 2nd parameter to InstanceCreate(position, entityID)")
-	}
-	valToCopy := gInstanceManager.idToEntityData[entityID]
-
+func (roomInst *RoomInstance) InstanceCreate(position Vec, objectIndex ObjectIndex) ObjectType {
 	// Create and add to entity list
 	manager := &roomInst.instanceManager
-	inst := reflect.New(reflect.ValueOf(valToCopy).Elem().Type()).Interface().(ObjectType)
-	index := len(manager.entities)
+	inst := newInstance(objectIndex)
+	baseObj := inst.BaseObject()
+	baseObj.index = len(manager.entities)
+	baseObj.room = roomInst
 	manager.entities = append(manager.entities, inst)
 
-	// Initialize object
-	baseObj := inst.BaseObject()
-	baseObj.index = index
-	baseObj.room = roomInst
-	baseObj.Create()
+	// Init and Set position
 	inst.Create()
-
-	// Set at instance create position
 	baseObj.Vec = position
 	return inst
 }
