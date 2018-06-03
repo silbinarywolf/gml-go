@@ -15,15 +15,23 @@ var _ = fmt.Errorf
 var _ = math.Inf
 
 type RoomObject struct {
-	ObjectIndex int32 `protobuf:"varint,1,opt,name=ObjectIndex,proto3" json:"ObjectIndex,omitempty"`
-	X           int64 `protobuf:"varint,2,opt,name=X,proto3" json:"X,omitempty"`
-	Y           int64 `protobuf:"varint,3,opt,name=Y,proto3" json:"Y,omitempty"`
+	Filename    string `protobuf:"bytes,1,opt,name=Filename,proto3" json:"Filename,omitempty"`
+	ObjectIndex int32  `protobuf:"varint,2,opt,name=ObjectIndex,proto3" json:"ObjectIndex,omitempty"`
+	X           int32  `protobuf:"varint,3,opt,name=X,proto3" json:"X,omitempty"`
+	Y           int32  `protobuf:"varint,4,opt,name=Y,proto3" json:"Y,omitempty"`
 }
 
 func (m *RoomObject) Reset()                    { *m = RoomObject{} }
 func (m *RoomObject) String() string            { return proto.CompactTextString(m) }
 func (*RoomObject) ProtoMessage()               {}
 func (*RoomObject) Descriptor() ([]byte, []int) { return fileDescriptorRoomObject, []int{0} }
+
+func (m *RoomObject) GetFilename() string {
+	if m != nil {
+		return m.Filename
+	}
+	return ""
+}
 
 func (m *RoomObject) GetObjectIndex() int32 {
 	if m != nil {
@@ -32,14 +40,14 @@ func (m *RoomObject) GetObjectIndex() int32 {
 	return 0
 }
 
-func (m *RoomObject) GetX() int64 {
+func (m *RoomObject) GetX() int32 {
 	if m != nil {
 		return m.X
 	}
 	return 0
 }
 
-func (m *RoomObject) GetY() int64 {
+func (m *RoomObject) GetY() int32 {
 	if m != nil {
 		return m.Y
 	}
@@ -64,18 +72,24 @@ func (m *RoomObject) MarshalTo(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if len(m.Filename) > 0 {
+		dAtA[i] = 0xa
+		i++
+		i = encodeVarintRoomObject(dAtA, i, uint64(len(m.Filename)))
+		i += copy(dAtA[i:], m.Filename)
+	}
 	if m.ObjectIndex != 0 {
-		dAtA[i] = 0x8
+		dAtA[i] = 0x10
 		i++
 		i = encodeVarintRoomObject(dAtA, i, uint64(m.ObjectIndex))
 	}
 	if m.X != 0 {
-		dAtA[i] = 0x10
+		dAtA[i] = 0x18
 		i++
 		i = encodeVarintRoomObject(dAtA, i, uint64(m.X))
 	}
 	if m.Y != 0 {
-		dAtA[i] = 0x18
+		dAtA[i] = 0x20
 		i++
 		i = encodeVarintRoomObject(dAtA, i, uint64(m.Y))
 	}
@@ -94,6 +108,10 @@ func encodeVarintRoomObject(dAtA []byte, offset int, v uint64) int {
 func (m *RoomObject) Size() (n int) {
 	var l int
 	_ = l
+	l = len(m.Filename)
+	if l > 0 {
+		n += 1 + l + sovRoomObject(uint64(l))
+	}
 	if m.ObjectIndex != 0 {
 		n += 1 + sovRoomObject(uint64(m.ObjectIndex))
 	}
@@ -149,6 +167,35 @@ func (m *RoomObject) Unmarshal(dAtA []byte) error {
 		}
 		switch fieldNum {
 		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Filename", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRoomObject
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRoomObject
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Filename = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field ObjectIndex", wireType)
 			}
@@ -167,7 +214,7 @@ func (m *RoomObject) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
-		case 2:
+		case 3:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field X", wireType)
 			}
@@ -181,12 +228,12 @@ func (m *RoomObject) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.X |= (int64(b) & 0x7F) << shift
+				m.X |= (int32(b) & 0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-		case 3:
+		case 4:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Y", wireType)
 			}
@@ -200,7 +247,7 @@ func (m *RoomObject) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.Y |= (int64(b) & 0x7F) << shift
+				m.Y |= (int32(b) & 0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -334,13 +381,14 @@ var (
 func init() { proto.RegisterFile("room_object.proto", fileDescriptorRoomObject) }
 
 var fileDescriptorRoomObject = []byte{
-	// 124 bytes of a gzipped FileDescriptorProto
+	// 142 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x12, 0x2c, 0xca, 0xcf, 0xcf,
 	0x8d, 0xcf, 0x4f, 0xca, 0x4a, 0x4d, 0x2e, 0xd1, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0x4e,
-	0xcf, 0xcd, 0x51, 0xf2, 0xe2, 0xe2, 0x0a, 0xca, 0xcf, 0xcf, 0xf5, 0x07, 0x4b, 0x08, 0x29, 0x70,
-	0x71, 0x43, 0x58, 0x9e, 0x79, 0x29, 0xa9, 0x15, 0x12, 0x8c, 0x0a, 0x8c, 0x1a, 0xac, 0x41, 0xc8,
-	0x42, 0x42, 0x3c, 0x5c, 0x8c, 0x11, 0x12, 0x4c, 0x0a, 0x8c, 0x1a, 0xcc, 0x41, 0x8c, 0x11, 0x20,
-	0x5e, 0xa4, 0x04, 0x33, 0x84, 0x17, 0xe9, 0x24, 0x70, 0xe2, 0x91, 0x1c, 0xe3, 0x85, 0x47, 0x72,
-	0x8c, 0x0f, 0x1e, 0xc9, 0x31, 0xce, 0x78, 0x2c, 0xc7, 0x90, 0xc4, 0x06, 0xb6, 0xc9, 0x18, 0x10,
-	0x00, 0x00, 0xff, 0xff, 0xad, 0xde, 0x49, 0x9b, 0x7e, 0x00, 0x00, 0x00,
+	0xcf, 0xcd, 0x51, 0x4a, 0xe3, 0xe2, 0x0a, 0xca, 0xcf, 0xcf, 0xf5, 0x07, 0x4b, 0x08, 0x49, 0x71,
+	0x71, 0xb8, 0x65, 0xe6, 0xa4, 0xe6, 0x25, 0xe6, 0xa6, 0x4a, 0x30, 0x2a, 0x30, 0x6a, 0x70, 0x06,
+	0xc1, 0xf9, 0x42, 0x0a, 0x5c, 0xdc, 0x10, 0x55, 0x9e, 0x79, 0x29, 0xa9, 0x15, 0x12, 0x4c, 0x0a,
+	0x8c, 0x1a, 0xac, 0x41, 0xc8, 0x42, 0x42, 0x3c, 0x5c, 0x8c, 0x11, 0x12, 0xcc, 0x60, 0x71, 0xc6,
+	0x08, 0x10, 0x2f, 0x52, 0x82, 0x05, 0xc2, 0x8b, 0x74, 0x12, 0x38, 0xf1, 0x48, 0x8e, 0xf1, 0xc2,
+	0x23, 0x39, 0xc6, 0x07, 0x8f, 0xe4, 0x18, 0x67, 0x3c, 0x96, 0x63, 0x48, 0x62, 0x03, 0xbb, 0xc2,
+	0x18, 0x10, 0x00, 0x00, 0xff, 0xff, 0xa2, 0x64, 0x45, 0x10, 0x9a, 0x00, 0x00, 0x00,
 }

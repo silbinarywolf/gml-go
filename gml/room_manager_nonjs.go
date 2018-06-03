@@ -51,7 +51,8 @@ func (room *Room) readInstance(instancePath string) {
 
 	// X
 	scanner.Scan()
-	x, err := strconv.ParseInt(strings.TrimSpace(scanner.Text()), 10, 64)
+	x64, err := strconv.ParseInt(strings.TrimSpace(scanner.Text()), 10, 32)
+	x := int32(x64)
 	if err != nil {
 		log.Printf("Error parsing Y of entity %s.\n", entityName)
 		return
@@ -59,7 +60,8 @@ func (room *Room) readInstance(instancePath string) {
 
 	// Y
 	scanner.Scan()
-	y, err := strconv.ParseInt(strings.TrimSpace(scanner.Text()), 10, 64)
+	y64, err := strconv.ParseInt(strings.TrimSpace(scanner.Text()), 10, 32)
+	y := int32(y64)
 	if err != nil {
 		log.Printf("Error parsing X of entity %s.\n", entityName)
 		return
@@ -107,7 +109,32 @@ func (room *Room) readInstance(instancePath string) {
 		//println("Left", room.Left, "Right", room.Right, "Top", room.Top, "Bottom", room.Bottom)
 	}
 
+	basename := filepath.Base(instancePath)
+	filename := strings.TrimSuffix(basename, filepath.Ext(basename))
+
+	// Increase entity counter
+	{
+		filenameParts := strings.Split(filename, "_")
+		if len(filenameParts) == 3 {
+			id := filenameParts[len(filenameParts)-1]
+			count, err := strconv.ParseInt(id, 10, 64)
+			if err == nil {
+				if count > room.UserEntityCount {
+					username := filenameParts[len(filenameParts)-2]
+					if username == roomEditorUsername() {
+						room.UserEntityCount = count
+					}
+				}
+			} else {
+				println(filename, ": Skipping, Error parsing the last part (entity ID) after splitting by _")
+			}
+		} else {
+			println(filename, ": Expected to split into 3 parts, not", len(filenameParts))
+		}
+	}
+
 	room.Instances = append(room.Instances, &RoomObject{
+		Filename:    filename,
 		ObjectIndex: int32(objectIndex),
 		X:           x,
 		Y:           y,

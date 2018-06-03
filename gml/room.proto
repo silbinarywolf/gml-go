@@ -8,5 +8,6 @@ message Room {
 	int32 Right = 2;
 	int32 Top = 3;
 	int32 Bottom = 4;
-    repeated RoomObject instances = 5;
+    repeated RoomObject Instances = 5;
+    int64 UserEntityCount = 6;
 }

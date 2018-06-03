@@ -17,8 +17,8 @@ type instanceManager struct {
 	//
 	// Move these to an objectManager struct
 	//
-	idToEntityData []ObjectType
-	nameToID       map[string]ObjectIndex
+	//idToEntityData []ObjectType
+	//nameToID       map[string]ObjectIndex
 }
 
 var (
@@ -29,11 +29,6 @@ func newInstanceManager() *instanceManager {
 	manager := new(instanceManager)
 	manager.reset()
 	return manager
-}
-
-func ObjectGetIndex(name string) (ObjectIndex, bool) {
-	res, ok := gInstanceManager.nameToID[name]
-	return res, ok
 }
 
 //func GetAll() []ObjectType {
@@ -75,9 +70,9 @@ func (manager *instanceManager) InstanceDestroy(inst ObjectType) {
 //
 // Kinda hacky way to get width of instances to calculate room bounds
 //
-func newInstance(entityID ObjectIndex) ObjectType {
+func newInstance(objectIndex ObjectIndex) ObjectType {
 	// Create
-	valToCopy := gInstanceManager.idToEntityData[entityID]
+	valToCopy := gObjectManager.idToEntityData[objectIndex]
 	inst := reflect.New(reflect.ValueOf(valToCopy).Elem().Type()).Interface().(ObjectType)
 
 	// Initialize object

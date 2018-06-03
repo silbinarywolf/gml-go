@@ -2,7 +2,8 @@ syntax = "proto3";
 package gml;
 
 message RoomObject {
-    int32 ObjectIndex = 1;
-    int64 X = 2;
-    int64 Y = 3;
+	string Filename = 1;
+    int32 ObjectIndex = 2;
+    int32 X = 3;
+    int32 Y = 4;
 }

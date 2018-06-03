@@ -28,7 +28,7 @@ func update(s *ebiten.Image) error {
 }
 
 func Init(idToEntityData []ObjectType, nameToID map[string]ObjectIndex) {
-	manager := gInstanceManager
+	manager := gObjectManager
 	manager.idToEntityData = idToEntityData
 	manager.nameToID = nameToID
 }

@@ -14,8 +14,8 @@ func (room *Room) Create() *RoomInstance {
 	roomInstances = append(roomInstances, roomInst)
 
 	// Instantiate instances for this room
-	for _, inst := range room.Instances {
-		roomInst.InstanceCreate(V(float64(inst.X), float64(inst.Y)), ObjectIndex(inst.ObjectIndex))
+	for _, obj := range room.Instances {
+		roomInst.InstanceCreate(V(float64(obj.X), float64(obj.Y)), ObjectIndex(obj.ObjectIndex))
 	}
 	return roomInst
 }
