@@ -40,27 +40,15 @@ func ObjectGetIndex(name string) (ObjectIndex, bool) {
 //	return gInstanceManager.entities
 //}
 
-func InstanceCreate(position Vec, entityID ObjectIndex) ObjectType {
-	return gInstanceManager.InstanceCreate(position, entityID)
-}
+//func InstanceCreate(position Vec, entityID ObjectIndex) ObjectType {
+//	return gInstanceManager.InstanceCreate(position, entityID)
+//}
 
-func InstanceDestroy(entity ObjectType) {
-	be := entity.BaseObject()
+//func InstanceDestroy(entity ObjectType) {
+//	gInstanceManager.InstanceDestroy(entity)
+//}
 
-	// Unordered delete
-	i := be.index
-	manager := gInstanceManager
-	lastEntry := manager.entities[len(manager.entities)-1]
-	manager.entities[i] = lastEntry
-	manager.entities = manager.entities[:len(manager.entities)-1]
-
-	// maybetodo(Jake): 2018-05-27
-	//
-	// Add func Destroy() to Entity interface and Call e.Destroy()
-	//
-}
-
-func (manager *instanceManager) InstanceCreate(position Vec, objectIndex ObjectIndex) ObjectType {
+/*func (manager *instanceManager) InstanceCreate(position Vec, objectIndex ObjectIndex) ObjectType {
 	// Create and add to entity list
 	inst := newInstance(objectIndex)
 	baseObj := inst.BaseObject()
@@ -71,6 +59,16 @@ func (manager *instanceManager) InstanceCreate(position Vec, objectIndex ObjectI
 	inst.Create()
 	baseObj.Vec = position
 	return inst
+}*/
+
+func (manager *instanceManager) InstanceDestroy(inst ObjectType) {
+	be := inst.BaseObject()
+
+	// Unordered delete
+	i := be.index
+	lastEntry := manager.entities[len(manager.entities)-1]
+	manager.entities[i] = lastEntry
+	manager.entities = manager.entities[:len(manager.entities)-1]
 }
 
 // NOTE(Jake): 2018-06-02

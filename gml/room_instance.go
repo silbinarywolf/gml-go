@@ -20,6 +20,11 @@ func (roomInst *RoomInstance) InstanceCreate(position Vec, objectIndex ObjectInd
 	return inst
 }
 
+func (roomInst *RoomInstance) InstanceDestroy(inst ObjectType) {
+	manager := &roomInst.instanceManager
+	manager.InstanceDestroy(inst)
+}
+
 func (roomInst *RoomInstance) update() {
 	roomInst.instanceManager.update()
 }
