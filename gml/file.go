@@ -2,6 +2,7 @@ package gml
 
 import (
 	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/hajimehoshi/ebiten/ebitenutil"
@@ -30,5 +31,14 @@ func ReadFileAsString(path string) (string, error) {
 }
 
 func init() {
-	assetsDirectory = ProgramDirectory() + "/assets"
+	// NOTE(Jake): 2018-06-03
+	//
+	// Allow setting asset dir via environment variable for `go test` support
+	//
+	assetsDirectory = os.Getenv("GML_ASSET_DIR")
+	if assetsDirectory != "" {
+		assetsDirectory = assetsDirectory + "/assets"
+	} else {
+		assetsDirectory = ProgramDirectory() + "/assets"
+	}
 }
