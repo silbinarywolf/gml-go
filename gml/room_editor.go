@@ -10,7 +10,10 @@ import (
 type roomEditor struct {
 	initialized       bool
 	username          string
+	editingRoom       *Room
 	objectIndexToData []ObjectType
+
+	camPos Vec
 }
 
 func newRoomEditor() *roomEditor {
@@ -25,6 +28,9 @@ func newRoomEditor() *roomEditor {
 	// Create stub instances to use for rendering map view
 	objectIndexToData := make([]ObjectType, len(gObjectManager.idToEntityData))
 	for i, obj := range gObjectManager.idToEntityData {
+		if obj == nil {
+			continue
+		}
 		objectIndex := obj.ObjectIndex()
 		inst := newInstance(objectIndex)
 		inst.Create()
@@ -32,8 +38,9 @@ func newRoomEditor() *roomEditor {
 	}
 
 	return &roomEditor{
-		initialized:       true,
-		username:          username,
+		initialized: true,
+		username:    username,
+		//editingRoom: nil,
 		objectIndexToData: objectIndexToData,
 	}
 }
@@ -46,9 +53,13 @@ func roomEditorUsername() string {
 	return gRoomEditor.username
 }
 
+func roomEditorEditingRoom() *Room {
+	return gRoomEditor.editingRoom
+}
+
 func EditorInit() {
 	if gRoomEditor != nil {
-		panic("Room Editor is already initialized.")
+		panic("EditorInit: Room Editor is already initialized.")
 	}
 	gRoomEditor = newRoomEditor()
 }
@@ -57,8 +68,23 @@ func EditorIsInitialized() bool {
 	return gRoomEditor != nil
 }
 
-func (roomInst *RoomInstance) EditorAddInstance(pos Vec, objectIndex ObjectIndex) ObjectType {
-	room := roomInst.room
+func EditorIsActive() bool {
+	return gRoomEditor != nil && roomEditorEditingRoom() != nil
+}
+
+func EditorSetRoom(room *Room) {
+	gRoomEditor.editingRoom = room
+
+	//
+	CameraSetEnabled(0)
+	CameraSetViewSize(0, V(float64(windowWidth()), float64(windowHeight())))
+}
+
+func EditorAddInstance(pos Vec, objectIndex ObjectIndex) ObjectType {
+	room := roomEditorEditingRoom()
+	if room == nil {
+		return nil
+	}
 	count := room.UserEntityCount
 	room.UserEntityCount++
 
@@ -66,26 +92,79 @@ func (roomInst *RoomInstance) EditorAddInstance(pos Vec, objectIndex ObjectIndex
 	username := roomEditorUsername()
 
 	//
-	inst := roomInst.InstanceCreate(pos, ObjectIndex(objectIndex))
-	be := inst.BaseObject()
+	inst := gRoomEditor.objectIndexToData[objectIndex]
+	baseObj := inst.BaseObject()
 	roomObj := &RoomObject{
 		Filename:    "entity_" + username + "_" + strconv.FormatInt(count, 10),
 		ObjectIndex: int32(objectIndex),
-		X:           int32(be.X),
-		Y:           int32(be.Y),
+		X:           int32(baseObj.X),
+		Y:           int32(baseObj.Y),
 	}
 	room.Instances = append(room.Instances, roomObj)
 	return inst
 }
 
-func (roomInst *RoomInstance) EditorUpdate() {
+func EditorUpdate() {
+	room := roomEditorEditingRoom()
+	if room == nil {
+		return
+	}
 
+	{
+		// Move camera
+		camPos := gRoomEditor.camPos
+		var speed float64 = 4
+		if KeyboardCheck(VkShift) {
+			speed = 8
+		}
+		if KeyboardCheck(VkRight) || KeyboardCheck(VkD) {
+			camPos.X += speed
+		} else if KeyboardCheck(VkLeft) || KeyboardCheck(VkA) {
+			camPos.X -= speed
+		}
+		if KeyboardCheck(VkUp) || KeyboardCheck(VkW) {
+			camPos.Y -= speed
+		} else if KeyboardCheck(VkDown) || KeyboardCheck(VkS) {
+			camPos.Y += speed
+		}
+		gRoomEditor.camPos = camPos
+		CameraSetViewPos(0, camPos)
+	}
+
+	//
 }
 
-func (roomInst *RoomInstance) EditorDraw() {
+func EditorDraw() {
+	room := roomEditorEditingRoom()
+	if room == nil {
+		return
+	}
 
+	// NOTE(Jake): 2018-06-04
+	//
+	// A hack to set the camera context, should probably
+	// add an internal function for this
+	//
+	currentCamera = &cameraList[0]
+
+	objectIndexToData := gRoomEditor.objectIndexToData
+	instances := room.Instances
+	for _, obj := range instances {
+		objectIndex := obj.ObjectIndex
+		inst := objectIndexToData[objectIndex]
+		if inst == nil {
+			continue
+		}
+		baseObj := inst.BaseObject()
+		baseObj.X = float64(obj.X)
+		baseObj.Y = float64(obj.Y)
+		inst.Draw()
+	}
 }
 
-func (roomInst *RoomInstance) EditorSave() {
-
+func EditorSave() {
+	room := roomEditorEditingRoom()
+	if room == nil {
+		return
+	}
 }

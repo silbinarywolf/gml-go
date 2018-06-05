@@ -32,7 +32,6 @@ func newSprite(name string, frames []*ebiten.Image) *Sprite {
 	return sprite
 }
 
-//draw_sprite(sprite, subimg, x, y);
 func (sprite *Sprite) DrawSprite(subimage float64, position Vec) {
 	frame := sprite.frames[int(subimage)]
 

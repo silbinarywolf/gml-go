@@ -11,7 +11,11 @@ type mainFunctions struct {
 
 var gMainFunctions *mainFunctions = new(mainFunctions)
 
-var gScreen *ebiten.Image
+var (
+	gScreen *ebiten.Image
+	gWidth  int
+	gHeight int
+)
 
 func update(s *ebiten.Image) error {
 	gScreen = s
@@ -25,6 +29,14 @@ func update(s *ebiten.Image) error {
 	}
 	//ebitenutil.DebugPrint(s, "Hello world!")
 	return nil
+}
+
+func windowWidth() int {
+	return gWidth
+}
+
+func windowHeight() int {
+	return gHeight
 }
 
 func Init(idToEntityData []ObjectType, nameToID map[string]ObjectIndex) {
@@ -51,5 +63,7 @@ func Run(gameStartFunc func(), updateFunc func(), width int, height int, title s
 
 	gMainFunctions.gameStart()
 	ebiten.SetRunnableInBackground(true)
+	gWidth = width
+	gHeight = height
 	ebiten.Run(update, width, height, 2, title)
 }
