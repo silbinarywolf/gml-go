@@ -1,6 +1,6 @@
 // +build js
 
-package gml
+package file
 
 import (
 	"path/filepath"
@@ -10,12 +10,8 @@ import (
 )
 
 var (
-	programDirectory string = calculateProgramDir()
+	ProgramDirectory string = calculateProgramDir()
 )
-
-func ProgramDirectory() string {
-	return programDirectory
-}
 
 func calculateProgramDir() string {
 	// Setup program dir

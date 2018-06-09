@@ -1,4 +1,4 @@
-package gml
+package sprite
 
 import (
 	"errors"
@@ -7,9 +7,12 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
+	"github.com/silbinarywolf/gml-go/gml/internal/file"
 )
 
-var g_spriteManager = newSpriteManager()
+var (
+	g_spriteManager = newSpriteManager()
+)
 
 func newSpriteManager() SpriteManager {
 	manager := SpriteManager{}
@@ -36,7 +39,7 @@ func LoadSprite(name string) *Sprite {
 	// This is slow but makes managing assets simpler. Will most likely add something to pack
 	// everything into a texture page for "production" builds.
 	//
-	folderPath := AssetsDirectory() + "/sprites/" + name + "/"
+	folderPath := file.AssetsDirectory + "/sprites/" + name + "/"
 	frames := make([]*ebiten.Image, 0, 10)
 	for i := 0; true; i++ {
 		path := folderPath + strconv.Itoa(i) + ".png" //fmt.Sprintf("%s%d.png", folderPath, i)

@@ -3,7 +3,7 @@
 // +build !android
 // +build !ios
 
-package gml
+package file
 
 import (
 	"os"
@@ -11,12 +11,8 @@ import (
 )
 
 var (
-	programDirectory string = calculateProgramDir()
+	ProgramDirectory string = calculateProgramDir()
 )
-
-func ProgramDirectory() string {
-	return programDirectory
-}
 
 func calculateProgramDir() string {
 	exePath, err := os.Executable()

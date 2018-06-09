@@ -93,7 +93,7 @@ func (manager *instanceManager) update() {
 			continue
 		}
 		baseObj := inst.BaseObject()
-		baseObj.SpriteState.imageUpdate()
+		baseObj.SpriteState.ImageUpdate()
 	}
 }
 

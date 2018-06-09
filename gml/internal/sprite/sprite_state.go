@@ -1,4 +1,4 @@
-package gml
+package sprite
 
 type SpriteState struct {
 	sprite      *Sprite
@@ -29,7 +29,7 @@ func (state *SpriteState) SetImageIndex(imageIndex float64) {
 	}
 }
 
-func (state *SpriteState) imageUpdate() {
+func (state *SpriteState) ImageUpdate() {
 	imageSpeed := state.imageSpeed // * dt
 	state.imageIndex += imageSpeed
 	if state.imageIndex > state.imageNumber {

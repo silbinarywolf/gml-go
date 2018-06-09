@@ -1,41 +1,24 @@
 package gml
 
-import "github.com/hajimehoshi/ebiten"
+import (
+	"github.com/hajimehoshi/ebiten"
+	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
+)
 
-type Sprite struct {
-	name   string
-	frames []*ebiten.Image
-	size   Vec
-	// todo(Jake): Get image speed from config.json
+type Sprite = sprite.Sprite
+
+type SpriteState = sprite.SpriteState
+
+func LoadSprite(name string) *sprite.Sprite {
+	return sprite.LoadSprite(name)
 }
 
-func newSprite(name string, frames []*ebiten.Image) *Sprite {
-	sprite := new(Sprite)
-	sprite.name = name
-	sprite.frames = frames
+func DrawSprite(spr *sprite.Sprite, subimage float64, position Vec) {
+	screen := gScreen
+	cameraPos := currentCamera.Vec
 
-	width := 0
-	height := 0
-	for _, frame := range frames {
-		frameWidth, frameHeight := frame.Size()
-		if width < frameWidth {
-			width = frameWidth
-		}
-		if height < frameHeight {
-			height = frameHeight
-		}
-	}
-	sprite.size = Vec{
-		X: float64(width),
-		Y: float64(height),
-	}
-	return sprite
-}
-
-func (sprite *Sprite) DrawSprite(subimage float64, position Vec) {
-	frame := sprite.frames[int(subimage)]
-
+	frame := spr.GetFrame(int(subimage))
 	op := ebiten.DrawImageOptions{}
-	op.GeoM.Translate(position.X-currentCamera.X, position.Y-currentCamera.Y)
-	gScreen.DrawImage(frame, &op)
+	op.GeoM.Translate(position.X-cameraPos.X, position.Y-cameraPos.Y)
+	screen.DrawImage(frame, &op)
 }

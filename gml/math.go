@@ -1,9 +1,11 @@
 package gml
 
-type Vec struct {
-	X, Y float64
-}
+import (
+	"github.com/silbinarywolf/gml-go/gml/internal/math"
+)
 
-func V(x float64, y float64) Vec {
-	return Vec{X: x, Y: y}
+type Vec = math.Vec
+
+func V(x float64, y float64) math.Vec {
+	return math.Vec{X: x, Y: y}
 }

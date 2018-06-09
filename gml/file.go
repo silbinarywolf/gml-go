@@ -2,18 +2,18 @@ package gml
 
 import (
 	"io/ioutil"
-	"os"
 	"strings"
 
 	"github.com/hajimehoshi/ebiten/ebitenutil"
-)
-
-var (
-	assetsDirectory string = "▲not-set▲"
+	"github.com/silbinarywolf/gml-go/gml/internal/file"
 )
 
 func AssetsDirectory() string {
-	return assetsDirectory
+	return file.AssetsDirectory
+}
+
+func ProgramDirectory() string {
+	return file.ProgramDirectory
 }
 
 func ReadFileAsString(path string) (string, error) {
@@ -28,17 +28,4 @@ func ReadFileAsString(path string) (string, error) {
 		return "", err
 	}
 	return strings.TrimSpace(string(bytesData)), nil
-}
-
-func init() {
-	// NOTE(Jake): 2018-06-03
-	//
-	// Allow setting asset dir via environment variable for `go test` support
-	//
-	assetsDirectory = os.Getenv("GML_ASSET_DIR")
-	if assetsDirectory != "" {
-		assetsDirectory = assetsDirectory + "/assets"
-	} else {
-		assetsDirectory = ProgramDirectory() + "/assets"
-	}
 }

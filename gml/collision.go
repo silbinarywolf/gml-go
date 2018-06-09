@@ -41,7 +41,7 @@ func (inst *Object) PlaceFree(position Vec) bool {
 			hasCollision = true
 			// Debug
 			if DEBUG_COLLISION {
-				debugString += "- " + other.Sprite().name + "\n"
+				debugString += "- " + other.Sprite().Name() + "\n"
 			}
 		}
 	}
