@@ -1,9 +1,9 @@
 package gml
 
-import "reflect"
+import "github.com/silbinarywolf/gml-go/gml/internal/object"
 
 type instanceManagerResettableData struct {
-	entities []ObjectType
+	entities []object.ObjectType
 }
 
 func (manager *instanceManager) reset() {
@@ -56,30 +56,14 @@ func newInstanceManager() *instanceManager {
 	return inst
 }*/
 
-func (manager *instanceManager) InstanceDestroy(inst ObjectType) {
+func (manager *instanceManager) InstanceDestroy(inst object.ObjectType) {
 	be := inst.BaseObject()
 
 	// Unordered delete
-	i := be.index
+	i := be.Index()
 	lastEntry := manager.entities[len(manager.entities)-1]
 	manager.entities[i] = lastEntry
 	manager.entities = manager.entities[:len(manager.entities)-1]
-}
-
-// NOTE(Jake): 2018-06-02
-//
-// Kinda hacky way to get width of instances to calculate room bounds
-//
-func newInstance(objectIndex ObjectIndex) ObjectType {
-	// Create
-	valToCopy := gObjectManager.idToEntityData[objectIndex]
-	inst := reflect.New(reflect.ValueOf(valToCopy).Elem().Type()).Interface().(ObjectType)
-
-	// Initialize object
-	baseObj := inst.BaseObject()
-	baseObj.Create()
-
-	return inst
 }
 
 func (manager *instanceManager) update() {

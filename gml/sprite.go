@@ -13,6 +13,10 @@ func LoadSprite(name string) *sprite.Sprite {
 	return sprite.LoadSprite(name)
 }
 
+func DrawSelf(state *sprite.SpriteState, position Vec) {
+	DrawSprite(state.Sprite(), state.ImageIndex(), position)
+}
+
 func DrawSprite(spr *sprite.Sprite, subimage float64, position Vec) {
 	screen := gScreen
 	cameraPos := currentCamera.Vec

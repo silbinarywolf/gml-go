@@ -1,5 +1,7 @@
 package gml
 
+import "github.com/silbinarywolf/gml-go/gml/internal/object"
+
 var (
 	currentCamera *camera
 	cameraList    [8]camera
@@ -7,7 +9,7 @@ var (
 
 type camera struct {
 	enabled bool
-	follow  ObjectType
+	follow  object.ObjectType
 	Vec
 	size Vec
 }
@@ -27,7 +29,7 @@ func CameraSetViewSize(index int, size Vec) {
 	view.size = size
 }
 
-func CameraSetViewTarget(index int, inst ObjectType) {
+func CameraSetViewTarget(index int, inst object.ObjectType) {
 	view := &cameraList[index]
 	view.follow = inst
 }
@@ -35,25 +37,29 @@ func CameraSetViewTarget(index int, inst ObjectType) {
 func (view *camera) update() {
 	if view.follow != nil {
 		inst := currentCamera.follow.BaseObject()
-		roomInst := inst.room.room
-		left := float64(roomInst.Left)
-		right := float64(roomInst.Right)
-		top := float64(roomInst.Top)
-		bottom := float64(roomInst.Bottom)
 
-		view.X = inst.X - (view.size.X / 2)
-		view.Y = inst.Y - (view.size.Y / 2)
-		if view.X < left {
-			view.X = left
-		}
-		if view.X+view.size.X > right {
-			view.X = right - view.size.X
-		}
-		if view.Y < top {
-			view.Y = top
-		}
-		if view.Y+view.size.Y > bottom {
-			view.Y = bottom - view.size.Y
+		roomInst := RoomGetInstance(inst.RoomInstanceIndex())
+		if roomInst != nil {
+			room := roomInst.room
+			left := float64(room.Left)
+			right := float64(room.Right)
+			top := float64(room.Top)
+			bottom := float64(room.Bottom)
+
+			view.X = inst.X - (view.size.X / 2)
+			view.Y = inst.Y - (view.size.Y / 2)
+			if view.X < left {
+				view.X = left
+			}
+			if view.X+view.size.X > right {
+				view.X = right - view.size.X
+			}
+			if view.Y < top {
+				view.Y = top
+			}
+			if view.Y+view.size.Y > bottom {
+				view.Y = bottom - view.size.Y
+			}
 		}
 	}
 }

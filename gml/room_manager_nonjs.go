@@ -17,6 +17,7 @@ import (
 	"strings"
 
 	"github.com/hajimehoshi/ebiten/ebitenutil"
+	"github.com/silbinarywolf/gml-go/gml/internal/object"
 )
 
 func (room *Room) writeDataFile(roomPath string) error {
@@ -83,7 +84,7 @@ func (room *Room) readInstance(instancePath string) {
 		// Probably a slow hack to get the entity size
 		// for building map data on-fly, but whatever!
 		//
-		inst := newInstance(objectIndex)
+		inst := object.NewRawInstance(objectIndex, 0, 0)
 		inst.Create()
 
 		baseObj := inst.BaseObject()

@@ -2,6 +2,7 @@ package gml
 
 import (
 	"github.com/hajimehoshi/ebiten"
+	"github.com/silbinarywolf/gml-go/gml/internal/object"
 )
 
 type mainFunctions struct {
@@ -39,10 +40,8 @@ func windowHeight() int {
 	return gHeight
 }
 
-func Init(idToEntityData []ObjectType, nameToID map[string]ObjectIndex) {
-	manager := gObjectManager
-	manager.idToEntityData = idToEntityData
-	manager.nameToID = nameToID
+func Init(idToEntityData []object.ObjectType, nameToID map[string]object.ObjectIndex) {
+	object.Init(idToEntityData, nameToID)
 }
 
 func Update() {

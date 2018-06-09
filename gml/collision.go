@@ -4,18 +4,25 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+
+	"github.com/silbinarywolf/gml-go/gml/internal/object"
 )
 
 var (
 	DEBUG_COLLISION = false
 )
 
-func (inst *Object) PlaceFree(position Vec) bool {
-	var entities []ObjectType
-	if inst.room == nil {
+/*func PlaceFree(inst object.ObjectType, position Vec) bool {
+	baseObj := inst.BaseObject()
+	return placeFree(baseObj, position)
+}*/
+
+func PlaceFree(inst *object.Object, position Vec) bool {
+	var entities []object.ObjectType
+	if room := RoomGetInstance(inst.RoomInstanceIndex()); room == nil {
 		entities = gInstanceManager.entities
 	} else {
-		entities = inst.room.instanceManager.entities
+		entities = room.instanceManager.entities
 	}
 
 	r1Left := position.X

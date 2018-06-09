@@ -5,13 +5,15 @@ import (
 	"path"
 	"strconv"
 	"strings"
+
+	"github.com/silbinarywolf/gml-go/gml/internal/object"
 )
 
 type roomEditor struct {
 	initialized       bool
 	username          string
 	editingRoom       *Room
-	objectIndexToData []ObjectType
+	objectIndexToData []object.ObjectType
 
 	camPos Vec
 }
@@ -26,13 +28,14 @@ func newRoomEditor() *roomEditor {
 	username = strings.Replace(username, "_", "-", -1)
 
 	// Create stub instances to use for rendering map view
-	objectIndexToData := make([]ObjectType, len(gObjectManager.idToEntityData))
-	for i, obj := range gObjectManager.idToEntityData {
+	idToEntityData := object.IDToEntityData()
+	objectIndexToData := make([]object.ObjectType, len(idToEntityData))
+	for i, obj := range idToEntityData {
 		if obj == nil {
 			continue
 		}
 		objectIndex := obj.ObjectIndex()
-		inst := newInstance(objectIndex)
+		inst := object.NewRawInstance(objectIndex, i, 0)
 		inst.Create()
 		objectIndexToData[i] = inst
 	}
@@ -80,7 +83,7 @@ func EditorSetRoom(room *Room) {
 	CameraSetViewSize(0, V(float64(windowWidth()), float64(windowHeight())))
 }
 
-func EditorAddInstance(pos Vec, objectIndex ObjectIndex) ObjectType {
+func EditorAddInstance(pos Vec, objectIndex object.ObjectIndex) object.ObjectType {
 	room := roomEditorEditingRoom()
 	if room == nil {
 		return nil
