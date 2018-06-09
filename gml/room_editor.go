@@ -145,10 +145,9 @@ func EditorDraw() {
 
 	// NOTE(Jake): 2018-06-04
 	//
-	// A hack to set the camera context, should probably
-	// add an internal function for this
+	// A hack to set the camera context
 	//
-	currentCamera = &cameraList[0]
+	cameraSetActive(0)
 
 	objectIndexToData := gRoomEditor.objectIndexToData
 	instances := room.Instances

@@ -67,27 +67,33 @@ func (manager *instanceManager) InstanceDestroy(inst object.ObjectType) {
 }
 
 func (manager *instanceManager) update() {
-	entities := manager.entities
-	for _, inst := range entities {
-		inst.Update()
-	}
+	cameraSetActive(0)
+	defer cameraClearActive()
 
-	for _, inst := range entities {
-		if inst == nil {
-			continue
+	{
+		entities := manager.entities
+		for _, inst := range entities {
+			inst.Update()
 		}
-		baseObj := inst.BaseObject()
-		baseObj.SpriteState.ImageUpdate()
+
+		for _, inst := range entities {
+			if inst == nil {
+				continue
+			}
+			baseObj := inst.BaseObject()
+			baseObj.SpriteState.ImageUpdate()
+		}
 	}
 }
 
 func (manager *instanceManager) draw() {
 	for i := 0; i < len(cameraList); i++ {
-		currentCamera = &cameraList[i]
-		if !currentCamera.enabled {
+		cam := &cameraList[i]
+		if !cam.enabled {
 			continue
 		}
-		currentCamera.update()
+		cam.update()
+		cameraSetActive(i)
 		for _, inst := range manager.entities {
 			if inst == nil {
 				continue
@@ -95,5 +101,5 @@ func (manager *instanceManager) draw() {
 			inst.Draw()
 		}
 	}
-	currentCamera = nil
+	cameraClearActive()
 }

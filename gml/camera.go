@@ -3,8 +3,8 @@ package gml
 import "github.com/silbinarywolf/gml-go/gml/internal/object"
 
 var (
-	currentCamera *camera
-	cameraList    [8]camera
+	__currentCamera *camera
+	cameraList      [8]camera
 )
 
 type camera struct {
@@ -17,6 +17,18 @@ type camera struct {
 func CameraSetEnabled(index int) {
 	view := &cameraList[index]
 	view.enabled = true
+}
+
+func cameraGetActive() *camera {
+	return __currentCamera
+}
+
+func cameraSetActive(index int) {
+	__currentCamera = &cameraList[index]
+}
+
+func cameraClearActive() {
+	__currentCamera = nil
 }
 
 func CameraSetViewPos(index int, pos Vec) {
@@ -36,7 +48,8 @@ func CameraSetViewTarget(index int, inst object.ObjectType) {
 
 func (view *camera) update() {
 	if view.follow != nil {
-		inst := currentCamera.follow.BaseObject()
+		cam := cameraGetActive()
+		inst := cam.follow.BaseObject()
 
 		roomInst := RoomGetInstance(inst.RoomInstanceIndex())
 		if roomInst != nil {

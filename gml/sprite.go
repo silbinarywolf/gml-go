@@ -19,10 +19,10 @@ func DrawSelf(state *sprite.SpriteState, position Vec) {
 
 func DrawSprite(spr *sprite.Sprite, subimage float64, position Vec) {
 	screen := gScreen
-	cameraPos := currentCamera.Vec
+	camPos := cameraGetActive().Vec
 
 	frame := spr.GetFrame(int(subimage))
 	op := ebiten.DrawImageOptions{}
-	op.GeoM.Translate(position.X-cameraPos.X, position.Y-cameraPos.Y)
+	op.GeoM.Translate(position.X-camPos.X, position.Y-camPos.Y)
 	screen.DrawImage(frame, &op)
 }

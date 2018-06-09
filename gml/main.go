@@ -50,6 +50,10 @@ func Update() {
 	for _, roomInst := range roomInstances {
 		roomInst.update()
 	}
+}
+
+func Draw() {
+	manager := gInstanceManager
 	manager.draw()
 	for _, roomInst := range roomInstances {
 		roomInst.draw()
