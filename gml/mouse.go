@@ -2,7 +2,6 @@ package gml
 
 import (
 	"github.com/hajimehoshi/ebiten"
-	"github.com/silbinarywolf/gml-go/gml"
 )
 
 var (
@@ -15,17 +14,17 @@ func MouseCheckButton(button int) bool {
 
 func MousePosition() Vec {
 	x, y := ebiten.CursorPosition()
-	return gml.V(x, y)
+	return V(float64(x), float64(y))
 }
 
 func MouseX() float64 {
 	x, _ := ebiten.CursorPosition()
-	return x
+	return float64(x)
 }
 
 func MouseY() float64 {
 	_, y := ebiten.CursorPosition()
-	return y
+	return float64(y)
 }
 
 //mouse_check_button_pressed
