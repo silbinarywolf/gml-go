@@ -22,6 +22,7 @@ func update(s *ebiten.Image) error {
 	gScreen = s
 	keyboardUpdate()
 	keyboardStringUpdate()
+	mouseUpdate()
 	gMainFunctions.update()
 	if g_game.hasGameRestarted {
 		gInstanceManager.reset()
@@ -45,6 +46,9 @@ func Init(idToEntityData []object.ObjectType, nameToID map[string]object.ObjectI
 }
 
 func Update() {
+	cameraSetActive(0)
+	defer cameraClearActive()
+
 	manager := gInstanceManager
 	manager.update()
 	for _, roomInst := range roomInstances {

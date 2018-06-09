@@ -67,9 +67,6 @@ func (manager *instanceManager) InstanceDestroy(inst object.ObjectType) {
 }
 
 func (manager *instanceManager) update() {
-	cameraSetActive(0)
-	defer cameraClearActive()
-
 	{
 		entities := manager.entities
 		for _, inst := range entities {
