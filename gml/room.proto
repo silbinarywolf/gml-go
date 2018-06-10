@@ -4,10 +4,14 @@ package gml;
 import "room_object.proto";
 
 message Room {
-	int32 Left = 1;
-	int32 Right = 2;
-	int32 Top = 3;
-	int32 Bottom = 4;
-    repeated RoomObject Instances = 5;
-    int64 UserEntityCount = 6;
+	string Filepath = 1;
+	int32 Left = 2;
+	int32 Right = 3;
+	int32 Top = 4;
+	int32 Bottom = 5;
+    repeated RoomObject Instances = 6; // todo(Jake): 2018-06-10, Rename 'Instances' to 'Objects'
+
+    // Room Editor
+    int64 UserEntityCount = 7;
+    repeated RoomObject DeletedObjects = 8;
 }

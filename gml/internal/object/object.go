@@ -12,6 +12,7 @@ type ObjectIndex int32
 type ObjectType interface {
 	BaseObject() *Object
 	ObjectIndex() ObjectIndex
+	ObjectName() string
 	Create()
 	Update()
 	Draw()
@@ -22,7 +23,7 @@ type Object struct {
 	m.Vec                      // Position (contains X,Y)
 	Size               m.Vec   // Size (X,Y)
 	index              int     // index in the 'entities' array
-	roomInstanceIndex  int     // index in the 'room' array
+	roomInstanceIndex  int     // index of the room in the 'room' array
 	imageAngleRadians  float64 // Image Angle
 	imageScale         m.Vec
 }

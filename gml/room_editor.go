@@ -1,13 +1,16 @@
 package gml
 
 import (
+	"bufio"
 	"fmt"
 	"math"
+	"os"
 	"os/user"
 	"path"
 	"strconv"
 	"strings"
 
+	m "github.com/silbinarywolf/gml-go/gml/internal/math"
 	"github.com/silbinarywolf/gml-go/gml/internal/object"
 )
 
@@ -17,7 +20,8 @@ type roomEditor struct {
 	editingRoom       *Room
 	objectIndexToData []object.ObjectType
 
-	camPos Vec
+	camPos       Vec
+	lastMousePos Vec
 }
 
 func newRoomEditor() *roomEditor {
@@ -47,6 +51,7 @@ func newRoomEditor() *roomEditor {
 		username:    username,
 		//editingRoom: nil,
 		objectIndexToData: objectIndexToData,
+		lastMousePos:      MousePosition(),
 	}
 }
 
@@ -60,6 +65,11 @@ func roomEditorUsername() string {
 
 func roomEditorEditingRoom() *Room {
 	return gRoomEditor.editingRoom
+}
+
+func roomEditorObjectIndexToData(objectIndex int32) object.ObjectType {
+	index := object.ObjectIndex(objectIndex)
+	return gRoomEditor.objectIndexToData[index]
 }
 
 func snapToGrid(val float64, grid float64) float64 {
@@ -90,12 +100,11 @@ func EditorSetRoom(room *Room) {
 	CameraSetViewSize(0, V(float64(windowWidth()), float64(windowHeight())))
 }
 
-func EditorAddInstance(pos Vec, objectIndex object.ObjectIndex) object.ObjectType {
+func EditorAddInstance(pos Vec, objectIndex object.ObjectIndex) *RoomObject {
 	room := roomEditorEditingRoom()
 	if room == nil {
 		return nil
 	}
-	roomEditor := gRoomEditor
 	count := room.UserEntityCount
 	room.UserEntityCount++
 
@@ -103,7 +112,7 @@ func EditorAddInstance(pos Vec, objectIndex object.ObjectIndex) object.ObjectTyp
 	username := roomEditorUsername()
 
 	//
-	inst := roomEditor.objectIndexToData[objectIndex]
+	//inst := roomEditor.objectIndexToData[objectIndex]
 	//baseObj := inst.BaseObject()
 	roomObj := &RoomObject{
 		Filename:    "entity_" + username + "_" + strconv.FormatInt(count, 10),
@@ -112,7 +121,20 @@ func EditorAddInstance(pos Vec, objectIndex object.ObjectIndex) object.ObjectTyp
 		Y:           int32(pos.Y),
 	}
 	room.Instances = append(room.Instances, roomObj)
-	return inst
+	return roomObj
+}
+
+func EditorRemoveInstance(index int) {
+	room := roomEditorEditingRoom()
+
+	// Unordered delete instance
+	entryBeingDeleted := room.Instances[index]
+	lastEntry := room.Instances[len(room.Instances)-1]
+	room.Instances[index] = lastEntry
+	room.Instances = room.Instances[:len(room.Instances)-1]
+
+	// Track deleted entities
+	room.DeletedInstances = append(room.DeletedInstances, entryBeingDeleted)
 }
 
 func EditorUpdate() {
@@ -131,7 +153,7 @@ func EditorUpdate() {
 
 	{
 		// Move camera
-		camPos := gRoomEditor.camPos
+		camPos := roomEditor.camPos
 		var speed float64 = 4
 		if KeyboardCheck(VkShift) {
 			speed = 8
@@ -150,46 +172,94 @@ func EditorUpdate() {
 		CameraSetViewPos(0, camPos)
 	}
 
+	//
+	if KeyboardCheck(VkControl) &&
+		KeyboardCheckPressed(VkS) {
+		EditorSave()
+		println("Saved room:", room.Filepath)
+	}
+
 	{
+		lastMousePos := roomEditor.lastMousePos
+		roomEditor.lastMousePos = MousePosition()
+
+		grid := V(32, 32)
+
 		// Left click
-		if MouseCheckPressed(MbLeft) {
-			mousePos := MousePosition()
-			mousePos.X = snapToGrid(mousePos.X, 32)
-			mousePos.Y = snapToGrid(mousePos.Y, 32)
-			fmt.Printf("Mouse X: %v, Y: %v \n", mousePos.X, mousePos.Y)
-			inst := EditorAddInstance(mousePos, 2)
-			fmt.Printf("%v\n", inst)
+		if MouseCheckButton(MbLeft) {
+			// NOTE(Jake): 2018-06-10
+			//
+			// We need to handle mouse click between the last mouse position
+			// and current mouse position so that there are no gaps when you're
+			// dragging the mouse across long distances.
+			//
+			rect := m.R(MousePosition(), lastMousePos)
+			for x := rect.Left(); x <= rect.Right(); x += grid.X {
+				for y := rect.Top(); y <= rect.Bottom(); y += grid.Y {
+					mousePos := V(x, y)
+
+					// Check to make sure we aren't placing over the top
+					// of an existing entity
+					hasCollision := false
+					for _, obj := range room.Instances {
+						inst := roomEditorObjectIndexToData(obj.ObjectIndex)
+						if inst == nil {
+							continue
+						}
+						pos := V(float64(obj.X), float64(obj.Y))
+						size := inst.BaseObject().Size
+						left := pos.X
+						right := left + size.X
+						top := pos.Y
+						bottom := top + size.Y
+						hasCollision = hasCollision ||
+							(mousePos.X >= left && mousePos.X < right &&
+								mousePos.Y >= top && mousePos.Y < bottom)
+					}
+
+					//
+					if !hasCollision {
+						// Snap to grid
+						mousePos.X = snapToGrid(mousePos.X, grid.X)
+						mousePos.Y = snapToGrid(mousePos.Y, grid.Y)
+
+						roomObj := EditorAddInstance(mousePos, 2)
+						fmt.Printf("Create entity: %v\n", roomObj)
+					}
+				}
+			}
 		}
 
-		// Right click
-		if MouseCheckPressed(MbRight) {
-			mousePos := MousePosition()
-			//mousePos.X = snapToGrid(mousePos.X, 32)
-			//mousePos.Y = snapToGrid(mousePos.Y, 32)
+		// Holding Right click
+		if MouseCheckButton(MbRight) {
+			// NOTE(Jake): 2018-06-10
+			//
+			// We need to handle mouse click between the last mouse position
+			// and current mouse position so that there are no gaps when you're
+			// dragging the mouse across long distances.
+			//
+			rect := m.R(MousePosition(), lastMousePos)
+			for x := rect.Left(); x <= rect.Right(); x += grid.X {
+				for y := rect.Top(); y <= rect.Bottom(); y += grid.Y {
+					mousePos := V(x, y)
 
-			//fmt.Printf("Right Mouse X: %v, Y: %v \n", mousePos.X, mousePos.Y)
-
-			objectIndexToData := roomEditor.objectIndexToData
-			instances := room.Instances
-			for i, obj := range instances {
-				objectIndex := obj.ObjectIndex
-				inst := objectIndexToData[objectIndex]
-				if inst == nil {
-					continue
-				}
-				baseObj := inst.BaseObject()
-				pos := V(float64(obj.X), float64(obj.Y))
-				size := baseObj.Size
-				left := pos.X
-				right := left + size.X
-				top := pos.Y
-				bottom := top + size.Y
-				if mousePos.X >= left && mousePos.X < right &&
-					mousePos.Y >= top && mousePos.Y < bottom {
-					// Unordered delete instance
-					lastEntry := instances[len(instances)-1]
-					instances[i] = lastEntry
-					instances = instances[:len(instances)-1]
+					for i, obj := range room.Instances {
+						inst := roomEditorObjectIndexToData(obj.ObjectIndex)
+						if inst == nil {
+							continue
+						}
+						pos := V(float64(obj.X), float64(obj.Y))
+						size := inst.BaseObject().Size
+						left := pos.X
+						right := left + size.X
+						top := pos.Y
+						bottom := top + size.Y
+						if mousePos.X >= left && mousePos.X < right &&
+							mousePos.Y >= top && mousePos.Y < bottom {
+							EditorRemoveInstance(i)
+							fmt.Printf("Deleted entity: %s\n", obj.GetFilename())
+						}
+					}
 				}
 			}
 		}
@@ -230,4 +300,67 @@ func EditorSave() {
 	if room == nil {
 		return
 	}
+
+	roomDirectory := room.Filepath
+
+	// Write objects
+	{
+		for _, obj := range room.Instances {
+			data := roomEditorObjectIndexToData(obj.ObjectIndex)
+			fname := obj.Filename
+			filepath := roomDirectory + "/" + fname + ".txt"
+
+			file, err := os.Create(filepath)
+			if err != nil {
+				println("Error writing file:", err.Error())
+
+				// todo(jake): 2018-06-10
+				//
+				// Error recovery here?
+				//
+
+				return
+			}
+
+			name := data.ObjectName()
+			x := obj.X
+			y := obj.Y
+
+			//
+			w := bufio.NewWriter(file)
+			w.WriteString(name)
+			w.WriteByte('\n')
+			w.WriteString(strconv.Itoa(int(x)))
+			w.WriteByte('\n')
+			w.WriteString(strconv.Itoa(int(y)))
+			w.WriteByte('\n')
+			w.Flush()
+
+			file.Close()
+		}
+	}
+
+	// Delete objects
+	deletedInstances := room.DeletedInstances
+	// NOTE(Jake): 2018-06-10
+	//
+	// Clear out 'DeletedInstances' before we save
+	// the map file as data.
+	//
+	// We don't want this information
+	// serialized.
+	//
+	room.DeletedInstances = nil
+	for _, obj := range deletedInstances {
+		fname := obj.Filename
+		filepath := roomDirectory + "/" + fname + ".txt"
+		err := os.Remove(filepath)
+		if err != nil {
+			println("Error deleting instance:", err.Error())
+			continue
+		}
+	}
+
+	// Save data copy of file
+	room.writeDataFile(room.Filepath)
 }

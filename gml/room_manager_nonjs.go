@@ -107,7 +107,6 @@ func (room *Room) readInstance(instancePath string) {
 		if bottom > room.Bottom {
 			room.Bottom = bottom + height
 		}
-		//println("Left", room.Left, "Right", room.Right, "Top", room.Top, "Bottom", room.Bottom)
 	}
 
 	basename := filepath.Base(instancePath)
@@ -177,6 +176,7 @@ func LoadRoom(name string) *Room {
 
 	//
 	room := new(Room)
+	room.Filepath = roomPath
 	room.Instances = make([]*RoomObject, 0, len(instancePathList))
 	for _, instance := range instancePathList {
 		room.readInstance(instance)
@@ -189,6 +189,7 @@ func LoadRoom(name string) *Room {
 	// so that web clients can load it.
 	//
 	// Write out *.data file (for browsers / fast client loading)
+	//
 	go func() {
 		err := room.writeDataFile(roomPath)
 		if err != nil {

@@ -32,18 +32,28 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 type Room struct {
-	Left            int32         `protobuf:"varint,1,opt,name=Left,proto3" json:"Left,omitempty"`
-	Right           int32         `protobuf:"varint,2,opt,name=Right,proto3" json:"Right,omitempty"`
-	Top             int32         `protobuf:"varint,3,opt,name=Top,proto3" json:"Top,omitempty"`
-	Bottom          int32         `protobuf:"varint,4,opt,name=Bottom,proto3" json:"Bottom,omitempty"`
-	Instances       []*RoomObject `protobuf:"bytes,5,rep,name=Instances" json:"Instances,omitempty"`
-	UserEntityCount int64         `protobuf:"varint,6,opt,name=UserEntityCount,proto3" json:"UserEntityCount,omitempty"`
+	Filepath  string        `protobuf:"bytes,1,opt,name=Filepath,proto3" json:"Filepath,omitempty"`
+	Left      int32         `protobuf:"varint,2,opt,name=Left,proto3" json:"Left,omitempty"`
+	Right     int32         `protobuf:"varint,3,opt,name=Right,proto3" json:"Right,omitempty"`
+	Top       int32         `protobuf:"varint,4,opt,name=Top,proto3" json:"Top,omitempty"`
+	Bottom    int32         `protobuf:"varint,5,opt,name=Bottom,proto3" json:"Bottom,omitempty"`
+	Instances []*RoomObject `protobuf:"bytes,6,rep,name=Instances" json:"Instances,omitempty"`
+	// Room Editor
+	UserEntityCount  int64         `protobuf:"varint,7,opt,name=UserEntityCount,proto3" json:"UserEntityCount,omitempty"`
+	DeletedInstances []*RoomObject `protobuf:"bytes,8,rep,name=DeletedInstances" json:"DeletedInstances,omitempty"`
 }
 
 func (m *Room) Reset()                    { *m = Room{} }
 func (m *Room) String() string            { return proto.CompactTextString(m) }
 func (*Room) ProtoMessage()               {}
 func (*Room) Descriptor() ([]byte, []int) { return fileDescriptorRoom, []int{0} }
+
+func (m *Room) GetFilepath() string {
+	if m != nil {
+		return m.Filepath
+	}
+	return ""
+}
 
 func (m *Room) GetLeft() int32 {
 	if m != nil {
@@ -87,6 +97,13 @@ func (m *Room) GetUserEntityCount() int64 {
 	return 0
 }
 
+func (m *Room) GetDeletedInstances() []*RoomObject {
+	if m != nil {
+		return m.DeletedInstances
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*Room)(nil), "gml.Room")
 }
@@ -105,29 +122,35 @@ func (m *Room) MarshalTo(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if len(m.Filepath) > 0 {
+		dAtA[i] = 0xa
+		i++
+		i = encodeVarintRoom(dAtA, i, uint64(len(m.Filepath)))
+		i += copy(dAtA[i:], m.Filepath)
+	}
 	if m.Left != 0 {
-		dAtA[i] = 0x8
+		dAtA[i] = 0x10
 		i++
 		i = encodeVarintRoom(dAtA, i, uint64(m.Left))
 	}
 	if m.Right != 0 {
-		dAtA[i] = 0x10
+		dAtA[i] = 0x18
 		i++
 		i = encodeVarintRoom(dAtA, i, uint64(m.Right))
 	}
 	if m.Top != 0 {
-		dAtA[i] = 0x18
+		dAtA[i] = 0x20
 		i++
 		i = encodeVarintRoom(dAtA, i, uint64(m.Top))
 	}
 	if m.Bottom != 0 {
-		dAtA[i] = 0x20
+		dAtA[i] = 0x28
 		i++
 		i = encodeVarintRoom(dAtA, i, uint64(m.Bottom))
 	}
 	if len(m.Instances) > 0 {
 		for _, msg := range m.Instances {
-			dAtA[i] = 0x2a
+			dAtA[i] = 0x32
 			i++
 			i = encodeVarintRoom(dAtA, i, uint64(msg.Size()))
 			n, err := msg.MarshalTo(dAtA[i:])
@@ -138,9 +161,21 @@ func (m *Room) MarshalTo(dAtA []byte) (int, error) {
 		}
 	}
 	if m.UserEntityCount != 0 {
-		dAtA[i] = 0x30
+		dAtA[i] = 0x38
 		i++
 		i = encodeVarintRoom(dAtA, i, uint64(m.UserEntityCount))
+	}
+	if len(m.DeletedInstances) > 0 {
+		for _, msg := range m.DeletedInstances {
+			dAtA[i] = 0x42
+			i++
+			i = encodeVarintRoom(dAtA, i, uint64(msg.Size()))
+			n, err := msg.MarshalTo(dAtA[i:])
+			if err != nil {
+				return 0, err
+			}
+			i += n
+		}
 	}
 	return i, nil
 }
@@ -157,6 +192,10 @@ func encodeVarintRoom(dAtA []byte, offset int, v uint64) int {
 func (m *Room) Size() (n int) {
 	var l int
 	_ = l
+	l = len(m.Filepath)
+	if l > 0 {
+		n += 1 + l + sovRoom(uint64(l))
+	}
 	if m.Left != 0 {
 		n += 1 + sovRoom(uint64(m.Left))
 	}
@@ -177,6 +216,12 @@ func (m *Room) Size() (n int) {
 	}
 	if m.UserEntityCount != 0 {
 		n += 1 + sovRoom(uint64(m.UserEntityCount))
+	}
+	if len(m.DeletedInstances) > 0 {
+		for _, e := range m.DeletedInstances {
+			l = e.Size()
+			n += 1 + l + sovRoom(uint64(l))
+		}
 	}
 	return n
 }
@@ -224,6 +269,35 @@ func (m *Room) Unmarshal(dAtA []byte) error {
 		}
 		switch fieldNum {
 		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Filepath", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRoom
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRoom
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Filepath = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Left", wireType)
 			}
@@ -242,7 +316,7 @@ func (m *Room) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
-		case 2:
+		case 3:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Right", wireType)
 			}
@@ -261,7 +335,7 @@ func (m *Room) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
-		case 3:
+		case 4:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Top", wireType)
 			}
@@ -280,7 +354,7 @@ func (m *Room) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
-		case 4:
+		case 5:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Bottom", wireType)
 			}
@@ -299,7 +373,7 @@ func (m *Room) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
-		case 5:
+		case 6:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Instances", wireType)
 			}
@@ -330,7 +404,7 @@ func (m *Room) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
-		case 6:
+		case 7:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field UserEntityCount", wireType)
 			}
@@ -349,6 +423,37 @@ func (m *Room) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DeletedInstances", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRoom
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= (int(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthRoom
+			}
+			postIndex := iNdEx + msglen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.DeletedInstances = append(m.DeletedInstances, &RoomObject{})
+			if err := m.DeletedInstances[len(m.DeletedInstances)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipRoom(dAtA[iNdEx:])
@@ -478,19 +583,21 @@ var (
 func init() { proto.RegisterFile("room.proto", fileDescriptorRoom) }
 
 var fileDescriptorRoom = []byte{
-	// 209 bytes of a gzipped FileDescriptorProto
+	// 249 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0x2a, 0xca, 0xcf, 0xcf,
 	0xd5, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0x4e, 0xcf, 0xcd, 0x91, 0x12, 0x04, 0x09, 0xc4,
-	0xe7, 0x27, 0x65, 0xa5, 0x26, 0x97, 0x40, 0xc4, 0x95, 0x36, 0x33, 0x72, 0xb1, 0x04, 0xe5, 0xe7,
-	0xe7, 0x0a, 0x09, 0x71, 0xb1, 0xf8, 0xa4, 0xa6, 0x95, 0x48, 0x30, 0x2a, 0x30, 0x6a, 0xb0, 0x06,
-	0x81, 0xd9, 0x42, 0x22, 0x5c, 0xac, 0x41, 0x99, 0xe9, 0x19, 0x25, 0x12, 0x4c, 0x60, 0x41, 0x08,
-	0x47, 0x48, 0x80, 0x8b, 0x39, 0x24, 0xbf, 0x40, 0x82, 0x19, 0x2c, 0x06, 0x62, 0x0a, 0x89, 0x71,
-	0xb1, 0x39, 0xe5, 0x97, 0x94, 0xe4, 0xe7, 0x4a, 0xb0, 0x80, 0x05, 0xa1, 0x3c, 0x21, 0x5d, 0x2e,
-	0x4e, 0xcf, 0xbc, 0xe2, 0x92, 0xc4, 0xbc, 0xe4, 0xd4, 0x62, 0x09, 0x56, 0x05, 0x66, 0x0d, 0x6e,
-	0x23, 0x7e, 0xbd, 0xf4, 0xdc, 0x1c, 0x3d, 0x90, 0x8d, 0xfe, 0x60, 0x67, 0x04, 0x21, 0x54, 0x08,
-	0x69, 0x70, 0xf1, 0x87, 0x16, 0xa7, 0x16, 0xb9, 0xe6, 0x95, 0x64, 0x96, 0x54, 0x3a, 0xe7, 0x97,
-	0xe6, 0x95, 0x48, 0xb0, 0x29, 0x30, 0x6a, 0x30, 0x07, 0xa1, 0x0b, 0x3b, 0x09, 0x9c, 0x78, 0x24,
-	0xc7, 0x78, 0xe1, 0x91, 0x1c, 0xe3, 0x83, 0x47, 0x72, 0x8c, 0x33, 0x1e, 0xcb, 0x31, 0x24, 0xb1,
-	0x81, 0xbd, 0x63, 0x0c, 0x08, 0x00, 0x00, 0xff, 0xff, 0x6e, 0x93, 0xb6, 0xf5, 0xf4, 0x00, 0x00,
-	0x00,
+	0xe7, 0x27, 0x65, 0xa5, 0x26, 0x97, 0x40, 0xc4, 0x95, 0x7a, 0x98, 0xb8, 0x58, 0x82, 0xf2, 0xf3,
+	0x73, 0x85, 0xa4, 0xb8, 0x38, 0xdc, 0x32, 0x73, 0x52, 0x0b, 0x12, 0x4b, 0x32, 0x24, 0x18, 0x15,
+	0x18, 0x35, 0x38, 0x83, 0xe0, 0x7c, 0x21, 0x21, 0x2e, 0x16, 0x9f, 0xd4, 0xb4, 0x12, 0x09, 0x26,
+	0x05, 0x46, 0x0d, 0xd6, 0x20, 0x30, 0x5b, 0x48, 0x84, 0x8b, 0x35, 0x28, 0x33, 0x3d, 0xa3, 0x44,
+	0x82, 0x19, 0x2c, 0x08, 0xe1, 0x08, 0x09, 0x70, 0x31, 0x87, 0xe4, 0x17, 0x48, 0xb0, 0x80, 0xc5,
+	0x40, 0x4c, 0x21, 0x31, 0x2e, 0x36, 0xa7, 0xfc, 0x92, 0x92, 0xfc, 0x5c, 0x09, 0x56, 0xb0, 0x20,
+	0x94, 0x27, 0xa4, 0xcb, 0xc5, 0xe9, 0x99, 0x57, 0x5c, 0x92, 0x98, 0x97, 0x9c, 0x5a, 0x2c, 0xc1,
+	0xa6, 0xc0, 0xac, 0xc1, 0x6d, 0xc4, 0xaf, 0x97, 0x9e, 0x9b, 0xa3, 0x07, 0x72, 0x8d, 0x3f, 0xd8,
+	0x89, 0x41, 0x08, 0x15, 0x42, 0x1a, 0x5c, 0xfc, 0xa1, 0xc5, 0xa9, 0x45, 0xae, 0x79, 0x25, 0x99,
+	0x25, 0x95, 0xce, 0xf9, 0xa5, 0x79, 0x25, 0x12, 0xec, 0x0a, 0x8c, 0x1a, 0xcc, 0x41, 0xe8, 0xc2,
+	0x42, 0xd6, 0x5c, 0x02, 0x2e, 0xa9, 0x39, 0xa9, 0x25, 0xa9, 0x29, 0x08, 0xf3, 0x39, 0xb0, 0x9b,
+	0x8f, 0xa1, 0xd0, 0x49, 0xe0, 0xc4, 0x23, 0x39, 0xc6, 0x0b, 0x8f, 0xe4, 0x18, 0x1f, 0x3c, 0x92,
+	0x63, 0x9c, 0xf1, 0x58, 0x8e, 0x21, 0x89, 0x0d, 0x1c, 0x4e, 0xc6, 0x80, 0x00, 0x00, 0x00, 0xff,
+	0xff, 0x1e, 0xba, 0x15, 0x9d, 0x4d, 0x01, 0x00, 0x00,
 }
