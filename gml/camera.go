@@ -48,8 +48,8 @@ func CameraSetViewTarget(index int, inst object.ObjectType) {
 
 func (view *camera) update() {
 	if view.follow != nil {
-		cam := cameraGetActive()
-		inst := cam.follow.BaseObject()
+		//cam := cameraGetActive()
+		inst := view.follow.BaseObject()
 
 		roomInst := RoomGetInstance(inst.RoomInstanceIndex())
 		if roomInst != nil {

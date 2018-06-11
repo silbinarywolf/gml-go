@@ -9,16 +9,17 @@ var (
 	//
 	// Starting middle param at "1" so that the 0th item always returns nil
 	//
-	roomInstances []*RoomInstance = make([]*RoomInstance, 1, 10)
+	roomInstances []RoomInstance = make([]RoomInstance, 1, 10)
 )
 
-func (room *Room) Create() *RoomInstance {
-	roomInst := &RoomInstance{
+func RoomInstanceCreate(room *Room) *RoomInstance {
+	roomInstances = append(roomInstances, RoomInstance{
+		used: true,
 		room: room,
-	}
-	index := len(roomInstances)
+	})
+	index := len(roomInstances) - 1
+	roomInst := &roomInstances[index]
 	roomInst.index = index
-	roomInstances = append(roomInstances, roomInst)
 
 	// Instantiate instances for this room
 	for _, obj := range room.Instances {
@@ -28,6 +29,7 @@ func (room *Room) Create() *RoomInstance {
 }
 
 type RoomInstance struct {
+	used            bool
 	index           int
 	room            *Room
 	instanceManager instanceManager
@@ -38,7 +40,11 @@ func (roomInst *RoomInstance) Index() int {
 }
 
 func RoomGetInstance(roomInstanceIndex int) *RoomInstance {
-	return roomInstances[roomInstanceIndex]
+	roomInst := &roomInstances[roomInstanceIndex]
+	if roomInst.used {
+		return roomInst
+	}
+	return nil
 }
 
 func (roomInst *RoomInstance) InstanceCreate(position Vec, objectIndex object.ObjectIndex) object.ObjectType {

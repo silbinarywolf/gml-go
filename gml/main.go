@@ -22,7 +22,12 @@ func update(s *ebiten.Image) error {
 	keyboardUpdate()
 	keyboardStringUpdate()
 	mouseUpdate()
-	gMainFunctions.update()
+	if EditorIsActive() {
+		EditorUpdate()
+		EditorDraw()
+	} else {
+		gMainFunctions.update()
+	}
 	if g_game.hasGameRestarted {
 		gInstanceManager.reset()
 		gMainFunctions.gameStart()
@@ -46,7 +51,8 @@ func Update() {
 
 	manager := gInstanceManager
 	manager.update()
-	for _, roomInst := range roomInstances {
+	for i := 1; i < len(roomInstances); i++ {
+		roomInst := &roomInstances[i]
 		roomInst.update()
 	}
 }
@@ -54,7 +60,8 @@ func Update() {
 func Draw() {
 	manager := gInstanceManager
 	manager.draw()
-	for _, roomInst := range roomInstances {
+	for i := 1; i < len(roomInstances); i++ {
+		roomInst := &roomInstances[i]
 		roomInst.draw()
 	}
 }
