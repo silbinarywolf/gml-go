@@ -2,7 +2,7 @@ package gml
 
 import (
 	"bufio"
-	"fmt"
+	"image/color"
 	"math"
 	"os"
 	"os/user"
@@ -22,6 +22,10 @@ type roomEditor struct {
 
 	camPos       Vec
 	lastMousePos Vec
+
+	isEntityMenuOpen   bool
+	entityMenuFiltered []object.ObjectType
+	objectSelected     object.ObjectType
 }
 
 func newRoomEditor() *roomEditor {
@@ -50,8 +54,9 @@ func newRoomEditor() *roomEditor {
 		initialized: true,
 		username:    username,
 		//editingRoom: nil,
-		objectIndexToData: objectIndexToData,
-		lastMousePos:      MousePosition(),
+		objectIndexToData:  objectIndexToData,
+		lastMousePos:       MousePosition(),
+		entityMenuFiltered: make([]object.ObjectType, 0, len(objectIndexToData)),
 	}
 }
 
@@ -143,6 +148,7 @@ func EditorUpdate() {
 		return
 	}
 	roomEditor := gRoomEditor
+	isMenuOpen := roomEditor.isEntityMenuOpen
 
 	// NOTE(Jake): 2018-06-04
 	//
@@ -151,42 +157,85 @@ func EditorUpdate() {
 	cameraSetActive(0)
 	defer cameraClearActive()
 
-	{
-		// Move camera
-		camPos := roomEditor.camPos
-		var speed float64 = 4
-		if KeyboardCheck(VkShift) {
-			speed = 8
+	isHoldingControl := KeyboardCheck(VkControl)
+	if isHoldingControl {
+		// Open entity select menu
+		if KeyboardCheckPressed(VkP) {
+			roomEditor.isEntityMenuOpen = !roomEditor.isEntityMenuOpen
+			if roomEditor.isEntityMenuOpen {
+				ClearKeyboardString()
+			}
 		}
-		if KeyboardCheck(VkRight) || KeyboardCheck(VkD) {
-			camPos.X += speed
-		} else if KeyboardCheck(VkLeft) || KeyboardCheck(VkA) {
-			camPos.X -= speed
+
+		// Save
+		if KeyboardCheckPressed(VkS) {
+			EditorSave()
+			println("Saved room:", room.Filepath)
 		}
-		if KeyboardCheck(VkUp) || KeyboardCheck(VkW) {
-			camPos.Y -= speed
-		} else if KeyboardCheck(VkDown) || KeyboardCheck(VkS) {
-			camPos.Y += speed
-		}
-		gRoomEditor.camPos = camPos
-		CameraSetViewPos(0, camPos)
 	}
 
-	//
-	if KeyboardCheck(VkControl) &&
-		KeyboardCheckPressed(VkS) {
-		EditorSave()
-		println("Saved room:", room.Filepath)
+	// Close open menus
+	if KeyboardCheckPressed(VkEscape) {
+		roomEditor.isEntityMenuOpen = false
 	}
 
-	{
+	// Handle filtering / selection
+	if roomEditor.isEntityMenuOpen {
+		typingText := KeyboardString()
+		roomEditor.entityMenuFiltered = roomEditor.entityMenuFiltered[:0]
+		for _, obj := range roomEditor.objectIndexToData {
+			if obj == nil {
+				continue
+			}
+			name := obj.ObjectName()
+			hasMatch := typingText == "" ||
+				strings.Contains(name, typingText)
+			if !hasMatch {
+				continue
+			}
+			roomEditor.entityMenuFiltered = append(roomEditor.entityMenuFiltered, obj)
+		}
+
+		//
+		if KeyboardCheckPressed(VkEnter) &&
+			len(roomEditor.entityMenuFiltered) > 0 {
+			selectedObj := roomEditor.entityMenuFiltered[0]
+			roomEditor.objectSelected = selectedObj
+			roomEditor.isEntityMenuOpen = false
+		}
+	}
+
+	if !isMenuOpen &&
+		!isHoldingControl {
+		{
+			// Move camera
+			camPos := &roomEditor.camPos
+			var speed float64 = 4
+			if KeyboardCheck(VkShift) {
+				speed = 8
+			}
+			if KeyboardCheck(VkRight) || KeyboardCheck(VkD) {
+				camPos.X += speed
+			} else if KeyboardCheck(VkLeft) || KeyboardCheck(VkA) {
+				camPos.X -= speed
+			}
+			if KeyboardCheck(VkUp) || KeyboardCheck(VkW) {
+				camPos.Y -= speed
+			} else if KeyboardCheck(VkDown) || KeyboardCheck(VkS) {
+				camPos.Y += speed
+			}
+			CameraSetViewPos(0, *camPos)
+		}
+
 		lastMousePos := roomEditor.lastMousePos
 		roomEditor.lastMousePos = MousePosition()
 
 		grid := V(32, 32)
 
 		// Left click
-		if MouseCheckButton(MbLeft) {
+		if MouseCheckButton(MbLeft) &&
+			roomEditor.objectSelected != nil {
+			objectIndexSelected := roomEditor.objectSelected.ObjectIndex()
 			// NOTE(Jake): 2018-06-10
 			//
 			// We need to handle mouse click between the last mouse position
@@ -223,8 +272,8 @@ func EditorUpdate() {
 						mousePos.X = snapToGrid(mousePos.X, grid.X)
 						mousePos.Y = snapToGrid(mousePos.Y, grid.Y)
 
-						roomObj := EditorAddInstance(mousePos, 2)
-						fmt.Printf("Create entity: %v\n", roomObj)
+						roomObj := EditorAddInstance(mousePos, objectIndexSelected)
+						println("Create entity:", roomObj.String())
 					}
 				}
 			}
@@ -257,7 +306,7 @@ func EditorUpdate() {
 						if mousePos.X >= left && mousePos.X < right &&
 							mousePos.Y >= top && mousePos.Y < bottom {
 							EditorRemoveInstance(i)
-							fmt.Printf("Deleted entity: %s\n", obj.GetFilename())
+							println("Deleted entity:", obj.Filename)
 						}
 					}
 				}
@@ -272,6 +321,7 @@ func EditorDraw() {
 		return
 	}
 	roomEditor := gRoomEditor
+	isMenuOpen := roomEditor.isEntityMenuOpen
 
 	// NOTE(Jake): 2018-06-04
 	//
@@ -279,12 +329,11 @@ func EditorDraw() {
 	//
 	cameraSetActive(0)
 	defer cameraClearActive()
+	currentCamera := cameraGetActive()
 
-	objectIndexToData := roomEditor.objectIndexToData
 	instances := room.Instances
 	for _, obj := range instances {
-		objectIndex := obj.ObjectIndex
-		inst := objectIndexToData[objectIndex]
+		inst := roomEditorObjectIndexToData(obj.ObjectIndex)
 		if inst == nil {
 			continue
 		}
@@ -292,6 +341,59 @@ func EditorDraw() {
 		baseObj.X = float64(obj.X)
 		baseObj.Y = float64(obj.Y)
 		inst.Draw()
+	}
+	if !isMenuOpen {
+		grid := V(32, 32)
+
+		// Draw selected
+		if selectedObj := roomEditor.objectSelected; selectedObj != nil {
+			mousePos := MousePosition()
+			mousePos.X = snapToGrid(mousePos.X, grid.X)
+			mousePos.Y = snapToGrid(mousePos.Y, grid.Y)
+
+			// Draw
+			baseObj := selectedObj.BaseObject()
+			baseObj.Vec = mousePos
+			selectedObj.Draw()
+		}
+	}
+
+	// Entity select menu
+	if roomEditor.isEntityMenuOpen {
+		{
+			//screen := gScreen
+			//screen.Fill(color.NRGBA{0x00, 0x00, 0x00, 128})
+			DrawRectangle(m.V(0, 0), m.V(2048, 2048), color.RGBA{0, 0, 0, 190})
+		}
+		var x float64 = 128
+		var y float64 = 32
+		{
+			searchText := "Search for object (type + press enter)"
+			DrawText(m.V(128-(StringWidth(searchText)/4), y), searchText)
+			y += 24
+		}
+		{
+			typingText := KeyboardString()
+			DrawText(m.V(x, y), typingText)
+			DrawText(m.V(x+StringWidth(typingText), y), "|")
+			y += 24
+		}
+		previewSize := m.V(32, 32)
+		for _, obj := range roomEditor.entityMenuFiltered {
+			//
+			baseObj := obj.BaseObject()
+			pos := &baseObj.Vec
+			size := baseObj.Size
+			oldImageScale := baseObj.ImageScale
+			pos.X = x - 40 + currentCamera.X
+			pos.Y = y - (previewSize.Y / 2) + currentCamera.Y
+			baseObj.ImageScale.X = previewSize.X / size.X
+			baseObj.ImageScale.Y = previewSize.Y / size.Y
+			obj.Draw()
+			DrawText(m.V(x, y), obj.ObjectName())
+			baseObj.ImageScale = oldImageScale
+			y += 48
+		}
 	}
 }
 
@@ -302,43 +404,6 @@ func EditorSave() {
 	}
 
 	roomDirectory := room.Filepath
-
-	// Write objects
-	{
-		for _, obj := range room.Instances {
-			data := roomEditorObjectIndexToData(obj.ObjectIndex)
-			fname := obj.Filename
-			filepath := roomDirectory + "/" + fname + ".txt"
-
-			file, err := os.Create(filepath)
-			if err != nil {
-				println("Error writing file:", err.Error())
-
-				// todo(jake): 2018-06-10
-				//
-				// Error recovery here?
-				//
-
-				return
-			}
-
-			name := data.ObjectName()
-			x := obj.X
-			y := obj.Y
-
-			//
-			w := bufio.NewWriter(file)
-			w.WriteString(name)
-			w.WriteByte('\n')
-			w.WriteString(strconv.Itoa(int(x)))
-			w.WriteByte('\n')
-			w.WriteString(strconv.Itoa(int(y)))
-			w.WriteByte('\n')
-			w.Flush()
-
-			file.Close()
-		}
-	}
 
 	// Delete objects
 	deletedInstances := room.DeletedInstances
@@ -358,6 +423,59 @@ func EditorSave() {
 		if err != nil {
 			println("Error deleting instance:", err.Error())
 			continue
+		}
+	}
+
+	// Write objects
+	{
+		for _, obj := range room.Instances {
+			data := roomEditorObjectIndexToData(obj.ObjectIndex)
+			fname := obj.Filename
+			filepath := roomDirectory + "/" + fname + ".txt"
+
+			file, err := os.Create(filepath)
+			if err != nil {
+				println("Error writing file:", err.Error())
+
+				// todo(jake): 2018-06-10
+				//
+				// Error recovery here?
+				//
+
+				continue
+			}
+
+			name := data.ObjectName()
+			x := obj.X
+			y := obj.Y
+
+			//
+			w := bufio.NewWriter(file)
+			w.WriteString(name)
+			w.WriteByte('\n')
+			w.WriteString(strconv.Itoa(int(x)))
+			w.WriteByte('\n')
+			w.WriteString(strconv.Itoa(int(y)))
+			w.WriteByte('\n')
+			// NOTE(Jake): 2018-06-11
+			//
+			// Why are we writing the relative filename [x] times here?
+			//
+			// To stop git from confusing deleted entities with renaming/moving
+			// a file. (ie. you'd delete an entity, create a new entity, but git would handle
+			// it as a rename/move)
+			//
+			// I'm actually not sure if a Git rename/move could lead to merge conflicts...
+			// but I'm going to err on the side of caution here until I decide to investigate
+			// this further.
+			//
+			w.WriteString(fname)
+			w.WriteString(fname)
+			w.WriteString(fname)
+			w.WriteString(fname)
+			w.Flush()
+
+			file.Close()
 		}
 	}
 

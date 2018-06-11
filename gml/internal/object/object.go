@@ -25,12 +25,11 @@ type Object struct {
 	index              int     // index in the 'entities' array
 	roomInstanceIndex  int     // index of the room in the 'room' array
 	imageAngleRadians  float64 // Image Angle
-	imageScale         m.Vec
 }
 
 func (inst *Object) Create() {
-	inst.imageScale.X = 1.0
-	inst.imageScale.Y = 1.0
+	inst.ImageScale.X = 1.0
+	inst.ImageScale.Y = 1.0
 }
 
 func (inst *Object) BaseObject() *Object        { return inst }
@@ -39,7 +38,8 @@ func (inst *Object) RoomInstanceIndex() int     { return inst.roomInstanceIndex 
 func (inst *Object) Pos() m.Vec                 { return inst.Vec }
 func (inst *Object) ImageAngleRadians() float64 { return inst.imageAngleRadians }
 func (inst *Object) ImageAngle() float64        { return inst.imageAngleRadians * (180 / math.Pi) }
-func (inst *Object) ImageScale() m.Vec          { return inst.imageScale }
+
+//func (inst *Object) ImageScale() m.Vec          { return inst.imageScale }
 
 func (inst *Object) SetSprite(sprite *sprite.Sprite) {
 	inst.SpriteState.SetSprite(sprite)

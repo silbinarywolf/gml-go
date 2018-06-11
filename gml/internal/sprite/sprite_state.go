@@ -1,7 +1,12 @@
 package sprite
 
+import (
+	"github.com/silbinarywolf/gml-go/gml/internal/math"
+)
+
 type SpriteState struct {
 	sprite      *Sprite
+	ImageScale  math.Vec
 	imageIndex  float64
 	imageNumber float64
 	imageSpeed  float64
