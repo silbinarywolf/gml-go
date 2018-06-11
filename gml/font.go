@@ -1,9 +1,6 @@
 package gml
 
 import (
-	"image/color"
-
-	"github.com/hajimehoshi/ebiten/text"
 	"golang.org/x/image/font"
 )
 
@@ -23,13 +20,6 @@ func StringWidth(text string) float64 {
 	face := currentFont.font
 	x := font.MeasureString(face, text)
 	return float64(x.Round())
-}
-
-func DrawText(position Vec, message string) {
-	if !g_fontManager.hasFontSet() {
-		panic("Must call DrawSetFont() before calling DrawText.")
-	}
-	text.Draw(gScreen, message, g_fontManager.currentFont.font, int(position.X), int(position.Y), color.White)
 }
 
 func DrawSetFont(font *Font) {

@@ -1,9 +1,5 @@
 package gml
 
-import (
-	"github.com/hajimehoshi/ebiten"
-)
-
 type mainFunctions struct {
 	gameStart func()
 	update    func()
@@ -12,13 +8,11 @@ type mainFunctions struct {
 var gMainFunctions *mainFunctions = new(mainFunctions)
 
 var (
-	gScreen *ebiten.Image
 	gWidth  int
 	gHeight int
 )
 
-func update(s *ebiten.Image) error {
-	gScreen = s
+func update() error {
 	keyboardUpdate()
 	keyboardStringUpdate()
 	mouseUpdate()
@@ -55,24 +49,4 @@ func Update() {
 		roomInst := &roomInstances[i]
 		roomInst.update()
 	}
-}
-
-func Draw() {
-	manager := gInstanceManager
-	manager.draw()
-	for i := 1; i < len(roomInstances); i++ {
-		roomInst := &roomInstances[i]
-		roomInst.draw()
-	}
-}
-
-func Run(gameStartFunc func(), updateFunc func(), width int, height int, title string) {
-	gMainFunctions.gameStart = gameStartFunc
-	gMainFunctions.update = updateFunc
-
-	gMainFunctions.gameStart()
-	ebiten.SetRunnableInBackground(true)
-	gWidth = width
-	gHeight = height
-	ebiten.Run(update, width, height, 2, title)
 }
