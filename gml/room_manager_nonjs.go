@@ -190,11 +190,13 @@ func LoadRoom(name string) *Room {
 	//
 	// Write out *.data file (for browsers / fast client loading)
 	//
-	go func() {
-		err := room.writeDataFile(roomPath)
-		if err != nil {
-			panic("Failed writing " + roomPath + ", error: " + err.Error())
-		}
-	}()
+	if debugMode {
+		go func() {
+			err := room.writeDataFile(roomPath)
+			if err != nil {
+				panic("Failed writing " + roomPath + ", error: " + err.Error())
+			}
+		}()
+	}
 	return room
 }
