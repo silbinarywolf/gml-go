@@ -15,3 +15,7 @@ func ObjectGetIndex(name string) (object.ObjectIndex, bool) {
 	res, ok := nameToID[name]
 	return res, ok
 }
+
+func ObjectInitTypes(objTypes []object.ObjectType) {
+	object.InitTypes(objTypes)
+}
