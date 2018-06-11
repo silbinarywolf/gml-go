@@ -2,13 +2,11 @@ package sprite
 
 import (
 	"github.com/silbinarywolf/gml-go/gml/internal/math"
-
-	"github.com/hajimehoshi/ebiten"
 )
 
 type Sprite struct {
 	name   string
-	frames []*ebiten.Image
+	frames []SpriteFrame
 	size   math.Vec
 	// todo(Jake): Get image speed from config.json
 }
@@ -16,11 +14,11 @@ type Sprite struct {
 func (spr *Sprite) Name() string   { return spr.name }
 func (spr *Sprite) Size() math.Vec { return spr.size }
 
-func (spr *Sprite) GetFrame(index int) *ebiten.Image {
-	return spr.frames[index]
-}
+/*func (spr *Sprite) GetFrame(index int) *SpriteFrame {
+	return &spr.frames[index]
+}*/
 
-func newSprite(name string, frames []*ebiten.Image) *Sprite {
+func newSprite(name string, frames []SpriteFrame) *Sprite {
 	spr := new(Sprite)
 	spr.name = name
 	spr.frames = frames

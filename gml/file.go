@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/hajimehoshi/ebiten/ebitenutil"
 	"github.com/silbinarywolf/gml-go/gml/internal/file"
 )
 
@@ -18,7 +17,7 @@ func ProgramDirectory() string {
 
 func ReadFileAsString(path string) (string, error) {
 	path = AssetsDirectory() + "/" + path
-	fileData, err := ebitenutil.OpenFile(path)
+	fileData, err := file.OpenFile(path)
 	if err != nil {
 		return "", err
 	}

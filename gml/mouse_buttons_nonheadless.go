@@ -1,3 +1,5 @@
+// +build !headless
+
 package gml
 
 import "github.com/hajimehoshi/ebiten"

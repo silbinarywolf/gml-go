@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 
-	"github.com/hajimehoshi/ebiten/ebitenutil"
+	"github.com/silbinarywolf/gml-go/gml/internal/file"
 )
 
 var (
@@ -25,7 +25,7 @@ func newRoomManager() *RoomManager {
 
 func loadRoomFromDataFile(name string) (*Room, error) {
 	roomDataPath := AssetsDirectory() + "/room/" + name + ".data"
-	dataFile, err := ebitenutil.OpenFile(roomDataPath)
+	dataFile, err := file.OpenFile(roomDataPath)
 	if err != nil {
 		return nil, err
 	}

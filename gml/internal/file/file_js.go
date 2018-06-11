@@ -7,11 +7,16 @@ import (
 	"strings"
 
 	"github.com/gopherjs/gopherjs/js"
+	"github.com/hajimehoshi/ebiten/ebitenutil"
 )
 
 var (
 	ProgramDirectory string = calculateProgramDir()
 )
+
+func OpenFile(path string) (ReadSeekCloser, error) {
+	return ebitenutil.OpenFile(path)
+}
 
 func calculateProgramDir() string {
 	// Setup program dir

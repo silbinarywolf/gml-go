@@ -19,7 +19,7 @@ func DrawSprite(spr *sprite.Sprite, subimage float64, position Vec) {
 		position.Y -= camPos.Y
 	}
 
-	frame := spr.GetFrame(int(subimage))
+	frame := sprite.GetFrame(spr, int(subimage))
 	op := ebiten.DrawImageOptions{}
 	op.GeoM.Translate(position.X, position.Y)
 	screen.DrawImage(frame, &op)
@@ -34,7 +34,7 @@ func DrawSpriteExt(spr *sprite.Sprite, subimage float64, position Vec, scale Vec
 		position.Y -= camPos.Y
 	}
 
-	frame := spr.GetFrame(int(subimage))
+	frame := sprite.GetFrame(spr, int(subimage))
 	op := ebiten.DrawImageOptions{}
 	// op.GeoM.Scale(width/float64(ew), height/float64(eh))
 	op.GeoM.Scale(scale.X, scale.Y)

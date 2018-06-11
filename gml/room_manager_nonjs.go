@@ -16,7 +16,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hajimehoshi/ebiten/ebitenutil"
+	"github.com/silbinarywolf/gml-go/gml/internal/file"
 	"github.com/silbinarywolf/gml-go/gml/internal/object"
 )
 
@@ -34,7 +34,7 @@ func (room *Room) writeDataFile(roomPath string) error {
 
 func (room *Room) readInstance(instancePath string) {
 	println("Loading ", instancePath, "...")
-	instanceFileData, err := ebitenutil.OpenFile(instancePath)
+	instanceFileData, err := file.OpenFile(instancePath)
 	if err != nil {
 		panic(fmt.Errorf("Unable to find map entity file: %s", err))
 	}

@@ -2,11 +2,8 @@ package sprite
 
 import (
 	"errors"
-	"image"
 	"strconv"
 
-	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/ebitenutil"
 	"github.com/silbinarywolf/gml-go/gml/internal/file"
 )
 
@@ -40,26 +37,17 @@ func LoadSprite(name string) *Sprite {
 	// everything into a texture page for "production" builds.
 	//
 	folderPath := file.AssetsDirectory + "/sprites/" + name + "/"
-	frames := make([]*ebiten.Image, 0, 10)
+	frames := make([]SpriteFrame, 0, 10)
 	for i := 0; true; i++ {
 		path := folderPath + strconv.Itoa(i) + ".png" //fmt.Sprintf("%s%d.png", folderPath, i)
-		imageFileData, err := ebitenutil.OpenFile(path)
+		frame, err := createFrame(path, i)
 		if err != nil {
 			if i == 0 {
 				panic(errors.New("Unable to find image: " + path))
 			}
 			break
 		}
-		image, _, err := image.Decode(imageFileData)
-		imageFileData.Close()
-		if err != nil {
-			panic(errors.New("Unable to decode image: " + path))
-		}
-		sheet, err := ebiten.NewImageFromImage(image, ebiten.FilterDefault)
-		if err != nil {
-			panic(errors.New("Unable to use image with ebiten.NewImageFromImage: " + path))
-		}
-		frames = append(frames, sheet)
+		frames = append(frames, frame)
 	}
 
 	result := newSprite(name, frames)
