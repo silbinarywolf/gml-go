@@ -14,7 +14,7 @@ var (
 	ProgramDirectory string = calculateProgramDir()
 )
 
-func OpenFile(path string) (ReadSeekCloser, error) {
+func OpenFile(path string) (readSeekCloser, error) {
 	return ebitenutil.OpenFile(path)
 }
 

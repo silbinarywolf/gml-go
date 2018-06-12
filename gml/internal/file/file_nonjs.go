@@ -6,7 +6,6 @@
 package file
 
 import (
-	"io"
 	"os"
 	"path/filepath"
 )
@@ -14,12 +13,6 @@ import (
 var (
 	ProgramDirectory string = calculateProgramDir()
 )
-
-// ReadSeekCloser is io.ReadSeeker and io.Closer.
-type readSeekCloser interface {
-	io.ReadSeeker
-	io.Closer
-}
 
 func OpenFile(path string) (readSeekCloser, error) {
 	return os.Open(filepath.FromSlash(path))

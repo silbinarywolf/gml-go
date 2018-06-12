@@ -1,12 +1,19 @@
 package file
 
 import (
+	"io"
 	"os"
 )
 
 var (
 	AssetsDirectory string = "▲not-set▲"
 )
+
+// ReadSeekCloser is io.ReadSeeker and io.Closer.
+type readSeekCloser interface {
+	io.ReadSeeker
+	io.Closer
+}
 
 func init() {
 	// NOTE(Jake): 2018-06-03
