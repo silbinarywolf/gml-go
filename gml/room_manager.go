@@ -3,7 +3,7 @@ package gml
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
+	"time"
 
 	"github.com/silbinarywolf/gml-go/gml/internal/file"
 )
@@ -24,6 +24,7 @@ func newRoomManager() *RoomManager {
 }
 
 func loadRoomFromDataFile(name string) (*Room, error) {
+	start := time.Now()
 	roomDataPath := AssetsDirectory() + "/room/" + name + ".data"
 	dataFile, err := file.OpenFile(roomDataPath)
 	if err != nil {
@@ -39,6 +40,7 @@ func loadRoomFromDataFile(name string) (*Room, error) {
 	if err != nil {
 		panic(fmt.Errorf("Unable to load map data: %s", err))
 	}
-	log.Println("Loaded map from data file")
+	elapsed := time.Since(start)
+	println("Room \"" + name + "\" took " + elapsed.String() + " to load.")
 	return result, nil
 }

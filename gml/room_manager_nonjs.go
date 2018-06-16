@@ -8,13 +8,12 @@ package gml
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/silbinarywolf/gml-go/gml/internal/file"
 	"github.com/silbinarywolf/gml-go/gml/internal/object"
@@ -33,15 +32,15 @@ func (room *Room) writeDataFile(roomPath string) error {
 }
 
 func (room *Room) readInstance(instancePath string) {
-	println("Loading ", instancePath, "...")
+	//println("Loading ", instancePath, "...")
 	instanceFileData, err := file.OpenFile(instancePath)
 	if err != nil {
-		panic(fmt.Errorf("Unable to find map entity file: %s", err))
+		panic("Unable to find map entity file: " + err.Error())
 	}
 	bytesData, err := ioutil.ReadAll(instanceFileData)
 	instanceFileData.Close()
 	if err != nil {
-		panic(fmt.Errorf("Unable to find map entity file: Read all: %s\n", err))
+		panic("Unable to find map entity file: Read all: " + err.Error())
 	}
 	bytesReader := bytes.NewReader(bytesData)
 	scanner := bufio.NewScanner(bytesReader)
@@ -55,7 +54,7 @@ func (room *Room) readInstance(instancePath string) {
 	x64, err := strconv.ParseInt(strings.TrimSpace(scanner.Text()), 10, 32)
 	x := int32(x64)
 	if err != nil {
-		log.Printf("Error parsing Y of entity %s.\n", entityName)
+		println("Error parsing Y of entity", entityName)
 		return
 	}
 
@@ -64,16 +63,16 @@ func (room *Room) readInstance(instancePath string) {
 	y64, err := strconv.ParseInt(strings.TrimSpace(scanner.Text()), 10, 32)
 	y := int32(y64)
 	if err != nil {
-		log.Printf("Error parsing X of entity %s.\n", entityName)
+		println("Error parsing X of entity", entityName)
 		return
 	}
 	if err := scanner.Err(); err != nil {
-		log.Printf("Error parsing entity, error: %s.\n", err)
+		println("Error parsing entity, error: ", err.Error())
 		return
 	}
 	objectIndex, ok := ObjectGetIndex(entityName)
 	if !ok {
-		log.Printf("Missing mapping of name \"%s\" to entity ID. Is this name defined in your gml.Init()?", entityName)
+		println("Missing mapping of name \"" + entityName + "\" to entity ID. Is this name defined in your gml.Init()?")
 		return
 	}
 
@@ -178,9 +177,12 @@ func LoadRoom(name string) *Room {
 	room := new(Room)
 	room.Filepath = roomPath
 	room.Instances = make([]*RoomObject, 0, len(instancePathList))
+	start := time.Now()
 	for _, instance := range instancePathList {
 		room.readInstance(instance)
 	}
+	elapsed := time.Since(start)
+	println("Room \"" + name + "\" took " + elapsed.String() + " to load.")
 	manager.assetMap[name] = room
 
 	// NOTE(Jake): 2018-05-29
