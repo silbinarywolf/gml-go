@@ -5,6 +5,7 @@ package sprite
 import (
 	"errors"
 	"image"
+	"math"
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
@@ -35,6 +36,20 @@ func createFrame(path string, i int) (SpriteFrame, error) {
 	}, nil
 }
 
-func GetFrame(spr *Sprite, index int) *ebiten.Image {
-	return spr.frames[index].image
+// NOTE(Jake): 2018-06-17
+//
+// This is called by draw_nonheadless.go in the parent package
+// so that it can draw the image.
+//
+func GetRawFrame(spr *Sprite, index float64) *ebiten.Image {
+	// NOTE(Jake): 2018-06-17
+	//
+	// Golang does not "cast", it uses type conversion, which means
+	// a float64 -> int will *round* not simply *floor* as you might
+	// expect in C/C++.
+	//
+	// https://stackoverflow.com/questions/35115868/how-to-round-to-nearest-int-when-casting-float-to-int-in-go
+	//
+	i := int(math.Floor(index))
+	return spr.frames[i].image
 }

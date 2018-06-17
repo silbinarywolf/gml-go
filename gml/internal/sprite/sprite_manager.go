@@ -39,7 +39,7 @@ func LoadSprite(name string) *Sprite {
 	folderPath := file.AssetsDirectory + "/sprites/" + name + "/"
 	frames := make([]SpriteFrame, 0, 10)
 	for i := 0; true; i++ {
-		path := folderPath + strconv.Itoa(i) + ".png" //fmt.Sprintf("%s%d.png", folderPath, i)
+		path := folderPath + strconv.Itoa(i) + ".png"
 		frame, err := createFrame(path, i)
 		if err != nil {
 			if i == 0 {
@@ -50,7 +50,14 @@ func LoadSprite(name string) *Sprite {
 		frames = append(frames, frame)
 	}
 
-	result := newSprite(name, frames)
+	// Read config information (if it exists)
+	var config spriteConfig
+	configPath := folderPath + "config.json"
+	config = loadConfig(configPath)
+
+	// Create sprite
+	result := newSprite(name, frames, config)
 	manager.assetMap[name] = result
+
 	return result
 }

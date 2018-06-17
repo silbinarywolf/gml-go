@@ -195,6 +195,7 @@ func EditorUpdate() {
 			if !hasMatch {
 				continue
 			}
+			obj.BaseObject().ImageUpdate()
 			roomEditor.entityMenuFiltered = append(roomEditor.entityMenuFiltered, obj)
 		}
 
@@ -387,12 +388,14 @@ func EditorDraw() {
 			pos := &baseObj.Vec
 			size := baseObj.Size
 			oldImageScale := baseObj.ImageScale
-			pos.X = x - 40 + currentCamera.X
-			pos.Y = y - (previewSize.Y / 2) + currentCamera.Y
-			baseObj.ImageScale.X = previewSize.X / size.X
-			baseObj.ImageScale.Y = previewSize.Y / size.Y
-			obj.Draw()
-			DrawText(m.V(x, y), obj.ObjectName())
+			{
+				pos.X = x - 40 + currentCamera.X
+				pos.Y = y - (previewSize.Y / 2) + currentCamera.Y
+				baseObj.ImageScale.X = previewSize.X / size.X
+				baseObj.ImageScale.Y = previewSize.Y / size.Y
+				obj.Draw()
+				DrawText(m.V(x, y), obj.ObjectName())
+			}
 			baseObj.ImageScale = oldImageScale
 			y += 48
 		}

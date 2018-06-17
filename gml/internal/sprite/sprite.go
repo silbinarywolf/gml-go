@@ -5,10 +5,10 @@ import (
 )
 
 type Sprite struct {
-	name   string
-	frames []SpriteFrame
-	size   math.Vec
-	// todo(Jake): Get image speed from config.json
+	name       string
+	frames     []SpriteFrame
+	size       math.Vec
+	imageSpeed float64
 }
 
 func (spr *Sprite) Name() string   { return spr.name }
@@ -18,10 +18,11 @@ func (spr *Sprite) Size() math.Vec { return spr.size }
 	return &spr.frames[index]
 }*/
 
-func newSprite(name string, frames []SpriteFrame) *Sprite {
+func newSprite(name string, frames []SpriteFrame, config spriteConfig) *Sprite {
 	spr := new(Sprite)
 	spr.name = name
 	spr.frames = frames
+	spr.imageSpeed = config.ImageSpeed
 
 	width := 0
 	height := 0

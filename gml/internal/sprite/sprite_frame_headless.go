@@ -34,6 +34,11 @@ func createFrame(path string, i int) (SpriteFrame, error) {
 	}, nil
 }
 
-//func GetFrame(spr *Sprite, index int) *SpriteFrame {
+// NOTE(Jake): 2018-06-17
+//
+// This is commented out as headless mode doesn't
+// draw any images.
+//
+//func GetRawFrame(spr, index) *SpriteFrame {
 //	return nil
 //}
