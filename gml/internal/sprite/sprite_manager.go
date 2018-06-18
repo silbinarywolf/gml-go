@@ -1,8 +1,10 @@
 package sprite
 
 import (
+	"bytes"
+	"encoding/gob"
 	"errors"
-	"strconv"
+	"io/ioutil"
 
 	"github.com/silbinarywolf/gml-go/gml/internal/file"
 )
@@ -21,6 +23,24 @@ type SpriteManager struct {
 	assetMap map[string]*Sprite
 }
 
+func loadSpriteFromData(name string) *spriteAsset {
+	path := file.AssetsDirectory + "/sprites/" + name + ".data"
+	fileData, err := file.OpenFile(path)
+	if err != nil {
+		//panic(errors.New("Unable to find image: " + path))
+		return nil
+	}
+	bytesData, err := ioutil.ReadAll(fileData)
+	fileData.Close()
+	if err != nil {
+		panic(errors.New("Unable to read bytes from image: " + path))
+	}
+	buf := bytes.NewReader(bytesData)
+	asset := new(spriteAsset)
+	gob.NewDecoder(buf).Decode(asset)
+	return asset
+}
+
 func LoadSprite(name string) *Sprite {
 	manager := g_spriteManager
 
@@ -29,34 +49,28 @@ func LoadSprite(name string) *Sprite {
 		return res
 	}
 
-	// Load frames
-	//
-	// NOTE(Jake): 2018-03-12
-	//
-	// This is slow but makes managing assets simpler. Will most likely add something to pack
-	// everything into a texture page for "production" builds.
-	//
-	folderPath := file.AssetsDirectory + "/sprites/" + name + "/"
-	frames := make([]SpriteFrame, 0, 10)
-	for i := 0; true; i++ {
-		path := folderPath + strconv.Itoa(i) + ".png"
-		frame, err := createFrame(path, i)
+	// If debug mode, write out the sprite
+	debugWriteSprite(name)
+
+	// Load from *.data
+	spriteAsset := loadSpriteFromData(name)
+	if spriteAsset == nil {
+		panic("Unable to load sprite from data file: " + name)
+	}
+	frames := make([]SpriteFrame, len(spriteAsset.Frames))
+	for i := 0; i < len(spriteAsset.Frames); i++ {
+		frameAsset := spriteAsset.Frames[i]
+		frame, err := createFrame(frameAsset)
 		if err != nil {
-			if i == 0 {
-				panic(errors.New("Unable to find image: " + path))
-			}
-			break
+			panic("Sprite frame load error for \"" + name + "\": " + err.Error())
 		}
-		frames = append(frames, frame)
+		frames[i] = frame
 	}
 
-	// Read config information (if it exists)
-	var config spriteConfig
-	configPath := folderPath + "config.json"
-	config = loadConfig(configPath)
-
 	// Create sprite
-	result := newSprite(name, frames, config)
+	result := newSprite(spriteAsset.Name, frames, spriteConfig{
+		ImageSpeed: spriteAsset.ImageSpeed,
+	})
 	manager.assetMap[name] = result
 
 	return result
