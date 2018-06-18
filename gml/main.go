@@ -1,5 +1,9 @@
 package gml
 
+import (
+	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
+)
+
 type mainFunctions struct {
 	gameStart func()
 	update    func()
@@ -13,6 +17,7 @@ var (
 )
 
 func update() error {
+	sprite.DebugWatch()
 	keyboardUpdate()
 	keyboardStringUpdate()
 	mouseUpdate()

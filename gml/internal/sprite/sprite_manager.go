@@ -41,15 +41,8 @@ func loadSpriteFromData(name string) *spriteAsset {
 	return asset
 }
 
-func LoadSprite(name string) *Sprite {
-	manager := g_spriteManager
-
-	// Use already loaded asset
-	if res, ok := manager.assetMap[name]; ok {
-		return res
-	}
-
-	// If debug mode, write out the sprite
+func loadSprite(name string) *Sprite {
+	// If debug mode, write out the sprite to *.data file
 	debugWriteSprite(name)
 
 	// Load from *.data
@@ -71,6 +64,17 @@ func LoadSprite(name string) *Sprite {
 	result := newSprite(spriteAsset.Name, frames, spriteConfig{
 		ImageSpeed: spriteAsset.ImageSpeed,
 	})
+	return result
+}
+
+func LoadSprite(name string) *Sprite {
+	manager := g_spriteManager
+
+	// Use already loaded asset
+	if res, ok := manager.assetMap[name]; ok {
+		return res
+	}
+	result := loadSprite(name)
 	manager.assetMap[name] = result
 
 	return result
