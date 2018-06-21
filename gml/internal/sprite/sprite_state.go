@@ -5,10 +5,9 @@ import (
 )
 
 type SpriteState struct {
-	sprite      *Sprite
-	ImageScale  math.Vec
-	imageIndex  float64
-	imageNumber int
+	sprite     *Sprite
+	ImageScale math.Vec
+	imageIndex float64
 }
 
 func (state *SpriteState) Sprite() *Sprite      { return state.sprite }
