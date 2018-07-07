@@ -34,6 +34,32 @@ func cameraClearActive() {
 func CameraSetViewPos(index int, pos Vec) {
 	view := &cameraList[index]
 	view.Vec = pos
+
+	if inst := view.follow; inst != nil {
+		roomInst := RoomGetInstance(inst.BaseObject().RoomInstanceIndex())
+		if roomInst != nil {
+			room := roomInst.room
+			left := float64(room.Left)
+			right := float64(room.Right)
+			top := float64(room.Top)
+			bottom := float64(room.Bottom)
+
+			view.X = pos.X - (view.size.X / 2)
+			view.Y = pos.Y - (view.size.Y / 2)
+			if view.X < left {
+				view.X = left
+			}
+			if view.X+view.size.X > right {
+				view.X = right - view.size.X
+			}
+			if view.Y < top {
+				view.Y = top
+			}
+			if view.Y+view.size.Y > bottom {
+				view.Y = bottom - view.size.Y
+			}
+		}
+	}
 }
 
 func CameraSetViewSize(index int, size Vec) {

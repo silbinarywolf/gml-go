@@ -1,4 +1,4 @@
-package gml
+package room
 
 import (
 	"fmt"
@@ -25,7 +25,7 @@ func newRoomManager() *RoomManager {
 
 func loadRoomFromDataFile(name string) (*Room, error) {
 	start := time.Now()
-	roomDataPath := AssetsDirectory() + "/room/" + name + ".data"
+	roomDataPath := file.AssetsDirectory + "/room/" + name + ".data"
 	dataFile, err := file.OpenFile(roomDataPath)
 	if err != nil {
 		return nil, err

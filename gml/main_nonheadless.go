@@ -16,12 +16,7 @@ func updateEbiten(s *ebiten.Image) error {
 }
 
 func Draw() {
-	manager := gInstanceManager
-	manager.draw()
-	for i := 1; i < len(roomInstances); i++ {
-		roomInst := &roomInstances[i]
-		roomInst.draw()
-	}
+	gState.draw()
 }
 
 func Run(gameStartFunc func(), updateFunc func(), width int, height int, title string) {

@@ -7,18 +7,16 @@ import (
 	"image/color"
 	"math"
 	"os"
-	"os/user"
-	"path"
 	"strconv"
 	"strings"
 
+	"github.com/silbinarywolf/gml-go/gml/internal/file"
 	m "github.com/silbinarywolf/gml-go/gml/internal/math"
 	"github.com/silbinarywolf/gml-go/gml/internal/object"
 )
 
 type roomEditor struct {
 	initialized       bool
-	username          string
 	editingRoom       *Room
 	objectIndexToData []object.ObjectType
 
@@ -31,14 +29,6 @@ type roomEditor struct {
 }
 
 func newRoomEditor() *roomEditor {
-	// Set username
-	user, _ := user.Current()
-	username := user.Username
-	username = path.Clean(username)
-	username = strings.Replace(username, "/", "-", -1)
-	username = strings.Replace(username, "\\", "-", -1)
-	username = strings.Replace(username, "_", "-", -1)
-
 	// Create stub instances to use for rendering map view
 	idToEntityData := object.IDToEntityData()
 	objectIndexToData := make([]object.ObjectType, len(idToEntityData))
@@ -54,7 +44,6 @@ func newRoomEditor() *roomEditor {
 
 	return &roomEditor{
 		initialized: true,
-		username:    username,
 		//editingRoom: nil,
 		objectIndexToData:  objectIndexToData,
 		lastMousePos:       MousePosition(),
@@ -67,7 +56,7 @@ var (
 )
 
 func roomEditorUsername() string {
-	return gRoomEditor.username
+	return file.DebugUsernameFileSafe()
 }
 
 func roomEditorEditingRoom() *Room {
@@ -485,5 +474,5 @@ func EditorSave() {
 	}
 
 	// Save data copy of file
-	room.writeDataFile(room.Filepath)
+	room.DebugWriteDataFile(room.Filepath)
 }

@@ -4,27 +4,13 @@ import (
 	"github.com/silbinarywolf/gml-go/gml/internal/object"
 )
 
-var (
-	// NOTE(Jake): 2018-06-09
-	//
-	// Starting middle param at "1" so that the 0th item always returns nil
-	//
-	roomInstances []RoomInstance = make([]RoomInstance, 1, 10)
-)
-
 func RoomInstanceCreate(room *Room) *RoomInstance {
-	roomInstances = append(roomInstances, RoomInstance{
-		used: true,
-		room: room,
-	})
-	index := len(roomInstances) - 1
-	roomInst := &roomInstances[index]
-	roomInst.index = index
+	roomInst := gState.createNewRoomInstance(room)
+	return roomInst
+}
 
-	// Instantiate instances for this room
-	for _, obj := range room.Instances {
-		roomInst.InstanceCreate(V(float64(obj.X), float64(obj.Y)), object.ObjectIndex(obj.ObjectIndex))
-	}
+func RoomInstanceEmptyCreate() *RoomInstance {
+	roomInst := gState.createNewRoomInstance(nil)
 	return roomInst
 }
 
@@ -39,8 +25,33 @@ func (roomInst *RoomInstance) Index() int {
 	return roomInst.index
 }
 
+/*func (roomInst *RoomInstance) CreateSnapshot() []byte {
+	now := time.Now()
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+	err := enc.Encode(roomInst.instanceManager.instances)
+	if err != nil {
+		panic(err)
+	}
+	result := buf.Bytes()
+	println("Time to encode:", time.Now().Sub(now).String(), ", Size in bytes:", len(result))
+	return result
+}
+
+func (roomInst *RoomInstance) RestoreSnapshot(data []byte) {
+	now := time.Now()
+	var buf bytes.Buffer
+	buf.Write(data)
+	enc := gob.NewDecoder(&buf)
+	err := enc.Decode(roomInst.instanceManager.instances)
+	if err != nil {
+		panic(err)
+	}
+	println("Time to decode:", time.Now().Sub(now).String())
+}*/
+
 func RoomGetInstance(roomInstanceIndex int) *RoomInstance {
-	roomInst := &roomInstances[roomInstanceIndex]
+	roomInst := &gState.roomInstances[roomInstanceIndex]
 	if roomInst.used {
 		return roomInst
 	}
@@ -50,9 +61,9 @@ func RoomGetInstance(roomInstanceIndex int) *RoomInstance {
 func (roomInst *RoomInstance) InstanceCreate(position Vec, objectIndex object.ObjectIndex) object.ObjectType {
 	// Create and add to entity list
 	manager := &roomInst.instanceManager
-	index := len(manager.entities)
+	index := len(manager.instances)
 	inst := object.NewRawInstance(objectIndex, index, roomInst.Index())
-	manager.entities = append(manager.entities, inst)
+	manager.instances = append(manager.instances, inst)
 
 	// Init and Set position
 	inst.Create()
@@ -66,8 +77,8 @@ func (roomInst *RoomInstance) InstanceDestroy(inst object.ObjectType) {
 	manager.InstanceDestroy(inst)
 }
 
-func (roomInst *RoomInstance) update() {
-	roomInst.instanceManager.update()
+func (roomInst *RoomInstance) update(animationUpdate bool) {
+	roomInst.instanceManager.update(animationUpdate)
 }
 
 func (roomInst *RoomInstance) draw() {

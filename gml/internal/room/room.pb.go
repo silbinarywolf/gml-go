@@ -12,7 +12,7 @@
 		Room
 		RoomObject
 */
-package gml
+package room
 
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"

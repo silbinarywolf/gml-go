@@ -11,8 +11,7 @@ type ObjectType = object.ObjectType
 type Object = object.Object
 
 func ObjectGetIndex(name string) (object.ObjectIndex, bool) {
-	nameToID := object.NameToID()
-	res, ok := nameToID[name]
+	res, ok := object.ObjectGetIndex(name)
 	return res, ok
 }
 

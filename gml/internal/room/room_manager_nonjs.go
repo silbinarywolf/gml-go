@@ -3,7 +3,7 @@
 // +build !android
 // +build !ios
 
-package gml
+package room
 
 import (
 	"bufio"
@@ -70,7 +70,7 @@ func (room *Room) readInstance(instancePath string) {
 		println("Error parsing entity, error: ", err.Error())
 		return
 	}
-	objectIndex, ok := ObjectGetIndex(entityName)
+	objectIndex, ok := object.ObjectGetIndex(entityName)
 	if !ok {
 		println("Missing mapping of name \"" + entityName + "\" to entity ID. Is this name defined in your gml.Init()?")
 		return
@@ -120,7 +120,7 @@ func (room *Room) readInstance(instancePath string) {
 			if err == nil {
 				if count > room.UserEntityCount {
 					username := filenameParts[len(filenameParts)-2]
-					if username == roomEditorUsername() {
+					if username == file.DebugUsernameFileSafe() {
 						room.UserEntityCount = count
 					}
 				}
@@ -154,7 +154,7 @@ func LoadRoom(name string) *Room {
 	//	return mapDataFile
 	//}
 
-	roomPath := AssetsDirectory() + "/room/" + name
+	roomPath := file.AssetsDirectory + "/room/" + name
 
 	// Read entities
 	instancePathList := make([]string, 0, 1000)
@@ -192,13 +192,7 @@ func LoadRoom(name string) *Room {
 	//
 	// Write out *.data file (for browsers / fast client loading)
 	//
-	if debugMode {
-		go func() {
-			err := room.writeDataFile(roomPath)
-			if err != nil {
-				panic("Failed writing " + roomPath + ", error: " + err.Error())
-			}
-		}()
-	}
+	room.DebugWriteDataFile(roomPath)
+
 	return room
 }

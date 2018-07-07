@@ -1,6 +1,6 @@
 // +build js
 
-package gml
+package room
 
 func LoadRoom(name string) *Room {
 	manager := gRoomManager

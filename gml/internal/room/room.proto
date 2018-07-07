@@ -1,5 +1,5 @@
 syntax = "proto3";
-package gml;
+package room;
 
 import "room_object.proto";
 

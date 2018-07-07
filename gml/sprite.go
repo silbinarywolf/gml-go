@@ -8,6 +8,6 @@ type Sprite = sprite.Sprite
 
 type SpriteState = sprite.SpriteState
 
-func LoadSprite(name string) *sprite.Sprite {
+func LoadSprite(name string) *Sprite {
 	return sprite.LoadSprite(name)
 }

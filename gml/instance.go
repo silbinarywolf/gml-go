@@ -3,7 +3,7 @@ package gml
 import "github.com/silbinarywolf/gml-go/gml/internal/object"
 
 type instanceManagerResettableData struct {
-	entities []object.ObjectType
+	instances []object.ObjectType
 }
 
 func (manager *instanceManager) reset() {
@@ -21,64 +21,37 @@ type instanceManager struct {
 	//nameToID       map[string]ObjectIndex
 }
 
-var (
-	gInstanceManager *instanceManager = newInstanceManager()
-)
-
 func newInstanceManager() *instanceManager {
 	manager := new(instanceManager)
 	manager.reset()
 	return manager
 }
 
-//func GetAll() []ObjectType {
-//	return gInstanceManager.entities
-//}
-
-//func InstanceCreate(position Vec, entityID ObjectIndex) ObjectType {
-//	return gInstanceManager.InstanceCreate(position, entityID)
-//}
-
-//func InstanceDestroy(entity ObjectType) {
-//	gInstanceManager.InstanceDestroy(entity)
-//}
-
-/*func (manager *instanceManager) InstanceCreate(position Vec, objectIndex ObjectIndex) ObjectType {
-	// Create and add to entity list
-	inst := newInstance(objectIndex)
-	baseObj := inst.BaseObject()
-	baseObj.index = len(manager.entities)
-	manager.entities = append(manager.entities, inst)
-
-	// Init and set position
-	inst.Create()
-	baseObj.Vec = position
-	return inst
-}*/
-
 func (manager *instanceManager) InstanceDestroy(inst object.ObjectType) {
 	be := inst.BaseObject()
 
 	// Unordered delete
 	i := be.Index()
-	lastEntry := manager.entities[len(manager.entities)-1]
-	manager.entities[i] = lastEntry
-	manager.entities = manager.entities[:len(manager.entities)-1]
+	lastEntry := manager.instances[len(manager.instances)-1]
+	manager.instances[i] = lastEntry
+	manager.instances = manager.instances[:len(manager.instances)-1]
 }
 
-func (manager *instanceManager) update() {
+func (manager *instanceManager) update(animationUpdate bool) {
 	{
-		entities := manager.entities
-		for _, inst := range entities {
+		instances := manager.instances
+		for _, inst := range instances {
 			inst.Update()
 		}
 
-		for _, inst := range entities {
-			if inst == nil {
-				continue
+		if animationUpdate {
+			for _, inst := range instances {
+				if inst == nil {
+					continue
+				}
+				baseObj := inst.BaseObject()
+				baseObj.SpriteState.ImageUpdate()
 			}
-			baseObj := inst.BaseObject()
-			baseObj.SpriteState.ImageUpdate()
 		}
 	}
 }
@@ -91,7 +64,7 @@ func (manager *instanceManager) draw() {
 		}
 		cam.update()
 		cameraSetActive(i)
-		for _, inst := range manager.entities {
+		for _, inst := range manager.instances {
 			if inst == nil {
 				continue
 			}

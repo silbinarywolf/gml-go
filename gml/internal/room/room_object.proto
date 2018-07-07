@@ -1,5 +1,5 @@
 syntax = "proto3";
-package gml;
+package room;
 
 message RoomObject {
 	string Filename = 1;

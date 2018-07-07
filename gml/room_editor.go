@@ -3,6 +3,7 @@
 package gml
 
 import (
+	m "github.com/silbinarywolf/gml-go/gml/internal/math"
 	"github.com/silbinarywolf/gml-go/gml/internal/object"
 )
 
@@ -24,7 +25,7 @@ func EditorIsActive() bool {
 func EditorSetRoom(room *Room) {
 }
 
-func EditorAddInstance(pos Vec, objectIndex object.ObjectIndex) *RoomObject {
+func EditorAddInstance(pos m.Vec, objectIndex object.ObjectIndex) *RoomObject {
 	return nil
 }
 

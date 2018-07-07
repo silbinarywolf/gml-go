@@ -4,25 +4,23 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
-
-	"github.com/silbinarywolf/gml-go/gml/internal/object"
 )
 
-var (
+const (
 	DEBUG_COLLISION = false
 )
 
-/*func PlaceFree(inst object.ObjectType, position Vec) bool {
-	baseObj := inst.BaseObject()
-	return placeFree(baseObj, position)
-}*/
+type collisionObject interface {
+	BaseObject() *Object
+}
 
-func PlaceFree(inst *object.Object, position Vec) bool {
-	var entities []object.ObjectType
+func PlaceFree(instType collisionObject, position Vec) bool {
+	inst := instType.BaseObject()
+	var instanceManager *instanceManager
 	if room := RoomGetInstance(inst.RoomInstanceIndex()); room == nil {
-		entities = gInstanceManager.entities
+		instanceManager = gState.globalInstances
 	} else {
-		entities = room.instanceManager.entities
+		instanceManager = &room.instanceManager
 	}
 
 	r1Left := position.X
@@ -32,8 +30,10 @@ func PlaceFree(inst *object.Object, position Vec) bool {
 
 	hasCollision := false
 	var debugString string
-	for _, other := range entities {
-		other := other.BaseObject()
+	iterator := instanceManager.Iterator()
+	for iterator.Next() {
+		otherInst := iterator.Current()
+		other := otherInst.BaseObject()
 		if inst == other {
 			// Skip self
 			continue
@@ -52,7 +52,8 @@ func PlaceFree(inst *object.Object, position Vec) bool {
 			}
 		}
 	}
-	if len(debugString) > 0 {
+	if DEBUG_COLLISION &&
+		len(debugString) > 0 {
 		// Get calling function name / line
 		var message string
 		{

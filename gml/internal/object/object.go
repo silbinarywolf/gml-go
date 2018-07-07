@@ -27,7 +27,7 @@ type Object struct {
 	imageAngleRadians  float64 // Image Angle
 }
 
-func (inst *Object) Create() {
+func (inst *Object) create() {
 	inst.ImageScale.X = 1.0
 	inst.ImageScale.Y = 1.0
 }

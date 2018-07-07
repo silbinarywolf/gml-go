@@ -28,11 +28,10 @@ func update() error {
 		gMainFunctions.update()
 	}
 	if g_game.hasGameRestarted {
-		gInstanceManager.reset()
+		gState.globalInstances.reset()
 		gMainFunctions.gameStart()
 		g_game.hasGameRestarted = false
 	}
-	//ebitenutil.DebugPrint(s, "Hello world!")
 	return nil
 }
 
@@ -44,14 +43,9 @@ func windowHeight() int {
 	return gHeight
 }
 
-func Update() {
+func Update(animationUpdate bool) {
 	cameraSetActive(0)
 	defer cameraClearActive()
 
-	manager := gInstanceManager
-	manager.update()
-	for i := 1; i < len(roomInstances); i++ {
-		roomInst := &roomInstances[i]
-		roomInst.update()
-	}
+	gState.update(animationUpdate)
 }

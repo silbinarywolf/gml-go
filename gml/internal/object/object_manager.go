@@ -54,7 +54,13 @@ func NewRawInstance(objectIndex ObjectIndex, index int, roomInstanceIndex int) O
 	baseObj := inst.BaseObject()
 	baseObj.index = index
 	baseObj.roomInstanceIndex = roomInstanceIndex
-	baseObj.Create()
+	baseObj.create()
 
 	return inst
+}
+
+func ObjectGetIndex(name string) (ObjectIndex, bool) {
+	nameToID := NameToID()
+	res, ok := nameToID[name]
+	return res, ok
 }
