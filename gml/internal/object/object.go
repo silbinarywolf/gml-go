@@ -19,12 +19,11 @@ type ObjectType interface {
 }
 
 type Object struct {
-	sprite.SpriteState         // Sprite (contains SetSprite)
-	m.Vec                      // Position (contains X,Y)
-	Size               m.Vec   // Size (X,Y)
-	index              int     // index in the 'entities' array
-	roomInstanceIndex  int     // index of the room in the 'room' array
-	imageAngleRadians  float64 // Image Angle
+	sprite.SpriteState // Sprite (contains SetSprite)
+	*Space
+	index             int     // index in the 'entities' array
+	roomInstanceIndex int     // index of the room in the 'room' array
+	imageAngleRadians float64 // Image Angle
 }
 
 func (inst *Object) create() {

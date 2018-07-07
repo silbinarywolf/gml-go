@@ -84,9 +84,10 @@ func (room *Room) readInstance(instancePath string) {
 		// for building map data on-fly, but whatever!
 		//
 		inst := object.NewRawInstance(objectIndex, 0, 0)
+		baseObj := inst.BaseObject()
+		baseObj.Space = &object.Space{}
 		inst.Create()
 
-		baseObj := inst.BaseObject()
 		x := int32(x)
 		y := int32(y)
 		width := int32(baseObj.Size.X)

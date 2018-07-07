@@ -59,17 +59,7 @@ func RoomGetInstance(roomInstanceIndex int) *RoomInstance {
 }
 
 func (roomInst *RoomInstance) InstanceCreate(position Vec, objectIndex object.ObjectIndex) object.ObjectType {
-	// Create and add to entity list
-	manager := &roomInst.instanceManager
-	index := len(manager.instances)
-	inst := object.NewRawInstance(objectIndex, index, roomInst.Index())
-	manager.instances = append(manager.instances, inst)
-
-	// Init and Set position
-	inst.Create()
-	baseObj := inst.BaseObject()
-	baseObj.Vec = position
-	return inst
+	return roomInst.instanceManager.InstanceCreate(position, objectIndex, roomInst.Index())
 }
 
 func (roomInst *RoomInstance) InstanceDestroy(inst object.ObjectType) {

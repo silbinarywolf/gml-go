@@ -3,7 +3,8 @@ package gml
 import "github.com/silbinarywolf/gml-go/gml/internal/object"
 
 type instanceManagerResettableData struct {
-	instances []object.ObjectType
+	instances      []object.ObjectType
+	instanceSpaces []object.Space
 }
 
 func (manager *instanceManager) reset() {
@@ -25,6 +26,28 @@ func newInstanceManager() *instanceManager {
 	manager := new(instanceManager)
 	manager.reset()
 	return manager
+}
+
+func (manager *instanceManager) InstanceCreate(position Vec, objectIndex object.ObjectIndex, roomInstanceIndex int) object.ObjectType {
+	// Create and add to entity list
+	index := len(manager.instances)
+	inst := object.NewRawInstance(objectIndex, index, roomInstanceIndex)
+
+	// NOTE(Jake): 2018-07-07
+	//
+	// These needs to be in-sync
+	//
+	manager.instanceSpaces = append(manager.instanceSpaces, object.Space{})
+	manager.instances = append(manager.instances, inst)
+
+	// Attach
+	baseObj := inst.BaseObject()
+	baseObj.Space = &manager.instanceSpaces[index]
+
+	// Init and Set position
+	inst.Create()
+	baseObj.Vec = position
+	return inst
 }
 
 func (manager *instanceManager) InstanceDestroy(inst object.ObjectType) {

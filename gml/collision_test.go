@@ -36,16 +36,13 @@ func init() {
 // Ran:
 // - go test -bench=.
 // Results are:
-// - 1676 ns/op
-// - 1702 ns/op
-// - 1693 ns/op
+// - 440 ns/op
+// - 457 ns/op
+// - 457 ns/op
 // Entities:
 // - 250 "wall" solid entities
 // - 1 player entity
 // - Player entity calling "PlaceFree"
-//
-// This means PlaceFree() can "only" be called ~9547 times
-// until the frame budget is blown (16ms, 16000000 nanoseconds)
 //
 func BenchmarkPlaceFree250(b *testing.B) {
 	roomInstance := RoomInstanceEmptyCreate()
@@ -70,9 +67,9 @@ func BenchmarkPlaceFree250(b *testing.B) {
 // Ran:
 // - go test -bench=.
 // Results are:
-// - 3462 ns/op
-// - 3483 ns/op
-// - 3391 ns/op
+// - 863 ns/op
+// - 906 ns/op
+// - 894 ns/op
 // Entities:
 // - 500 "wall" solid entities
 // - 1 player entity
@@ -101,15 +98,15 @@ func BenchmarkPlaceFree500(b *testing.B) {
 // Ran:
 // - go test -bench=.
 // Results are:
-// - 90120775 ns/op
-// - 89392725 ns/op
-// - 89713630 ns/op
+// - 22620706 ns/op
+// - 23755288 ns/op
+// - 23313041 ns/op
 // Entities:
 // - 250 "wall" solid entities
 // - 1024 moving/non-trivial entities
 // - All 1024 moving entities calling "PlaceFree" 10 times.
 //
-// This means PlaceFree() blows the entire 16ms by 73ms, 73713630 nanoseconds
+// This means PlaceFree() blows the entire 16ms by 7.313041ms
 //
 func BenchmarkPlaceFreeMMOCase_250SolidWalls_1024MovingEntities(b *testing.B) {
 	roomInstance := RoomInstanceEmptyCreate()

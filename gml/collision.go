@@ -15,14 +15,17 @@ type collisionObject interface {
 }
 
 func PlaceFree(instType collisionObject, position Vec) bool {
-	inst := instType.BaseObject()
 	var instanceManager *instanceManager
-	if room := RoomGetInstance(inst.RoomInstanceIndex()); room == nil {
-		instanceManager = gState.globalInstances
-	} else {
-		instanceManager = &room.instanceManager
+	{
+		inst := instType.BaseObject()
+		if room := RoomGetInstance(inst.RoomInstanceIndex()); room == nil {
+			instanceManager = gState.globalInstances
+		} else {
+			instanceManager = &room.instanceManager
+		}
 	}
 
+	inst := instType.BaseObject().Space
 	r1Left := position.X
 	r1Right := r1Left + inst.Size.X
 	r1Top := position.Y
@@ -30,10 +33,9 @@ func PlaceFree(instType collisionObject, position Vec) bool {
 
 	hasCollision := false
 	var debugString string
-	iterator := instanceManager.Iterator()
-	for iterator.Next() {
-		otherInst := iterator.Current()
-		other := otherInst.BaseObject()
+
+	for i := 0; i < len(instanceManager.instanceSpaces); i++ {
+		other := &instanceManager.instanceSpaces[i]
 		if inst == other {
 			// Skip self
 			continue
@@ -47,9 +49,9 @@ func PlaceFree(instType collisionObject, position Vec) bool {
 			r1Top < r2Bottom && r1Bottom > r2Top {
 			hasCollision = true
 			// Debug
-			if DEBUG_COLLISION {
-				debugString += "- " + other.Sprite().Name() + "\n"
-			}
+			//if DEBUG_COLLISION {
+			//	debugString += "- " + other.Sprite().Name() + "\n"
+			//}
 		}
 	}
 	if DEBUG_COLLISION &&
