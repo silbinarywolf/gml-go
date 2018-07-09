@@ -3,8 +3,8 @@ package gml
 import "github.com/silbinarywolf/gml-go/gml/internal/object"
 
 type instanceManagerResettableData struct {
-	instances      []object.ObjectType
-	instanceSpaces []object.Space
+	instances []object.ObjectType
+	spaces    object.SpaceBucketArray
 }
 
 func (manager *instanceManager) reset() {
@@ -13,13 +13,6 @@ func (manager *instanceManager) reset() {
 
 type instanceManager struct {
 	instanceManagerResettableData
-
-	// todo(Jake): 2018-06-02
-	//
-	// Move these to an objectManager struct
-	//
-	//idToEntityData []ObjectType
-	//nameToID       map[string]ObjectIndex
 }
 
 func newInstanceManager() *instanceManager {
@@ -31,18 +24,18 @@ func newInstanceManager() *instanceManager {
 func (manager *instanceManager) InstanceCreate(position Vec, objectIndex object.ObjectIndex, roomInstanceIndex int) object.ObjectType {
 	// Create and add to entity list
 	index := len(manager.instances)
-	inst := object.NewRawInstance(objectIndex, index, roomInstanceIndex)
 
-	// NOTE(Jake): 2018-07-07
 	//
-	// These needs to be in-sync
-	//
-	manager.instanceSpaces = append(manager.instanceSpaces, object.Space{})
-	manager.instances = append(manager.instances, inst)
+	var inst object.ObjectType
+	{
+		spaceIndex := manager.spaces.GetNew()
+		space := manager.spaces.Get(spaceIndex)
+		inst = object.NewRawInstance(objectIndex, index, roomInstanceIndex, space, spaceIndex)
+		manager.instances = append(manager.instances, inst)
+	}
 
 	// Attach
 	baseObj := inst.BaseObject()
-	baseObj.Space = &manager.instanceSpaces[index]
 
 	// Init and Set position
 	inst.Create()
@@ -52,6 +45,12 @@ func (manager *instanceManager) InstanceCreate(position Vec, objectIndex object.
 
 func (manager *instanceManager) InstanceDestroy(inst object.ObjectType) {
 	be := inst.BaseObject()
+
+	// Free up space slot
+	be.Space = nil
+	if be.SpaceIndex() > -1 {
+		manager.spaces.Remove(be.SpaceIndex())
+	}
 
 	// Unordered delete
 	i := be.Index()

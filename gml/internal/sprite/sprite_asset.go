@@ -22,8 +22,7 @@ func newSpriteAsset(name string, frames []spriteAssetFrame, config spriteConfig)
 	spr.Frames = frames
 	spr.ImageSpeed = config.ImageSpeed
 
-	width := float64(0)
-	height := float64(0)
+	var width, height float64
 	for _, frame := range frames {
 		frameWidth, frameHeight := frame.Size.X, frame.Size.Y
 		if width < frameWidth {

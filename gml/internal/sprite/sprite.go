@@ -7,12 +7,12 @@ import (
 type Sprite struct {
 	name       string
 	frames     []SpriteFrame
-	size       math.Vec
+	size       math.Size
 	imageSpeed float64
 }
 
-func (spr *Sprite) Name() string   { return spr.name }
-func (spr *Sprite) Size() math.Vec { return spr.size }
+func (spr *Sprite) Name() string    { return spr.name }
+func (spr *Sprite) Size() math.Size { return spr.size }
 
 /*func (spr *Sprite) GetFrame(index int) *SpriteFrame {
 	return &spr.frames[index]
@@ -35,9 +35,9 @@ func newSprite(name string, frames []SpriteFrame, config spriteConfig) *Sprite {
 			height = frameHeight
 		}
 	}
-	spr.size = math.Vec{
-		X: float64(width),
-		Y: float64(height),
+	spr.size = math.Size{
+		X: int32(width),
+		Y: int32(height),
 	}
 	return spr
 }

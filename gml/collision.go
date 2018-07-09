@@ -1,11 +1,5 @@
 package gml
 
-import (
-	"runtime"
-	"strconv"
-	"strings"
-)
-
 const (
 	DEBUG_COLLISION = false
 )
@@ -15,9 +9,12 @@ type collisionObject interface {
 }
 
 func PlaceFree(instType collisionObject, position Vec) bool {
+	baseObj := instType.BaseObject()
+
 	var instanceManager *instanceManager
 	{
-		inst := instType.BaseObject()
+		inst := baseObj
+
 		if room := RoomGetInstance(inst.RoomInstanceIndex()); room == nil {
 			instanceManager = gState.globalInstances
 		} else {
@@ -25,36 +22,41 @@ func PlaceFree(instType collisionObject, position Vec) bool {
 		}
 	}
 
-	inst := instType.BaseObject().Space
+	inst := baseObj.Space
 	r1Left := position.X
-	r1Right := r1Left + inst.Size.X
+	r1Right := r1Left + float64(inst.Size.X)
 	r1Top := position.Y
-	r1Bottom := r1Top + inst.Size.Y
+	r1Bottom := r1Top + float64(inst.Size.Y)
 
+	//var debugString string
 	hasCollision := false
-	var debugString string
+	for _, bucket := range instanceManager.spaces.Buckets() {
+		for i := 0; i < bucket.Len(); i++ {
+			other := bucket.Get(i)
+			r2Left := other.X
+			r2Right := r2Left + float64(other.Size.X)
+			r2Top := other.Y
+			r2Bottom := r2Top + float64(other.Size.Y)
 
-	for i := 0; i < len(instanceManager.instanceSpaces); i++ {
-		other := &instanceManager.instanceSpaces[i]
-		if inst == other {
-			// Skip self
-			continue
-		}
-		r2Left := other.X
-		r2Right := r2Left + other.Size.X
-		r2Top := other.Y
-		r2Bottom := r2Top + other.Size.Y
-
-		if r1Left < r2Right && r1Right > r2Left &&
-			r1Top < r2Bottom && r1Bottom > r2Top {
-			hasCollision = true
-			// Debug
-			//if DEBUG_COLLISION {
-			//	debugString += "- " + other.Sprite().Name() + "\n"
-			//}
+			// NOTE(Jake): 2018-07-08
+			//
+			// For JavaScript performance, we get a 1.2x speedup if we
+			// handle as much logic in one if-statement as possible.
+			//
+			// For native binaries, it doesn't seem to change performance noticeably
+			// at all if I add "if inst == other || !instanceManager.spaces.IsUsed(i) { continue; }"
+			//
+			// ("gjbt" and Chrome 67 Windows were for benchmarking)
+			//
+			if r1Left < r2Right && r1Right > r2Left &&
+				r1Top < r2Bottom && r1Bottom > r2Top &&
+				inst != other &&
+				bucket.IsUsed(i) {
+				hasCollision = true
+			}
 		}
 	}
-	if DEBUG_COLLISION &&
+	/*if DEBUG_COLLISION &&
 		len(debugString) > 0 {
 		// Get calling function name / line
 		var message string
@@ -74,8 +76,8 @@ func PlaceFree(instType collisionObject, position Vec) bool {
 				callIndex++
 			}
 		}
-		//fmt.Printf("PlaceFree: collision between %s:\n%s%s\n\n", e.Sprite().name, debugString, message)
+		fmt.Printf("PlaceFree: collision between %s:\n%s%s\n\n", e.Sprite().name, debugString, message)
 	}
-	//fmt.Printf("EndPlaceFree\n\n")
+	fmt.Printf("EndPlaceFree\n\n")*/
 	return !hasCollision
 }

@@ -20,7 +20,7 @@ type ObjectType interface {
 
 type Object struct {
 	sprite.SpriteState // Sprite (contains SetSprite)
-	*Space
+	SpaceObject
 	index             int     // index in the 'entities' array
 	roomInstanceIndex int     // index of the room in the 'room' array
 	imageAngleRadians float64 // Image Angle

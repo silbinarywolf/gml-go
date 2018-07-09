@@ -83,9 +83,8 @@ func (room *Room) readInstance(instancePath string) {
 		// Probably a slow hack to get the entity size
 		// for building map data on-fly, but whatever!
 		//
-		inst := object.NewRawInstance(objectIndex, 0, 0)
+		inst := object.NewRawInstance(objectIndex, 0, 0, new(object.Space), -1)
 		baseObj := inst.BaseObject()
-		baseObj.Space = &object.Space{}
 		inst.Create()
 
 		x := int32(x)

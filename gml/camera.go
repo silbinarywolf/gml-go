@@ -1,6 +1,8 @@
 package gml
 
-import "github.com/silbinarywolf/gml-go/gml/internal/object"
+import (
+	"github.com/silbinarywolf/gml-go/gml/internal/object"
+)
 
 var (
 	__currentCamera *camera

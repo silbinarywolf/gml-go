@@ -37,7 +37,7 @@ func newRoomEditor() *roomEditor {
 			continue
 		}
 		objectIndex := obj.ObjectIndex()
-		inst := object.NewRawInstance(objectIndex, i, 0)
+		inst := object.NewRawInstance(objectIndex, i, 0, new(object.Space), -1)
 		inst.Create()
 		objectIndexToData[i] = inst
 	}
@@ -250,12 +250,13 @@ func EditorUpdate() {
 						pos := V(float64(obj.X), float64(obj.Y))
 						size := inst.BaseObject().Size
 						left := pos.X
-						right := left + size.X
+						right := left + float64(size.X)
 						top := pos.Y
-						bottom := top + size.Y
-						hasCollision = hasCollision ||
-							(mousePos.X >= left && mousePos.X < right &&
-								mousePos.Y >= top && mousePos.Y < bottom)
+						bottom := top + float64(size.Y)
+						if mousePos.X >= left && mousePos.X < right &&
+							mousePos.Y >= top && mousePos.Y < bottom {
+							hasCollision = true
+						}
 					}
 
 					//
@@ -292,9 +293,9 @@ func EditorUpdate() {
 						pos := V(float64(obj.X), float64(obj.Y))
 						size := inst.BaseObject().Size
 						left := pos.X
-						right := left + size.X
+						right := left + float64(size.X)
 						top := pos.Y
-						bottom := top + size.Y
+						bottom := top + float64(size.Y)
 						if mousePos.X >= left && mousePos.X < right &&
 							mousePos.Y >= top && mousePos.Y < bottom {
 							EditorRemoveInstance(i)
@@ -380,8 +381,8 @@ func EditorDraw() {
 			{
 				pos.X = x - 40 + currentCamera.X
 				pos.Y = y - (previewSize.Y / 2) + currentCamera.Y
-				baseObj.ImageScale.X = previewSize.X / size.X
-				baseObj.ImageScale.Y = previewSize.Y / size.Y
+				baseObj.ImageScale.X = previewSize.X / float64(size.X)
+				baseObj.ImageScale.Y = previewSize.Y / float64(size.Y)
 				obj.Draw()
 				DrawText(m.V(x, y), obj.ObjectName())
 			}

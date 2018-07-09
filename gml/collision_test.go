@@ -4,41 +4,23 @@ import (
 	"testing"
 )
 
-const (
-	ObjUndefined   ObjectIndex = 0
-	ObjDummyPlayer             = 1
-	ObjDummyEnemy              = 2
-)
-
-type DummyPlayer struct {
-	Object
-}
-
-func (_ *DummyPlayer) ObjectIndex() ObjectIndex { return ObjDummyPlayer }
-
-func (_ *DummyPlayer) ObjectName() string { return "DummyPlayer" }
-
-func (_ *DummyPlayer) Create() {}
-
-func (_ *DummyPlayer) Update() {}
-
-func (_ *DummyPlayer) Draw() {}
-
-func init() {
-	// Setup
-	ObjectInitTypes([]ObjectType{
-		ObjDummyPlayer: new(DummyPlayer),
-	})
-}
+// NOTE(Jake): 2018-07-08
+//
+// Native: ("go test --bench=.")
+// -------
+// BenchmarkPlaceFree250-4                                          3000000               424 ns/op
+// BenchmarkPlaceFree500-4                                          2000000               877 ns/op
+// BenchmarkPlaceFreeMMOCase_250SolidWalls_1024MovingEntities-4         100          23510338 ns/op
+//
+// JS: ("GOOS=linux gjbt --bench=."")
+// ---
+// BenchmarkPlaceFree250                                             500000              2326 ns/op
+// BenchmarkPlaceFree500                                             300000              3910 ns/op
+// BenchmarkPlaceFreeMMOCase_250SolidWalls_1024MovingEntities            10         103200000 ns/op
+//
 
 // NOTE(Jake): 2018-07-07
 //
-// Ran:
-// - go test -bench=.
-// Results are:
-// - 440 ns/op
-// - 457 ns/op
-// - 457 ns/op
 // Entities:
 // - 250 "wall" solid entities
 // - 1 player entity
@@ -57,6 +39,7 @@ func BenchmarkPlaceFree250(b *testing.B) {
 	}
 	playerInstance := roomInstance.InstanceCreate(V(0, 0), ObjDummyPlayer).(*DummyPlayer)
 
+	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		PlaceFree(playerInstance, V(32, 32))
 	}
@@ -64,12 +47,6 @@ func BenchmarkPlaceFree250(b *testing.B) {
 
 // NOTE(Jake): 2018-07-07
 //
-// Ran:
-// - go test -bench=.
-// Results are:
-// - 863 ns/op
-// - 906 ns/op
-// - 894 ns/op
 // Entities:
 // - 500 "wall" solid entities
 // - 1 player entity
@@ -88,6 +65,7 @@ func BenchmarkPlaceFree500(b *testing.B) {
 	}
 	playerInstance := roomInstance.InstanceCreate(V(0, 0), ObjDummyPlayer).(*DummyPlayer)
 
+	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		PlaceFree(playerInstance, V(32, 32))
 	}
@@ -95,18 +73,10 @@ func BenchmarkPlaceFree500(b *testing.B) {
 
 // NOTE(Jake): 2018-07-07
 //
-// Ran:
-// - go test -bench=.
-// Results are:
-// - 22620706 ns/op
-// - 23755288 ns/op
-// - 23313041 ns/op
 // Entities:
 // - 250 "wall" solid entities
 // - 1024 moving/non-trivial entities
 // - All 1024 moving entities calling "PlaceFree" 10 times.
-//
-// This means PlaceFree() blows the entire 16ms by 7.313041ms
 //
 func BenchmarkPlaceFreeMMOCase_250SolidWalls_1024MovingEntities(b *testing.B) {
 	roomInstance := RoomInstanceEmptyCreate()
@@ -117,13 +87,14 @@ func BenchmarkPlaceFreeMMOCase_250SolidWalls_1024MovingEntities(b *testing.B) {
 	// everything is considered solid.
 	//
 	for i := 0; i < 250; i++ {
-		roomInstance.InstanceCreate(V(0, 0), ObjDummyPlayer)
+		roomInstance.InstanceCreate(V(float64(i*32), 0), ObjDummyPlayer)
 	}
 	movingEntityInstances := make([]*DummyPlayer, 1024)
 	for i := 0; i < len(movingEntityInstances); i++ {
 		movingEntityInstances[i] = roomInstance.InstanceCreate(V(0, 0), ObjDummyPlayer).(*DummyPlayer)
 	}
 
+	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		for _, movingEntityInstance := range movingEntityInstances {
 			// NOTE(Jake): 2018-07-07

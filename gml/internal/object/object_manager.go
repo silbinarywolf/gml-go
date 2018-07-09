@@ -45,7 +45,7 @@ func NameToID() map[string]ObjectIndex {
 	return gObjectManager.nameToID
 }
 
-func NewRawInstance(objectIndex ObjectIndex, index int, roomInstanceIndex int) ObjectType {
+func NewRawInstance(objectIndex ObjectIndex, index int, roomInstanceIndex int, space *Space, spaceIndex int) ObjectType {
 	// Create
 	valToCopy := gObjectManager.idToEntityData[objectIndex]
 	inst := reflect.New(reflect.ValueOf(valToCopy).Elem().Type()).Interface().(ObjectType)
@@ -54,6 +54,15 @@ func NewRawInstance(objectIndex ObjectIndex, index int, roomInstanceIndex int) O
 	baseObj := inst.BaseObject()
 	baseObj.index = index
 	baseObj.roomInstanceIndex = roomInstanceIndex
+	// todo(Jake): 2018-07-08
+	//
+	// Figure out a cleaner way to handle this functionality across
+	// the room editor and gamecode.
+	//
+	// Perhaps force objects to have to be created via an instance manager.
+	//
+	baseObj.Space = space
+	baseObj.spaceIndex = spaceIndex
 	baseObj.create()
 
 	return inst
