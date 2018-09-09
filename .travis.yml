@@ -20,6 +20,7 @@ addons:
 
 install:
   - go get -t -v github.com/hajimehoshi/ebiten/...
+  - go get -t -v github.com/golang/protobuf/...
 
 before_script:
   - export DISPLAY=:99.0
