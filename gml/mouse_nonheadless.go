@@ -3,14 +3,14 @@
 package gml
 
 import (
-	"github.com/silbinarywolf/gml-go/gml/internal/math"
-
 	"github.com/hajimehoshi/ebiten"
+	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 )
 
 var (
-	pressingMouseButtonLastFrame [mbSize]bool
-	_mousePos                    math.Vec
+	mouseButtonPress             [MbSize]int // this array is reset every frame
+	pressingMouseButtonLastFrame [MbSize]bool
+	_mousePos                    geom.Vec
 )
 
 func MouseCheckButton(button int) bool {
@@ -18,7 +18,8 @@ func MouseCheckButton(button int) bool {
 }
 
 func MouseCheckPressed(button int) bool {
-	isHeld := MouseCheckButton(button)
+	return mouseButtonPress[button] == 1
+	/*isHeld := MouseCheckButton(button)
 	if !isHeld {
 		pressingMouseButtonLastFrame[button] = false
 	}
@@ -28,30 +29,36 @@ func MouseCheckPressed(button int) bool {
 	if isHeld {
 		pressingMouseButtonLastFrame[button] = true
 	}
-	return isHeld
+	return isHeld*/
 }
 
-func MousePosition() Vec {
-	return mousePosition()
-}
-
-/*func MouseX() float64 {
-	x, _ := ebiten.CursorPosition()
-	return float64(x)
-}
-
-func MouseY() float64 {
-	_, y := ebiten.CursorPosition()
-	return float64(y)
-}*/
-
-func mousePosition() math.Vec {
+func MousePosition() geom.Vec {
 	return _mousePos
 }
 
+// Get the mouse position relative to the window
+func mouseScreenPosition() geom.Vec {
+	x, y := ebiten.CursorPosition()
+	return geom.Vec{float64(x), float64(y)}
+}
+
+//
+// NOTE(Jake): 2018-07-10
+//
+// Ebiten doesn't have mouseWheel() support on a stable version yet and
+// it doesn't support browser mouse wheel.
+// - https://github.com/hajimehoshi/ebiten/issues/630
+//
+// I'll look into this later!
+//
+/*func mouseWheel() geom.Vec {
+	xoff, yoff := ebiten.MouseWheel()
+	return geom.V(xoff, yoff)
+}*/
+
 func mouseUpdate() {
 	x, y := ebiten.CursorPosition()
-	newPos := math.V(float64(x), float64(y))
+	newPos := geom.Vec{float64(x), float64(y)}
 
 	// NOTE(Jake): 2018-06-09
 	//
@@ -64,11 +71,20 @@ func mouseUpdate() {
 	//
 	// This is future-me's problem though!
 	//
-	cam := &cameraList[0]
-	newPos.X += cam.X
-	newPos.Y += cam.Y
+	viewPos := CameraGetViewPos(0)
+	newPos.X += viewPos.X
+	newPos.Y += viewPos.Y
 
 	_mousePos = newPos
+
+	// Add code to check mouse inputs
+	for btn := MbLeft; btn < MbSize; btn++ {
+		if MouseCheckButton(btn) {
+			mouseButtonPress[btn]++
+		} else {
+			mouseButtonPress[btn] = 0
+		}
+	}
 }
 
 //mouse_check_button_pressed

@@ -1,18 +1,18 @@
 package sprite
 
 import (
-	"github.com/silbinarywolf/gml-go/gml/internal/math"
+	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 )
 
 type Sprite struct {
 	name       string
 	frames     []SpriteFrame
-	size       math.Size
+	size       geom.Size
 	imageSpeed float64
 }
 
 func (spr *Sprite) Name() string    { return spr.name }
-func (spr *Sprite) Size() math.Size { return spr.size }
+func (spr *Sprite) Size() geom.Size { return spr.size }
 
 /*func (spr *Sprite) GetFrame(index int) *SpriteFrame {
 	return &spr.frames[index]
@@ -35,7 +35,7 @@ func newSprite(name string, frames []SpriteFrame, config spriteConfig) *Sprite {
 			height = frameHeight
 		}
 	}
-	spr.size = math.Size{
+	spr.size = geom.Size{
 		X: int32(width),
 		Y: int32(height),
 	}

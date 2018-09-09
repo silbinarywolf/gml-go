@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gopherjs/gopherjs/js"
+	"github.com/gopherjs/gopherwasm/js"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 )
 
@@ -20,7 +20,7 @@ func OpenFile(path string) (readSeekCloser, error) {
 
 func calculateProgramDir() string {
 	// Setup program dir
-	location := js.Global.Get("location")
+	location := js.Global().Get("location")
 	result := location.Get("href").String()
 	result = filepath.Dir(result)
 	result = strings.TrimPrefix(result, "file:/")

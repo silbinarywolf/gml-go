@@ -2,16 +2,13 @@
 
 package gml
 
-import (
-	m "github.com/silbinarywolf/gml-go/gml/internal/math"
-	"github.com/silbinarywolf/gml-go/gml/internal/object"
-)
+import "github.com/silbinarywolf/gml-go/gml/internal/room"
 
 func roomEditorUsername() string {
 	return ""
 }
 
-func EditorInit() {
+func EditorInit(exitEditorFunc func(room *room.Room)) {
 }
 
 func EditorIsInitialized() bool {
@@ -25,18 +22,8 @@ func EditorIsActive() bool {
 func EditorSetRoom(room *Room) {
 }
 
-func EditorAddInstance(pos m.Vec, objectIndex object.ObjectIndex) *RoomObject {
-	return nil
+func editorUpdate() {
 }
 
-func EditorRemoveInstance(index int) {
-}
-
-func EditorUpdate() {
-}
-
-func EditorDraw() {
-}
-
-func EditorSave() {
+func editorDraw() {
 }

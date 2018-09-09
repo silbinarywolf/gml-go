@@ -1,26 +1,8 @@
-package object
-
-import (
-	m "github.com/silbinarywolf/gml-go/gml/internal/math"
-)
+package space
 
 const (
-	spaceBucketSize = 256
+	spaceBucketSize = 128
 )
-
-type SpaceObject struct {
-	*Space
-	spaceIndex int
-}
-
-func (space *SpaceObject) SpaceIndex() int {
-	return space.spaceIndex
-}
-
-type Space struct {
-	m.Vec        // Position (contains X,Y)
-	Size  m.Size // Size (X,Y)
-}
 
 type SpaceBucketArray struct {
 	length  int
@@ -61,6 +43,7 @@ func (array *SpaceBucketArray) Get(index int) *Space {
 }
 
 func (array *SpaceBucketArray) Remove(index int) {
+	//log.Printf("DEBUG: Removing from bucket %d, index %d. (array.length = %d)", index/spaceBucketSize, index%spaceBucketSize, array.length)
 	bucket := array.buckets[index/spaceBucketSize]
 	bucketIndex := index % spaceBucketSize
 	if !bucket.used[bucketIndex] {
@@ -83,10 +66,10 @@ func (array *SpaceBucketArray) Buckets() []*SpaceBucket {
 // In fact, checking "IsUsed" seems to be an almost-free operation when added
 // to the end of the if-statement checking collisions
 //
-func (array *SpaceBucketArray) IsUsed(index int) bool {
-	bucket := array.buckets[index/spaceBucketSize]
-	return bucket.used[index%spaceBucketSize]
-}
+//func (array *SpaceBucketArray) IsUsed(index int) bool {
+//	bucket := array.buckets[index/spaceBucketSize]
+//	return bucket.used[index%spaceBucketSize]
+//}
 
 func (array *SpaceBucketArray) Len() int {
 	return array.length

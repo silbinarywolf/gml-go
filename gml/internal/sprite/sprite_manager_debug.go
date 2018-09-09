@@ -15,7 +15,7 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/silbinarywolf/gml-go/gml/internal/file"
-	"github.com/silbinarywolf/gml-go/gml/internal/math"
+	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 )
 
 var (
@@ -108,7 +108,7 @@ func debugWriteSprite(name string) {
 		}
 		imageSize := image.Bounds().Size()
 		frame := spriteAssetFrame{
-			Size: math.V(float64(imageSize.X), float64(imageSize.Y)),
+			Size: geom.Vec{float64(imageSize.X), float64(imageSize.Y)},
 			Data: buf.Bytes(),
 		}
 		frames = append(frames, frame)

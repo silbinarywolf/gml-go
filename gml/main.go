@@ -2,6 +2,7 @@ package gml
 
 import (
 	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
+	"github.com/silbinarywolf/gml-go/gml/internal/timegml"
 )
 
 type mainFunctions struct {
@@ -12,18 +13,23 @@ type mainFunctions struct {
 var gMainFunctions *mainFunctions = new(mainFunctions)
 
 var (
-	gWidth  int
-	gHeight int
+	gWindowWidth  int
+	gWindowHeight int
+	gWindowScale  float64 // Window scale
+	//lastFrameTime int64
 )
 
 func update() error {
+	frameStartTime := timegml.Now()
+	//frameOffset := timegml.Now() - lastFrameTime
 	sprite.DebugWatch()
 	keyboardUpdate()
 	keyboardStringUpdate()
 	mouseUpdate()
 	if EditorIsActive() {
-		EditorUpdate()
-		EditorDraw()
+		cameraSetActive(0)
+		editorUpdate()
+		cameraClearActive()
 	} else {
 		gMainFunctions.update()
 	}
@@ -32,15 +38,22 @@ func update() error {
 		gMainFunctions.gameStart()
 		g_game.hasGameRestarted = false
 	}
+	gState.frameBudgetNanosecondsUsed = timegml.Now() - frameStartTime
+	//gState.frameBudgetNanosecondsUsed += frameOffset
+	//lastFrameTime = timegml.Now()
 	return nil
 }
 
 func windowWidth() int {
-	return gWidth
+	return gWindowWidth
 }
 
 func windowHeight() int {
-	return gHeight
+	return gWindowHeight
+}
+
+func windowScale() float64 {
+	return gWindowScale
 }
 
 func Update(animationUpdate bool) {

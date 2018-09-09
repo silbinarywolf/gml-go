@@ -2,21 +2,19 @@
 
 package file
 
-import (
-	"os/user"
-	"path"
-	"strings"
-)
-
-var (
+/*var (
 	debugUsername string = "▲not-set▲"
-)
+)*/
 
-func DebugUsernameFileSafe() string {
-	return debugUsername
-}
+// NOTE(Jake): 2018-07-15
+//
+// Deprecated in favour of XID UUID
+//
+//func DebugUsernameFileSafe() string {
+//	return debugUsername
+//}
 
-func init() {
+/*func init() {
 	// Setup file-safe escaped username
 	user, _ := user.Current()
 	username := user.Username
@@ -26,3 +24,4 @@ func init() {
 	username = strings.Replace(username, "_", "-", -1)
 	debugUsername = username
 }
+*/

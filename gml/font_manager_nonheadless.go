@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 
 	"github.com/golang/freetype/truetype"
-	"github.com/hajimehoshi/ebiten/ebitenutil"
+	"github.com/silbinarywolf/gml-go/gml/internal/file"
 	"golang.org/x/image/font"
 )
 
@@ -37,7 +37,7 @@ func LoadFont(name string, settings FontSettings) *Font {
 	}
 
 	path := AssetsDirectory() + "/fonts/" + name + ".ttf"
-	fileData, err := ebitenutil.OpenFile(path)
+	fileData, err := file.OpenFile(path)
 	if err != nil {
 		panic(errors.New("Unable to find font: " + path + ". Error: " + err.Error()))
 	}
@@ -46,6 +46,7 @@ func LoadFont(name string, settings FontSettings) *Font {
 	if err != nil {
 		panic(errors.New("Unable to read font file into bytes: " + path))
 	}
+	//fmt.Printf("%v\n", b)
 	tt, err := truetype.Parse(b)
 	if err != nil {
 		panic(errors.New("Unable to parse true type font file: " + path + ", err: " + err.Error()))

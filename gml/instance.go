@@ -1,10 +1,21 @@
 package gml
 
-import "github.com/silbinarywolf/gml-go/gml/internal/object"
+import (
+	"github.com/silbinarywolf/gml-go/gml/internal/geom"
+	"github.com/silbinarywolf/gml-go/gml/internal/object"
+	"github.com/silbinarywolf/gml-go/gml/internal/space"
+)
 
+/*type InstanceIndex struct {
+	layerIndex        int
+	roomInstanceIndex int
+	instanceIndex     int
+	obj               object.ObjectType
+}
+*/
 type instanceManagerResettableData struct {
 	instances []object.ObjectType
-	spaces    object.SpaceBucketArray
+	spaces    space.SpaceBucketArray
 }
 
 func (manager *instanceManager) reset() {
@@ -21,41 +32,86 @@ func newInstanceManager() *instanceManager {
 	return manager
 }
 
-func (manager *instanceManager) InstanceCreate(position Vec, objectIndex object.ObjectIndex, roomInstanceIndex int) object.ObjectType {
+func instanceCreateLayer(position geom.Vec, layer *RoomInstanceLayerInstance, roomInst *RoomInstance, objectIndex object.ObjectIndex) object.ObjectType {
+	return layer.manager.InstanceCreate(position, objectIndex, roomInst.Index(), layer.index)
+	/*result := InstanceIndex{
+		layerIndex:        layer.index,
+		roomInstanceIndex: roomInst.Index(),
+		instanceIndex:     len(layer.manager.instances),
+	}
+	result.obj = layer.manager.InstanceCreate(position, objectIndex, roomInst.Index(), layer.index)
+	return result.obj*/
+}
+
+func InstanceCreateRoom(position geom.Vec, roomInst *RoomInstance, objectIndex object.ObjectIndex) object.ObjectType {
+	// NOTE(Jake): 2018-07-22
+	//
+	// For now instances default to the last instance layer
+	//
+	layerIndex := len(roomInst.instanceLayers) - 1
+	//fmt.Printf("InstanceCreateRoom: Create on layer %d\n", layerIndex)
+	layer := &roomInst.instanceLayers[layerIndex]
+	return layer.manager.InstanceCreate(position, objectIndex, roomInst.Index(), layer.index)
+}
+
+func InstanceExists(inst object.ObjectType) bool {
+	baseObj := inst.BaseObject()
+	if baseObj == nil {
+		return false
+	}
+	roomInst := RoomGetInstance(object.RoomInstanceIndex(baseObj))
+	// todo(Jake): 2018-08-20
+	//
+	// Check to see if current entity is destroyed
+	//
+	return roomInst != nil
+}
+
+func (manager *instanceManager) InstanceCreate(position geom.Vec, objectIndex object.ObjectIndex, roomInstanceIndex, layerIndex int) object.ObjectType {
 	// Create and add to entity list
 	index := len(manager.instances)
 
-	//
-	var inst object.ObjectType
-	{
-		spaceIndex := manager.spaces.GetNew()
-		space := manager.spaces.Get(spaceIndex)
-		inst = object.NewRawInstance(objectIndex, index, roomInstanceIndex, space, spaceIndex)
-		manager.instances = append(manager.instances, inst)
-	}
+	// Get Pos/Size part of instance (SpaceObject)
+	spaceIndex := manager.spaces.GetNew()
+	space := manager.spaces.Get(spaceIndex)
 
-	// Attach
-	baseObj := inst.BaseObject()
+	// Get instance
+	inst := object.NewRawInstance(objectIndex, index, roomInstanceIndex, layerIndex, space, spaceIndex)
+	manager.instances = append(manager.instances, inst)
 
 	// Init and Set position
 	inst.Create()
-	baseObj.Vec = position
+	inst.BaseObject().Vec = position
 	return inst
 }
 
-func (manager *instanceManager) InstanceDestroy(inst object.ObjectType) {
-	be := inst.BaseObject()
+func InstanceDestroy(inst object.ObjectType) {
+	// Destroy this
+	inst.Destroy()
+	cameraInstanceDestroy(inst)
 
-	// Free up space slot
-	be.Space = nil
-	if be.SpaceIndex() > -1 {
-		manager.spaces.Remove(be.SpaceIndex())
+	baseObj := inst.BaseObject()
+
+	// Get slots
+	roomInstanceIndex := object.RoomInstanceIndex(baseObj)
+	layerIndex := object.LayerInstanceIndex(baseObj)
+	index := object.InstanceIndex(baseObj)
+
+	// Get manager
+	roomInst := &gState.roomInstances[roomInstanceIndex]
+	layerInst := &roomInst.instanceLayers[layerIndex]
+	manager := &layerInst.manager
+
+	// Free up SpaceObject slot
+	spaceIndex := baseObj.SpaceIndex()
+	baseObj.Space = nil
+	if spaceIndex > -1 {
+		manager.spaces.Remove(spaceIndex)
 	}
 
 	// Unordered delete
-	i := be.Index()
 	lastEntry := manager.instances[len(manager.instances)-1]
-	manager.instances[i] = lastEntry
+	manager.instances[index] = lastEntry
 	manager.instances = manager.instances[:len(manager.instances)-1]
 }
 
@@ -79,19 +135,10 @@ func (manager *instanceManager) update(animationUpdate bool) {
 }
 
 func (manager *instanceManager) draw() {
-	for i := 0; i < len(cameraList); i++ {
-		cam := &cameraList[i]
-		if !cam.enabled {
+	for _, inst := range manager.instances {
+		if inst == nil {
 			continue
 		}
-		cam.update()
-		cameraSetActive(i)
-		for _, inst := range manager.instances {
-			if inst == nil {
-				continue
-			}
-			inst.Draw()
-		}
+		inst.Draw()
 	}
-	cameraClearActive()
 }

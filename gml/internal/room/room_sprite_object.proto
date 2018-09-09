@@ -1,0 +1,11 @@
+syntax = "proto3";
+package room;
+
+message RoomSpriteObject {
+	string UUID = 1;
+    int32 X = 2;
+    int32 Y = 3;
+    int32 Width = 4;
+    int32 Height = 5;
+    string SpriteName = 6;
+}

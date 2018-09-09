@@ -1,6 +1,11 @@
 package object
 
-import "reflect"
+import (
+	"fmt"
+	"reflect"
+
+	"github.com/silbinarywolf/gml-go/gml/internal/space"
+)
 
 var (
 	gObjectManager *objectManager = newObjectManager()
@@ -30,6 +35,11 @@ func InitTypes(objTypes []ObjectType) {
 		}
 		name := objType.ObjectName()
 		objectIndex := objType.ObjectIndex()
+		otherID, used := manager.nameToID[name]
+		if used {
+			otherType := manager.idToEntityData[otherID]
+			panic(fmt.Sprintf("You cannot have two objects with the same object name.\n- %T::ObjectName() == %s\n- %T::ObjectName() == %s", objType, objType.ObjectName(), otherType, otherType.ObjectName()))
+		}
 		manager.nameToID[name] = objectIndex
 	}
 }
@@ -45,7 +55,7 @@ func NameToID() map[string]ObjectIndex {
 	return gObjectManager.nameToID
 }
 
-func NewRawInstance(objectIndex ObjectIndex, index int, roomInstanceIndex int, space *Space, spaceIndex int) ObjectType {
+func NewRawInstance(objectIndex ObjectIndex, index int, roomInstanceIndex int, layerIndex int, space *space.Space, spaceIndex int) ObjectType {
 	// Create
 	valToCopy := gObjectManager.idToEntityData[objectIndex]
 	inst := reflect.New(reflect.ValueOf(valToCopy).Elem().Type()).Interface().(ObjectType)
@@ -54,6 +64,7 @@ func NewRawInstance(objectIndex ObjectIndex, index int, roomInstanceIndex int, s
 	baseObj := inst.BaseObject()
 	baseObj.index = index
 	baseObj.roomInstanceIndex = roomInstanceIndex
+	baseObj.layerInstanceIndex = layerIndex
 	// todo(Jake): 2018-07-08
 	//
 	// Figure out a cleaner way to handle this functionality across
@@ -61,8 +72,7 @@ func NewRawInstance(objectIndex ObjectIndex, index int, roomInstanceIndex int, s
 	//
 	// Perhaps force objects to have to be created via an instance manager.
 	//
-	baseObj.Space = space
-	baseObj.spaceIndex = spaceIndex
+	baseObj.SpaceObject.Init(space, spaceIndex)
 	baseObj.create()
 
 	return inst

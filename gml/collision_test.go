@@ -2,6 +2,8 @@ package gml
 
 import (
 	"testing"
+
+	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 )
 
 // NOTE(Jake): 2018-07-08
@@ -35,13 +37,13 @@ func BenchmarkPlaceFree250(b *testing.B) {
 	// everything is considered solid.
 	//
 	for i := 0; i < 250; i++ {
-		roomInstance.InstanceCreate(V(0, 0), ObjDummyPlayer)
+		InstanceCreateRoom(geom.Vec{0, 0}, roomInstance, ObjDummyPlayer)
 	}
-	playerInstance := roomInstance.InstanceCreate(V(0, 0), ObjDummyPlayer).(*DummyPlayer)
+	playerInstance := InstanceCreateRoom(geom.Vec{0, 0}, roomInstance, ObjDummyPlayer).(*DummyPlayer)
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		PlaceFree(playerInstance, V(32, 32))
+		PlaceFree(playerInstance, geom.Vec{32, 32})
 	}
 }
 
@@ -61,13 +63,13 @@ func BenchmarkPlaceFree500(b *testing.B) {
 	// everything is considered solid.
 	//
 	for i := 0; i < 500; i++ {
-		roomInstance.InstanceCreate(V(0, 0), ObjDummyPlayer)
+		InstanceCreateRoom(geom.Vec{0, 0}, roomInstance, ObjDummyPlayer)
 	}
-	playerInstance := roomInstance.InstanceCreate(V(0, 0), ObjDummyPlayer).(*DummyPlayer)
+	playerInstance := InstanceCreateRoom(geom.Vec{0, 0}, roomInstance, ObjDummyPlayer).(*DummyPlayer)
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		PlaceFree(playerInstance, V(32, 32))
+		PlaceFree(playerInstance, geom.Vec{32, 32})
 	}
 }
 
@@ -87,11 +89,11 @@ func BenchmarkPlaceFreeMMOCase_250SolidWalls_1024MovingEntities(b *testing.B) {
 	// everything is considered solid.
 	//
 	for i := 0; i < 250; i++ {
-		roomInstance.InstanceCreate(V(float64(i*32), 0), ObjDummyPlayer)
+		InstanceCreateRoom(geom.Vec{float64(i * 32.0), 0}, roomInstance, ObjDummyPlayer)
 	}
 	movingEntityInstances := make([]*DummyPlayer, 1024)
 	for i := 0; i < len(movingEntityInstances); i++ {
-		movingEntityInstances[i] = roomInstance.InstanceCreate(V(0, 0), ObjDummyPlayer).(*DummyPlayer)
+		movingEntityInstances[i] = InstanceCreateRoom(geom.Vec{0, 0}, roomInstance, ObjDummyPlayer).(*DummyPlayer)
 	}
 
 	b.ResetTimer()
@@ -102,7 +104,7 @@ func BenchmarkPlaceFreeMMOCase_250SolidWalls_1024MovingEntities(b *testing.B) {
 			// Assume each entity would call PlaceFree() at least 10 times each.
 			//
 			for i := 0; i < 10; i++ {
-				PlaceFree(movingEntityInstance, V(32, 32))
+				PlaceFree(movingEntityInstance, geom.Vec{32, 32})
 			}
 		}
 	}

@@ -1,12 +1,12 @@
 package sprite
 
 import (
-	"github.com/silbinarywolf/gml-go/gml/internal/math"
+	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 )
 
 type SpriteState struct {
 	sprite     *Sprite
-	ImageScale math.Vec
+	ImageScale geom.Vec
 	imageIndex float64
 }
 
@@ -16,8 +16,10 @@ func (state *SpriteState) ImageNumber() float64 { return float64(len(state.sprit
 func (state *SpriteState) ImageSpeed() float64  { return state.sprite.imageSpeed }
 
 func (state *SpriteState) SetSprite(sprite *Sprite) {
-	state.sprite = sprite
-	state.imageIndex = 0
+	if state.sprite != sprite {
+		state.sprite = sprite
+		state.imageIndex = 0
+	}
 }
 
 func (state *SpriteState) SetImageIndex(imageIndex float64) {

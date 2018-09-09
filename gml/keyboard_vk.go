@@ -45,6 +45,7 @@ const (
 	VkNumpad7
 	VkNumpad8
 	VkNumpad9
+	VkNumpadEnter
 	VkMultiply // multiply key on the numeric keypad
 	VkDivide   // divide key on the numeric keypad
 	VkAdd      // key on the numeric keypad

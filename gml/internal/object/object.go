@@ -3,7 +3,7 @@ package object
 import (
 	"math"
 
-	m "github.com/silbinarywolf/gml-go/gml/internal/math"
+	"github.com/silbinarywolf/gml-go/gml/internal/space"
 	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
 )
 
@@ -14,15 +14,15 @@ type ObjectType interface {
 	ObjectIndex() ObjectIndex
 	ObjectName() string
 	Create()
+	Destroy()
 	Update()
 	Draw()
 }
 
 type Object struct {
 	sprite.SpriteState // Sprite (contains SetSprite)
-	SpaceObject
-	index             int     // index in the 'entities' array
-	roomInstanceIndex int     // index of the room in the 'room' array
+	space.SpaceObject
+	instanceObject
 	imageAngleRadians float64 // Image Angle
 }
 
@@ -32,13 +32,10 @@ func (inst *Object) create() {
 }
 
 func (inst *Object) BaseObject() *Object        { return inst }
-func (inst *Object) Index() int                 { return inst.index }
-func (inst *Object) RoomInstanceIndex() int     { return inst.roomInstanceIndex }
-func (inst *Object) Pos() m.Vec                 { return inst.Vec }
 func (inst *Object) ImageAngleRadians() float64 { return inst.imageAngleRadians }
 func (inst *Object) ImageAngle() float64        { return inst.imageAngleRadians * (180 / math.Pi) }
 
-//func (inst *Object) ImageScale() m.Vec          { return inst.imageScale }
+//func (inst *Object) ImageScale() geom.Vec          { return inst.imageScale }
 
 func (inst *Object) SetSprite(sprite *sprite.Sprite) {
 	inst.SpriteState.SetSprite(sprite)
@@ -59,4 +56,8 @@ func (inst *Object) SetImageAngle(angleInDegrees float64) {
 
 func (inst *Object) SetImageAngleRadians(angleInRadians float64) {
 	inst.imageAngleRadians = angleInRadians
+}
+
+func (inst *Object) CollisionInstance(otherInst ObjectType) bool {
+	return inst.Rect.CollisionRectangle(otherInst.BaseObject().Rect)
 }
