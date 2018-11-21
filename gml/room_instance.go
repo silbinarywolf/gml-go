@@ -23,6 +23,11 @@ func RoomInstanceName(roomInstanceIndex int) string {
 	return roomInst.room.Config.UUID
 }
 
+func RoomInstanceNew() int {
+	roomInst := gState.createNewRoomInstance(nil)
+	return roomInst.index
+}
+
 func RoomInstanceCreate(room *Room) int {
 	roomInst := gState.createNewRoomInstance(room)
 	return roomInst.index

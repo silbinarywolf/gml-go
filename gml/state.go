@@ -65,6 +65,18 @@ func (state *state) createNewRoomInstance(room *Room) *RoomInstance {
 	roomInst := &state.roomInstances[index]
 	roomInst.index = index
 
+	if room == nil ||
+		len(room.InstanceLayers) == 0 {
+		// Create default instance layer if...
+		// - No instance layers exist in the room data
+		// - Creating blank room
+		roomInst.instanceLayers = make([]RoomInstanceLayerInstance, 1)
+		roomInst.instanceLayers[0] = RoomInstanceLayerInstance{
+			index: 0,
+		}
+		roomInst.drawLayers = append(roomInst.drawLayers, &roomInst.instanceLayers[0])
+	}
+
 	// If non-blank room instance, use room data to create
 	if roomInst.room != nil {
 		// Instance layers
@@ -82,13 +94,6 @@ func (state *state) createNewRoomInstance(room *Room) *RoomInstance {
 				}
 				roomInst.drawLayers = append(roomInst.drawLayers, layer)
 			}
-		} else {
-			// If no instance layers exist in the room data, create one.
-			roomInst.instanceLayers = make([]RoomInstanceLayerInstance, 1)
-			roomInst.instanceLayers[0] = RoomInstanceLayerInstance{
-				index: 0,
-			}
-			roomInst.drawLayers = append(roomInst.drawLayers, &roomInst.instanceLayers[0])
 		}
 		// Background layers
 		for i := 0; i < len(room.BackgroundLayers); i++ {

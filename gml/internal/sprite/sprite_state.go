@@ -10,10 +10,20 @@ type SpriteState struct {
 	imageIndex float64
 }
 
-func (state *SpriteState) Sprite() *Sprite      { return state.sprite }
-func (state *SpriteState) ImageIndex() float64  { return state.imageIndex }
-func (state *SpriteState) ImageNumber() float64 { return float64(len(state.sprite.frames)) }
-func (state *SpriteState) ImageSpeed() float64  { return state.sprite.imageSpeed }
+func (state *SpriteState) Sprite() *Sprite     { return state.sprite }
+func (state *SpriteState) ImageIndex() float64 { return state.imageIndex }
+func (state *SpriteState) ImageSpeed() float64 {
+	if state.sprite == nil {
+		return 0
+	}
+	return state.sprite.imageSpeed
+}
+func (state *SpriteState) ImageNumber() float64 {
+	if state.sprite == nil {
+		return 0
+	}
+	return float64(len(state.sprite.frames))
+}
 
 func (state *SpriteState) SetSprite(sprite *Sprite) {
 	if state.sprite != sprite {

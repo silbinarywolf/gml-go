@@ -64,14 +64,29 @@ func update() error {
 	return nil
 }
 
+func WindowWidth() int {
+	return gWindowWidth
+}
+
+func WindowHeight() int {
+	return gWindowHeight
+}
+
+func WindowScale() float64 {
+	return gWindowScale
+}
+
+// todo: replace windowWidth() with WindowWidth()
 func windowWidth() int {
 	return gWindowWidth
 }
 
+// todo: replace windowHeight() with WindowHeight()
 func windowHeight() int {
 	return gWindowHeight
 }
 
+// todo: replace windowScale() with WindowScale()
 func windowScale() float64 {
 	return gWindowScale
 }
