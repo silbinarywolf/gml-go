@@ -35,6 +35,16 @@ const (
 	VkF10
 	VkF11
 	VkF12
+	Vk0
+	Vk1
+	Vk2
+	Vk3
+	Vk4
+	Vk5
+	Vk6
+	Vk7
+	Vk8
+	Vk9
 	VkNumpad0
 	VkNumpad1
 	VkNumpad2

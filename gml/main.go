@@ -1,7 +1,6 @@
 package gml
 
 import (
-	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
 	"github.com/silbinarywolf/gml-go/gml/internal/timegml"
 )
 
@@ -16,31 +15,52 @@ var (
 	gWindowWidth  int
 	gWindowHeight int
 	gWindowScale  float64 // Window scale
-	//lastFrameTime int64
 )
 
 func update() error {
 	frameStartTime := timegml.Now()
-	//frameOffset := timegml.Now() - lastFrameTime
-	sprite.DebugWatch()
 	keyboardUpdate()
 	keyboardStringUpdate()
 	mouseUpdate()
-	if EditorIsActive() {
-		cameraSetActive(0)
-		editorUpdate()
-		cameraClearActive()
-	} else {
+
+	debugUpdate()
+
+	switch debugMenuID {
+	case debugMenuNone:
 		gMainFunctions.update()
+	case debugMenuRoomEditor:
+		cameraSetActive(0)
+		cameraClear(0)
+
+		editorUpdate()
+
+		cameraDraw(0)
+		cameraClearActive()
+	case debugMenuAnimationEditor:
+		cameraSetActive(0)
+		cameraClear(0)
+
+		animationEditorUpdate()
+
+		cameraDraw(0)
+		cameraClearActive()
+	default:
+		panic("Invalid debug mode.")
 	}
 	if g_game.hasGameRestarted {
+		panic("todo: Fix / test this. I assume its broken")
 		gState.globalInstances.reset()
 		gMainFunctions.gameStart()
 		g_game.hasGameRestarted = false
 	}
-	gState.frameBudgetNanosecondsUsed = timegml.Now() - frameStartTime
-	//gState.frameBudgetNanosecondsUsed += frameOffset
-	//lastFrameTime = timegml.Now()
+
+	// NOTE(Jake): 2018-09-29
+	// Ignoring when 0 is reported. This happens on Windows
+	// and just makes the frame usage timer annoying.
+	frameBudgetUsed := timegml.Now() - frameStartTime
+	if frameBudgetUsed > 0 {
+		gState.frameBudgetNanosecondsUsed = frameBudgetUsed
+	}
 	return nil
 }
 

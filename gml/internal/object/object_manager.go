@@ -3,8 +3,6 @@ package object
 import (
 	"fmt"
 	"reflect"
-
-	"github.com/silbinarywolf/gml-go/gml/internal/space"
 )
 
 var (
@@ -55,8 +53,22 @@ func NameToID() map[string]ObjectIndex {
 	return gObjectManager.nameToID
 }
 
-func NewRawInstance(objectIndex ObjectIndex, index int, roomInstanceIndex int, layerIndex int, space *space.Space, spaceIndex int) ObjectType {
-	// Create
+func MoveInstance(inst ObjectType, index int, roomInstanceIndex int, layerIndex int) {
+	// Initialize object
+	baseObj := inst.BaseObject()
+	baseObj.index = index
+	baseObj.roomInstanceIndex = roomInstanceIndex
+	baseObj.layerInstanceIndex = layerIndex
+}
+
+func NewRawInstance(objectIndex ObjectIndex, index int, roomInstanceIndex int, layerIndex int) ObjectType {
+	valToCopy := gObjectManager.idToEntityData[objectIndex]
+	inst := reflect.New(reflect.ValueOf(valToCopy).Elem().Type()).Interface().(ObjectType)
+	MoveInstance(inst, index, roomInstanceIndex, layerIndex)
+	baseObj := inst.BaseObject()
+	baseObj.create()
+	return inst
+	/*// Create
 	valToCopy := gObjectManager.idToEntityData[objectIndex]
 	inst := reflect.New(reflect.ValueOf(valToCopy).Elem().Type()).Interface().(ObjectType)
 
@@ -73,9 +85,7 @@ func NewRawInstance(objectIndex ObjectIndex, index int, roomInstanceIndex int, l
 	// Perhaps force objects to have to be created via an instance manager.
 	//
 	baseObj.SpaceObject.Init(space, spaceIndex)
-	baseObj.create()
-
-	return inst
+	baseObj.create()*/
 }
 
 func ObjectGetIndex(name string) (ObjectIndex, bool) {

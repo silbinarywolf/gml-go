@@ -21,9 +21,7 @@ import (
 	"github.com/silbinarywolf/gml-go/gml/internal/object"
 	"github.com/silbinarywolf/gml-go/gml/internal/reditor"
 	"github.com/silbinarywolf/gml-go/gml/internal/room"
-	"github.com/silbinarywolf/gml-go/gml/internal/space"
 	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
-	"github.com/silbinarywolf/gml-go/gml/internal/user"
 )
 
 //
@@ -41,13 +39,15 @@ import (
 //}
 
 type roomEditor struct {
+	spriteViewer debugSpriteViewer
+
 	initialized  bool
 	editingRoom  *room.Room
 	editingLayer room.RoomLayer
 
 	objectIndexToData []object.ObjectType
-	spriteList        []*sprite.Sprite
-	spriteMap         map[string]*sprite.Sprite
+	//spriteList        []*sprite.Sprite
+	//spriteMap         map[string]*sprite.Sprite
 
 	camPos             Vec
 	lastMousePos       Vec
@@ -58,7 +58,7 @@ type roomEditor struct {
 	hasUnsavedChanges bool
 
 	entityMenuFiltered []object.ObjectType
-	spriteMenuFiltered []*sprite.Sprite
+	//spriteMenuFiltered []*sprite.Sprite
 
 	objectSelected object.ObjectType
 	spriteSelected *sprite.Sprite
@@ -108,53 +108,23 @@ func newRoomEditor() *roomEditor {
 			continue
 		}
 		objectIndex := obj.ObjectIndex()
-		inst := object.NewRawInstance(objectIndex, i, 0, 0, new(space.Space), -1)
+		inst := object.NewRawInstance(objectIndex, i, 0, 0)
 		inst.Create()
 		objectIndexToData[i] = inst
-	}
-
-	// NOTE(Jake): 2018-07-25
-	//
-	// Load all sprites
-	//
-	var spriteList []*sprite.Sprite
-	spriteMap := make(map[string]*sprite.Sprite)
-	spritePath := file.AssetsDirectory + "/sprites"
-	err := filepath.Walk(spritePath, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			println("prevent panic by handling failure accessing a path " + path + ": " + err.Error())
-			return err
-		}
-		if !info.IsDir() {
-			// Skip files
-			return nil
-		}
-		if path == spritePath {
-			// Skip self
-			return nil
-		}
-		name := filepath.Base(path)
-		sprite := LoadSprite(name)
-		spriteList = append(spriteList, sprite)
-		spriteMap[sprite.Name()] = sprite
-		return nil
-	})
-	if err != nil {
-		panic(err)
 	}
 
 	return &roomEditor{
 		initialized:       true,
 		objectIndexToData: objectIndexToData,
 		//objectNameToData:   objectNameToData,
-		spriteList:         spriteList,
-		spriteMap:          spriteMap,
+		//spriteList:         spriteList,
+		//spriteMap:          spriteMap,
 		lastMousePos:       MousePosition(),
 		entityMenuFiltered: make([]object.ObjectType, 0, len(objectIndexToData)),
-		spriteMenuFiltered: make([]*sprite.Sprite, 0, len(spriteList)),
-		roomDirectory:      file.AssetsDirectory + "/room/",
-		tempLayers:         make([]room.RoomLayer, 0, 25),
-		gridEnabled:        false,
+		//spriteMenuFiltered: make([]*sprite.Sprite, 0, len(spriteList)),
+		roomDirectory: file.AssetsDirectory + "/room/",
+		tempLayers:    make([]room.RoomLayer, 0, 25),
+		gridEnabled:   false,
 	}
 }
 
@@ -235,14 +205,11 @@ func EditorIsInitialized() bool {
 	return gRoomEditor != nil
 }
 
-func EditorIsActive() bool {
-	return gRoomEditor != nil && roomEditorEditingRoom() != nil
-}
-
 func EditorSetRoom(room *Room) {
 	roomEditor := gRoomEditor
 	if roomEditor.editorChangeRoom(room) {
 		roomEditor.editorConfigLoad()
+		debugMenuOpenOrToggleClosed(debugMenuRoomEditor)
 	}
 }
 
@@ -256,6 +223,7 @@ func (roomEditor *roomEditor) editorChangeRoom(room *Room) bool {
 		roomEditor.editingRoom = nil
 		// Reset camera settings back
 		*gCameraManager = roomEditor.cameraStateBeforeEnteringEditingMode
+		debugMenuOpenOrToggleClosed(debugMenuNone)
 		// Execute custom user-code logic
 		if gRoomEditor.exitEditorFunc != nil {
 			gRoomEditor.exitEditorFunc(editingRoom)
@@ -274,7 +242,6 @@ func (roomEditor *roomEditor) editorChangeRoom(room *Room) bool {
 	// editor. Retain the same camera position.
 	//
 	roomEditor.camPos = CameraGetViewPos(0)
-	CameraSetEnabled(0)
 	CameraSetViewSize(0, geom.Vec{float64(windowWidth()), float64(windowHeight())})
 	CameraSetViewTarget(0, nil)
 	return true
@@ -534,7 +501,7 @@ func editorUpdate() {
 
 	// Draw
 	{
-		cameraSize := cameraGetActive().Size()
+		cameraSize := cameraGetActive().size
 
 		{
 			// Fill screen with gray
@@ -576,12 +543,7 @@ func editorUpdate() {
 						break
 					}
 					// Draw bg
-					sprite, ok := roomEditor.spriteMap[layer.SpriteName]
-					if !ok {
-						// If unable to find sprite, don't draw anything
-						// ie. handle case where background layer is using a deleted sprite
-						break
-					}
+					sprite := sprite.LoadSprite(layer.SpriteName)
 					x := float64(layer.X)
 					y := float64(layer.Y)
 					width := float64(sprite.Size().X)
@@ -606,10 +568,7 @@ func editorUpdate() {
 					// Draw room sprites
 					for _, obj := range layer.Sprites {
 						spriteName := obj.SpriteName
-						sprite, ok := roomEditor.spriteMap[spriteName]
-						if !ok {
-							continue
-						}
+						sprite := sprite.LoadSprite(spriteName)
 						DrawSprite(sprite, 0, geom.Vec{float64(obj.X), float64(obj.Y)})
 					}
 				default:
@@ -1039,10 +998,7 @@ func editorUpdate() {
 								hasCollision := false
 								for _, obj := range layer.Sprites {
 									spriteName := obj.SpriteName
-									sprite, ok := roomEditor.spriteMap[spriteName]
-									if !ok {
-										continue
-									}
+									sprite := sprite.LoadSprite(spriteName)
 
 									other := geom.Rect{}
 									other.X = float64(obj.X)
@@ -1087,10 +1043,7 @@ func editorUpdate() {
 								hasCollision := false
 								for _, obj := range layer.Sprites {
 									spriteName := obj.SpriteName
-									sprite, ok := roomEditor.spriteMap[spriteName]
-									if !ok {
-										continue
-									}
+									sprite := sprite.LoadSprite(spriteName)
 
 									other := geom.Rect{}
 									other.X = float64(obj.X)
@@ -1142,10 +1095,8 @@ func editorUpdate() {
 							// Mark deleted
 							for i, obj := range layer.Sprites {
 								spriteName := obj.SpriteName
-								sprite, ok := roomEditor.spriteMap[spriteName]
-								if !ok {
-									continue
-								}
+								sprite := sprite.LoadSprite(spriteName)
+
 								width := float64(sprite.Size().X)
 								height := float64(sprite.Size().Y)
 								left := float64(obj.X)
@@ -1212,15 +1163,17 @@ func editorUpdate() {
 
 		// Select menu
 		if roomEditor.menuOpened != reditor.MenuNone {
-			DrawSetGUI(true)
-			// Add black opacity over screen with menu open
-			DrawRectangle(geom.Vec{0, 0}, geom.Vec{2048, 2048}, color.RGBA{0, 0, 0, 190})
-
-			//
-			var x float64 = float64(windowWidth()) / 2
-			var y float64 = 32
 			switch roomEditor.menuOpened {
 			case reditor.MenuEntity:
+				DrawSetGUI(true)
+				// Add black opacity over screen with menu open
+				DrawRectangle(geom.Vec{0, 0}, geom.Vec{2048, 2048}, color.RGBA{0, 0, 0, 190})
+
+				//
+				ui := geom.Vec{
+					X: float64(windowWidth()) / 2,
+					Y: 32,
+				}
 				typingText := KeyboardString()
 				roomEditor.entityMenuFiltered = roomEditor.entityMenuFiltered[:0]
 				for _, obj := range roomEditor.objectIndexToData {
@@ -1253,14 +1206,14 @@ func editorUpdate() {
 
 				{
 					searchText := "Search for object (type + press enter)"
-					DrawText(geom.Vec{x - (StringWidth(searchText) / 4), y}, searchText)
-					y += 24
+					DrawText(geom.Vec{ui.X - (StringWidth(searchText) / 4), ui.Y}, searchText)
+					ui.Y += 24
 				}
 				{
 					typingText := KeyboardString()
-					DrawText(geom.Vec{x, y}, typingText)
-					DrawText(geom.Vec{x + StringWidth(typingText), y}, "|")
-					y += 24
+					DrawText(ui, typingText)
+					DrawText(geom.Vec{ui.X + StringWidth(typingText), ui.Y}, "|")
+					ui.Y += 24
 				}
 				previewSize := geom.Vec{32, 32}
 				for _, obj := range roomEditor.entityMenuFiltered {
@@ -1279,51 +1232,29 @@ func editorUpdate() {
 					// Also look at other similar UI experiences, because
 					// maybe we wont need to center this to get good UX.
 					//
-					pos.X = x - 40
-					pos.Y = y - (previewSize.Y / 2)
+					pos.X = ui.X - 40
+					pos.Y = ui.Y - (previewSize.Y / 2)
 					//baseObj.ImageScale.X = previewSize.X / float64(size.X)
 					//baseObj.ImageScale.Y = previewSize.Y / float64(size.Y)
 					//obj.Draw()
 					drawObjectPreview(obj, pos, previewSize)
 					name := obj.ObjectName()
-					DrawText(geom.Vec{x, y}, name)
+					DrawText(ui, name)
 					//baseObj.ImageScale = oldImageScale
-					y += previewSize.Y + 16
+					ui.Y += previewSize.Y + 16
 				}
 			case reditor.MenuSprite,
 				reditor.MenuBackground:
-				typingText := KeyboardString()
-				roomEditor.spriteMenuFiltered = roomEditor.spriteMenuFiltered[:0]
-				for _, spr := range roomEditor.spriteList {
-					if spr == nil {
-						continue
-					}
-					hasMatch := hasFilterMatch(spr.Name(), typingText)
-					if !hasMatch {
-						continue
-					}
-					// NOTE(Jake): 2018-07-11
-					//
-					// Animating in the object list isn't particularly useful.
-					//
-					//obj.BaseObject().ImageUpdate()
-					roomEditor.spriteMenuFiltered = append(roomEditor.spriteMenuFiltered, spr)
-				}
-
-				//
-				if inputSelectPressed() &&
-					len(roomEditor.spriteMenuFiltered) > 0 {
-					selectedSpr := roomEditor.spriteMenuFiltered[0]
+				if spriteSelected, ok := roomEditor.spriteViewer.Update(); ok {
 					switch roomEditor.menuOpened {
 					case reditor.MenuSprite:
-						// Set
-						roomEditor.spriteSelected = selectedSpr
+						roomEditor.spriteSelected = spriteSelected
 						roomEditor.editorConfigSave()
 					case reditor.MenuBackground:
 						switch layer := roomEditor.editingLayer.(type) {
 						case *room.RoomLayerBackground:
-							if layer.SpriteName != selectedSpr.Name() {
-								layer.SpriteName = selectedSpr.Name()
+							if layer.SpriteName != spriteSelected.Name() {
+								layer.SpriteName = spriteSelected.Name()
 								roomEditor.hasUnsavedChanges = true
 							}
 						default:
@@ -1331,32 +1262,6 @@ func editorUpdate() {
 						}
 					}
 					roomEditor.menuOpened = reditor.MenuNone
-				}
-
-				//
-				{
-					searchText := "Search for image (type + press enter)"
-					DrawText(geom.Vec{x - (StringWidth(searchText) / 4), y}, searchText)
-					y += 24
-				}
-				{
-					typingText := KeyboardString()
-					DrawText(geom.Vec{x, y}, typingText)
-					DrawText(geom.Vec{x + StringWidth(typingText), y}, "|")
-					y += 24
-				}
-				previewSize := geom.Vec{32, 32}
-				for _, spr := range roomEditor.spriteMenuFiltered {
-					var pos geom.Vec
-					pos.X = x - 40
-					pos.Y = y - (previewSize.Y / 2)
-					calcPreviewSize := previewSize
-					calcPreviewSize.X /= float64(spr.Size().X)
-					calcPreviewSize.Y /= float64(spr.Size().Y)
-					DrawSpriteScaled(spr, 0, pos, calcPreviewSize)
-					name := spr.Name()
-					DrawText(geom.Vec{x, y}, name)
-					y += previewSize.Y + 16
 				}
 			case reditor.MenuNewRoom,
 				reditor.MenuLoadRoom,
@@ -1376,15 +1281,24 @@ func editorUpdate() {
 					panic("Invalid menu type, No search text defined")
 				}
 
+				DrawSetGUI(true)
+				// Add black opacity over screen with menu open
+				DrawRectangle(geom.Vec{0, 0}, geom.Vec{2048, 2048}, color.RGBA{0, 0, 0, 190})
+
+				//
+				ui := geom.Vec{
+					X: float64(windowWidth()) / 2,
+					Y: 32,
+				}
 				{
-					DrawText(geom.Vec{x - (StringWidth(searchText) / 4), y}, searchText)
-					y += 24
+					DrawText(geom.Vec{ui.X - (StringWidth(searchText) / 4), ui.Y}, searchText)
+					ui.Y += 24
 				}
 				{
 					typingText := KeyboardString()
-					DrawText(geom.Vec{x, y}, typingText)
-					DrawText(geom.Vec{x + StringWidth(typingText), y}, "|")
-					y += 24
+					DrawText(ui, typingText)
+					DrawText(geom.Vec{ui.X + StringWidth(typingText), ui.Y}, "|")
+					ui.Y += 24
 				}
 			}
 			DrawSetGUI(false)
@@ -1472,38 +1386,6 @@ func drawTextButton(pos geom.Vec, text string) bool {
 	return MouseCheckPressed(MbLeft) && isMouseOver
 }
 
-func drawButton(pos geom.Vec, text string) bool {
-	// Config
-	paddingH := 32.0
-	borderWidth := 2.0
-	size := geom.Vec{StringWidth(text) + paddingH, 24}
-
-	// Handle mouse over
-	isMouseOver := isMouseScreenOver(pos, size)
-	var innerRectColor color.RGBA
-	if isMouseOver {
-		innerRectColor = color.RGBA{180, 180, 180, 255}
-	} else {
-		innerRectColor = color.RGBA{255, 255, 255, 255}
-	}
-
-	// Draw Border (outer rect)
-	DrawRectangleBorder(pos, size, innerRectColor, borderWidth, color.RGBA{0, 162, 232, 255})
-	/*	pos.X += borderWidth
-		pos.Y += borderWidth
-		size.X -= borderWidth * 2
-		size.Y -= borderWidth * 2
-
-		// Draw Rect (inner rect)
-		DrawRectangle(pos, size, innerRectColor)*/
-
-	// Draw Text
-	pos.X += paddingH * 0.5
-	pos.Y += 16
-	DrawTextColor(pos, text, color.Black)
-	return MouseCheckPressed(MbLeft) && isMouseOver
-}
-
 func (roomEditor *roomEditor) getSnapPosition(pos geom.Vec, brushSize geom.Size, layer *room.RoomLayerSprite) (geom.Vec, bool) {
 	offsetX := float64(brushSize.X)
 	offsetY := float64(brushSize.Y)
@@ -1520,10 +1402,7 @@ func (roomEditor *roomEditor) getSnapPosition(pos geom.Vec, brushSize geom.Size,
 
 		for _, obj := range layer.Sprites {
 			spriteName := obj.SpriteName
-			sprite, ok := roomEditor.spriteMap[spriteName]
-			if !ok {
-				continue
-			}
+			sprite := sprite.LoadSprite(spriteName)
 
 			other := geom.Rect{}
 			other.X = float64(obj.X)
@@ -1552,10 +1431,7 @@ func (roomEditor *roomEditor) getSnapPosition(pos geom.Vec, brushSize geom.Size,
 
 		for _, obj := range layer.Sprites {
 			spriteName := obj.SpriteName
-			sprite, ok := roomEditor.spriteMap[spriteName]
-			if !ok {
-				continue
-			}
+			sprite := sprite.LoadSprite(spriteName)
 
 			other := geom.Rect{}
 			other.X = float64(obj.X)
@@ -1584,10 +1460,7 @@ func (roomEditor *roomEditor) getSnapPosition(pos geom.Vec, brushSize geom.Size,
 
 		for _, obj := range layer.Sprites {
 			spriteName := obj.SpriteName
-			sprite, ok := roomEditor.spriteMap[spriteName]
-			if !ok {
-				continue
-			}
+			sprite := sprite.LoadSprite(spriteName)
 
 			other := geom.Rect{}
 			other.X = float64(obj.X)
@@ -1616,10 +1489,7 @@ func (roomEditor *roomEditor) getSnapPosition(pos geom.Vec, brushSize geom.Size,
 
 		for _, obj := range layer.Sprites {
 			spriteName := obj.SpriteName
-			sprite, ok := roomEditor.spriteMap[spriteName]
-			if !ok {
-				continue
-			}
+			sprite := sprite.LoadSprite(spriteName)
 
 			other := geom.Rect{}
 			other.X = float64(obj.X)
@@ -1684,26 +1554,6 @@ func (roomEditor *roomEditor) getSnapPosition(pos geom.Vec, brushSize geom.Size,
 	return pos, false
 }
 
-func isMouseOver(pos geom.Vec, size geom.Vec) bool {
-	mousePos := MousePosition()
-	left := pos.X
-	right := left + float64(size.X)
-	top := pos.Y
-	bottom := top + float64(size.Y)
-	return mousePos.X >= left && mousePos.X < right &&
-		mousePos.Y >= top && mousePos.Y < bottom
-}
-
-func isMouseScreenOver(pos geom.Vec, size geom.Vec) bool {
-	mousePos := mouseScreenPosition()
-	left := pos.X
-	right := left + float64(size.X)
-	top := pos.Y
-	bottom := top + float64(size.Y)
-	return mousePos.X >= left && mousePos.X < right &&
-		mousePos.Y >= top && mousePos.Y < bottom
-}
-
 func (roomEditor *roomEditor) calculateRoomBounds() {
 	// Reset room size
 	editingRoom := roomEditor.editingRoom
@@ -1740,10 +1590,8 @@ func (roomEditor *roomEditor) calculateRoomBounds() {
 		case *room.RoomLayerSprite:
 			for _, obj := range layer.Sprites {
 				spriteName := obj.SpriteName
-				sprite, ok := roomEditor.spriteMap[spriteName]
-				if !ok {
-					continue
-				}
+				sprite := sprite.LoadSprite(spriteName)
+
 				x := int32(obj.X)
 				y := int32(obj.Y)
 				width := int32(sprite.Size().X)
@@ -1824,31 +1672,6 @@ func (roomEditor *roomEditor) loadRoom(name string) {
 	roomEditor.editorChangeRoom(editingRoom)
 }
 
-/*func (roomEditor *roomEditor) onCollisionSprite(layer *room.RoomLayerSprite, x, y float64, width, height float64, callback func(left, top, right, bottom float64)) {
-	for _, obj := range layer.Sprites {
-		spriteName := obj.SpriteName
-		sprite, ok := roomEditor.spriteMap[spriteName]
-		if !ok {
-			continue
-		}
-
-		other := space.Space{}
-		other.X = float64(obj.X)
-		other.Y = float64(obj.Y)
-		other.Size = sprite.Size()
-
-		r2Left := other.X
-		r2Top := other.Y
-		r2Right := r2Left + float64(other.Size.X)
-		r2Bottom := r2Top + float64(other.Size.Y)
-
-		if r1Right > r2Left && r1Bottom > r2Top &&
-			r1Left < r2Right && r1Top < r2Bottom {
-			callback(r2Left, r2Top, r2Right, r2Bottom)
-		}
-	}
-}*/
-
 func (roomEditor *roomEditor) newLayerAndSelected(editingRoom *room.Room, text string, kind room.RoomLayerKind) {
 	text = strings.TrimSpace(text)
 	config := &room.RoomLayerConfig{
@@ -1892,14 +1715,7 @@ func hasFilterMatch(s string, filterBy string) bool {
 
 func (roomEditor *roomEditor) editorConfigLoad() {
 	roomEditor.editingLayer = nil
-
-	// Load room editor config
-	roomEditorConfigPath := user.HomeDir() + "/.gmlgo"
-	if _, err := os.Stat(roomEditorConfigPath); os.IsNotExist(err) {
-		os.Mkdir(roomEditorConfigPath, 0700)
-	}
-
-	configPath := roomEditorConfigPath + "/config.json"
+	configPath := debugConfigPath("room_editor")
 	fileData, err := file.OpenFile(configPath)
 	if err == nil {
 		bytes, err := ioutil.ReadAll(fileData)
@@ -1920,9 +1736,8 @@ func (roomEditor *roomEditor) editorConfigLoad() {
 		// Set brush from config
 		switch roomEditor.editingLayer.(type) {
 		case *room.RoomLayerSprite:
-			obj, ok := roomEditor.spriteMap[editorConfig.BrushSelected]
-			if ok &&
-				obj.Name() == editorConfig.BrushSelected {
+			obj := sprite.LoadSprite(editorConfig.BrushSelected)
+			if obj.Name() == editorConfig.BrushSelected {
 				roomEditor.spriteSelected = obj
 				break
 			}
@@ -1962,13 +1777,8 @@ func (roomEditor *roomEditor) editorConfigSave() {
 		editorConfig.RoomSelected = roomEditor.editingRoom.Config.UUID
 	}
 
-	roomEditorConfigPath := user.HomeDir() + "/.gmlgo"
-	if _, err := os.Stat(roomEditorConfigPath); os.IsNotExist(err) {
-		os.Mkdir(roomEditorConfigPath, 0700)
-	}
-
 	json, _ := json.MarshalIndent(editorConfig, "", "\t")
-	configPath := roomEditorConfigPath + "/config.json"
+	configPath := debugConfigPath("room_editor")
 	err := ioutil.WriteFile(configPath, json, 0644)
 	if err != nil {
 		println("Failed to write room editor config: " + configPath + "\n" + "Error: " + err.Error())

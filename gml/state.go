@@ -11,11 +11,22 @@ import (
 
 var (
 	gState *state = newState()
+	g_game gameState
 )
+
+type gameState struct {
+	hasGameRestarted bool
+}
+
+func GameRestart() {
+	g_game.hasGameRestarted = true
+}
 
 type state struct {
 	globalInstances            *instanceManager
 	roomInstances              []RoomInstance
+	instancesMarkedForDelete   []object.ObjectType
+	isCreatingRoomInstance     bool
 	gWidth                     int
 	gHeight                    int
 	frameBudgetNanosecondsUsed int64
@@ -33,7 +44,12 @@ func FrameUsage() string {
 	timeTaken := float64(frameBudgetUsed) / 16000000.0
 	//fmt.Printf("Time used: %v / 16000000.0\n", frameBudgetUsed)
 	text := strconv.FormatFloat(timeTaken*100, 'f', 6, 64)
-	return text + "%"
+	return text + "% (" + strconv.Itoa(int(gState.frameBudgetNanosecondsUsed)) + "ns)"
+}
+
+// Check if RoomInstanceEmptyCreate() create is being executed
+func IsCreatingRoomInstance() bool {
+	return gState.isCreatingRoomInstance
 }
 
 func (state *state) createNewRoomInstance(room *Room) *RoomInstance {
@@ -41,6 +57,10 @@ func (state *state) createNewRoomInstance(room *Room) *RoomInstance {
 		used: true,
 		room: room,
 	})
+	state.isCreatingRoomInstance = true
+	defer func() {
+		state.isCreatingRoomInstance = false
+	}()
 	index := len(state.roomInstances) - 1
 	roomInst := &state.roomInstances[index]
 	roomInst.index = index
@@ -82,7 +102,7 @@ func (state *state) createNewRoomInstance(room *Room) *RoomInstance {
 			layer.y = float64(layerData.Y)
 			layer.roomLeft = float64(room.Left)
 			layer.roomRight = float64(room.Right)
-			layer.sprite = LoadSprite(spriteName)
+			layer.sprite = sprite.LoadSprite(spriteName)
 			layer.drawOrder = layerData.Config.Order
 			roomInst.drawLayers = append(roomInst.drawLayers, layer)
 		}
@@ -102,16 +122,7 @@ func (state *state) createNewRoomInstance(room *Room) *RoomInstance {
 				record.X = float64(sprObj.X)
 				record.Y = float64(sprObj.Y)
 				layer.sprites = append(layer.sprites, record)
-				if hasCollision {
-					// Add collision
-					space := layer.spaces.Get(layer.spaces.GetNew())
-					space.X = float64(sprObj.X)
-					space.Y = float64(sprObj.Y)
-				}
 			}
-			//sort.Slice(layer.sprites, func(i, j int) bool {
-			//	return layer.sprites[i].Sprite.Name() < layer.sprites[j].Sprite.Name()
-			//})
 			layer.drawOrder = layerData.Config.Order
 			roomInst.spriteLayers = append(roomInst.spriteLayers, layer)
 			roomInst.drawLayers = append(roomInst.drawLayers, &roomInst.spriteLayers[len(roomInst.spriteLayers)-1])
@@ -155,27 +166,10 @@ func (state *state) update(animationUpdate bool) {
 		}
 		roomInst.update(animationUpdate)
 	}
-}
 
-func (state *state) draw() {
-	for i := 0; i < len(gCameraManager.cameras); i++ {
-		view := &gCameraManager.cameras[i]
-		if !view.enabled {
-			continue
-		}
-		view.update()
-		cameraSetActive(i)
-		// Render global instances
-		state.globalInstances.draw()
-
-		// Render each instance in each room instance
-		for i := 1; i < len(state.roomInstances); i++ {
-			roomInst := &state.roomInstances[i]
-			if !roomInst.used {
-				continue
-			}
-			roomInst.draw()
-		}
+	// Remove deleted entities
+	for _, inst := range state.instancesMarkedForDelete {
+		instanceRemove(inst)
 	}
-	cameraClearActive()
+	state.instancesMarkedForDelete = state.instancesMarkedForDelete[:0]
 }

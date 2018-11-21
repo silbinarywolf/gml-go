@@ -2,7 +2,6 @@ package gml
 
 import (
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
-	"github.com/silbinarywolf/gml-go/gml/internal/object"
 )
 
 const (
@@ -14,15 +13,11 @@ type collisionObject interface {
 }
 
 func PlaceFree(instType collisionObject, position geom.Vec) bool {
-	baseObj := instType.BaseObject()
-	room := RoomGetInstance(object.RoomInstanceIndex(baseObj))
+	inst := instType.BaseObject()
+	room := roomGetInstance(inst.BaseObject().RoomInstanceIndex())
 	if room == nil {
 		panic("RoomInstance this object belongs to has been destroyed")
 	}
-
-	// Keep pointer to space object to avoid comparing collision
-	// against self
-	inst := baseObj.Space
 
 	// Create collision rect at position provided in function
 	r1 := inst.Rect
@@ -32,7 +27,15 @@ func PlaceFree(instType collisionObject, position geom.Vec) bool {
 	//var debugString string
 	hasCollision := false
 	for i := 0; i < len(room.instanceLayers); i++ {
-		spaces := &room.instanceLayers[i].manager.spaces
+		for _, other := range room.instanceLayers[i].manager.instances {
+			other := other.BaseObject()
+			if other.Solid() &&
+				r1.CollisionRectangle(other.Rect) &&
+				inst != other {
+				hasCollision = true
+			}
+		}
+		/*spaces := &room.instanceLayers[i].manager.spaces
 		for _, bucket := range spaces.Buckets() {
 			for i := 0; i < bucket.Len(); i++ {
 				other := bucket.Get(i)
@@ -58,14 +61,19 @@ func PlaceFree(instType collisionObject, position geom.Vec) bool {
 					hasCollision = true
 				}
 			}
-		}
+		}*/
 	}
 	for i := 0; i < len(room.spriteLayers); i++ {
 		layer := &room.spriteLayers[i]
 		if !layer.hasCollision {
 			continue
 		}
-		spaces := layer.spaces
+		for _, other := range layer.sprites {
+			if r1.CollisionRectangle(other.Rect()) {
+				hasCollision = true
+			}
+		}
+		/*spaces := layer.sprites
 		for _, bucket := range spaces.Buckets() {
 			for i := 0; i < bucket.Len(); i++ {
 				other := bucket.Get(i)
@@ -75,7 +83,7 @@ func PlaceFree(instType collisionObject, position geom.Vec) bool {
 					hasCollision = true
 				}
 			}
-		}
+		}*/
 	}
 
 	/*if DEBUG_COLLISION &&

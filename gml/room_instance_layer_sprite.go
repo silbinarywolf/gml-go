@@ -2,7 +2,6 @@ package gml
 
 import (
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
-	"github.com/silbinarywolf/gml-go/gml/internal/space"
 	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
 )
 
@@ -11,11 +10,18 @@ type RoomInstanceLayerSpriteObject struct {
 	Sprite *sprite.Sprite
 }
 
+func (record *RoomInstanceLayerSpriteObject) Rect() geom.Rect {
+	r := geom.Rect{}
+	r.Vec = record.Vec
+	r.Size = record.Sprite.Size()
+	return r
+}
+
 type RoomInstanceLayerSprite struct {
 	RoomInstanceLayerDrawBase
-	name         string
-	sprites      []RoomInstanceLayerSpriteObject
-	spaces       space.SpaceBucketArray
+	name    string
+	sprites []RoomInstanceLayerSpriteObject
+	//spaces       space.SpaceBucketArray
 	hasCollision bool
 }
 

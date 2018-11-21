@@ -13,14 +13,34 @@ var (
 	g_spriteManager = newSpriteManager()
 )
 
-func newSpriteManager() SpriteManager {
-	manager := SpriteManager{}
+type spriteManager struct {
+	assetMap  map[string]*Sprite
+	assetList []*Sprite
+}
+
+func newSpriteManager() *spriteManager {
+	manager := &spriteManager{}
 	manager.assetMap = make(map[string]*Sprite)
+	manager.assetList = make([]*Sprite, 1, 10)
 	return manager
 }
 
-type SpriteManager struct {
-	assetMap map[string]*Sprite
+func SpriteList() []*Sprite {
+	return g_spriteManager.assetList[1:]
+}
+
+func LoadSprite(name string) *Sprite {
+	manager := g_spriteManager
+
+	// Use already loaded asset
+	if res, ok := manager.assetMap[name]; ok {
+		return res
+	}
+	result := loadSprite(name)
+	manager.assetMap[name] = result
+	manager.assetList = append(manager.assetList, result)
+
+	return result
 }
 
 func loadSpriteFromData(name string) *spriteAsset {
@@ -64,18 +84,5 @@ func loadSprite(name string) *Sprite {
 	result := newSprite(spriteAsset.Name, frames, spriteConfig{
 		ImageSpeed: spriteAsset.ImageSpeed,
 	})
-	return result
-}
-
-func LoadSprite(name string) *Sprite {
-	manager := g_spriteManager
-
-	// Use already loaded asset
-	if res, ok := manager.assetMap[name]; ok {
-		return res
-	}
-	result := loadSprite(name)
-	manager.assetMap[name] = result
-
 	return result
 }

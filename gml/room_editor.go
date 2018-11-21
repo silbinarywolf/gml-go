@@ -15,15 +15,8 @@ func EditorIsInitialized() bool {
 	return false
 }
 
-func EditorIsActive() bool {
-	return false
-}
-
 func EditorSetRoom(room *Room) {
 }
 
 func editorUpdate() {
-}
-
-func editorDraw() {
 }

@@ -15,12 +15,21 @@ type RoomInstance struct {
 	drawLayers     []RoomInstanceLayerDraw
 }
 
-func RoomInstanceCreate(room *Room) *RoomInstance {
-	roomInst := gState.createNewRoomInstance(room)
-	return roomInst
+func RoomInstanceName(roomInstanceIndex int) string {
+	roomInst := &gState.roomInstances[roomInstanceIndex]
+	if !roomInst.used {
+		return ""
+	}
+	return roomInst.room.Config.UUID
 }
 
-func RoomInstanceDestroy(roomInst *RoomInstance) {
+func RoomInstanceCreate(room *Room) int {
+	roomInst := gState.createNewRoomInstance(room)
+	return roomInst.index
+}
+
+func RoomInstanceDestroy(roomInstanceIndex int) {
+	roomInst := &gState.roomInstances[roomInstanceIndex]
 	gState.deleteRoomInstance(roomInst)
 }
 
@@ -41,7 +50,7 @@ type roomInstanceObject interface {
 	BaseObject() *object.Object
 }
 
-func RoomInstanceInstances(inst roomInstanceObject) []object.ObjectType {
+/*func RoomInstanceInstances(inst roomInstanceObject) []object.ObjectType {
 	roomInstanceIndex := object.RoomInstanceIndex(inst.BaseObject())
 	roomInst := RoomGetInstance(roomInstanceIndex)
 	if roomInst == nil {
@@ -49,14 +58,14 @@ func RoomInstanceInstances(inst roomInstanceObject) []object.ObjectType {
 	}
 	instanceLayer := &roomInst.instanceLayers[len(roomInst.instanceLayers)-1]
 	return instanceLayer.manager.instances
-}
+}*/
 
 // NOTE(Jake):2018-08-19
 //
 // I might want to make this private so a user
 // can only manipulate a room instance via functions
 //
-func RoomGetInstance(roomInstanceIndex int) *RoomInstance {
+func roomGetInstance(roomInstanceIndex int) *RoomInstance {
 	roomInst := &gState.roomInstances[roomInstanceIndex]
 	if roomInst.used {
 		return roomInst

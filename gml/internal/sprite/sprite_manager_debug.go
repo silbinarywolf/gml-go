@@ -5,6 +5,7 @@ package sprite
 import (
 	"bytes"
 	"encoding/gob"
+	"encoding/json"
 	"errors"
 	"image"
 	"image/png"
@@ -69,6 +70,39 @@ FileWatchLoop:
 	}
 }
 
+func DebugWriteSpriteConfig(spr *Sprite) error {
+	name := spr.Name()
+	config := loadConfig(name)
+
+	// Write collision masks
+	{
+		collisionMasks := make(map[int]map[int]CollisionMask)
+		masks := make(map[int]CollisionMask)
+		for i, _ := range spr.frames {
+			mask := *GetCollisionMask(spr, i, 0)
+			if mask.Kind == CollisionMaskInherit {
+				delete(masks, i)
+			} else {
+				masks[i] = mask
+			}
+		}
+		collisionMasks[0] = masks
+		config.CollisionMasks = collisionMasks
+	}
+
+	configPath := file.AssetsDirectory + "/sprites/" + name + "/config.json"
+
+	json, err := json.MarshalIndent(config, "", "\t")
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile(configPath, json, 0644)
+	if err != nil {
+		return errors.New("Unable to write sprite config out to file: " + configPath + ", error:" + err.Error())
+	}
+	return nil
+}
+
 func debugWriteSprite(name string) {
 	folderPath := file.AssetsDirectory + "/sprites/" + name + "/"
 
@@ -78,6 +112,10 @@ func debugWriteSprite(name string) {
 	//
 	watcher.Remove(folderPath)
 	watcher.Add(folderPath)
+
+	// Read config information (if it exists)
+	var config spriteConfig
+	config = loadConfig(name)
 
 	// Load frames
 	//
@@ -114,13 +152,10 @@ func debugWriteSprite(name string) {
 		frames = append(frames, frame)
 	}
 
-	// Read config information (if it exists)
-	var config spriteConfig
-	configPath := folderPath + "config.json"
-	config = loadConfig(configPath)
-
 	// Create sprite
 	asset := newSpriteAsset(name, frames, config)
+
+	//
 
 	// Write to file
 	{

@@ -3,6 +3,7 @@
 package gml
 
 import (
+	"fmt"
 	"image/color"
 	"math"
 
@@ -18,17 +19,20 @@ var (
 	isDrawGuiMode = false
 )
 
+func DrawGetGUI() bool {
+	return isDrawGuiMode
+}
+
 func DrawSetGUI(guiMode bool) {
 	isDrawGuiMode = guiMode
 }
 
 func DrawSprite(spr *sprite.Sprite, subimage float64, position geom.Vec) {
-	screen := gScreen
 	position = maybeApplyOffsetByCamera(position)
 	frame := sprite.GetRawFrame(spr, int(math.Floor(subimage)))
 	op := ebiten.DrawImageOptions{}
 	op.GeoM.Translate(position.X, position.Y)
-	screen.DrawImage(frame, &op)
+	drawGetTarget().DrawImage(frame, &op)
 }
 
 func DrawSpriteScaled(spr *sprite.Sprite, subimage float64, position geom.Vec, scale geom.Vec) {
@@ -37,7 +41,6 @@ func DrawSpriteScaled(spr *sprite.Sprite, subimage float64, position geom.Vec, s
 
 // draw_sprite_ext( sprite, subimg, x, y, xscale, yscale, rot, colour, alpha );
 func DrawSpriteExt(spr *sprite.Sprite, subimage float64, position geom.Vec, scale geom.Vec, alpha float64) {
-	screen := gScreen
 	position = maybeApplyOffsetByCamera(position)
 	// NOTE(Jake): 2018-07-09
 	//
@@ -59,43 +62,51 @@ func DrawSpriteExt(spr *sprite.Sprite, subimage float64, position geom.Vec, scal
 	op.ColorM.Scale(1.0, 1.0, 1.0, alpha)
 	//op.Colorgeom.RotateHue(float64(360))
 
-	screen.DrawImage(frame, &op)
+	drawGetTarget().DrawImage(frame, &op)
 }
 
 func DrawRectangle(position geom.Vec, size geom.Vec, col color.Color) {
-	screen := gScreen
 	position = maybeApplyOffsetByCamera(position)
 
-	ebitenutil.DrawRect(screen, position.X, position.Y, size.X, size.Y, col)
+	ebitenutil.DrawRect(drawGetTarget(), position.X, position.Y, size.X, size.Y, col)
 }
 
 func DrawRectangleBorder(position geom.Vec, size geom.Vec, color color.Color, borderSize float64, borderColor color.Color) {
-	screen := gScreen
 	position = maybeApplyOffsetByCamera(position)
-	ebitenutil.DrawRect(screen, position.X, position.Y, size.X, size.Y, borderColor)
+	ebitenutil.DrawRect(drawGetTarget(), position.X, position.Y, size.X, size.Y, borderColor)
 	position.X += borderSize
 	position.Y += borderSize
 	size.X -= borderSize * 2
 	size.Y -= borderSize * 2
-	ebitenutil.DrawRect(screen, position.X, position.Y, size.X, size.Y, color)
+	ebitenutil.DrawRect(drawGetTarget(), position.X, position.Y, size.X, size.Y, color)
 }
 
 func DrawText(position geom.Vec, message string) {
-	screen := gScreen
 	if !g_fontManager.hasFontSet() {
 		panic("Must call DrawSetFont() before calling DrawText.")
 	}
 	position = maybeApplyOffsetByCamera(position)
-	text.Draw(screen, message, g_fontManager.currentFont.font, int(position.X), int(position.Y), color.White)
+	text.Draw(drawGetTarget(), message, g_fontManager.currentFont.font, int(position.X), int(position.Y), color.White)
 }
 
 func DrawTextColor(position geom.Vec, message string, col color.Color) {
-	screen := gScreen
 	if !g_fontManager.hasFontSet() {
 		panic("Must call DrawSetFont() before calling DrawText.")
 	}
 	position = maybeApplyOffsetByCamera(position)
-	text.Draw(screen, message, g_fontManager.currentFont.font, int(position.X), int(position.Y), col)
+	text.Draw(drawGetTarget(), message, g_fontManager.currentFont.font, int(position.X), int(position.Y), col)
+}
+
+func DrawTextF(position Vec, message string, args ...interface{}) {
+	message = fmt.Sprintf(message, args...)
+	DrawText(position, message)
+}
+
+func drawGetTarget() *ebiten.Image {
+	if camera := cameraGetActive(); camera != nil {
+		return camera.screen
+	}
+	return gScreen
 }
 
 func maybeApplyOffsetByCamera(position geom.Vec) geom.Vec {

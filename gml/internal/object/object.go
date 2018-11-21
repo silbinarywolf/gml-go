@@ -3,7 +3,7 @@ package object
 import (
 	"math"
 
-	"github.com/silbinarywolf/gml-go/gml/internal/space"
+	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
 )
 
@@ -21,8 +21,9 @@ type ObjectType interface {
 
 type Object struct {
 	sprite.SpriteState // Sprite (contains SetSprite)
-	space.SpaceObject
+	geom.Rect
 	instanceObject
+	solid             bool
 	imageAngleRadians float64 // Image Angle
 }
 
@@ -31,6 +32,11 @@ func (inst *Object) create() {
 	inst.ImageScale.Y = 1.0
 }
 
+func (inst *Object) SetSolid(isSolid bool) {
+	inst.solid = isSolid
+}
+
+func (inst *Object) Solid() bool                { return inst.solid }
 func (inst *Object) BaseObject() *Object        { return inst }
 func (inst *Object) ImageAngleRadians() float64 { return inst.imageAngleRadians }
 func (inst *Object) ImageAngle() float64        { return inst.imageAngleRadians * (180 / math.Pi) }

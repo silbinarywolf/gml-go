@@ -20,7 +20,6 @@ import (
 
 	"github.com/silbinarywolf/gml-go/gml/internal/file"
 	"github.com/silbinarywolf/gml-go/gml/internal/object"
-	"github.com/silbinarywolf/gml-go/gml/internal/space"
 	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
 )
 
@@ -75,6 +74,18 @@ func LoadRoom(name string) *Room {
 }
 
 func loadRoomFromDirectoryFiles(name string) *Room {
+	objectTypeToInitState := make(map[object.ObjectIndex]object.ObjectType)
+	defer func() {
+		for _, inst := range objectTypeToInitState {
+			// NOTE(Jake): 2018-09-15
+			// Cleanup entities or else they might stay alive on the server
+			// ie. networked entities
+			// I had to fix a bug where 26 enemies were "there" because this
+			// Destroy() wasn't here.
+			inst.Destroy()
+		}
+	}()
+
 	//
 	room := new(Room)
 	room.Config = new(RoomConfig)
@@ -223,9 +234,18 @@ func loadRoomFromDirectoryFiles(name string) *Room {
 						// Probably a slow hack to get the entity size
 						// for building map data on-fly, but whatever!
 						//
-						inst := object.NewRawInstance(objectIndex, 0, 0, 0, new(space.Space), -1)
+						// NOTE(Jake): 2018-09-15
+						// Should definitely look into an entity having default
+						// hitbox etc as Create() can cause bugs, like multiple
+						// networked entities because I didn't call gml.Destroy()
+						//
+						inst, ok := objectTypeToInitState[objectIndex]
+						if !ok {
+							inst = object.NewRawInstance(objectIndex, 0, 0, 0)
+							inst.Create()
+							objectTypeToInitState[objectIndex] = inst
+						}
 						baseObj := inst.BaseObject()
-						inst.Create()
 
 						x := int32(x)
 						y := int32(y)

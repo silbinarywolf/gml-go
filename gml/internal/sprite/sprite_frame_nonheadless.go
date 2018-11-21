@@ -10,6 +10,7 @@ import (
 )
 
 type SpriteFrame struct {
+	spriteFrameShared
 	image *ebiten.Image
 }
 
@@ -25,9 +26,11 @@ func createFrame(frameData spriteAssetFrame) (SpriteFrame, error) {
 	if err != nil {
 		return SpriteFrame{}, err
 	}
-	return SpriteFrame{
+	r := SpriteFrame{
 		image: sheet,
-	}, nil
+	}
+	r.init(frameData)
+	return r, nil
 }
 
 // NOTE(Jake): 2018-06-17

@@ -8,6 +8,10 @@ import (
 	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
 )
 
+func DrawGetGUI() bool {
+	return false
+}
+
 func DrawSetGUI(guiMode bool) {
 }
 
@@ -27,4 +31,7 @@ func DrawRectangleBorder(position Vec, size Vec, color color.Color, borderSize f
 }
 
 func DrawText(position Vec, message string) {
+}
+
+func DrawTextF(position Vec, message string, args ...interface{}) {
 }

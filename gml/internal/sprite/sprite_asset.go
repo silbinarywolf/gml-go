@@ -5,8 +5,9 @@ import (
 )
 
 type spriteAssetFrame struct {
-	Size geom.Vec
-	Data []byte
+	Size           geom.Vec
+	CollisionMasks [maxCollisionMasks]CollisionMask
+	Data           []byte
 }
 
 type spriteAsset struct {
@@ -36,5 +37,17 @@ func newSpriteAsset(name string, frames []spriteAssetFrame, config spriteConfig)
 		X: width,
 		Y: height,
 	}
+
+	// Load collision masks
+	for maskID, mask := range config.CollisionMasks {
+		for frameIndex, _ := range spr.Frames {
+			if frameMask, ok := mask[frameIndex]; ok {
+				mask := &spr.Frames[frameIndex].CollisionMasks[maskID]
+				*mask = frameMask
+				// fmt.Printf("%v, mask id: %d, frame id: %d\n", frameMask, maskID, frameIndex)
+			}
+		}
+	}
+
 	return spr
 }
