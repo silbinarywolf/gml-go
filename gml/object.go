@@ -15,6 +15,7 @@ func ObjectGetIndex(name string) (object.ObjectIndex, bool) {
 	return res, ok
 }
 
+// ObjectInitTypes is required to be called so the engine can create game objects
 func ObjectInitTypes(objTypes []object.ObjectType) {
 	object.InitTypes(objTypes)
 }

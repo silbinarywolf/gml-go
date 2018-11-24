@@ -38,6 +38,7 @@ func RoomInstanceDestroy(roomInstanceIndex int) {
 	gState.deleteRoomInstance(roomInst)
 }
 
+// todo(Jake): 2018-11-24: Github Issue #12
 func RoomInstanceEmptyCreate() *RoomInstance {
 	roomInst := gState.createNewRoomInstance(nil)
 	return roomInst

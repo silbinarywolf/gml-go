@@ -2,22 +2,12 @@ package game
 
 import "github.com/silbinarywolf/gml-go/gml"
 
-const ObjBullet = 2
-
 type Bullet struct {
 	gml.Object
 }
 
-func (inst *Bullet) ObjectIndex() gml.ObjectIndex {
-	return ObjBullet
-}
-
-func (inst *Bullet) ObjectName() string {
-	return "Bullet"
-}
-
 func (inst *Bullet) Create() {
-	inst.SetSprite(gml.SpriteLoad("spaceship"))
+	inst.SetSprite(gml.SpriteLoad("Spaceship"))
 }
 
 func (inst *Bullet) Destroy() {

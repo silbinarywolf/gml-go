@@ -47,7 +47,7 @@ func FrameUsage() string {
 	return text + "% (" + strconv.Itoa(int(gState.frameBudgetNanosecondsUsed)) + "ns)"
 }
 
-// Check if RoomInstanceEmptyCreate() create is being executed
+// Check if createNewRoomInstance() create is being executed
 func IsCreatingRoomInstance() bool {
 	return gState.isCreatingRoomInstance
 }

@@ -1,7 +1,5 @@
 package game
 
-//go:generate gmlgo_gen
-
 import "github.com/silbinarywolf/gml-go/gml"
 
 const (

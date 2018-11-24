@@ -2,28 +2,15 @@ package game
 
 import "github.com/silbinarywolf/gml-go/gml"
 
-const ObjPlayer = 1
-
 type Player struct {
 	gml.Object
 }
 
-func (inst *Player) ObjectIndex() gml.ObjectIndex {
-	return ObjPlayer
-}
-
-// todo(Jake): 2018-11-22
-// Make this auto-generated based on the struct name
-func (inst *Player) ObjectName() string {
-	return "Player"
-}
-
 func (inst *Player) Create() {
-	inst.SetSprite(gml.SpriteLoad("spaceship"))
+	inst.SetSprite(gml.SpriteLoad("Spaceship"))
 }
 
 func (inst *Player) Destroy() {
-
 }
 
 func (inst *Player) Update() {
