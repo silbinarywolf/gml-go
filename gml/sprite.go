@@ -4,9 +4,6 @@ import (
 	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
 )
 
-// todo(Jake): 2018-11-24 - Github Issue #2
-// Remove Sprite in favour of exposing "SpriteIndex"
-type Sprite = sprite.Sprite
 type SpriteIndex = sprite.SpriteIndex
 
 type SpriteState = sprite.SpriteState
@@ -15,6 +12,7 @@ func SpriteInitializeIndexToName(indexToName []string, nameToIndex map[string]Sp
 	sprite.SpriteInitializeIndexToName(indexToName, nameToIndex)
 }
 
-func SpriteLoad(index SpriteIndex) *Sprite {
-	return sprite.SpriteLoad(index)
+func SpriteLoad(index SpriteIndex) SpriteIndex {
+	sprite.SpriteLoad(index)
+	return index
 }

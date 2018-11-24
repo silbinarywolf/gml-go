@@ -8,7 +8,7 @@ import (
 type RoomInstanceLayerBackground struct {
 	RoomInstanceLayerDrawBase
 	name      string
-	sprite    *sprite.Sprite
+	sprite    sprite.SpriteIndex
 	x, y      float64
 	roomLeft  float64
 	roomRight float64

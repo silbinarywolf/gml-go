@@ -34,33 +34,45 @@ func SpriteInitializeIndexToName(indexToName []string, nameToIndex map[string]Sp
 	g_spriteManager.assetList = make([]Sprite, len(g_spriteManager.spriteIndexToName))
 }
 
-// todo(Jake): 2018-24-11 - Github #14
-// Remove SpriteList() as it's brittle and only used by sprite_selector.go
-func SpriteList() []*Sprite {
-	panic("Broke sprite_selector(), need to fix")
-	return nil
-	//return g_spriteManager.assetList[1:]
+func SpriteNames() []string {
+	return g_spriteManager.spriteIndexToName
 }
 
-func SpriteLoadByName(name string) *Sprite {
-	index := g_spriteManager.spriteNameToIndex[name]
-	return SpriteLoad(index)
-}
-
-func SpriteLoad(index SpriteIndex) *Sprite {
-	manager := g_spriteManager
-
-	sprite := &manager.assetList[index]
-	// todo(Jake): have a "isUsed" var or function instead of checking
-	// for frames
-	if sprite.isUsed() {
+func sprite(index SpriteIndex) *Sprite {
+	sprite := &g_spriteManager.assetList[index]
+	if sprite.isLoaded() {
 		return sprite
 	}
-	name := g_spriteManager.spriteIndexToName[index]
+	return nil
+}
+
+func SpriteLoadByName(name string) SpriteIndex {
+	index, ok := g_spriteManager.spriteNameToIndex[name]
+	if !ok {
+		return SprUndefined
+	}
+	return index
+}
+
+/*func SpriteSize(index SpriteIndex) geom.Size {
+	manager := g_spriteManager
+	sprite := &manager.assetList[index]
+	if !sprite.isUsed() {
+		panic("sprite: Invalid sprite.")
+	}
+	return sprite.Size()
+}*/
+
+func SpriteLoad(index SpriteIndex) {
+	manager := g_spriteManager
+	sprite := &manager.assetList[index]
+	if sprite.isLoaded() {
+		return
+	}
+	name := manager.spriteIndexToName[index]
 	// todo(Jake): change loadSprite() to return Sprite, not *Sprite
 	result := loadSprite(name)
 	*sprite = *result
-	return result
 }
 
 func loadSpriteFromData(name string) *spriteAsset {

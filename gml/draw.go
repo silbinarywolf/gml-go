@@ -6,5 +6,5 @@ import (
 )
 
 func DrawSelf(state *sprite.SpriteState, position geom.Vec) {
-	DrawSpriteScaled(state.Sprite(), state.ImageIndex(), position, state.ImageScale)
+	DrawSpriteScaled(state.SpriteIndex(), state.ImageIndex(), position, state.ImageScale)
 }

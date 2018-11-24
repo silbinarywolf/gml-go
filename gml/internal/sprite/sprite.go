@@ -8,6 +8,8 @@ const (
 	maxCollisionMasks = 3
 )
 
+const SprUndefined SpriteIndex = 0
+
 type Sprite struct {
 	name       string
 	frames     []SpriteFrame
@@ -15,25 +17,31 @@ type Sprite struct {
 	imageSpeed float64
 }
 
-type SpriteIndex int32
-
-func (spr *Sprite) Name() string        { return spr.name }
-func (spr *Sprite) Size() geom.Size     { return spr.size }
-func (spr *Sprite) ImageSpeed() float64 { return spr.imageSpeed }
-func (spr *Sprite) isUsed() bool        { return len(spr.frames) > 0 }
+func (spr *Sprite) Name() string   { return spr.name }
+func (spr *Sprite) isLoaded() bool { return len(spr.frames) > 0 }
 func (spr *Sprite) rect() geom.Rect {
 	return geom.Rect{
 		Vec:  geom.Vec{},
-		Size: spr.Size(),
+		Size: spr.size,
 	}
 }
 
-func GetCollisionMask(spr *Sprite, frame int, kind int) *CollisionMask {
-	// masks := &spr.frames[frame].collisionMasks[kind].masks[kind]
-	//if len(masks) == 0 {
-	//	panic("Should have at least 1 collision mask defined")
-	//}
-	return &spr.frames[frame].collisionMasks[kind]
+type SpriteIndex int32
+
+func (spriteIndex SpriteIndex) Name() string    { return g_spriteManager.assetList[spriteIndex].name }
+func (spriteIndex SpriteIndex) Size() geom.Size { return g_spriteManager.assetList[spriteIndex].size }
+func (spriteIndex SpriteIndex) ImageSpeed() float64 {
+	return g_spriteManager.assetList[spriteIndex].imageSpeed
+}
+func (spriteIndex SpriteIndex) IsValid() bool {
+	return spriteIndex > 0
+}
+func (spriteIndex SpriteIndex) IsLoaded() bool {
+	return len(g_spriteManager.assetList[spriteIndex].frames) > 0
+}
+
+func Frames(spriteIndex SpriteIndex) []SpriteFrame {
+	return g_spriteManager.assetList[spriteIndex].frames
 }
 
 /*func (spr *Sprite) GetFrame(index int) *SpriteFrame {

@@ -61,7 +61,7 @@ type roomEditor struct {
 	//spriteMenuFiltered []*sprite.Sprite
 
 	objectSelected object.ObjectType
-	spriteSelected *sprite.Sprite
+	spriteSelected SpriteIndex
 
 	mouseHold   [MbSize]bool
 	gridEnabled bool
@@ -534,8 +534,7 @@ func editorUpdate() {
 						baseObj := inst.BaseObject()
 						baseObj.X = float64(obj.X)
 						baseObj.Y = float64(obj.Y)
-						spr := baseObj.Sprite()
-						DrawSpriteScaled(spr, 0, baseObj.Pos(), baseObj.ImageScale)
+						DrawSpriteScaled(baseObj.SpriteIndex(), 0, baseObj.Pos(), baseObj.ImageScale)
 					}
 				case *room.RoomLayerBackground:
 					if layer.SpriteName == "" {
@@ -607,7 +606,7 @@ func editorUpdate() {
 				}
 			case *room.RoomLayerSprite:
 				// Draw selected sprite
-				if selectedBrush := roomEditor.spriteSelected; selectedBrush != nil {
+				if selectedBrush := roomEditor.spriteSelected; selectedBrush.IsValid() {
 					pos := MousePosition()
 					if isHoldingControl {
 						maybeNewPos, ok := roomEditor.getSnapPosition(pos, selectedBrush.Size(), layer)
@@ -962,7 +961,7 @@ func editorUpdate() {
 			case *room.RoomLayerSprite:
 				// Left click
 				if roomEditor.MouseCheckButton(MbLeft) &&
-					roomEditor.spriteSelected != nil {
+					roomEditor.spriteSelected.IsValid() {
 					spriteName := roomEditor.spriteSelected.Name()
 					//spriteWidth := roomEditor.spriteSelected.Size().X
 					//spriteHeight := roomEditor.spriteSelected.Size().Y
@@ -1335,7 +1334,7 @@ func editorUpdate() {
 
 func drawObjectPreview(inst object.ObjectType, pos geom.Vec, fitToSize geom.Vec) {
 	baseObj := inst.BaseObject()
-	sprite := baseObj.Sprite()
+	sprite := baseObj.SpriteIndex()
 	spriteSize := sprite.Size()
 	scale := geom.Vec{fitToSize.X / float64(spriteSize.X), fitToSize.Y / float64(spriteSize.Y)}
 	if scale.X > 1 {
@@ -1350,8 +1349,7 @@ func drawObjectPreview(inst object.ObjectType, pos geom.Vec, fitToSize geom.Vec)
 func drawObject(inst object.ObjectType, pos geom.Vec) {
 	baseObj := inst.BaseObject()
 	//baseObj.Vec = pos
-	sprite := baseObj.Sprite()
-	DrawSprite(sprite, 0, pos)
+	DrawSprite(baseObj.SpriteIndex(), 0, pos)
 }
 
 func drawRoomObject(roomObject *room.RoomObject, pos geom.Vec) {
@@ -1766,7 +1764,7 @@ func (roomEditor *roomEditor) editorConfigSave() {
 				editorConfig.BrushSelected = roomEditor.objectSelected.ObjectName()
 			}
 		case *room.RoomLayerSprite:
-			if roomEditor.spriteSelected != nil {
+			if roomEditor.spriteSelected.IsValid() {
 				editorConfig.BrushSelected = roomEditor.spriteSelected.Name()
 			}
 		case *room.RoomLayerBackground:

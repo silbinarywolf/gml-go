@@ -7,13 +7,13 @@ import (
 
 type RoomInstanceLayerSpriteObject struct {
 	geom.Vec
-	Sprite *sprite.Sprite
+	sprite sprite.SpriteIndex
 }
 
 func (record *RoomInstanceLayerSpriteObject) Rect() geom.Rect {
 	r := geom.Rect{}
 	r.Vec = record.Vec
-	r.Size = record.Sprite.Size()
+	r.Size = record.sprite.Size()
 	return r
 }
 
@@ -37,6 +37,6 @@ func (layer *RoomInstanceLayerSprite) draw() {
 		op := ebiten.DrawImageOptions{}
 		op.GeoM.Translate(position.X, position.Y)
 		screen.DrawImage(frame, &op)*/
-		DrawSprite(record.Sprite, 0, geom.Vec{record.X, record.Y})
+		DrawSprite(record.sprite, 0, geom.Vec{record.X, record.Y})
 	}
 }

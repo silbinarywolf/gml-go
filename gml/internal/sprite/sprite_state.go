@@ -5,29 +5,43 @@ import (
 )
 
 type SpriteState struct {
-	sprite     *Sprite
-	ImageScale geom.Vec
-	imageIndex float64
+	spriteIndex SpriteIndex
+	ImageScale  geom.Vec
+	imageIndex  float64
 }
 
-func (state *SpriteState) Sprite() *Sprite     { return state.sprite }
-func (state *SpriteState) ImageIndex() float64 { return state.imageIndex }
+func GetCollisionMask(spriteIndex SpriteIndex, imageIndex int, kind int) *CollisionMask {
+	spr := sprite(spriteIndex)
+	if spr == nil {
+		return nil
+	}
+	return &spr.frames[imageIndex].collisionMasks[kind]
+}
+
+func (state *SpriteState) SpriteIndex() SpriteIndex { return state.spriteIndex }
+func (state *SpriteState) sprite() SpriteIndex      { return state.spriteIndex }
+func (state *SpriteState) ImageIndex() float64      { return state.imageIndex }
 func (state *SpriteState) ImageSpeed() float64 {
-	if state.sprite == nil {
+	if state.spriteIndex == SprUndefined {
 		return 0
 	}
-	return state.sprite.imageSpeed
+	spr := sprite(state.spriteIndex)
+	return spr.imageSpeed
 }
 func (state *SpriteState) ImageNumber() float64 {
-	if state.sprite == nil {
+	if state.spriteIndex == SprUndefined {
 		return 0
 	}
-	return float64(len(state.sprite.frames))
+	spr := sprite(state.spriteIndex)
+	return float64(len(spr.frames))
 }
 
-func (state *SpriteState) SetSprite(sprite *Sprite) {
-	if state.sprite != sprite {
-		state.sprite = sprite
+func (state *SpriteState) SetSprite(spriteIndex SpriteIndex) {
+	if state.spriteIndex != spriteIndex {
+		if !spriteIndex.IsLoaded() {
+			SpriteLoad(spriteIndex)
+		}
+		state.spriteIndex = spriteIndex
 		state.imageIndex = 0
 	}
 }

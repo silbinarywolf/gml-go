@@ -43,16 +43,17 @@ func (inst *Object) ImageAngle() float64        { return inst.imageAngleRadians 
 
 //func (inst *Object) ImageScale() geom.Vec          { return inst.imageScale }
 
-func (inst *Object) SetSprite(sprite *sprite.Sprite) {
-	inst.SpriteState.SetSprite(sprite)
+func (inst *Object) SetSprite(spriteIndex sprite.SpriteIndex) {
+	inst.SpriteState.SetSprite(spriteIndex)
 
 	// Infer width and height if they aren't manually set
 	// (This might be a bad idea, too magic! But feels like Game Maker, so...)
+	size := spriteIndex.Size()
 	if inst.Size.X == 0 {
-		inst.Size.X = sprite.Size().X
+		inst.Size.X = size.X
 	}
 	if inst.Size.Y == 0 {
-		inst.Size.Y = sprite.Size().Y
+		inst.Size.Y = size.Y
 	}
 }
 

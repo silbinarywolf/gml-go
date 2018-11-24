@@ -65,15 +65,19 @@ FileWatchLoop:
 
 	// If those sprites are loaded, reload them
 	for _, spriteName := range watcherSpritesToUpdate {
-		spr := SpriteLoadByName(spriteName)
-		if spr != nil {
-			newSprData := loadSprite(spriteName)
-			*spr = *newSprData
+		spriteIndex := SpriteLoadByName(spriteName)
+		if spriteIndex == SprUndefined {
+			continue
 		}
+		spr := sprite(spriteIndex)
+		newSprData := loadSprite(spriteName)
+		*spr = *newSprData
 	}
 }
 
-func DebugWriteSpriteConfig(spr *Sprite) error {
+// DebugWriteSpriteConfig is called by the animation editor
+func DebugWriteSpriteConfig(spriteIndex SpriteIndex) error {
+	spr := sprite(spriteIndex)
 	name := spr.Name()
 	config := loadConfig(name)
 
@@ -82,7 +86,7 @@ func DebugWriteSpriteConfig(spr *Sprite) error {
 		collisionMasks := make(map[int]map[int]CollisionMask)
 		masks := make(map[int]CollisionMask)
 		for i, _ := range spr.frames {
-			mask := *GetCollisionMask(spr, i, 0)
+			mask := *GetCollisionMask(spriteIndex, i, 0)
 			if mask.Kind == CollisionMaskInherit {
 				delete(masks, i)
 			} else {

@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	debugScratchSpriteList  []*sprite.Sprite
+	debugScratchSpriteList  []sprite.SpriteIndex
 	debugSpriteViewerLoaded bool
 )
 
@@ -47,17 +47,17 @@ func (viewer *debugSpriteViewer) lazyLoad() {
 	}
 }
 
-func (viewer *debugSpriteViewer) Update() (*sprite.Sprite, bool) {
+func (viewer *debugSpriteViewer) Update() (sprite.SpriteIndex, bool) {
 	viewer.lazyLoad()
 
 	typingText := KeyboardString()
 	spriteMenuFiltered := debugScratchSpriteList[:0]
-	for _, spr := range sprite.SpriteList() {
-		hasMatch := hasFilterMatch(spr.Name(), typingText)
+	for spriteIndex, name := range sprite.SpriteNames() {
+		hasMatch := hasFilterMatch(name, typingText)
 		if !hasMatch {
 			continue
 		}
-		spriteMenuFiltered = append(spriteMenuFiltered, spr)
+		spriteMenuFiltered = append(spriteMenuFiltered, sprite.SpriteIndex(spriteIndex))
 	}
 
 	// Input
@@ -106,5 +106,5 @@ func (viewer *debugSpriteViewer) Update() (*sprite.Sprite, bool) {
 			ui.Y += previewSize.Y + 16
 		}
 	}
-	return nil, false
+	return sprite.SprUndefined, false
 }

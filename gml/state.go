@@ -122,7 +122,7 @@ func (state *state) createNewRoomInstance(room *Room) *RoomInstance {
 				// Add draw sprite
 				spr := sprite.SpriteLoadByName(sprObj.SpriteName)
 				record := RoomInstanceLayerSpriteObject{
-					Sprite: spr,
+					sprite: spr,
 				}
 				record.X = float64(sprObj.X)
 				record.Y = float64(sprObj.Y)

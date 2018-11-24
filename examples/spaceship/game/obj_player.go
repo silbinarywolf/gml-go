@@ -10,7 +10,7 @@ type Player struct {
 }
 
 func (inst *Player) Create() {
-	inst.SetSprite(gml.SpriteLoad(asset.SprSpaceship))
+	inst.SetSprite(asset.SprSpaceship)
 }
 
 func (inst *Player) Destroy() {

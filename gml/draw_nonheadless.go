@@ -27,20 +27,16 @@ func DrawSetGUI(guiMode bool) {
 	isDrawGuiMode = guiMode
 }
 
-func DrawSprite(spr *sprite.Sprite, subimage float64, position geom.Vec) {
-	position = maybeApplyOffsetByCamera(position)
-	frame := sprite.GetRawFrame(spr, int(math.Floor(subimage)))
-	op := ebiten.DrawImageOptions{}
-	op.GeoM.Translate(position.X, position.Y)
-	drawGetTarget().DrawImage(frame, &op)
+func DrawSprite(spriteIndex sprite.SpriteIndex, subimage float64, position geom.Vec) {
+	DrawSpriteExt(spriteIndex, subimage, position, geom.Vec{1, 1}, 1.0)
 }
 
-func DrawSpriteScaled(spr *sprite.Sprite, subimage float64, position geom.Vec, scale geom.Vec) {
-	DrawSpriteExt(spr, subimage, position, scale, 1.0)
+func DrawSpriteScaled(spriteIndex sprite.SpriteIndex, subimage float64, position geom.Vec, scale geom.Vec) {
+	DrawSpriteExt(spriteIndex, subimage, position, scale, 1.0)
 }
 
 // draw_sprite_ext( sprite, subimg, x, y, xscale, yscale, rot, colour, alpha );
-func DrawSpriteExt(spr *sprite.Sprite, subimage float64, position geom.Vec, scale geom.Vec, alpha float64) {
+func DrawSpriteExt(spriteIndex sprite.SpriteIndex, subimage float64, position geom.Vec, scale geom.Vec, alpha float64) {
 	position = maybeApplyOffsetByCamera(position)
 	// NOTE(Jake): 2018-07-09
 	//
@@ -54,7 +50,7 @@ func DrawSpriteExt(spr *sprite.Sprite, subimage float64, position geom.Vec, scal
 	//scale.X *= view.Scale().X
 	//scale.Y *= view.Scale().Y
 
-	frame := sprite.GetRawFrame(spr, int(math.Floor(subimage)))
+	frame := sprite.GetRawFrame(spriteIndex, int(math.Floor(subimage)))
 	op := ebiten.DrawImageOptions{}
 	op.GeoM.Scale(scale.X, scale.Y)
 	op.GeoM.Translate(position.X, position.Y)

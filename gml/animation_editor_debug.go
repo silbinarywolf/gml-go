@@ -82,7 +82,7 @@ func (editor *debugAnimationEditor) animationConfigLoad() {
 
 func (editor *debugAnimationEditor) animationConfigSave() {
 	editorConfig := animationEditorConfig{}
-	editorConfig.SpriteSelected = editor.spriteViewing.Sprite().Name()
+	editorConfig.SpriteSelected = editor.spriteViewing.SpriteIndex().Name()
 	json, _ := json.MarshalIndent(editorConfig, "", "\t")
 	configPath := debugConfigPath("animation_editor")
 	err := ioutil.WriteFile(configPath, json, 0644)
@@ -95,9 +95,9 @@ func (editor *debugAnimationEditor) animationEditorToggleMenu(menu animMenu) {
 	if editor.menuOpened == menu {
 		menu = animMenuNone
 	}
-	spr := editor.spriteViewing.Sprite()
+	spriteIndex := editor.spriteViewing.SpriteIndex()
 	imageIndex := int(math.Floor(editor.spriteViewing.ImageIndex()))
-	collisionMask := sprite.GetCollisionMask(spr, imageIndex, 0)
+	collisionMask := sprite.GetCollisionMask(spriteIndex, imageIndex, 0)
 	value, err := strconv.ParseFloat(KeyboardString(), 64)
 	if err == nil {
 		switch editor.menuOpened {
@@ -131,12 +131,13 @@ func animationEditorUpdate() {
 		DrawTextColor(pos, "Space = Play/Pause Animation", color.White)
 		pos.Y += 24
 		DrawTextColor(pos, "CTRL + P = Open Sprite List", color.White)
-		if spr := editor.spriteViewing.Sprite(); spr != nil {
+
+		if spriteIndex := editor.spriteViewing.SpriteIndex(); spriteIndex != sprite.SprUndefined {
 			pos.Y += 24
 			DrawTextColor(pos, "CTRL + S = Save", color.White)
 
 			if KeyboardCheck(VkControl) && KeyboardCheckPressed(VkS) {
-				err := sprite.DebugWriteSpriteConfig(spr)
+				err := sprite.DebugWriteSpriteConfig(spriteIndex)
 				if err != nil {
 					panic(err)
 				}
@@ -155,7 +156,7 @@ func animationEditorUpdate() {
 	}
 
 	// Change frame viewing
-	if spr := editor.spriteViewing.Sprite(); spr != nil {
+	if spr := editor.spriteViewing.SpriteIndex(); spr.IsValid() {
 		imageIndex := math.Floor(editor.spriteViewing.ImageIndex())
 		if KeyboardCheckPressed(VkLeft) {
 			imageIndex -= 1
@@ -176,24 +177,24 @@ func animationEditorUpdate() {
 	//
 	var collisionMask *sprite.CollisionMask
 	var inheritCollisionMask *sprite.CollisionMask
-	if spr := editor.spriteViewing.Sprite(); spr != nil {
+	if spriteIndex := editor.spriteViewing.SpriteIndex(); spriteIndex.IsValid() {
 		imageIndex := int(math.Floor(editor.spriteViewing.ImageIndex()))
-		collisionMask = sprite.GetCollisionMask(spr, imageIndex, 0)
+		collisionMask = sprite.GetCollisionMask(spriteIndex, imageIndex, 0)
 		switch collisionMask.Kind {
 		case sprite.CollisionMaskInherit:
 			for ; imageIndex > 0; imageIndex-- {
-				collisionMask = sprite.GetCollisionMask(spr, imageIndex, 0)
+				collisionMask = sprite.GetCollisionMask(spriteIndex, imageIndex, 0)
 				if collisionMask.Kind != sprite.CollisionMaskInherit {
 					break
 				}
 			}
 			if imageIndex == 0 {
-				collisionMask = sprite.GetCollisionMask(spr, imageIndex, 0)
+				collisionMask = sprite.GetCollisionMask(spriteIndex, imageIndex, 0)
 				if collisionMask.Kind == sprite.CollisionMaskInherit {
 					collisionMask = &sprite.CollisionMask{
 						Kind: sprite.CollisionMaskManual,
 						Rect: geom.Rect{
-							Size: spr.Size(),
+							Size: spriteIndex.Size(),
 						},
 					}
 				}
@@ -204,8 +205,8 @@ func animationEditorUpdate() {
 		}
 	}
 
-	if spr := editor.spriteViewing.Sprite(); spr != nil {
-		size := spr.Size()
+	if spriteIndex := editor.spriteViewing.SpriteIndex(); spriteIndex.IsValid() {
+		size := spriteIndex.Size()
 		pos := geom.Vec{float64(windowWidth()/2) - (float64(size.X) / 2), float64(windowHeight()/2) - (float64(size.Y) / 2)}
 
 		{
@@ -218,7 +219,7 @@ func animationEditorUpdate() {
 		if editor.isInPlayback {
 			editor.spriteViewing.ImageUpdate()
 		}
-		DrawSprite(spr, editor.spriteViewing.ImageIndex(), pos)
+		DrawSprite(spriteIndex, editor.spriteViewing.ImageIndex(), pos)
 
 		if collisionMask != nil {
 			// Draw collision box
@@ -357,7 +358,7 @@ func animationEditorUpdate() {
 		}
 	}
 
-	if spr := editor.spriteViewing.Sprite(); spr != nil {
+	if spriteIndex := editor.spriteViewing.SpriteIndex(); spriteIndex.IsValid() {
 		basePos := geom.Vec{(float64(windowWidth()) / 2) - 140, float64(windowHeight())}
 		basePos.Y -= 210
 
@@ -365,12 +366,12 @@ func animationEditorUpdate() {
 		DrawTextF(basePos, "Frame: %d", imageIndex)
 		basePos.Y += 24
 		if drawButton(basePos, "Kind: Inherit") {
-			collisionMask = sprite.GetCollisionMask(spr, imageIndex, 0)
+			collisionMask = sprite.GetCollisionMask(spriteIndex, imageIndex, 0)
 			collisionMask.Kind = sprite.CollisionMaskInherit
 		}
 		basePos.Y += 30
 		if drawButton(basePos, "Kind: Manual") {
-			collisionMask = sprite.GetCollisionMask(spr, imageIndex, 0)
+			collisionMask = sprite.GetCollisionMask(spriteIndex, imageIndex, 0)
 			if collisionMask.Kind != sprite.CollisionMaskManual {
 				collisionMask.Rect = inheritCollisionMask.Rect
 				collisionMask.Kind = sprite.CollisionMaskManual

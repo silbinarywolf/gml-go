@@ -369,15 +369,16 @@ func loadRoomFromDirectoryFiles(name string) *Room {
 
 					// Set room dimensions
 					{
-						spr := sprite.SpriteLoadByName(spriteName)
-						if spr == nil {
+						spriteIndex := sprite.SpriteLoadByName(spriteName)
+						if spriteIndex == sprite.SprUndefined {
 							println("Error loading sprite sprite \"", spriteName, "\" error: ", err.Error())
 							continue
 						}
 						x := int32(x)
 						y := int32(y)
-						width := int32(spr.Size().X)
-						height := int32(spr.Size().Y)
+						size := spriteIndex.Size()
+						width := int32(size.X)
+						height := int32(size.Y)
 
 						if x < room.Left {
 							room.Left = x

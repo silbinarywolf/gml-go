@@ -15,13 +15,13 @@ func DrawGetGUI() bool {
 func DrawSetGUI(guiMode bool) {
 }
 
-func DrawSprite(spr *sprite.Sprite, subimage float64, position Vec) {
+func DrawSprite(spr sprite.SpriteIndex, subimage float64, position Vec) {
 }
 
-func DrawSpriteScaled(spr *sprite.Sprite, subimage float64, position Vec, scale Vec) {
+func DrawSpriteScaled(spr sprite.SpriteIndex, subimage float64, position Vec, scale Vec) {
 }
 
-func DrawSpriteExt(spr *sprite.Sprite, subimage float64, position Vec, scale Vec, alpha float64) {
+func DrawSpriteExt(spr sprite.SpriteIndex, subimage float64, position Vec, scale Vec, alpha float64) {
 }
 
 func DrawRectangle(pos Vec, size Vec, col color.Color) {
