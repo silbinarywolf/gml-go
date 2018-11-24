@@ -369,7 +369,7 @@ func loadRoomFromDirectoryFiles(name string) *Room {
 
 					// Set room dimensions
 					{
-						spr := sprite.LoadSprite(spriteName)
+						spr := sprite.SpriteLoadByName(spriteName)
 						if spr == nil {
 							println("Error loading sprite sprite \"", spriteName, "\" error: ", err.Error())
 							continue

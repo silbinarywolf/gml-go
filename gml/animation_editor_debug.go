@@ -75,7 +75,7 @@ func (editor *debugAnimationEditor) animationConfigLoad() {
 		// todo(Jake): 2018-10-28
 		// Add function to load a sprite if it exists, we don't want to crash
 		// if we remove a sprite that we previously had loaded.
-		spr := sprite.LoadSprite(name)
+		spr := sprite.SpriteLoadByName(name)
 		editor.spriteViewing.SetSprite(spr)
 	}
 }

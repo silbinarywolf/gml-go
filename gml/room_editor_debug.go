@@ -543,7 +543,7 @@ func editorUpdate() {
 						break
 					}
 					// Draw bg
-					sprite := sprite.LoadSprite(layer.SpriteName)
+					sprite := sprite.SpriteLoadByName(layer.SpriteName)
 					x := float64(layer.X)
 					y := float64(layer.Y)
 					width := float64(sprite.Size().X)
@@ -568,7 +568,7 @@ func editorUpdate() {
 					// Draw room sprites
 					for _, obj := range layer.Sprites {
 						spriteName := obj.SpriteName
-						sprite := sprite.LoadSprite(spriteName)
+						sprite := sprite.SpriteLoadByName(spriteName)
 						DrawSprite(sprite, 0, geom.Vec{float64(obj.X), float64(obj.Y)})
 					}
 				default:
@@ -998,7 +998,7 @@ func editorUpdate() {
 								hasCollision := false
 								for _, obj := range layer.Sprites {
 									spriteName := obj.SpriteName
-									sprite := sprite.LoadSprite(spriteName)
+									sprite := sprite.SpriteLoadByName(spriteName)
 
 									other := geom.Rect{}
 									other.X = float64(obj.X)
@@ -1043,7 +1043,7 @@ func editorUpdate() {
 								hasCollision := false
 								for _, obj := range layer.Sprites {
 									spriteName := obj.SpriteName
-									sprite := sprite.LoadSprite(spriteName)
+									sprite := sprite.SpriteLoadByName(spriteName)
 
 									other := geom.Rect{}
 									other.X = float64(obj.X)
@@ -1095,7 +1095,7 @@ func editorUpdate() {
 							// Mark deleted
 							for i, obj := range layer.Sprites {
 								spriteName := obj.SpriteName
-								sprite := sprite.LoadSprite(spriteName)
+								sprite := sprite.SpriteLoadByName(spriteName)
 
 								width := float64(sprite.Size().X)
 								height := float64(sprite.Size().Y)
@@ -1402,7 +1402,7 @@ func (roomEditor *roomEditor) getSnapPosition(pos geom.Vec, brushSize geom.Size,
 
 		for _, obj := range layer.Sprites {
 			spriteName := obj.SpriteName
-			sprite := sprite.LoadSprite(spriteName)
+			sprite := sprite.SpriteLoadByName(spriteName)
 
 			other := geom.Rect{}
 			other.X = float64(obj.X)
@@ -1431,7 +1431,7 @@ func (roomEditor *roomEditor) getSnapPosition(pos geom.Vec, brushSize geom.Size,
 
 		for _, obj := range layer.Sprites {
 			spriteName := obj.SpriteName
-			sprite := sprite.LoadSprite(spriteName)
+			sprite := sprite.SpriteLoadByName(spriteName)
 
 			other := geom.Rect{}
 			other.X = float64(obj.X)
@@ -1460,7 +1460,7 @@ func (roomEditor *roomEditor) getSnapPosition(pos geom.Vec, brushSize geom.Size,
 
 		for _, obj := range layer.Sprites {
 			spriteName := obj.SpriteName
-			sprite := sprite.LoadSprite(spriteName)
+			sprite := sprite.SpriteLoadByName(spriteName)
 
 			other := geom.Rect{}
 			other.X = float64(obj.X)
@@ -1489,7 +1489,7 @@ func (roomEditor *roomEditor) getSnapPosition(pos geom.Vec, brushSize geom.Size,
 
 		for _, obj := range layer.Sprites {
 			spriteName := obj.SpriteName
-			sprite := sprite.LoadSprite(spriteName)
+			sprite := sprite.SpriteLoadByName(spriteName)
 
 			other := geom.Rect{}
 			other.X = float64(obj.X)
@@ -1590,7 +1590,7 @@ func (roomEditor *roomEditor) calculateRoomBounds() {
 		case *room.RoomLayerSprite:
 			for _, obj := range layer.Sprites {
 				spriteName := obj.SpriteName
-				sprite := sprite.LoadSprite(spriteName)
+				sprite := sprite.SpriteLoadByName(spriteName)
 
 				x := int32(obj.X)
 				y := int32(obj.Y)
@@ -1736,7 +1736,7 @@ func (roomEditor *roomEditor) editorConfigLoad() {
 		// Set brush from config
 		switch roomEditor.editingLayer.(type) {
 		case *room.RoomLayerSprite:
-			obj := sprite.LoadSprite(editorConfig.BrushSelected)
+			obj := sprite.SpriteLoadByName(editorConfig.BrushSelected)
 			if obj.Name() == editorConfig.BrushSelected {
 				roomEditor.spriteSelected = obj
 				break

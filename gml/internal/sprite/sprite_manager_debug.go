@@ -32,6 +32,10 @@ func init() {
 	//watcher.Close()
 }
 
+func debugSpriteByName() {
+
+}
+
 func DebugWatch() {
 	// Get list of sprites updated this frame
 	var watcherSpritesToUpdate []string
@@ -60,9 +64,8 @@ FileWatchLoop:
 	}
 
 	// If those sprites are loaded, reload them
-	manager := g_spriteManager
 	for _, spriteName := range watcherSpritesToUpdate {
-		spr := manager.assetMap[spriteName]
+		spr := SpriteLoadByName(spriteName)
 		if spr != nil {
 			newSprData := loadSprite(spriteName)
 			*spr = *newSprData

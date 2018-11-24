@@ -107,7 +107,7 @@ func (state *state) createNewRoomInstance(room *Room) *RoomInstance {
 			layer.y = float64(layerData.Y)
 			layer.roomLeft = float64(room.Left)
 			layer.roomRight = float64(room.Right)
-			layer.sprite = sprite.LoadSprite(spriteName)
+			layer.sprite = sprite.SpriteLoadByName(spriteName)
 			layer.drawOrder = layerData.Config.Order
 			roomInst.drawLayers = append(roomInst.drawLayers, layer)
 		}
@@ -120,7 +120,7 @@ func (state *state) createNewRoomInstance(room *Room) *RoomInstance {
 			layer.sprites = make([]RoomInstanceLayerSpriteObject, 0, len(layerData.Sprites))
 			for _, sprObj := range layerData.Sprites {
 				// Add draw sprite
-				spr := sprite.LoadSprite(sprObj.SpriteName)
+				spr := sprite.SpriteLoadByName(sprObj.SpriteName)
 				record := RoomInstanceLayerSpriteObject{
 					Sprite: spr,
 				}

@@ -15,9 +15,12 @@ type Sprite struct {
 	imageSpeed float64
 }
 
+type SpriteIndex int32
+
 func (spr *Sprite) Name() string        { return spr.name }
 func (spr *Sprite) Size() geom.Size     { return spr.size }
 func (spr *Sprite) ImageSpeed() float64 { return spr.imageSpeed }
+func (spr *Sprite) isUsed() bool        { return len(spr.frames) > 0 }
 func (spr *Sprite) rect() geom.Rect {
 	return geom.Rect{
 		Vec:  geom.Vec{},

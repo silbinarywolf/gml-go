@@ -1,13 +1,16 @@
 package game
 
-import "github.com/silbinarywolf/gml-go/gml"
+import (
+	"github.com/silbinarywolf/gml-go/examples/spaceship/asset"
+	"github.com/silbinarywolf/gml-go/gml"
+)
 
 type Player struct {
 	gml.Object
 }
 
 func (inst *Player) Create() {
-	inst.SetSprite(gml.SpriteLoad("Spaceship"))
+	inst.SetSprite(gml.SpriteLoad(asset.SprSpaceship))
 }
 
 func (inst *Player) Destroy() {

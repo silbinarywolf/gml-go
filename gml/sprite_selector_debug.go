@@ -39,7 +39,7 @@ func (viewer *debugSpriteViewer) lazyLoad() {
 			return nil
 		}
 		name := filepath.Base(path)
-		sprite.LoadSprite(name)
+		sprite.SpriteLoadByName(name)
 		return nil
 	})
 	if err != nil {

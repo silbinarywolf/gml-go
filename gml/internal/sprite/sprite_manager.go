@@ -18,32 +18,48 @@ var (
 )
 
 type spriteManager struct {
-	assetMap  map[string]*Sprite
-	assetList []*Sprite
+	assetList         []Sprite
+	spriteNameToIndex map[string]SpriteIndex
+	spriteIndexToName []string
 }
 
 func newSpriteManager() *spriteManager {
 	manager := &spriteManager{}
-	manager.assetMap = make(map[string]*Sprite)
-	manager.assetList = make([]*Sprite, 1, 10)
 	return manager
 }
 
-func SpriteList() []*Sprite {
-	return g_spriteManager.assetList[1:]
+func SpriteInitializeIndexToName(indexToName []string, nameToIndex map[string]SpriteIndex) {
+	g_spriteManager.spriteIndexToName = indexToName
+	g_spriteManager.spriteNameToIndex = nameToIndex
+	g_spriteManager.assetList = make([]Sprite, len(g_spriteManager.spriteIndexToName))
 }
 
-func LoadSprite(name string) *Sprite {
+// todo(Jake): 2018-24-11 - Github #14
+// Remove SpriteList() as it's brittle and only used by sprite_selector.go
+func SpriteList() []*Sprite {
+	panic("Broke sprite_selector(), need to fix")
+	return nil
+	//return g_spriteManager.assetList[1:]
+}
+
+func SpriteLoadByName(name string) *Sprite {
+	index := g_spriteManager.spriteNameToIndex[name]
+	return SpriteLoad(index)
+}
+
+func SpriteLoad(index SpriteIndex) *Sprite {
 	manager := g_spriteManager
 
-	// Use already loaded asset
-	if res, ok := manager.assetMap[name]; ok {
-		return res
+	sprite := &manager.assetList[index]
+	// todo(Jake): have a "isUsed" var or function instead of checking
+	// for frames
+	if sprite.isUsed() {
+		return sprite
 	}
+	name := g_spriteManager.spriteIndexToName[index]
+	// todo(Jake): change loadSprite() to return Sprite, not *Sprite
 	result := loadSprite(name)
-	manager.assetMap[name] = result
-	manager.assetList = append(manager.assetList, result)
-
+	*sprite = *result
 	return result
 }
 
