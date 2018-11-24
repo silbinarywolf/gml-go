@@ -7,8 +7,8 @@ import (
 	"github.com/silbinarywolf/gml-go/gml/internal/file"
 )
 
-func AssetsDirectory() string {
-	return file.AssetsDirectory
+func AssetDirectory() string {
+	return file.AssetDirectory
 }
 
 func ProgramDirectory() string {
@@ -16,7 +16,7 @@ func ProgramDirectory() string {
 }
 
 func ReadFileAsString(path string) (string, error) {
-	path = AssetsDirectory() + "/" + path
+	path = AssetDirectory() + "/" + path
 	fileData, err := file.OpenFile(path)
 	if err != nil {
 		return "", err

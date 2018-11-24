@@ -18,7 +18,7 @@ type spriteConfig struct {
 }
 
 func loadConfig(name string) spriteConfig {
-	configPath := file.AssetsDirectory + "/sprites/" + name + "/config.json"
+	configPath := file.AssetDirectory + "/" + SpriteDirectoryBase + "/" + name + "/config.json"
 	fileData, err := file.OpenFile(configPath)
 	if err != nil {
 		return spriteConfig{}

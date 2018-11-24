@@ -8,6 +8,10 @@ import (
 	"github.com/silbinarywolf/gml-go/gml/internal/file"
 )
 
+const (
+	RoomDirectoryBase = "room"
+)
+
 var (
 	gRoomManager = newRoomManager()
 )
@@ -25,7 +29,7 @@ func newRoomManager() *RoomManager {
 
 func loadRoomFromDataFile(name string) (*Room, error) {
 	start := time.Now()
-	roomDataPath := file.AssetsDirectory + "/room/" + name + ".data"
+	roomDataPath := file.AssetDirectory + "/" + RoomDirectoryBase + "/" + name + ".data"
 	dataFile, err := file.OpenFile(roomDataPath)
 	if err != nil {
 		return nil, err

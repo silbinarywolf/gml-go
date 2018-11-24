@@ -9,6 +9,10 @@ import (
 	"github.com/silbinarywolf/gml-go/gml/internal/file"
 )
 
+const (
+	SpriteDirectoryBase = "sprite"
+)
+
 var (
 	g_spriteManager = newSpriteManager()
 )
@@ -44,7 +48,7 @@ func LoadSprite(name string) *Sprite {
 }
 
 func loadSpriteFromData(name string) *spriteAsset {
-	path := file.AssetsDirectory + "/sprites/" + name + ".data"
+	path := file.AssetDirectory + "/" + SpriteDirectoryBase + "/" + name + ".data"
 	fileData, err := file.OpenFile(path)
 	if err != nil {
 		//panic(errors.New("Unable to find image: " + path))

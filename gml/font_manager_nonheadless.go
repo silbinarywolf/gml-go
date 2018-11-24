@@ -36,7 +36,7 @@ func LoadFont(name string, settings FontSettings) *Font {
 		return result
 	}
 
-	path := AssetsDirectory() + "/fonts/" + name + ".ttf"
+	path := AssetDirectory() + "/fonts/" + name + ".ttf"
 	fileData, err := file.OpenFile(path)
 	if err != nil {
 		panic(errors.New("Unable to find font: " + path + ". Error: " + err.Error()))

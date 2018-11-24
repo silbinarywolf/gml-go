@@ -10,15 +10,12 @@ import (
 	"path/filepath"
 )
 
-var (
-	ProgramDirectory string = calculateProgramDir()
-)
-
 func OpenFile(path string) (readSeekCloser, error) {
 	return os.Open(filepath.FromSlash(path))
 }
 
-func calculateProgramDir() string {
+// computeProgramDirectory returns the directory or url that the executable is running from
+func computeProgramDirectory() string {
 	exePath, err := os.Executable()
 	if err != nil {
 		panic(err)

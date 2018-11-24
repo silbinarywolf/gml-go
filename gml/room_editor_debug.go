@@ -122,7 +122,7 @@ func newRoomEditor() *roomEditor {
 		lastMousePos:       MousePosition(),
 		entityMenuFiltered: make([]object.ObjectType, 0, len(objectIndexToData)),
 		//spriteMenuFiltered: make([]*sprite.Sprite, 0, len(spriteList)),
-		roomDirectory: file.AssetsDirectory + "/room/",
+		roomDirectory: file.AssetDirectory + "/" + room.RoomDirectoryBase + "/",
 		tempLayers:    make([]room.RoomLayer, 0, 25),
 		gridEnabled:   false,
 	}

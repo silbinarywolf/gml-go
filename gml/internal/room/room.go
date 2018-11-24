@@ -5,7 +5,7 @@ import (
 )
 
 func (room *Room) Filepath() string {
-	return file.AssetsDirectory + "/room/" + room.Config.UUID
+	return file.AssetDirectory + "/" + RoomDirectoryBase + "/" + room.Config.UUID
 }
 
 //func (room *Room) LayerCount() int {

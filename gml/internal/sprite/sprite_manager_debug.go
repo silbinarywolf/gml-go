@@ -90,7 +90,7 @@ func DebugWriteSpriteConfig(spr *Sprite) error {
 		config.CollisionMasks = collisionMasks
 	}
 
-	configPath := file.AssetsDirectory + "/sprites/" + name + "/config.json"
+	configPath := file.AssetDirectory + "/" + SpriteDirectoryBase + "/" + name + "/config.json"
 
 	json, err := json.MarshalIndent(config, "", "\t")
 	if err != nil {
@@ -104,7 +104,7 @@ func DebugWriteSpriteConfig(spr *Sprite) error {
 }
 
 func debugWriteSprite(name string) {
-	folderPath := file.AssetsDirectory + "/sprites/" + name + "/"
+	folderPath := file.AssetDirectory + "/" + SpriteDirectoryBase + "/" + name + "/"
 
 	// NOTE(Jake): 2018-06-18
 	//
@@ -159,7 +159,7 @@ func debugWriteSprite(name string) {
 
 	// Write to file
 	{
-		spritePath := file.AssetsDirectory + "/sprites/" + name
+		spritePath := file.AssetDirectory + "/" + SpriteDirectoryBase + "/" + name
 		var data bytes.Buffer
 		gob.NewEncoder(&data).Encode(asset)
 		err := ioutil.WriteFile(spritePath+".data", data.Bytes(), 0644)

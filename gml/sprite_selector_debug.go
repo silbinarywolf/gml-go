@@ -25,10 +25,9 @@ func (viewer *debugSpriteViewer) lazyLoad() {
 		return
 	}
 	debugSpriteViewerLoaded = true
-	spritePath := file.AssetsDirectory + "/sprites"
+	spritePath := file.AssetDirectory + "/" + sprite.SpriteDirectoryBase
 	err := filepath.Walk(spritePath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			println("prevent panic by handling failure accessing a path " + path + ": " + err.Error())
 			return err
 		}
 		if !info.IsDir() {
