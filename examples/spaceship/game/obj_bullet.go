@@ -10,7 +10,7 @@ type Bullet struct {
 }
 
 func (inst *Bullet) Create() {
-	inst.SetSprite(gml.SpriteLoad(asset.SprSpaceship))
+	inst.SetSprite(gml.SpriteLoad(asset.SprBullet))
 }
 
 func (inst *Bullet) Destroy() {

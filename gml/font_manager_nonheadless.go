@@ -13,6 +13,10 @@ import (
 
 var g_fontManager = newFontManager()
 
+const (
+	fontDirectoryBase = "font"
+)
+
 type FontManager struct {
 	currentFont *Font
 	assetMap    map[string]*Font
@@ -36,7 +40,7 @@ func LoadFont(name string, settings FontSettings) *Font {
 		return result
 	}
 
-	path := AssetDirectory() + "/fonts/" + name + ".ttf"
+	path := AssetDirectory() + "/" + fontDirectoryBase + "/" + name + ".ttf"
 	fileData, err := file.OpenFile(path)
 	if err != nil {
 		panic(errors.New("Unable to find font: " + path + ". Error: " + err.Error()))
