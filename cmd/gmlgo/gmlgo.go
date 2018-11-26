@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"go/ast"
 	"go/build"
-	"go/constant"
 	"go/format"
 	"go/importer"
 	"go/parser"
@@ -230,45 +229,73 @@ func (pkg *Package) typeCheck(fs *token.FileSet, astFiles []*ast.File) {
 	pkg.typesPkg = typesPkg
 }
 
+type Struct struct {
+	Name string
+}
+
 // generate produces the String method for the named type.
 func (g *Generator) generate() {
-	values := make([]Value, 0, 100)
+	var structsUsingGMLObject []Struct
 	for _, file := range g.pkg.files {
-		// Set the state for this run of the walker.
-		file.values = nil
+		gmlPackageName := ""
 		if file.file != nil {
 			fmt.Printf("file: %s\n---------------\n\n", file.file.Name.String())
 			ast.Inspect(file.file, func(n ast.Node) bool {
-				var s string
 				switch n := n.(type) {
-				case *ast.BasicLit:
-					s = n.Value
-				case *ast.Ident:
-					s = n.Name
-				case *ast.StructType:
-					//if n.Fields.NumFields() == 0 {
-					//	break
-					//}
-					fmt.Printf("STRUCT\n")
-					for _, field := range n.Fields.List {
-						fmt.Printf("%v\n", field.Names)
+				// import "github.com/silbinarywolf/gml-go/gml"
+				case *ast.ImportSpec:
+					if n.Path.Value == "\"github.com/silbinarywolf/gml-go/gml\"" {
+						gmlPackageName = "gml"
+						if n.Name != nil {
+							// import gml "github.com/silbinarywolf/gml-go/gml"
+							gmlPackageName = n.Name.Name
+						}
 					}
+					return false
+				// type XXXX struct
+				case *ast.TypeSpec:
+					structName := n.Name.Name
+					switch n := n.Type.(type) {
+					// type XXXX struct
+					case *ast.StructType:
+						if n.Incomplete ||
+							gmlPackageName == "" {
+							return false
+						}
+						for _, field := range n.Fields.List {
+							switch fieldType := field.Type.(type) {
+							case *ast.SelectorExpr:
+								switch kind := fieldType.X.(type) {
+								case *ast.Ident:
+									// Find embedded "gml.Object"
+									if kind.Name == gmlPackageName &&
+										fieldType.Sel.Name == "Object" {
+										structsUsingGMLObject = append(structsUsingGMLObject, Struct{
+											Name: structName,
+										})
+									}
+								}
+							}
+						}
+						return false
+					}
+					return false
 				}
-				_ = s
-				//fmt.Printf("generate: %T\n", n)
 				return true
 			})
-			//ast.Inspect(file.file, file.genDecl)
-			//fmt.Printf("generate: %v\n\n", file)
-			values = append(values, file.values...)
 		}
 	}
 
-	if len(values) == 0 {
+	if len(structsUsingGMLObject) == 0 {
 		return
-		//log.Fatalf("no values defined for type %s", typeName)
 	}
-	runs := splitIntoRuns(values)
+
+	for _, record := range structsUsingGMLObject {
+		fmt.Printf("- %s\n", record.Name)
+	}
+	panic("End")
+
+	//runs := splitIntoRuns(values)
 	// The decision of which pattern to use depends on the number of
 	// runs in the numbers. If there's only one, it's easy. For more than
 	// one, there's a tradeoff between complexity and size of the data
@@ -281,7 +308,7 @@ func (g *Generator) generate() {
 	// being necessary for any realistic example other than bitmasks
 	// is very low. And bitmasks probably deserve their own analysis,
 	// to be done some other day.
-	g.buildOneRun(runs)
+	//g.buildOneRun(runs)
 	/*switch {
 	case len(runs) == 1:
 		g.buildOneRun(runs, typeName)
@@ -366,112 +393,6 @@ func (b byValue) Less(i, j int) bool {
 		return int64(b[i].value) < int64(b[j].value)
 	}
 	return b[i].value < b[j].value
-}
-
-// genDecl processes one declaration clause.
-func (f *File) genDecl(node ast.Node) bool {
-	decl, ok := node.(*ast.GenDecl)
-	if !ok || decl.Tok != token.CONST {
-		// We only care about const declarations.
-		return true
-	}
-	// The name of the type of the constants we are declaring.
-	// Can change if this is a multi-element declaration.
-	typ := ""
-	// Loop over the elements of the declaration. Each element is a ValueSpec:
-	// a list of names possibly followed by a type, possibly followed by values.
-	// If the type and value are both missing, we carry down the type (and value,
-	// but the "go/types" package takes care of that).
-	for _, spec := range decl.Specs {
-		vspec := spec.(*ast.ValueSpec) // Guaranteed to succeed as this is CONST.
-		if vspec.Type == nil && len(vspec.Values) > 0 {
-			// "X = 1". With no type but a value. If the constant is untyped,
-			// skip this vspec and reset the remembered type.
-			typ = ""
-
-			{
-				// NOTE(Jake): 2018-11-23
-				// Continue here
-				bl, ok := vspec.Values[0].(*ast.BasicLit)
-				if !ok {
-					continue
-				}
-				fmt.Printf("%s\n", decl.Tok.String())
-				fmt.Printf("%s\n", vspec.Names[0])
-				panic(bl.Value) // Returns 1
-			}
-
-			// If this is a simple type conversion, remember the type.
-			// We don't mind if this is actually a call; a qualified call won't
-			// be matched (that will be SelectorExpr, not Ident), and only unusual
-			// situations will result in a function call that appears to be
-			// a type conversion.
-			ce, ok := vspec.Values[0].(*ast.CallExpr)
-			if !ok {
-				continue
-			}
-			id, ok := ce.Fun.(*ast.Ident)
-			if !ok {
-				continue
-			}
-			typ = id.Name
-		}
-		if vspec.Type != nil {
-			// "X T". We have a type. Remember it.
-			ident, ok := vspec.Type.(*ast.Ident)
-			if !ok {
-				continue
-			}
-			typ = ident.Name
-		}
-		//if typ != f.typeName {
-		// This is not the type we're looking for.
-		//continue
-		//}
-		// We now have a list of names (from one line of source code) all being
-		// declared with the desired type.
-		// Grab their names and actual values and store them in f.values.
-		for _, name := range vspec.Names {
-			if name.Name == "_" {
-				continue
-			}
-			// This dance lets the type checker find the values for us. It's a
-			// bit tricky: look up the object declared by the name, find its
-			// types.Const, and extract its value.
-			obj, ok := f.pkg.defs[name]
-			if !ok {
-				log.Fatalf("no value for constant %s", name)
-			}
-			info := obj.Type().Underlying().(*types.Basic).Info()
-			if info&types.IsInteger == 0 {
-				log.Fatalf("can't handle non-integer constant type %s", typ)
-			}
-			value := obj.(*types.Const).Val() // Guaranteed to succeed as this is CONST.
-			if value.Kind() != constant.Int {
-				log.Fatalf("can't happen: constant is not an integer %s", name)
-			}
-			i64, isInt := constant.Int64Val(value)
-			u64, isUint := constant.Uint64Val(value)
-			if !isInt && !isUint {
-				log.Fatalf("internal error: value of %s is not an integer: %s", name, value.String())
-			}
-			if !isInt {
-				u64 = uint64(i64)
-			}
-			v := Value{
-				name:   name.Name,
-				value:  u64,
-				signed: info&types.IsUnsigned == 0,
-				str:    value.String(),
-			}
-			if c := vspec.Comment; f.lineComment && c != nil && len(c.List) == 1 {
-				v.name = strings.TrimSpace(c.Text())
-			}
-			v.name = strings.TrimPrefix(v.name, f.trimPrefix)
-			f.values = append(f.values, v)
-		}
-	}
-	return false
 }
 
 // Helpers
