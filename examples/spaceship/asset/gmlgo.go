@@ -6,9 +6,8 @@ import "github.com/silbinarywolf/gml-go/gml"
 // Auto-generate this file
 
 const (
-	_            gml.SpriteIndex = 0
-	SprSpaceship                 = 1
-	SprBullet                    = 2
+	SprSpaceship gml.SpriteIndex = 1
+	SprBullet    gml.SpriteIndex = 2
 )
 
 func init() {
