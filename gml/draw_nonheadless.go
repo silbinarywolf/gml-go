@@ -19,10 +19,12 @@ var (
 	isDrawGuiMode = false
 )
 
+// DrawGetGUI returns whether Draw functions will draw relative to the screen or not
 func DrawGetGUI() bool {
 	return isDrawGuiMode
 }
 
+// DrawSetGUI allows you to set whether you want to draw relative to the screen (true) or to the world (false)
 func DrawSetGUI(guiMode bool) {
 	isDrawGuiMode = guiMode
 }

@@ -47,7 +47,7 @@ func (viewer *debugSpriteViewer) lazyLoad() {
 	}
 }
 
-func (viewer *debugSpriteViewer) Update() (sprite.SpriteIndex, bool) {
+func (viewer *debugSpriteViewer) update() (sprite.SpriteIndex, bool) {
 	viewer.lazyLoad()
 
 	typingText := KeyboardString()

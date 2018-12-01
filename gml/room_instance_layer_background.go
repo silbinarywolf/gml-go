@@ -5,8 +5,8 @@ import (
 	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
 )
 
-type RoomInstanceLayerBackground struct {
-	RoomInstanceLayerDrawBase
+type roomInstanceLayerBackground struct {
+	roomInstanceLayerDrawBase
 	name      string
 	sprite    sprite.SpriteIndex
 	x, y      float64
@@ -14,11 +14,11 @@ type RoomInstanceLayerBackground struct {
 	roomRight float64
 }
 
-func (layer *RoomInstanceLayerBackground) order() int32 {
+func (layer *roomInstanceLayerBackground) order() int32 {
 	return layer.drawOrder
 }
 
-func (layer *RoomInstanceLayerBackground) draw() {
+func (layer *roomInstanceLayerBackground) draw() {
 	sprite := layer.sprite
 	width := float64(sprite.Size().X)
 	x := layer.x

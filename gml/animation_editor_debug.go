@@ -349,7 +349,7 @@ func animationEditorUpdate() {
 	if editor.menuOpened != animMenuNone {
 		switch editor.menuOpened {
 		case animMenuSprite:
-			if selectedSpr, ok := animationEditor.debugSpriteViewer.Update(); ok {
+			if selectedSpr, ok := animationEditor.debugSpriteViewer.update(); ok {
 				editor.spriteViewing = SpriteState{}
 				editor.spriteViewing.SetSprite(selectedSpr)
 				editor.menuOpened = animMenuNone

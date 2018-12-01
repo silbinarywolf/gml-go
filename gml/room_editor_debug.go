@@ -871,7 +871,7 @@ func editorUpdate() {
 								//editingRoom.UserEntityCount++
 
 								//
-								roomObj := &RoomObject{
+								roomObj := &room.RoomObject{
 									UUID:        reditor.UUID(),
 									ObjectIndex: int32(objectIndexSelected),
 									X:           int32(pos.X),
@@ -1244,7 +1244,7 @@ func editorUpdate() {
 				}
 			case reditor.MenuSprite,
 				reditor.MenuBackground:
-				if spriteSelected, ok := roomEditor.spriteViewer.Update(); ok {
+				if spriteSelected, ok := roomEditor.spriteViewer.update(); ok {
 					switch roomEditor.menuOpened {
 					case reditor.MenuSprite:
 						roomEditor.spriteSelected = spriteSelected

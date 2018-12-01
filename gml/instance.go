@@ -19,7 +19,7 @@ func (manager *instanceManager) reset() {
 	*manager = instanceManager{}
 }
 
-func instanceCreateLayer(position geom.Vec, layer *RoomInstanceLayerInstance, roomInst *RoomInstance, objectIndex object.ObjectIndex) object.ObjectType {
+func instanceCreateLayer(position geom.Vec, layer *roomInstanceLayerInstance, roomInst *RoomInstance, objectIndex object.ObjectIndex) object.ObjectType {
 	return layer.manager.InstanceCreate(position, objectIndex, roomInst.Index(), layer.index)
 }
 

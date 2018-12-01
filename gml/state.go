@@ -39,6 +39,8 @@ func newState() *state {
 	}
 }
 
+// FrameUsage returns a string like "1% (55ns)" to tell you how much
+// of your frame budget has been utilized. (Assumes 60FPS)
 func FrameUsage() string {
 	frameBudgetUsed := gState.frameBudgetNanosecondsUsed
 	timeTaken := float64(frameBudgetUsed) / 16000000.0
@@ -47,7 +49,8 @@ func FrameUsage() string {
 	return text + "% (" + strconv.Itoa(int(gState.frameBudgetNanosecondsUsed)) + "ns)"
 }
 
-// Check if createNewRoomInstance() create is being executed
+// IsCreatingRoomInstance returns whether this instance was created by a room or not, rather
+// than programmatically.
 func IsCreatingRoomInstance() bool {
 	return gState.isCreatingRoomInstance
 }
@@ -70,8 +73,8 @@ func (state *state) createNewRoomInstance(room *Room) *RoomInstance {
 		// Create default instance layer if...
 		// - No instance layers exist in the room data
 		// - Creating blank room
-		roomInst.instanceLayers = make([]RoomInstanceLayerInstance, 1)
-		roomInst.instanceLayers[0] = RoomInstanceLayerInstance{
+		roomInst.instanceLayers = make([]roomInstanceLayerInstance, 1)
+		roomInst.instanceLayers[0] = roomInstanceLayerInstance{
 			index: 0,
 		}
 		roomInst.drawLayers = append(roomInst.drawLayers, &roomInst.instanceLayers[0])
@@ -81,10 +84,10 @@ func (state *state) createNewRoomInstance(room *Room) *RoomInstance {
 	if roomInst.room != nil {
 		// Instance layers
 		if len(room.InstanceLayers) > 0 {
-			roomInst.instanceLayers = make([]RoomInstanceLayerInstance, len(room.InstanceLayers))
+			roomInst.instanceLayers = make([]roomInstanceLayerInstance, len(room.InstanceLayers))
 			for i := 0; i < len(room.InstanceLayers); i++ {
 				layerData := room.InstanceLayers[i]
-				roomInst.instanceLayers[i] = RoomInstanceLayerInstance{
+				roomInst.instanceLayers[i] = roomInstanceLayerInstance{
 					index: i,
 				}
 				layer := &roomInst.instanceLayers[i]
@@ -102,7 +105,7 @@ func (state *state) createNewRoomInstance(room *Room) *RoomInstance {
 			if spriteName == "" {
 				continue
 			}
-			layer := new(RoomInstanceLayerBackground)
+			layer := new(roomInstanceLayerBackground)
 			layer.x = float64(layerData.X)
 			layer.y = float64(layerData.Y)
 			layer.roomLeft = float64(room.Left)
@@ -115,13 +118,13 @@ func (state *state) createNewRoomInstance(room *Room) *RoomInstance {
 		for i := 0; i < len(room.SpriteLayers); i++ {
 			layerData := room.SpriteLayers[i]
 			hasCollision := layerData.Config.HasCollision
-			layer := RoomInstanceLayerSprite{}
+			layer := roomInstanceLayerSprite{}
 			layer.hasCollision = hasCollision
-			layer.sprites = make([]RoomInstanceLayerSpriteObject, 0, len(layerData.Sprites))
+			layer.sprites = make([]roomInstanceLayerSpriteObject, 0, len(layerData.Sprites))
 			for _, sprObj := range layerData.Sprites {
 				// Add draw sprite
 				spr := sprite.SpriteLoadByName(sprObj.SpriteName)
-				record := RoomInstanceLayerSpriteObject{
+				record := roomInstanceLayerSpriteObject{
 					sprite: spr,
 				}
 				record.X = float64(sprObj.X)

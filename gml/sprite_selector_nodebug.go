@@ -5,5 +5,5 @@ package gml
 type debugSpriteViewer struct {
 }
 
-func (viewer *debugSpriteViewer) Update() {
+func (viewer *debugSpriteViewer) update() {
 }

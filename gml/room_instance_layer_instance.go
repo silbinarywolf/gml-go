@@ -1,7 +1,7 @@
 package gml
 
-type RoomInstanceLayerInstance struct {
-	RoomInstanceLayerDrawBase
+type roomInstanceLayerInstance struct {
+	roomInstanceLayerDrawBase
 	index   int
 	name    string
 	manager instanceManager
@@ -12,10 +12,10 @@ type RoomInstanceLayerInstance struct {
 //	return layer._parent
 //}
 
-func (layer *RoomInstanceLayerInstance) update(animationUpdate bool) {
+func (layer *roomInstanceLayerInstance) update(animationUpdate bool) {
 	layer.manager.update(animationUpdate)
 }
 
-func (layer *RoomInstanceLayerInstance) draw() {
+func (layer *roomInstanceLayerInstance) draw() {
 	layer.manager.draw()
 }

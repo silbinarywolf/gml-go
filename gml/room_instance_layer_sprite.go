@@ -5,31 +5,31 @@ import (
 	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
 )
 
-type RoomInstanceLayerSpriteObject struct {
+type roomInstanceLayerSpriteObject struct {
 	geom.Vec
 	sprite sprite.SpriteIndex
 }
 
-func (record *RoomInstanceLayerSpriteObject) Rect() geom.Rect {
+func (record *roomInstanceLayerSpriteObject) Rect() geom.Rect {
 	r := geom.Rect{}
 	r.Vec = record.Vec
 	r.Size = record.sprite.Size()
 	return r
 }
 
-type RoomInstanceLayerSprite struct {
-	RoomInstanceLayerDrawBase
+type roomInstanceLayerSprite struct {
+	roomInstanceLayerDrawBase
 	name    string
-	sprites []RoomInstanceLayerSpriteObject
+	sprites []roomInstanceLayerSpriteObject
 	//spaces       space.SpaceBucketArray
 	hasCollision bool
 }
 
-func (layer *RoomInstanceLayerSprite) order() int32 {
+func (layer *roomInstanceLayerSprite) order() int32 {
 	return layer.drawOrder
 }
 
-func (layer *RoomInstanceLayerSprite) draw() {
+func (layer *roomInstanceLayerSprite) draw() {
 	//screen := gScreen
 	for _, record := range layer.sprites {
 		/*position := maybeApplyOffsetByCamera(record.Vec)

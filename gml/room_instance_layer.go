@@ -5,19 +5,19 @@ package gml
 //	draw()
 //}
 
-type RoomInstanceLayerDrawBase struct {
+type roomInstanceLayerDrawBase struct {
 	drawOrder int32
 }
 
-func (layer *RoomInstanceLayerDrawBase) order() int32 {
+func (layer *roomInstanceLayerDrawBase) order() int32 {
 	return layer.drawOrder
 }
 
-type RoomInstanceLayerUpdate interface {
+type roomInstanceLayerUpdate interface {
 	update(animationUpdate bool)
 }
 
-type RoomInstanceLayerDraw interface {
+type roomInstanceLayerDraw interface {
 	draw()
 	order() int32
 }
