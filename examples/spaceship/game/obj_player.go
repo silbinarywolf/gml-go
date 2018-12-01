@@ -1,7 +1,6 @@
 package game
 
 import (
-	"github.com/silbinarywolf/gml-go/examples/spaceship/asset"
 	"github.com/silbinarywolf/gml-go/gml"
 )
 
@@ -10,7 +9,7 @@ type Player struct {
 }
 
 func (inst *Player) Create() {
-	inst.SetSprite(asset.SprSpaceship)
+	inst.SetSprite(SprSpaceship)
 }
 
 func (inst *Player) Destroy() {

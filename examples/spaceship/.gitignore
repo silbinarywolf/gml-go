@@ -1,4 +1,9 @@
+# Ignore compiled asset data
 asset/**/*.data
+# Ignore code generated files
+gmlgo_gen.go
+**/gmlgo_gen.go
+# Ignore binary for Windows
 *.exe
-**/*_gen.go
+# Ignore binary for Linux / Mac
 spaceship
