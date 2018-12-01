@@ -9,7 +9,7 @@ type Bullet struct {
 }
 
 func (inst *Bullet) Create() {
-	inst.SetSprite(gml.SpriteLoad(SprBullet))
+	inst.SetSprite(SprBullet)
 }
 
 func (inst *Bullet) Destroy() {
@@ -18,6 +18,16 @@ func (inst *Bullet) Destroy() {
 
 func (inst *Bullet) Update() {
 	inst.Y -= 8
+
+	for _, other := range gml.CollisionRectList(inst, inst.Pos()) {
+		other, ok := other.(*Player)
+		if !ok {
+			continue
+		}
+		inst.X += 8
+		other.X += 1
+		//gml.InstanceDestroy(other)
+	}
 }
 
 func (inst *Bullet) Draw() {

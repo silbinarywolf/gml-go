@@ -23,6 +23,11 @@ func instanceCreateLayer(position geom.Vec, layer *RoomInstanceLayerInstance, ro
 	return layer.manager.InstanceCreate(position, objectIndex, roomInst.Index(), layer.index)
 }
 
+func InstanceGet(index object.ObjectIndex) object.ObjectType {
+	panic("todo: Implement InstanceGet()")
+	return nil
+}
+
 func InstanceChangeRoom(inst object.ObjectType, roomInstanceIndex int) {
 	roomInst := &gState.roomInstances[roomInstanceIndex]
 	if !roomInst.used {

@@ -23,6 +23,7 @@ type Object struct {
 	sprite.SpriteState // Sprite (contains SetSprite)
 	geom.Rect
 	instanceObject
+	objectIndex       ObjectIndex
 	solid             bool
 	imageAngleRadians float64 // Image Angle
 }
@@ -38,6 +39,7 @@ func (inst *Object) SetSolid(isSolid bool) {
 
 func (inst *Object) Solid() bool                { return inst.solid }
 func (inst *Object) BaseObject() *Object        { return inst }
+func (inst *Object) ObjectIndex() ObjectIndex   { return inst.objectIndex }
 func (inst *Object) ImageAngleRadians() float64 { return inst.imageAngleRadians }
 func (inst *Object) ImageAngle() float64        { return inst.imageAngleRadians * (180 / math.Pi) }
 

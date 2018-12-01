@@ -409,7 +409,7 @@ func init() {
 	{
 		// Write Object types
 		for _, record := range structsUsingGMLObject {
-			g.Printf("func (inst *" + record.Name + ") ObjectIndex() gml.ObjectIndex { return Obj" + record.Name + " }\n")
+			//g.Printf("func (inst *" + record.Name + ") ObjectIndex() gml.ObjectIndex { return Obj" + record.Name + " }\n")
 			g.Printf("func (inst *" + record.Name + ") ObjectName() string { return \"" + record.Name + "\" }\n")
 			g.Printf("\n")
 		}

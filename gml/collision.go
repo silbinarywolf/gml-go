@@ -2,6 +2,7 @@ package gml
 
 import (
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
+	"github.com/silbinarywolf/gml-go/gml/internal/object"
 )
 
 const (
@@ -10,6 +11,37 @@ const (
 
 type collisionObject interface {
 	BaseObject() *Object
+}
+
+func CollisionRectList(instType collisionObject, position geom.Vec) []object.ObjectType {
+	inst := instType.BaseObject()
+	room := roomGetInstance(inst.BaseObject().RoomInstanceIndex())
+	if room == nil {
+		panic("RoomInstance this object belongs to has been destroyed")
+	}
+
+	// Create collision rect at position provided in function
+	r1 := inst.Rect
+	r1.Vec = position
+	r1.Size = inst.Size
+
+	// todo(Jake): 2018-12-01 - #18
+	// Consider pooling reusable object.ObjectType slices to
+	// improve performance.
+	var list []object.ObjectType
+	for i := 0; i < len(room.instanceLayers); i++ {
+		for _, otherT := range room.instanceLayers[i].manager.instances {
+			other := otherT.BaseObject()
+			if r1.CollisionRectangle(other.Rect) &&
+				inst != other {
+				list = append(list, otherT)
+			}
+		}
+	}
+	if len(list) == 0 {
+		return nil
+	}
+	return list
 }
 
 func PlaceFree(instType collisionObject, position geom.Vec) bool {

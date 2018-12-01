@@ -66,6 +66,7 @@ func NewRawInstance(objectIndex ObjectIndex, index int, roomInstanceIndex int, l
 	inst := reflect.New(reflect.ValueOf(valToCopy).Elem().Type()).Interface().(ObjectType)
 	MoveInstance(inst, index, roomInstanceIndex, layerIndex)
 	baseObj := inst.BaseObject()
+	baseObj.objectIndex = objectIndex
 	baseObj.create()
 	return inst
 	/*// Create
