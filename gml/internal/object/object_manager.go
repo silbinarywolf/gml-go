@@ -10,8 +10,9 @@ var (
 )
 
 type objectManager struct {
-	idToEntityData []ObjectType
-	nameToID       map[string]ObjectIndex
+	idToEntityData  []ObjectType
+	objectIndexList []ObjectIndex
+	nameToID        map[string]ObjectIndex
 }
 
 func newObjectManager() *objectManager {
@@ -21,11 +22,12 @@ func newObjectManager() *objectManager {
 	}
 }
 
-func InitTypes(objTypes []ObjectType) {
+func InitTypes(objTypes []ObjectType, objectIndexList []ObjectIndex) {
 	manager := gObjectManager
 	if manager.idToEntityData != nil {
 		panic("Cannot call init type function more than once.")
 	}
+	manager.objectIndexList = objectIndexList
 	manager.idToEntityData = objTypes
 	for _, objType := range objTypes {
 		if objType == nil {
@@ -40,6 +42,10 @@ func InitTypes(objTypes []ObjectType) {
 		}
 		manager.nameToID[name] = objectIndex
 	}
+}
+
+func ObjectIndexList() []ObjectIndex {
+	return gObjectManager.objectIndexList
 }
 
 func IDToEntityData() []ObjectType {
@@ -63,6 +69,9 @@ func MoveInstance(inst ObjectType, index int, roomInstanceIndex int, layerIndex 
 
 func NewRawInstance(objectIndex ObjectIndex, index int, roomInstanceIndex int, layerIndex int) ObjectType {
 	valToCopy := gObjectManager.idToEntityData[objectIndex]
+	if valToCopy == nil {
+		panic("Invalid objectIndex given")
+	}
 	inst := reflect.New(reflect.ValueOf(valToCopy).Elem().Type()).Interface().(ObjectType)
 	MoveInstance(inst, index, roomInstanceIndex, layerIndex)
 	baseObj := inst.BaseObject()

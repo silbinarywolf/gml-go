@@ -407,6 +407,26 @@ func init() {
 	}
 
 	{
+		// Write object index list
+		g.Printf("var _gen_Obj_index_list = []gml.ObjectIndex{\n")
+		for _, record := range structsUsingGMLObject {
+			// ie. ObjPlayer,
+			g.Printf("	Obj%s,\n", record.Name)
+		}
+		g.Printf("\n}\n\n")
+	}
+
+	{
+		// Write object index to data list
+		g.Printf("var _gen_Obj_index_to_data = []gml.ObjectType{\n")
+		for _, record := range structsUsingGMLObject {
+			// ie. ObjPlayer:    new(Player),
+			g.Printf("	Obj%s: new(%s),\n", record.Name, record.Name)
+		}
+		g.Printf("\n}\n\n")
+	}
+
+	{
 		// Write Object types
 		for _, record := range structsUsingGMLObject {
 			//g.Printf("func (inst *" + record.Name + ") ObjectIndex() gml.ObjectIndex { return Obj" + record.Name + " }\n")
@@ -417,12 +437,7 @@ func init() {
 		g.Printf(`
 
 func init() {
-	gml.ObjectInitTypes([]gml.ObjectType{
-`)
-		for _, record := range structsUsingGMLObject {
-			g.Printf("		Obj" + record.Name + ": new(" + record.Name + "),\n")
-		}
-		g.Printf(`	})
+	gml.ObjectInitTypes(_gen_Obj_index_to_data, _gen_Obj_index_list)
 }
 `)
 	}

@@ -1,9 +1,6 @@
 package gml
 
 import (
-	"io/ioutil"
-	"strings"
-
 	"github.com/silbinarywolf/gml-go/gml/internal/file"
 )
 
@@ -15,7 +12,10 @@ func ProgramDirectory() string {
 	return file.ProgramDirectory
 }
 
-func ReadFileAsString(path string) (string, error) {
+// todo(Jake): 2018-12-02: #21
+// Deprecated. Only used in private project, can be removed after we support "data" binary files
+// FileStringReadAll will read a file from the "asset" directory, used to be ReadFileAsString
+/*func FileStringReadAll(path string) (string, error) {
 	path = AssetDirectory() + "/" + path
 	fileData, err := file.OpenFile(path)
 	if err != nil {
@@ -28,3 +28,4 @@ func ReadFileAsString(path string) (string, error) {
 	}
 	return strings.TrimSpace(string(bytesData)), nil
 }
+*/

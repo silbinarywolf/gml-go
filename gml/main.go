@@ -32,6 +32,7 @@ func update() error {
 		cameraSetActive(0)
 		cameraClear(0)
 
+		editorLazyInit()
 		editorUpdate()
 
 		cameraDraw(0)

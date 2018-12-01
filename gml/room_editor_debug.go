@@ -69,7 +69,7 @@ type roomEditor struct {
 	cameraStateBeforeEnteringEditingMode cameraManager
 
 	// Callbacks
-	exitEditorFunc func(room *room.Room)
+	//exitEditorFunc func(room *room.Room)
 
 	//
 	statusText  string
@@ -101,13 +101,9 @@ func newRoomEditor() *roomEditor {
 	// - The entity size (as set in Create())
 	// - The default sprite of the object
 	//
-	idToEntityData := object.IDToEntityData()
-	objectIndexToData := make([]object.ObjectType, len(idToEntityData))
-	for i, obj := range idToEntityData {
-		if obj == nil {
-			continue
-		}
-		objectIndex := obj.ObjectIndex()
+	objectIndexList := object.ObjectIndexList()
+	objectIndexToData := make([]object.ObjectType, len(objectIndexList))
+	for i, objectIndex := range objectIndexList {
 		inst := object.NewRawInstance(objectIndex, i, 0, 0)
 		inst.Create()
 		objectIndexToData[i] = inst
@@ -133,6 +129,9 @@ func (editor *roomEditor) IsMenuOpen() bool {
 }
 
 func (editor *roomEditor) calculateAndSortLayers() {
+	if editor.editingRoom == nil {
+		return
+	}
 	editor.tempLayers = editor.tempLayers[:0]
 	editor.layers()
 }
@@ -189,19 +188,17 @@ func snapToGrid(val float64, grid float64) float64 {
 	return base * grid
 }
 
-func EditorInit(exitEditorFunc func(room *room.Room)) {
-	if gRoomEditor != nil {
-		panic("EditorInit: Room Editor is already initialized.")
+func editorLazyInit() {
+	if gRoomEditor == nil {
+		gRoomEditor = newRoomEditor()
 	}
-	gRoomEditor = newRoomEditor()
-	gRoomEditor.exitEditorFunc = exitEditorFunc
 	// TODO(Jake): 2018-07-10
 	//
 	// Load editor font (possibly by embedding data into `reditor`?)
 	//
 }
 
-func EditorIsInitialized() bool {
+/*func EditorIsInitialized() bool {
 	return gRoomEditor != nil
 }
 
@@ -212,22 +209,21 @@ func EditorSetRoom(room *Room) {
 		debugMenuOpenOrToggleClosed(debugMenuRoomEditor)
 	}
 }
-
+*/
 func (roomEditor *roomEditor) editorChangeRoom(room *Room) bool {
 	if roomEditor.editingRoom == room {
 		// If no changes
 		return false
 	}
 	if room == nil {
-		editingRoom := roomEditor.editingRoom
 		roomEditor.editingRoom = nil
 		// Reset camera settings back
 		*gCameraManager = roomEditor.cameraStateBeforeEnteringEditingMode
 		debugMenuOpenOrToggleClosed(debugMenuNone)
 		// Execute custom user-code logic
-		if gRoomEditor.exitEditorFunc != nil {
-			gRoomEditor.exitEditorFunc(editingRoom)
-		}
+		//if gRoomEditor.exitEditorFunc != nil {
+		//	gRoomEditor.exitEditorFunc(editingRoom)
+		//}
 		return false
 	}
 	roomEditor.editingRoom = room
@@ -249,12 +245,8 @@ func (roomEditor *roomEditor) editorChangeRoom(room *Room) bool {
 
 func editorUpdate() {
 	roomEditor := gRoomEditor
-	editingRoom := roomEditor.editingRoom
-	if editingRoom == nil {
-		return
-	}
-	isMenuOpen := roomEditor.IsMenuOpen()
 	roomEditor.calculateAndSortLayers() // reset layers / recalculate sort order lazily with layers()
+	isMenuOpen := roomEditor.IsMenuOpen()
 	canUseBrush := true
 	grid := geom.Vec{32, 32}
 
@@ -415,7 +407,7 @@ func editorUpdate() {
 					roomEditor.loadRoom(typingText)
 				case reditor.MenuNewLayer:
 					// Create new room if typed
-					roomEditor.newLayerAndSelected(editingRoom, typingText, roomEditor.menuLayerKind)
+					roomEditor.newLayerAndSelected(roomEditor.editingRoom, typingText, roomEditor.menuLayerKind)
 				case reditor.MenuSetOrder:
 					//
 					layer := roomEditor.editingLayer
@@ -448,6 +440,11 @@ func editorUpdate() {
 			roomEditor.menuOpened = reditor.MenuNone
 		}
 	}
+
+	/*editingRoom := roomEditor.editingRoom
+	if editingRoom == nil {
+		return
+	}*/
 
 	if !isMenuOpen &&
 		!isHoldingControl {
@@ -510,18 +507,20 @@ func editorUpdate() {
 			DrawSetGUI(false)
 
 			// Draw black box using room bounds
-			borderWidth := 2.0
-			pos := geom.Vec{float64(editingRoom.Left), float64(editingRoom.Top)}
-			pos.X -= borderWidth
-			pos.Y -= borderWidth
-			size := geom.Vec{float64(editingRoom.Right - editingRoom.Left), float64(editingRoom.Bottom - editingRoom.Top)}
-			size.X += borderWidth * 2
-			size.Y += borderWidth * 2
-			DrawRectangleBorder(pos, size, color.Black, 2, color.White)
+			if editingRoom := roomEditor.editingRoom; editingRoom != nil {
+				borderWidth := 2.0
+				pos := geom.Vec{float64(editingRoom.Left), float64(editingRoom.Top)}
+				pos.X -= borderWidth
+				pos.Y -= borderWidth
+				size := geom.Vec{float64(editingRoom.Right - editingRoom.Left), float64(editingRoom.Bottom - editingRoom.Top)}
+				size.X += borderWidth * 2
+				size.Y += borderWidth * 2
+				DrawRectangleBorder(pos, size, color.Black, 2, color.White)
+			}
 		}
 
 		// Draw layers
-		{
+		if editingRoom := roomEditor.editingRoom; editingRoom != nil {
 			for _, layer := range roomEditor.layers() {
 				switch layer := layer.(type) {
 				case *room.RoomLayerInstance:
@@ -649,10 +648,9 @@ func editorUpdate() {
 		}
 
 		if roomEditor.menuOpened == reditor.MenuNone {
-			DrawSetGUI(true)
-
 			// Draw layer widget
-			{
+			if roomEditor.editingRoom != nil {
+				DrawSetGUI(true)
 				yStart := 0.0
 				var x, y, width, height float64
 				x = 0
@@ -811,9 +809,8 @@ func editorUpdate() {
 					}
 					y += 32
 				}
-
+				DrawSetGUI(false)
 			}
-			DrawSetGUI(false)
 		}
 
 		if canUseBrush &&
@@ -1307,12 +1304,17 @@ func editorUpdate() {
 		{
 			DrawSetGUI(true)
 			editingString := ""
-			editingString += "Editing: " + filepath.Base(roomEditor.editingRoom.Filepath())
+			if editingRoom := roomEditor.editingRoom; editingRoom != nil {
+				editingString += "Editing: " + filepath.Base(roomEditor.editingRoom.Filepath())
+			}
 			{
 				mousePos := MousePosition()
 				mousePos.X = snapToGrid(mousePos.X, grid.X)
 				mousePos.Y = snapToGrid(mousePos.Y, grid.Y)
-				editingString += " | " + strconv.FormatFloat(mousePos.X, 'f', -1, 64) + "," + strconv.FormatFloat(mousePos.Y, 'f', -1, 64) + "px"
+				if editingString != "" {
+					editingString += " | "
+				}
+				editingString += strconv.FormatFloat(mousePos.X, 'f', -1, 64) + "," + strconv.FormatFloat(mousePos.Y, 'f', -1, 64) + "px"
 			}
 			if text := roomEditor.statusText; text != "" {
 				editingString += " | " + text
