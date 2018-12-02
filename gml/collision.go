@@ -32,7 +32,8 @@ func CollisionRectList(instType collisionObject, position geom.Vec) []object.Obj
 	for i := 0; i < len(room.instanceLayers); i++ {
 		for _, otherT := range room.instanceLayers[i].manager.instances {
 			other := otherT.BaseObject()
-			if r1.CollisionRectangle(other.Rect) &&
+			if !object.IsDestroyed(other) &&
+				r1.CollisionRectangle(other.Rect) &&
 				inst != other {
 				list = append(list, otherT)
 			}

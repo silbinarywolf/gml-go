@@ -17,6 +17,8 @@ const (
 	fontDirectoryBase = "font"
 )
 
+// todo(Jake): 2018-12-02 - #26
+// Stop exposing FontManager struct
 type FontManager struct {
 	currentFont *Font
 	assetMap    map[string]*Font

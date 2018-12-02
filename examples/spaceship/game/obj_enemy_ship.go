@@ -10,6 +10,7 @@ type EnemyShip struct {
 
 func (inst *EnemyShip) Create() {
 	inst.SetSprite(SprSpaceship)
+	inst.ImageScale.Y = -1
 }
 
 func (inst *EnemyShip) Destroy() {
@@ -17,7 +18,7 @@ func (inst *EnemyShip) Destroy() {
 }
 
 func (inst *EnemyShip) Update() {
-	inst.Y -= 8
+	inst.Y += 8
 }
 
 func (inst *EnemyShip) Draw() {

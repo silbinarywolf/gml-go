@@ -6,6 +6,10 @@ import (
 
 type Bullet struct {
 	gml.Object
+	// todo(Jake): 2018-12-02 - #24
+	// Swap this to gml.InstanceIndex when ready
+	// Maybe also add "vet" functionality - #25
+	Owner gml.ObjectType
 }
 
 func (inst *Bullet) Create() {
@@ -20,13 +24,13 @@ func (inst *Bullet) Update() {
 	inst.Y -= 8
 
 	for _, other := range gml.CollisionRectList(inst, inst.Pos()) {
-		other, ok := other.(*Player)
+		other, ok := other.(*EnemyShip)
 		if !ok {
 			continue
 		}
-		inst.X += 8
-		other.X += 1
-		//gml.InstanceDestroy(other)
+		owner := inst.Owner.(*Player)
+		owner.Score += 1
+		gml.InstanceDestroy(other)
 	}
 }
 

@@ -39,4 +39,5 @@ This project is mostly for fun and I have no intentions to get anything done unl
 
 ## Credits
 
-* [Hajime Hoshi](https://github.com/hajimehoshi/ebiten) for his fantastically simple 2D game library, [https://github.com/hajimehoshi/ebiten](Ebiten).
+* [Hajime Hoshi](https://github.com/hajimehoshi/ebiten) for their fantastically simple 2D game library, [https://github.com/hajimehoshi/ebiten](Ebiten).
+* [Yann Le Coroller ](www.yannlecoroller.com) for their free to use Helvetica style font. 
