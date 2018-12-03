@@ -95,9 +95,8 @@ func DrawTextColor(position geom.Vec, message string, col color.Color) {
 	text.Draw(drawGetTarget(), message, g_fontManager.currentFont.font, int(position.X), int(position.Y), col)
 }
 
-func DrawTextF(position Vec, message string, args ...interface{}) {
-	message = fmt.Sprintf(message, args...)
-	DrawText(position, message)
+func DrawTextF(position Vec, format string, args ...interface{}) {
+	DrawText(position, fmt.Sprintf(format, args...))
 }
 
 func drawGetTarget() *ebiten.Image {
