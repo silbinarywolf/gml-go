@@ -1,8 +1,10 @@
 # Game Maker Language Go
 
 [![Build Status](https://travis-ci.org/silbinarywolf/gml-go.svg?branch=master)](https://travis-ci.org/silbinarywolf/gml-go)
+[![Documentation](https://godoc.org/github.com/silbinarywolf/gml-go?status.svg)](https://github.com/silbinarywolf/gml-go)
+[![Report Card](https://goreportcard.com/badge/github.com/silbinarywolf/gml-go)](https://godoc.org/github.com/silbinarywolf/gml-go)
 
-**NOTE: This is currently a hobby project and not meant for any use other than my own. If you are interested in this or use this, please let me know so I can improve documentation, tagging, etc**
+**NOTE: This project is currently undergoing a large refactoring effort to help ease workflow and serialization. I'm also aiming to improve the documentation, add examples and improve test coverage. This is still just a hobby project for now!**
 
 This is a library / framework that aims to create workflow like Game Maker, but utilizing the Go programming language.
 
@@ -18,7 +20,7 @@ go get github.com/silbinarywolf/gml-go
 
 ## Documentation
 
-* TODO when the library has progressed
+* TODO when this library has been refactored
 * [License](LICENSE.md)
 
 # Rough Roadmap
@@ -33,9 +35,8 @@ This project is mostly for fun and I have no intentions to get anything done unl
 		- This should cover installing "gofmt" / "goimports"
 	- Transitioning from GML to Golang, major / minor differences
 * Add build tools to help with:
+	- [x] Auto generating entity IDs and the like.
 	- Packing assets into texture atlases
-	- Converting Tiled maps into an internal engine format
-	- (maybe) Auto generating entity IDs and the like.
 
 ## Credits
 
