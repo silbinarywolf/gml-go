@@ -7,4 +7,4 @@ gmlgo_gen.go
 # Ignore binary for Windows
 *.exe
 # Ignore binary for Linux / Mac
-spaceship
+./spaceship
