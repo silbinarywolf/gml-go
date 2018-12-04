@@ -1,8 +1,8 @@
 # Game Maker Language Go
 
 [![Build Status](https://travis-ci.org/silbinarywolf/gml-go.svg?branch=master)](https://travis-ci.org/silbinarywolf/gml-go)
-[![Documentation](https://godoc.org/github.com/silbinarywolf/gml-go?status.svg)](https://github.com/silbinarywolf/gml-go)
-[![Report Card](https://goreportcard.com/badge/github.com/silbinarywolf/gml-go)](https://godoc.org/github.com/silbinarywolf/gml-go)
+[![Documentation](https://godoc.org/github.com/silbinarywolf/gml-go?status.svg)](https://godoc.org/github.com/silbinarywolf/gml-go)
+[![Report Card](https://goreportcard.com/badge/github.com/silbinarywolf/gml-go)](https://goreportcard.com/report/github.com/silbinarywolf/gml-go)
 
 **NOTE: This project is currently undergoing a large refactoring effort to help ease workflow and serialization. I'm also aiming to improve the documentation, add examples and improve test coverage. This is still just a hobby project for now!**
 
@@ -41,4 +41,4 @@ This project is mostly for fun and I have no intentions to get anything done unl
 ## Credits
 
 * [Hajime Hoshi](https://github.com/hajimehoshi/ebiten) for their fantastically simple 2D game library, [https://github.com/hajimehoshi/ebiten](Ebiten).
-* [Yann Le Coroller ](www.yannlecoroller.com) for their free to use Helvetica style font. 
+* [Yann Le Coroller](www.yannlecoroller.com) for their free to use Helvetica style font. 
