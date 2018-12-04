@@ -3,6 +3,12 @@ language: go
 go:
   - "1.11"
 
+# https://restic.net/blog/2018-09-02/travis-build-cache
+cache:
+  directories:
+    - $HOME/.cache/go-build
+    - $HOME/gopath/pkg/mod
+
 addons:
   apt:
     sources:
