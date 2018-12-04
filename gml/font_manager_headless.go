@@ -2,7 +2,7 @@
 
 package gml
 
-type FontManager struct {
+type fontManager struct {
 }
 
 func LoadFont(name string, settings FontSettings) *Font {

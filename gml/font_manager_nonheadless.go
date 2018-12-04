@@ -17,19 +17,17 @@ const (
 	fontDirectoryBase = "font"
 )
 
-// todo(Jake): 2018-12-02 - #26
-// Stop exposing FontManager struct
-type FontManager struct {
+type fontManager struct {
 	currentFont *Font
 	assetMap    map[string]*Font
 }
 
-func (manager *FontManager) hasFontSet() bool {
+func (manager *fontManager) hasFontSet() bool {
 	return manager.currentFont != nil && manager.currentFont.font != nil
 }
 
-func newFontManager() *FontManager {
-	return &FontManager{
+func newFontManager() *fontManager {
+	return &fontManager{
 		assetMap: make(map[string]*Font),
 	}
 }
