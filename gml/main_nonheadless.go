@@ -19,14 +19,15 @@ func Draw() {
 	gState.draw()
 }
 
-func Run(gameStartFunc func(), updateFunc func(), width int, height int, title string) {
-	gWidth = width
-	gHeight = height
+func Run(gameStartFunc func(), updateFunc func(), width int, height int, scale float64, title string) {
+	gWindowWidth = width
+	gWindowHeight = height
+	gWindowScale = scale
 
 	gMainFunctions.gameStart = gameStartFunc
 	gMainFunctions.update = updateFunc
 	gMainFunctions.gameStart()
 
 	ebiten.SetRunnableInBackground(true)
-	ebiten.Run(updateEbiten, width, height, 2, title)
+	ebiten.Run(updateEbiten, width, height, scale, title)
 }

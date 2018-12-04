@@ -1,7 +1,9 @@
-// +build !debug
-
 package gml
 
+type debugMenu int
+
 const (
-	debugMode = false
+	debugMenuNone debugMenu = 0 + iota
+	debugMenuRoomEditor
+	debugMenuAnimationEditor
 )

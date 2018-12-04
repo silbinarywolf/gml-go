@@ -1,0 +1,14 @@
+syntax = "proto3";
+package room;
+
+import "room_layer_kind.proto";
+
+message RoomLayerConfig {
+	RoomLayerKind Kind = 1;
+	string UUID = 2;
+	string Name = 3;
+	int32 Order = 4;
+
+	// RoomLayerSprite Only
+	bool HasCollision = 5;
+}

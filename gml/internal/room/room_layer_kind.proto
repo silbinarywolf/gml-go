@@ -1,0 +1,9 @@
+syntax = "proto3";
+package room;
+
+enum RoomLayerKind {
+	None = 0;
+	Instance = 1;
+	Background = 2;
+	Sprite = 3;
+}

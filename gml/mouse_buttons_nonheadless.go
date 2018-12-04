@@ -8,5 +8,5 @@ const (
 	MbLeft   int = iota + int(ebiten.MouseButtonLeft)
 	MbRight      = int(ebiten.MouseButtonRight)
 	MbMiddle     = int(ebiten.MouseButtonMiddle)
-	mbSize
+	MbSize       = int(ebiten.MouseButtonMiddle) + 1
 )

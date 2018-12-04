@@ -1,7 +1,13 @@
 language: go
 
 go:
-  - "1.10"
+  - "1.11"
+
+# https://restic.net/blog/2018-09-02/travis-build-cache
+cache:
+  directories:
+    - $HOME/.cache/go-build
+    - $HOME/gopath/pkg/mod
 
 addons:
   apt:
@@ -19,7 +25,14 @@ addons:
       - libxxf86vm-dev
 
 install:
+  # Underlying framework used
   - go get -t -v github.com/hajimehoshi/ebiten/...
+  # Used by some structures
+  - go get -t -v github.com/golang/protobuf/...
+  # Debug Mode: Live file reloading (watch files for changes)
+  - go get -t -v github.com/fsnotify/fsnotify/...
+  # Debug Mode: Used for generating UUID's for room objects, etc.
+  - go get -t -v github.com/rs/xid/...
 
 before_script:
   - export DISPLAY=:99.0
@@ -27,10 +40,15 @@ before_script:
   - sleep 3
 
 script:
-  - go build -v ./...
+  - go install -tags debug -v ./gml/...
+  - go install -tags headless -v ./gml/...
+  - go install -v ./gml/...
+  - go install -v ./cmd/gmlgo
+  - gmlgo ./examples/spaceship
+  - go build -tags debug -v ./examples/...
+  - go build -tags headless -v ./examples/...
+  - go build -v ./examples/...
+  - go test -v ./cmd/...
   # NOTE(Jake): 2018-06-20
-  #
   # No tests exist yet
-  #
-  #- go test -v ./...
-  - go vet -v ./...
+  #- go test -v ./gml/...

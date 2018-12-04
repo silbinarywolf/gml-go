@@ -2,7 +2,7 @@ syntax = "proto3";
 package room;
 
 message RoomObject {
-	string Filename = 1;
+	string UUID = 1;
     int32 ObjectIndex = 2;
     int32 X = 3;
     int32 Y = 4;

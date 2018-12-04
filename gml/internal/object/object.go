@@ -3,7 +3,7 @@ package object
 import (
 	"math"
 
-	m "github.com/silbinarywolf/gml-go/gml/internal/math"
+	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
 )
 
@@ -14,15 +14,17 @@ type ObjectType interface {
 	ObjectIndex() ObjectIndex
 	ObjectName() string
 	Create()
+	Destroy()
 	Update()
 	Draw()
 }
 
 type Object struct {
 	sprite.SpriteState // Sprite (contains SetSprite)
-	SpaceObject
-	index             int     // index in the 'entities' array
-	roomInstanceIndex int     // index of the room in the 'room' array
+	geom.Rect
+	instanceObject
+	objectIndex       ObjectIndex
+	solid             bool
 	imageAngleRadians float64 // Image Angle
 }
 
@@ -31,25 +33,29 @@ func (inst *Object) create() {
 	inst.ImageScale.Y = 1.0
 }
 
+func (inst *Object) SetSolid(isSolid bool) {
+	inst.solid = isSolid
+}
+
+func (inst *Object) Solid() bool                { return inst.solid }
 func (inst *Object) BaseObject() *Object        { return inst }
-func (inst *Object) Index() int                 { return inst.index }
-func (inst *Object) RoomInstanceIndex() int     { return inst.roomInstanceIndex }
-func (inst *Object) Pos() m.Vec                 { return inst.Vec }
+func (inst *Object) ObjectIndex() ObjectIndex   { return inst.objectIndex }
 func (inst *Object) ImageAngleRadians() float64 { return inst.imageAngleRadians }
 func (inst *Object) ImageAngle() float64        { return inst.imageAngleRadians * (180 / math.Pi) }
 
-//func (inst *Object) ImageScale() m.Vec          { return inst.imageScale }
+//func (inst *Object) ImageScale() geom.Vec          { return inst.imageScale }
 
-func (inst *Object) SetSprite(sprite *sprite.Sprite) {
-	inst.SpriteState.SetSprite(sprite)
+func (inst *Object) SetSprite(spriteIndex sprite.SpriteIndex) {
+	inst.SpriteState.SetSprite(spriteIndex)
 
 	// Infer width and height if they aren't manually set
 	// (This might be a bad idea, too magic! But feels like Game Maker, so...)
+	size := spriteIndex.Size()
 	if inst.Size.X == 0 {
-		inst.Size.X = sprite.Size().X
+		inst.Size.X = size.X
 	}
 	if inst.Size.Y == 0 {
-		inst.Size.Y = sprite.Size().Y
+		inst.Size.Y = size.Y
 	}
 }
 
@@ -59,4 +65,8 @@ func (inst *Object) SetImageAngle(angleInDegrees float64) {
 
 func (inst *Object) SetImageAngleRadians(angleInRadians float64) {
 	inst.imageAngleRadians = angleInRadians
+}
+
+func (inst *Object) CollisionInstance(otherInst ObjectType) bool {
+	return inst.Rect.CollisionRectangle(otherInst.BaseObject().Rect)
 }

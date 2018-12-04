@@ -7,12 +7,18 @@ import (
 	"io/ioutil"
 
 	"github.com/golang/freetype/truetype"
-	"github.com/hajimehoshi/ebiten/ebitenutil"
+	"github.com/silbinarywolf/gml-go/gml/internal/file"
 	"golang.org/x/image/font"
 )
 
 var g_fontManager = newFontManager()
 
+const (
+	fontDirectoryBase = "font"
+)
+
+// todo(Jake): 2018-12-02 - #26
+// Stop exposing FontManager struct
 type FontManager struct {
 	currentFont *Font
 	assetMap    map[string]*Font
@@ -36,8 +42,8 @@ func LoadFont(name string, settings FontSettings) *Font {
 		return result
 	}
 
-	path := AssetsDirectory() + "/fonts/" + name + ".ttf"
-	fileData, err := ebitenutil.OpenFile(path)
+	path := AssetDirectory() + "/" + fontDirectoryBase + "/" + name + ".ttf"
+	fileData, err := file.OpenFile(path)
 	if err != nil {
 		panic(errors.New("Unable to find font: " + path + ". Error: " + err.Error()))
 	}
@@ -46,6 +52,7 @@ func LoadFont(name string, settings FontSettings) *Font {
 	if err != nil {
 		panic(errors.New("Unable to read font file into bytes: " + path))
 	}
+	//fmt.Printf("%v\n", b)
 	tt, err := truetype.Parse(b)
 	if err != nil {
 		panic(errors.New("Unable to parse true type font file: " + path + ", err: " + err.Error()))

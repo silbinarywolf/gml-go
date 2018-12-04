@@ -6,31 +6,27 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gopherjs/gopherjs/js"
+	"github.com/gopherjs/gopherwasm/js"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
-)
-
-var (
-	ProgramDirectory string = calculateProgramDir()
 )
 
 func OpenFile(path string) (readSeekCloser, error) {
 	return ebitenutil.OpenFile(path)
 }
 
-func calculateProgramDir() string {
-	// Setup program dir
-	location := js.Global.Get("location")
-	result := location.Get("href").String()
-	result = filepath.Dir(result)
-	result = strings.TrimPrefix(result, "file:/")
-	if strings.HasPrefix(result, "http:/") {
-		result = strings.TrimPrefix(result, "http:/")
-		result = "http://" + result
+// computeProgramDirectory returns the directory or url that the executable is running from
+func computeProgramDirectory() string {
+	location := js.Global().Get("location")
+	url := location.Get("href").String()
+	url = filepath.Dir(url)
+	url = strings.TrimPrefix(url, "file:/")
+	if strings.HasPrefix(url, "http:/") {
+		url = strings.TrimPrefix(url, "http:/")
+		url = "http://" + url
 	}
-	if strings.HasPrefix(result, "https:/") {
-		result = strings.TrimPrefix(result, "https:/")
-		result = "https://" + result
+	if strings.HasPrefix(url, "https:/") {
+		url = strings.TrimPrefix(url, "https:/")
+		url = "https://" + url
 	}
-	return result
+	return url
 }

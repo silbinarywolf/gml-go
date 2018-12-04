@@ -7,16 +7,19 @@ import (
 )
 
 type SpriteFrame struct {
+	spriteFrameShared
 	width, height int
 }
 
 func (frame *SpriteFrame) Size() (width int, height int) { return frame.width, frame.height }
 
 func createFrame(frameData spriteAssetFrame) (SpriteFrame, error) {
-	return SpriteFrame{
+	r := SpriteFrame{
 		width:  int(frameData.Size.X),
 		height: int(frameData.Size.Y),
-	}, nil
+	}
+	r.init(frameData)
+	return r, nil
 }
 
 // NOTE(Jake): 2018-06-17

@@ -1,0 +1,10 @@
+# Ignore compiled asset data
+asset/**/*.data
+asset/font/*.rtf#
+# Ignore code generated files
+gmlgo_gen.go
+**/gmlgo_gen.go
+# Ignore binary for Windows
+*.exe
+# Ignore binary for Linux / Mac
+./spaceship

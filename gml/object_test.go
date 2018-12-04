@@ -17,15 +17,11 @@ func (_ *DummyPlayer) ObjectName() string { return "DummyPlayer" }
 func (inst *DummyPlayer) Create() {
 	inst.Size.X = 32
 	inst.Size.Y = 32
+	inst.SetSolid(true)
 }
 
 func (_ *DummyPlayer) Update() {}
 
-func (_ *DummyPlayer) Draw() {}
+func (_ *DummyPlayer) Destroy() {}
 
-func init() {
-	// Setup
-	ObjectInitTypes([]ObjectType{
-		ObjDummyPlayer: new(DummyPlayer),
-	})
-}
+func (_ *DummyPlayer) Draw() {}

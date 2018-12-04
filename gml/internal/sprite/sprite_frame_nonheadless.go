@@ -5,12 +5,12 @@ package sprite
 import (
 	"bytes"
 	"image"
-	"math"
 
 	"github.com/hajimehoshi/ebiten"
 )
 
 type SpriteFrame struct {
+	spriteFrameShared
 	image *ebiten.Image
 }
 
@@ -26,9 +26,11 @@ func createFrame(frameData spriteAssetFrame) (SpriteFrame, error) {
 	if err != nil {
 		return SpriteFrame{}, err
 	}
-	return SpriteFrame{
+	r := SpriteFrame{
 		image: sheet,
-	}, nil
+	}
+	r.init(frameData)
+	return r, nil
 }
 
 // NOTE(Jake): 2018-06-17
@@ -36,7 +38,7 @@ func createFrame(frameData spriteAssetFrame) (SpriteFrame, error) {
 // This is called by draw_nonheadless.go in the parent package
 // so that it can draw the image.
 //
-func GetRawFrame(spr *Sprite, index float64) *ebiten.Image {
+func GetRawFrame(spriteIndex SpriteIndex, index int) *ebiten.Image {
 	// NOTE(Jake): 2018-06-17
 	//
 	// Golang does not "cast", it uses type conversion, which means
@@ -45,6 +47,5 @@ func GetRawFrame(spr *Sprite, index float64) *ebiten.Image {
 	//
 	// https://stackoverflow.com/questions/35115868/how-to-round-to-nearest-int-when-casting-float-to-int-in-go
 	//
-	i := int(math.Floor(index))
-	return spr.frames[i].image
+	return Frames(spriteIndex)[index].image
 }

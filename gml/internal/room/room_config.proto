@@ -1,0 +1,7 @@
+syntax = "proto3";
+package room;
+
+message RoomConfig {
+	string UUID = 1;
+	string Name = 2;
+}

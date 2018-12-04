@@ -5,6 +5,7 @@ package sprite
 import (
 	"bytes"
 	"encoding/gob"
+	"encoding/json"
 	"errors"
 	"image"
 	"image/png"
@@ -15,7 +16,7 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/silbinarywolf/gml-go/gml/internal/file"
-	"github.com/silbinarywolf/gml-go/gml/internal/math"
+	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 )
 
 var (
@@ -29,6 +30,10 @@ func init() {
 		panic(err)
 	}
 	//watcher.Close()
+}
+
+func debugSpriteByName() {
+
 }
 
 func DebugWatch() {
@@ -59,18 +64,54 @@ FileWatchLoop:
 	}
 
 	// If those sprites are loaded, reload them
-	manager := g_spriteManager
 	for _, spriteName := range watcherSpritesToUpdate {
-		spr := manager.assetMap[spriteName]
-		if spr != nil {
-			newSprData := loadSprite(spriteName)
-			*spr = *newSprData
+		spriteIndex := SpriteLoadByName(spriteName)
+		if spriteIndex == SprUndefined {
+			continue
 		}
+		spr := sprite(spriteIndex)
+		newSprData := loadSprite(spriteName)
+		*spr = *newSprData
 	}
 }
 
+// DebugWriteSpriteConfig is called by the animation editor
+func DebugWriteSpriteConfig(spriteIndex SpriteIndex) error {
+	spr := sprite(spriteIndex)
+	name := spr.Name()
+	config := loadConfig(name)
+
+	// Write collision masks
+	{
+		collisionMasks := make(map[int]map[int]CollisionMask)
+		masks := make(map[int]CollisionMask)
+		for i, _ := range spr.frames {
+			mask := *GetCollisionMask(spriteIndex, i, 0)
+			if mask.Kind == CollisionMaskInherit {
+				delete(masks, i)
+			} else {
+				masks[i] = mask
+			}
+		}
+		collisionMasks[0] = masks
+		config.CollisionMasks = collisionMasks
+	}
+
+	configPath := file.AssetDirectory + "/" + SpriteDirectoryBase + "/" + name + "/config.json"
+
+	json, err := json.MarshalIndent(config, "", "\t")
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile(configPath, json, 0644)
+	if err != nil {
+		return errors.New("Unable to write sprite config out to file: " + configPath + ", error:" + err.Error())
+	}
+	return nil
+}
+
 func debugWriteSprite(name string) {
-	folderPath := file.AssetsDirectory + "/sprites/" + name + "/"
+	folderPath := file.AssetDirectory + "/" + SpriteDirectoryBase + "/" + name + "/"
 
 	// NOTE(Jake): 2018-06-18
 	//
@@ -78,6 +119,10 @@ func debugWriteSprite(name string) {
 	//
 	watcher.Remove(folderPath)
 	watcher.Add(folderPath)
+
+	// Read config information (if it exists)
+	var config spriteConfig
+	config = loadConfig(name)
 
 	// Load frames
 	//
@@ -108,23 +153,20 @@ func debugWriteSprite(name string) {
 		}
 		imageSize := image.Bounds().Size()
 		frame := spriteAssetFrame{
-			Size: math.V(float64(imageSize.X), float64(imageSize.Y)),
+			Size: geom.Vec{float64(imageSize.X), float64(imageSize.Y)},
 			Data: buf.Bytes(),
 		}
 		frames = append(frames, frame)
 	}
 
-	// Read config information (if it exists)
-	var config spriteConfig
-	configPath := folderPath + "config.json"
-	config = loadConfig(configPath)
-
 	// Create sprite
 	asset := newSpriteAsset(name, frames, config)
 
+	//
+
 	// Write to file
 	{
-		spritePath := file.AssetsDirectory + "/sprites/" + name
+		spritePath := file.AssetDirectory + "/" + SpriteDirectoryBase + "/" + name
 		var data bytes.Buffer
 		gob.NewEncoder(&data).Encode(asset)
 		err := ioutil.WriteFile(spritePath+".data", data.Bytes(), 0644)

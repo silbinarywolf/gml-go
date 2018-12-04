@@ -13,11 +13,13 @@ type spriteConfig struct {
 	// Remember! JSON unmarshal won't work on
 	// unexported fields!
 	//
-	ImageSpeed float64 `json:"ImageSpeed"`
+	ImageSpeed     float64                       `json:"ImageSpeed"`
+	CollisionMasks map[int]map[int]CollisionMask `json:"CollisionMasks"`
 }
 
-func loadConfig(path string) spriteConfig {
-	fileData, err := file.OpenFile(path)
+func loadConfig(name string) spriteConfig {
+	configPath := file.AssetDirectory + "/" + SpriteDirectoryBase + "/" + name + "/config.json"
+	fileData, err := file.OpenFile(configPath)
 	if err != nil {
 		return spriteConfig{}
 	}

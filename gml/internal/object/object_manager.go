@@ -1,14 +1,18 @@
 package object
 
-import "reflect"
+import (
+	"fmt"
+	"reflect"
+)
 
 var (
 	gObjectManager *objectManager = newObjectManager()
 )
 
 type objectManager struct {
-	idToEntityData []ObjectType
-	nameToID       map[string]ObjectIndex
+	idToEntityData  []ObjectType
+	objectIndexList []ObjectIndex
+	nameToID        map[string]ObjectIndex
 }
 
 func newObjectManager() *objectManager {
@@ -18,11 +22,12 @@ func newObjectManager() *objectManager {
 	}
 }
 
-func InitTypes(objTypes []ObjectType) {
+func InitTypes(objTypes []ObjectType, objectIndexList []ObjectIndex) {
 	manager := gObjectManager
 	if manager.idToEntityData != nil {
 		panic("Cannot call init type function more than once.")
 	}
+	manager.objectIndexList = objectIndexList
 	manager.idToEntityData = objTypes
 	for _, objType := range objTypes {
 		if objType == nil {
@@ -30,8 +35,17 @@ func InitTypes(objTypes []ObjectType) {
 		}
 		name := objType.ObjectName()
 		objectIndex := objType.ObjectIndex()
+		otherID, used := manager.nameToID[name]
+		if used {
+			otherType := manager.idToEntityData[otherID]
+			panic(fmt.Sprintf("You cannot have two objects with the same object name.\n- %T::ObjectName() == %s\n- %T::ObjectName() == %s", objType, objType.ObjectName(), otherType, otherType.ObjectName()))
+		}
 		manager.nameToID[name] = objectIndex
 	}
+}
+
+func ObjectIndexList() []ObjectIndex {
+	return gObjectManager.objectIndexList
 }
 
 func IDToEntityData() []ObjectType {
@@ -45,8 +59,26 @@ func NameToID() map[string]ObjectIndex {
 	return gObjectManager.nameToID
 }
 
-func NewRawInstance(objectIndex ObjectIndex, index int, roomInstanceIndex int, space *Space, spaceIndex int) ObjectType {
-	// Create
+func MoveInstance(inst ObjectType, index int, roomInstanceIndex int, layerIndex int) {
+	// Initialize object
+	baseObj := inst.BaseObject()
+	baseObj.index = index
+	baseObj.roomInstanceIndex = roomInstanceIndex
+	baseObj.layerInstanceIndex = layerIndex
+}
+
+func NewRawInstance(objectIndex ObjectIndex, index int, roomInstanceIndex int, layerIndex int) ObjectType {
+	valToCopy := gObjectManager.idToEntityData[objectIndex]
+	if valToCopy == nil {
+		panic("Invalid objectIndex given")
+	}
+	inst := reflect.New(reflect.ValueOf(valToCopy).Elem().Type()).Interface().(ObjectType)
+	MoveInstance(inst, index, roomInstanceIndex, layerIndex)
+	baseObj := inst.BaseObject()
+	baseObj.objectIndex = objectIndex
+	baseObj.create()
+	return inst
+	/*// Create
 	valToCopy := gObjectManager.idToEntityData[objectIndex]
 	inst := reflect.New(reflect.ValueOf(valToCopy).Elem().Type()).Interface().(ObjectType)
 
@@ -54,6 +86,7 @@ func NewRawInstance(objectIndex ObjectIndex, index int, roomInstanceIndex int, s
 	baseObj := inst.BaseObject()
 	baseObj.index = index
 	baseObj.roomInstanceIndex = roomInstanceIndex
+	baseObj.layerInstanceIndex = layerIndex
 	// todo(Jake): 2018-07-08
 	//
 	// Figure out a cleaner way to handle this functionality across
@@ -61,11 +94,8 @@ func NewRawInstance(objectIndex ObjectIndex, index int, roomInstanceIndex int, s
 	//
 	// Perhaps force objects to have to be created via an instance manager.
 	//
-	baseObj.Space = space
-	baseObj.spaceIndex = spaceIndex
-	baseObj.create()
-
-	return inst
+	baseObj.SpaceObject.Init(space, spaceIndex)
+	baseObj.create()*/
 }
 
 func ObjectGetIndex(name string) (ObjectIndex, bool) {

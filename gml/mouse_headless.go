@@ -3,7 +3,7 @@
 package gml
 
 import (
-	"github.com/silbinarywolf/gml-go/gml/internal/math"
+	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 )
 
 func MouseCheckButton(button int) bool {
@@ -15,11 +15,15 @@ func MouseCheckPressed(button int) bool {
 }
 
 func MousePosition() Vec {
-	return math.V(0, 0)
+	return geom.Vec{}
 }
 
-func mousePosition() math.Vec {
-	return math.V(0, 0)
+func mousePosition() geom.Vec {
+	return geom.Vec{}
+}
+
+func mouseScreenPosition() Vec {
+	return geom.Vec{}
 }
 
 func mouseUpdate() {

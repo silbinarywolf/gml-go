@@ -6,5 +6,5 @@ const (
 	MbLeft int = iota + 0
 	MbRight
 	MbMiddle
-	mbSize
+	MbSize
 )
