@@ -33,7 +33,14 @@ func GameStart() {
 	// Change CameraCreate to use geom.Size for w/h
 	gml.CameraCreate(0, 0, 0, float64(gml.WindowWidth()), float64(gml.WindowHeight()))
 	gameWorld.CurrentRoomIndex = gml.RoomInstanceNew()
-	gml.InstanceCreateRoom(gml.Vec{float64(gml.WindowWidth()) / 2, float64(gml.WindowHeight()) / 2}, gameWorld.CurrentRoomIndex, ObjPlayer)
+
+	// todo(Jake): 2018-12-06 - #38
+	// Add function to get RoomSize from RoomIndex
+	// (once gml.RoomIndex is implemented)
+	startPos := gml.WindowSize().Vec()
+	startPos.X /= 2
+	startPos.Y /= 2
+	gml.InstanceCreateRoom(startPos, gameWorld.CurrentRoomIndex, ObjPlayer)
 }
 
 func GameUpdate() {

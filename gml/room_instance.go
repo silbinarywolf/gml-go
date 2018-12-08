@@ -2,12 +2,13 @@ package gml
 
 import (
 	"github.com/silbinarywolf/gml-go/gml/internal/object"
+	"github.com/silbinarywolf/gml-go/gml/internal/room"
 )
 
 type RoomInstance struct {
 	used  bool
 	index int
-	room  *Room
+	room  *room.Room
 
 	instanceLayers []roomInstanceLayerInstance
 	spriteLayers   []roomInstanceLayerSprite
@@ -32,7 +33,7 @@ func RoomInstanceNew() int {
 
 // RoomInstanceCreate will create a new instance of the room given
 // todo(Jake): 2018-12-01: #6: Change *Room to be gml.RoomIndex
-func todo__roomInstanceCreate(room *Room) int {
+func todo__roomInstanceCreate(room *room.Room) int {
 	roomInst := gState.createNewRoomInstance(room)
 	return roomInst.index
 }

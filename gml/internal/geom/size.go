@@ -12,6 +12,6 @@ type Size struct {
 	X, Y int32
 }
 
-func (s *Size) Vec() Vec {
+func (s Size) Vec() Vec {
 	return Vec{float64(s.X), float64(s.Y)}
 }

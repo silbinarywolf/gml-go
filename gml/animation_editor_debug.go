@@ -207,7 +207,7 @@ func animationEditorUpdate() {
 
 	if spriteIndex := editor.spriteViewing.SpriteIndex(); spriteIndex.IsValid() {
 		size := spriteIndex.Size()
-		pos := geom.Vec{float64(windowWidth()/2) - (float64(size.X) / 2), float64(windowHeight()/2) - (float64(size.Y) / 2)}
+		pos := geom.Vec{float64(WindowWidth()/2) - (float64(size.X) / 2), float64(WindowHeight()/2) - (float64(size.Y) / 2)}
 
 		{
 			// Draw backdrop
@@ -359,7 +359,7 @@ func animationEditorUpdate() {
 	}
 
 	if spriteIndex := editor.spriteViewing.SpriteIndex(); spriteIndex.IsValid() {
-		basePos := geom.Vec{(float64(windowWidth()) / 2) - 140, float64(windowHeight())}
+		basePos := geom.Vec{(float64(WindowWidth()) / 2) - 140, float64(WindowHeight())}
 		basePos.Y -= 210
 
 		imageIndex := int(math.Floor(editor.spriteViewing.ImageIndex()))

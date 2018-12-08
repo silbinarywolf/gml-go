@@ -40,8 +40,8 @@ func newCameraState() *cameraManager {
 }
 
 func (view *camera) Reset() {
-	view.size.X = float64(windowWidth())
-	view.size.Y = float64(windowHeight())
+	view.size.X = float64(WindowWidth())
+	view.size.Y = float64(WindowHeight())
 	view.scale.X = 1
 	view.scale.Y = 1
 }

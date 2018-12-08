@@ -1,6 +1,7 @@
 package gml
 
 import (
+	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 	"github.com/silbinarywolf/gml-go/gml/internal/timegml"
 )
 
@@ -57,12 +58,20 @@ func update() error {
 
 	// NOTE(Jake): 2018-09-29
 	// Ignoring when 0 is reported. This happens on Windows
-	// and just makes the frame usage timer annoying.
+	// and just makes the frame usage timer completely helpful.
+	// Not a good workaround.
 	frameBudgetUsed := timegml.Now() - frameStartTime
 	if frameBudgetUsed > 0 {
 		gState.frameBudgetNanosecondsUsed = frameBudgetUsed
 	}
 	return nil
+}
+
+func WindowSize() geom.Size {
+	return geom.Size{
+		X: int32(gWindowWidth),
+		Y: int32(gWindowHeight),
+	}
 }
 
 func WindowWidth() int {
@@ -74,21 +83,6 @@ func WindowHeight() int {
 }
 
 func WindowScale() float64 {
-	return gWindowScale
-}
-
-// todo: replace windowWidth() with WindowWidth()
-func windowWidth() int {
-	return gWindowWidth
-}
-
-// todo: replace windowHeight() with WindowHeight()
-func windowHeight() int {
-	return gWindowHeight
-}
-
-// todo: replace windowScale() with WindowScale()
-func windowScale() float64 {
 	return gWindowScale
 }
 

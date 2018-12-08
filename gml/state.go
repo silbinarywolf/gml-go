@@ -6,6 +6,7 @@ import (
 
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 	"github.com/silbinarywolf/gml-go/gml/internal/object"
+	"github.com/silbinarywolf/gml-go/gml/internal/room"
 	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
 )
 
@@ -55,7 +56,7 @@ func IsCreatingRoomInstance() bool {
 	return gState.isCreatingRoomInstance
 }
 
-func (state *state) createNewRoomInstance(room *Room) *RoomInstance {
+func (state *state) createNewRoomInstance(room *room.Room) *RoomInstance {
 	state.roomInstances = append(state.roomInstances, RoomInstance{
 		used: true,
 		room: room,

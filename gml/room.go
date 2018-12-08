@@ -6,8 +6,8 @@ import (
 
 // todo(Jake): 2018-12-01
 // Remove this, change LoadRoom functions to return gml.RoomIndex
-type Room = room.Room
+//type Room = room.Room
 
-func LoadRoom(name string) *Room {
+func LoadRoom(name string) *room.Room {
 	return room.LoadRoom(name)
 }
