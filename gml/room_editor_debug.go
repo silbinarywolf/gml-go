@@ -210,7 +210,7 @@ func EditorSetRoom(room *Room) {
 	}
 }
 */
-func (roomEditor *roomEditor) editorChangeRoom(room *Room) bool {
+func (roomEditor *roomEditor) editorChangeRoom(room *room.Room) bool {
 	if roomEditor.editingRoom == room {
 		// If no changes
 		return false
@@ -238,7 +238,7 @@ func (roomEditor *roomEditor) editorChangeRoom(room *Room) bool {
 	// editor. Retain the same camera position.
 	//
 	roomEditor.camPos = CameraGetViewPos(0)
-	CameraSetViewSize(0, geom.Vec{float64(windowWidth()), float64(windowHeight())})
+	CameraSetViewSize(0, geom.Vec{float64(WindowWidth()), float64(WindowHeight())})
 	CameraSetViewTarget(0, nil)
 	return true
 }
@@ -633,8 +633,8 @@ func editorUpdate() {
 				roomEditor.gridEnabled {
 				DrawSetGUI(true)
 				cameraPos := CameraGetViewPos(0)
-				windowWidth := float64(windowWidth())
-				windowHeight := float64(windowHeight())
+				windowWidth := float64(WindowWidth())
+				windowHeight := float64(WindowHeight())
 				xOffset := math.Mod(cameraPos.X, grid.X)
 				yOffset := math.Mod(cameraPos.Y, grid.Y)
 				for y := 0.0; y < windowHeight+grid.Y; y += grid.Y {
@@ -1167,7 +1167,7 @@ func editorUpdate() {
 
 				//
 				ui := geom.Vec{
-					X: float64(windowWidth()) / 2,
+					X: float64(WindowWidth()) / 2,
 					Y: 32,
 				}
 				typingText := KeyboardString()
@@ -1283,7 +1283,7 @@ func editorUpdate() {
 
 				//
 				ui := geom.Vec{
-					X: float64(windowWidth()) / 2,
+					X: float64(WindowWidth()) / 2,
 					Y: 32,
 				}
 				{
