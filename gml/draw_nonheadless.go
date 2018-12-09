@@ -80,20 +80,19 @@ func DrawRectangleBorder(position geom.Vec, size geom.Vec, color color.Color, bo
 }
 
 func DrawText(position geom.Vec, message string) {
-	if !g_fontManager.hasFontSet() {
-		panic("Must call DrawSetFont() before calling DrawText.")
-	}
-	position = maybeApplyOffsetByCamera(position)
-	text.Draw(drawGetTarget(), message, g_fontManager.currentFont.font, int(position.X), int(position.Y), color.White)
+	DrawTextColor(position, message, color.White)
 }
 
 func DrawTextColor(position geom.Vec, message string, col color.Color) {
-	if !g_fontManager.hasFontSet() {
+	if !hasFontSet() {
 		panic("Must call DrawSetFont() before calling DrawText.")
 	}
-	position = maybeApplyOffsetByCamera(position)
-	text.Draw(drawGetTarget(), message, g_fontManager.currentFont.font, int(position.X), int(position.Y), col)
+	text.Draw(drawGetTarget(), message, fontFont(gFontManager.currentFont), int(position.X), int(position.Y), col)
 }
+
+/*func drawText(font FontIndex, message string) {
+	text.Draw(drawGetTarget(), message, fontFont(gFontManager.currentFont), int(position.X), int(position.Y), color.White)
+}*/
 
 func DrawTextF(position Vec, format string, args ...interface{}) {
 	DrawText(position, fmt.Sprintf(format, args...))

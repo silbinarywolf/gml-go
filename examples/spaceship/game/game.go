@@ -20,13 +20,7 @@ type GameWorld struct {
 }
 
 func GameStart() {
-	// todo(Jake): 2018-11-24 - #15
-	// - Simplify this so that you can just pass "asset.AlteHaasGroteskRegular"?
-	// - Change LoadFont to return FontIndex
-	gml.DrawSetFont(gml.LoadFont("AlteHaasGroteskRegular", gml.FontSettings{
-		Size: 16, // 12pt == 16px
-		DPI:  96,
-	}))
+	gml.DrawSetFont(FntDefault)
 
 	// Setup camera
 	// todo(Jake): 2018-11-24 - #3

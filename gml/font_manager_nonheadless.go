@@ -3,6 +3,7 @@
 package gml
 
 import (
+	"encoding/json"
 	"errors"
 	"io/ioutil"
 
@@ -11,36 +12,89 @@ import (
 	"golang.org/x/image/font"
 )
 
-var g_fontManager = newFontManager()
+var gFontManager = newFontManager()
 
 const (
 	fontDirectoryBase = "font"
+	fontDefaultSize   = 16
+	fontDefaultDPI    = 96
 )
 
 type fontManager struct {
-	currentFont *Font
-	assetMap    map[string]*Font
+	currentFont      FontIndex
+	assetList        []fontData
+	assetNameToIndex map[string]FontIndex
+	assetIndexToName []string
 }
 
-func (manager *fontManager) hasFontSet() bool {
-	return manager.currentFont != nil && manager.currentFont.font != nil
+type fontConfig struct {
+	Name     string  `json:Name`
+	FontSize float64 `json:FontSize`
+	DPI      float64 `json:DPI`
+}
+
+func hasFontSet() bool {
+	return gFontManager.currentFont != fntUndefined
 }
 
 func newFontManager() *fontManager {
-	return &fontManager{
-		assetMap: make(map[string]*Font),
-	}
+	return &fontManager{}
 }
 
-func LoadFont(name string, settings FontSettings) *Font {
-	manager := g_fontManager
+// FontInitializeIndexToName is not used for headless builds
+func FontInitializeIndexToName(indexToName []string, nameToIndex map[string]FontIndex) {
+	gFontManager.assetIndexToName = indexToName
+	gFontManager.assetNameToIndex = nameToIndex
+	gFontManager.assetList = make([]fontData, len(gFontManager.assetIndexToName))
+}
 
-	// Use already loaded asset
-	if result, ok := manager.assetMap[name]; ok {
-		return result
+func fontFont(fontIndex FontIndex) font.Face {
+	fontData := &gFontManager.assetList[fontIndex]
+	if fontData.font == nil {
+		return nil
+	}
+	return fontData.font
+}
+
+func fontLoad(fontIndex FontIndex) {
+	fontData := &gFontManager.assetList[fontIndex]
+
+	// If already loaded, return early
+	if fontData.font != nil {
+		return
 	}
 
-	path := AssetDirectory() + "/" + fontDirectoryBase + "/" + name + ".ttf"
+	name := gFontManager.assetIndexToName[fontIndex]
+
+	// Load font config
+	config := fontConfig{}
+	{
+		configPath := AssetDirectory() + "/" + fontDirectoryBase + "/" + name + "/config.json"
+		fileData, err := file.OpenFile(configPath)
+		if err != nil {
+			panic(errors.New("Unable to find font: " + configPath + ". Error: " + err.Error()))
+		}
+		bytes, err := ioutil.ReadAll(fileData)
+		if err != nil {
+			panic("Error loading load config.json for font: " + configPath + "\n" + "Error: " + err.Error())
+		}
+		if err := json.Unmarshal(bytes, &config); err != nil {
+			panic("Error unmarshalling load config.json for font: " + configPath + "\n" + "Error: " + err.Error())
+		}
+		if config.Name == "" {
+			panic("Missing \"Name\" from " + configPath)
+		}
+		// Setup defaults
+		if config.FontSize == 0 {
+			config.FontSize = fontDefaultSize
+		}
+		if config.DPI == 0 {
+			config.DPI = fontDefaultDPI
+		}
+	}
+
+	// Load ttf
+	path := AssetDirectory() + "/" + fontDirectoryBase + "/data/" + config.Name
 	fileData, err := file.OpenFile(path)
 	if err != nil {
 		panic(errors.New("Unable to find font: " + path + ". Error: " + err.Error()))
@@ -50,27 +104,17 @@ func LoadFont(name string, settings FontSettings) *Font {
 	if err != nil {
 		panic(errors.New("Unable to read font file into bytes: " + path))
 	}
-	//fmt.Printf("%v\n", b)
 	tt, err := truetype.Parse(b)
 	if err != nil {
 		panic(errors.New("Unable to parse true type font file: " + path + ", err: " + err.Error()))
 	}
 
 	// Setup defaults
-	if settings.DPI == 0 {
-		settings.DPI = 72
-	}
-	if settings.Size == 0 {
-		settings.Size = 12 // 12pt == 16px
-	}
 	font := truetype.NewFace(tt, &truetype.Options{
-		Size:    settings.Size,
-		DPI:     settings.DPI,
+		Size:    config.FontSize, // 16px if DPI is 96
+		DPI:     config.DPI,
 		Hinting: font.HintingFull,
 	})
 
-	result := new(Font)
-	result.font = font
-	manager.assetMap[name] = result
-	return result
+	fontData.font = font
 }

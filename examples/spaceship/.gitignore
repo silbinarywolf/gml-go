@@ -1,6 +1,6 @@
 # Ignore compiled asset data
 asset/**/*.data
-asset/font/*.rtf#
+asset/font/data/*.rtf#
 # Ignore code generated files
 gmlgo_gen.go
 **/gmlgo_gen.go
