@@ -28,20 +28,20 @@ func (spr *Sprite) rect() geom.Rect {
 
 type SpriteIndex int32
 
-func (spriteIndex SpriteIndex) Name() string    { return g_spriteManager.assetList[spriteIndex].name }
-func (spriteIndex SpriteIndex) Size() geom.Size { return g_spriteManager.assetList[spriteIndex].size }
+func (spriteIndex SpriteIndex) Name() string    { return gSpriteManager.assetList[spriteIndex].name }
+func (spriteIndex SpriteIndex) Size() geom.Size { return gSpriteManager.assetList[spriteIndex].size }
 func (spriteIndex SpriteIndex) ImageSpeed() float64 {
-	return g_spriteManager.assetList[spriteIndex].imageSpeed
+	return gSpriteManager.assetList[spriteIndex].imageSpeed
 }
 func (spriteIndex SpriteIndex) IsValid() bool {
 	return spriteIndex > 0
 }
 func (spriteIndex SpriteIndex) IsLoaded() bool {
-	return len(g_spriteManager.assetList[spriteIndex].frames) > 0
+	return len(gSpriteManager.assetList[spriteIndex].frames) > 0
 }
 
 func Frames(spriteIndex SpriteIndex) []SpriteFrame {
-	return g_spriteManager.assetList[spriteIndex].frames
+	return gSpriteManager.assetList[spriteIndex].frames
 }
 
 /*func (spr *Sprite) GetFrame(index int) *SpriteFrame {

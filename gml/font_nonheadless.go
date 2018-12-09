@@ -2,28 +2,28 @@
 
 package gml
 
-import (
-	"golang.org/x/image/font"
-)
+import "golang.org/x/image/font"
 
-type Font struct {
+type fontData struct {
 	font font.Face
 }
 
-// NOTE(Jake): 2018-06-02
-//
-// Technically related to font code, so I'll put it here for now
-//
-func StringWidth(text string) float64 {
-	currentFont := g_fontManager.currentFont
-	if currentFont == nil {
-		return 0
+// DrawSetFont() will set the font to be used for DrawText functions
+func DrawSetFont(font FontIndex) {
+	fontData := &gFontManager.assetList[font]
+	if fontData.font == nil {
+		// Load font if not yet loaded
+		fontLoad(font)
 	}
-	face := currentFont.font
-	x := font.MeasureString(face, text)
-	return float64(x.Round())
+	gFontManager.currentFont = font
 }
 
-func DrawSetFont(font *Font) {
-	g_fontManager.currentFont = font
+// StringWidth() will return the width of the input string in pixels.
+func StringWidth(text string) float64 {
+	fontFace := fontFont(gFontManager.currentFont)
+	if fontFace == nil {
+		return 0
+	}
+	x := font.MeasureString(fontFace, text)
+	return float64(x.Round())
 }

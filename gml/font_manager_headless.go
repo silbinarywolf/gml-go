@@ -2,9 +2,6 @@
 
 package gml
 
-type fontManager struct {
-}
-
-func LoadFont(name string, settings FontSettings) *Font {
-	return nil
+func FontLoad(name string) FontIndex {
+	return fntUndefined
 }
