@@ -37,20 +37,9 @@ func DrawSpriteScaled(spriteIndex sprite.SpriteIndex, subimage float64, position
 	DrawSpriteExt(spriteIndex, subimage, position, scale, 1.0)
 }
 
-// draw_sprite_ext( sprite, subimg, x, y, xscale, yscale, rot, colour, alpha );
 func DrawSpriteExt(spriteIndex sprite.SpriteIndex, subimage float64, position geom.Vec, scale geom.Vec, alpha float64) {
+	// draw_sprite_ext( sprite, subimg, x, y, xscale, yscale, rot, colour, alpha );
 	position = maybeApplyOffsetByCamera(position)
-	// NOTE(Jake): 2018-07-09
-	//
-	// This doesn't work. A cleaner solution might be to
-	// render everything to a seperate image if possible then
-	// scale that and render.
-	//
-	// Since this is only really needed for the map editor, I dont
-	// have a problem with it.
-	//
-	//scale.X *= view.Scale().X
-	//scale.Y *= view.Scale().Y
 
 	frame := sprite.GetRawFrame(spriteIndex, int(math.Floor(subimage)))
 	op := ebiten.DrawImageOptions{}

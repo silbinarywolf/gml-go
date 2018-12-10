@@ -12,28 +12,28 @@ type Bullet struct {
 	Owner gml.ObjectType
 }
 
-func (inst *Bullet) Create() {
-	inst.SetSprite(SprBullet)
+func (self *Bullet) Create() {
+	self.SetSprite(SprBullet)
 }
 
-func (inst *Bullet) Destroy() {
+func (self *Bullet) Destroy() {
 
 }
 
-func (inst *Bullet) Update() {
-	inst.Y -= 8
+func (self *Bullet) Update() {
+	self.Y -= 8
 
-	for _, other := range gml.CollisionRectList(inst, inst.Pos()) {
+	for _, other := range gml.CollisionRectList(self, self.Pos()) {
 		other, ok := other.(*EnemyShip)
 		if !ok {
 			continue
 		}
-		owner := inst.Owner.(*Player)
+		owner := self.Owner.(*Player)
 		owner.Score += 1
 		gml.InstanceDestroy(other)
 	}
 }
 
-func (inst *Bullet) Draw() {
-	gml.DrawSelf(&inst.SpriteState, inst.Pos())
+func (self *Bullet) Draw() {
+	gml.DrawSelf(&self.SpriteState, self.Pos())
 }

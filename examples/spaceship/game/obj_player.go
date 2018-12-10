@@ -12,39 +12,39 @@ type Player struct {
 	Score            int
 }
 
-func (inst *Player) Create() {
-	inst.SetSprite(SprSpaceship)
+func (self *Player) Create() {
+	self.SetSprite(SprSpaceship)
 }
 
-func (inst *Player) Destroy() {
+func (self *Player) Destroy() {
 }
 
-func (inst *Player) Update() {
-	if inst.enemyCreateAlarm.Update(60) {
+func (self *Player) Update() {
+	if self.enemyCreateAlarm.Update(60) {
 		// Spawn enemies at the top of the frame, every 60 frames
-		gml.InstanceCreateRoom(gml.Vec{float64(rand.Intn(gml.WindowWidth())), 0}, gameWorld.CurrentRoomIndex, ObjEnemyShip)
+		gml.InstanceCreateRoom(gml.Vec{float64(rand.Intn(gml.WindowWidth())), 0}, global.CurrentRoomIndex, ObjEnemyShip)
 	}
 
 	if gml.KeyboardCheck(gml.VkLeft) {
-		inst.X -= 8
+		self.X -= 8
 	}
 	if gml.KeyboardCheck(gml.VkRight) {
-		inst.X += 8
+		self.X += 8
 	}
 	if gml.KeyboardCheck(gml.VkUp) {
-		inst.Y -= 8
+		self.Y -= 8
 	}
 	if gml.KeyboardCheck(gml.VkDown) {
-		inst.Y += 8
+		self.Y += 8
 	}
 	if gml.KeyboardCheckPressed(gml.VkSpace) {
-		bullet := gml.InstanceCreateRoom(inst.Pos(), gameWorld.CurrentRoomIndex, ObjBullet).(*Bullet)
-		bullet.Owner = inst
+		bullet := gml.InstanceCreateRoom(self.Pos(), global.CurrentRoomIndex, ObjBullet).(*Bullet)
+		bullet.Owner = self
 	}
 }
 
-func (inst *Player) Draw() {
-	gml.DrawSelf(&inst.SpriteState, inst.Pos())
+func (self *Player) Draw() {
+	gml.DrawSelf(&self.SpriteState, self.Pos())
 
-	gml.DrawTextF(gml.Vec{0, 32}, "Score: %d", inst.Score)
+	gml.DrawTextF(gml.Vec{0, 32}, "Score: %d", self.Score)
 }

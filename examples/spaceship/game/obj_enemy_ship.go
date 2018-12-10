@@ -8,19 +8,19 @@ type EnemyShip struct {
 	gml.Object
 }
 
-func (inst *EnemyShip) Create() {
-	inst.SetSprite(SprSpaceship)
-	inst.ImageScale.Y = -1
+func (self *EnemyShip) Create() {
+	self.SetSprite(SprSpaceship)
+	self.ImageScale.Y = -1
 }
 
-func (inst *EnemyShip) Destroy() {
+func (self *EnemyShip) Destroy() {
 
 }
 
-func (inst *EnemyShip) Update() {
-	inst.Y += 8
+func (self *EnemyShip) Update() {
+	self.Y += 8
 }
 
-func (inst *EnemyShip) Draw() {
-	gml.DrawSelf(&inst.SpriteState, inst.Pos())
+func (self *EnemyShip) Draw() {
+	gml.DrawSelf(&self.SpriteState, self.Pos())
 }
