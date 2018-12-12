@@ -1,12 +1,6 @@
 package gml
 
-import (
-	"reflect"
-
-	"github.com/silbinarywolf/gml-go/gml/internal/object"
-)
-
-type instanceIteratorObjectState struct {
+/*type instanceIteratorObjectState struct {
 	roomInstanceIndex int
 	layerIndex        int
 	instanceIndex     int
@@ -55,4 +49,4 @@ loop:
 
 func (iterator *instanceIteratorObjectState) Value() object.ObjectType {
 	return gState.roomInstances[iterator.roomInstanceIndex].instanceLayers[iterator.layerIndex].manager.instances[iterator.instanceIndex]
-}
+}*/

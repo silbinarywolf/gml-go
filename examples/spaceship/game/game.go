@@ -16,7 +16,7 @@ var (
 type Globals struct {
 	// todo(Jake): 2018-11-24 - #6
 	// Change int to gml.RoomIndex
-	CurrentRoomIndex int
+	//CurrentRoomIndex int
 }
 
 func GameStart() {
@@ -26,7 +26,7 @@ func GameStart() {
 	// todo(Jake): 2018-11-24 - #3
 	// Change CameraCreate to use geom.Size for w/h
 	gml.CameraCreate(0, 0, 0, float64(gml.WindowWidth()), float64(gml.WindowHeight()))
-	global.CurrentRoomIndex = gml.RoomInstanceNew()
+	currentRoomIndex := gml.RoomInstanceNew()
 
 	// todo(Jake): 2018-12-06 - #38
 	// Add function to get RoomSize from RoomIndex
@@ -34,7 +34,7 @@ func GameStart() {
 	startPos := gml.WindowSize().Vec()
 	startPos.X /= 2
 	startPos.Y /= 2
-	gml.InstanceCreateRoom(startPos, global.CurrentRoomIndex, ObjPlayer)
+	gml.InstanceCreateRoom(startPos, currentRoomIndex, ObjPlayer)
 }
 
 func GameUpdate() {

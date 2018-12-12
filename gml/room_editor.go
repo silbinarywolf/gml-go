@@ -14,8 +14,6 @@ func EditorIsInitialized() bool {
 func EditorSetRoom(room *Room) {
 }*/
 
-func editorLazyInit() {
-}
+func editorLazyInit() {}
 
-func editorUpdate() {
-}
+func editorUpdate() {}

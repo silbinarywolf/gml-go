@@ -1,13 +1,14 @@
 package gml
 
 import (
-	"github.com/silbinarywolf/gml-go/gml/internal/object"
 	"github.com/silbinarywolf/gml-go/gml/internal/room"
 )
 
-type RoomInstance struct {
+type RoomInstanceIndex int32
+
+type roomInstance struct {
 	used  bool
-	index int
+	index RoomInstanceIndex
 	room  *room.Room
 
 	instanceLayers []roomInstanceLayerInstance
@@ -26,35 +27,30 @@ type RoomInstance struct {
 }*/
 
 // RoomInstanceNew create a new empty room instance programmatically
-func RoomInstanceNew() int {
+func RoomInstanceNew() RoomInstanceIndex {
 	roomInst := gState.createNewRoomInstance(nil)
 	return roomInst.index
 }
 
 // RoomInstanceCreate will create a new instance of the room given
 // todo(Jake): 2018-12-01: #6: Change *Room to be gml.RoomIndex
-func todo__roomInstanceCreate(room *room.Room) int {
+func todo__roomInstanceCreate(room *room.Room) RoomInstanceIndex {
 	roomInst := gState.createNewRoomInstance(room)
 	return roomInst.index
 }
 
 // RoomInstanceDestroy destroys a room instance
-func RoomInstanceDestroy(roomInstanceIndex int) {
+func RoomInstanceDestroy(roomInstanceIndex RoomInstanceIndex) {
 	roomInst := &gState.roomInstances[roomInstanceIndex]
 	gState.deleteRoomInstance(roomInst)
 }
 
-// todo(Jake): 2018-12-01: Github #19: Remove this
-func (roomInst *RoomInstance) Index() int {
-	return roomInst.index
-}
-
 type roomInstanceObject interface {
-	BaseObject() *object.Object
+	BaseObject() *Object
 }
 
-/*func RoomInstanceInstances(inst roomInstanceObject) []object.ObjectType {
-	roomInstanceIndex := object.RoomInstanceIndex(inst.BaseObject())
+/*func RoomInstanceInstances(inst roomInstanceObject) []ObjectType {
+	roomInstanceIndex := RoomInstanceIndex(inst.BaseObject())
 	roomInst := RoomGetInstance(roomInstanceIndex)
 	if roomInst == nil {
 		return nil
@@ -63,7 +59,7 @@ type roomInstanceObject interface {
 	return instanceLayer.manager.instances
 }*/
 
-func roomGetInstance(roomInstanceIndex int) *RoomInstance {
+func roomGetInstance(roomInstanceIndex RoomInstanceIndex) *roomInstance {
 	roomInst := &gState.roomInstances[roomInstanceIndex]
 	if roomInst.used {
 		return roomInst
@@ -71,13 +67,13 @@ func roomGetInstance(roomInstanceIndex int) *RoomInstance {
 	return nil
 }
 
-func (roomInst *RoomInstance) update(animationUpdate bool) {
+func (roomInst *roomInstance) update(animationUpdate bool) {
 	for _, layer := range roomInst.instanceLayers {
 		layer.update(animationUpdate)
 	}
 }
 
-func (roomInst *RoomInstance) draw() {
+func (roomInst *roomInstance) draw() {
 	for _, layer := range roomInst.drawLayers {
 		layer.draw()
 	}

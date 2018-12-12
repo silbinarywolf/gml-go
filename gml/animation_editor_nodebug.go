@@ -2,6 +2,4 @@
 
 package gml
 
-func animationEditorUpdate() {
-
-}
+func animationEditorUpdate() {}

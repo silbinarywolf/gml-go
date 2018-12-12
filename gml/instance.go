@@ -2,11 +2,41 @@ package gml
 
 import (
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
-	"github.com/silbinarywolf/gml-go/gml/internal/object"
 )
 
 type instanceManager struct {
-	instances []object.ObjectType
+	instances []ObjectType
+}
+
+type instanceObject struct {
+	isDestroyed        bool
+	index              int               // index in the 'entities' array
+	roomInstanceIndex  RoomInstanceIndex // Room Instance Index belongs to
+	layerInstanceIndex int               // Layer belongs to
+}
+
+func (inst *Object) RoomInstanceIndex() RoomInstanceIndex {
+	return inst.roomInstanceIndex
+}
+
+func IsDestroyed(inst *Object) bool {
+	return inst.isDestroyed
+}
+
+func MarkAsDestroyed(inst *Object) {
+	inst.isDestroyed = true
+}
+
+func SetInstanceIndex(inst *Object, index int) {
+	inst.index = index
+}
+
+func InstanceIndex(inst *Object) int {
+	return inst.index
+}
+
+func LayerInstanceIndex(inst *Object) int {
+	return inst.layerInstanceIndex
 }
 
 func newInstanceManager() *instanceManager {
@@ -19,16 +49,16 @@ func (manager *instanceManager) reset() {
 	*manager = instanceManager{}
 }
 
-func instanceCreateLayer(position geom.Vec, layer *roomInstanceLayerInstance, roomInst *RoomInstance, objectIndex object.ObjectIndex) object.ObjectType {
-	return layer.manager.InstanceCreate(position, objectIndex, roomInst.Index(), layer.index)
+func instanceCreateLayer(position geom.Vec, layer *roomInstanceLayerInstance, roomInst *roomInstance, objectIndex ObjectIndex) ObjectType {
+	return layer.manager.InstanceCreate(position, objectIndex, roomInst.index, layer.index)
 }
 
-func InstanceGet(index object.ObjectIndex) object.ObjectType {
+func InstanceGet(index ObjectIndex) ObjectType {
 	panic("todo: Implement InstanceGet()")
 	return nil
 }
 
-func InstanceChangeRoom(inst object.ObjectType, roomInstanceIndex int) {
+func InstanceChangeRoom(inst ObjectType, roomInstanceIndex int) {
 	roomInst := &gState.roomInstances[roomInstanceIndex]
 	if !roomInst.used {
 		return
@@ -39,20 +69,20 @@ func InstanceChangeRoom(inst object.ObjectType, roomInstanceIndex int) {
 	layer := &roomInst.instanceLayers[layerIndex]
 
 	instanceRemove(inst)
-	layer.manager.instanceAdd(inst, roomInst.Index(), layer.index)
+	layer.manager.instanceAdd(inst, roomInst.index, layer.index)
 }
 
-func InstanceCreateRoom(position geom.Vec, roomInstanceIndex int, objectIndex object.ObjectIndex) object.ObjectType {
+func InstanceCreateRoom(position geom.Vec, roomInstanceIndex RoomInstanceIndex, objectIndex ObjectIndex) ObjectType {
 	roomInst := &gState.roomInstances[roomInstanceIndex]
 	// NOTE(Jake): 2018-07-22
 	// For now instances default to the last instance layer
 	layerIndex := len(roomInst.instanceLayers) - 1
 	layer := &roomInst.instanceLayers[layerIndex]
 	//fmt.Printf("InstanceCreateRoom: Create on layer %d\n", layerIndex)
-	return layer.manager.InstanceCreate(position, objectIndex, roomInst.Index(), layer.index)
+	return layer.manager.InstanceCreate(position, objectIndex, roomInst.index, layer.index)
 }
 
-func InstanceExists(inst object.ObjectType) bool {
+func InstanceExists(inst ObjectType) bool {
 	baseObj := inst.BaseObject()
 	if baseObj == nil {
 		return false
@@ -65,19 +95,19 @@ func InstanceExists(inst object.ObjectType) bool {
 	return roomInst != nil
 }
 
-func (manager *instanceManager) instanceAdd(inst object.ObjectType, roomInstanceIndex, layerIndex int) {
+func (manager *instanceManager) instanceAdd(inst ObjectType, roomInstanceIndex RoomInstanceIndex, layerIndex int) {
 	// Move entity to new list
 	index := len(manager.instances)
-	object.MoveInstance(inst, index, roomInstanceIndex, layerIndex)
+	moveInstance(inst, index, roomInstanceIndex, layerIndex)
 	manager.instances = append(manager.instances, inst)
 }
 
-func (manager *instanceManager) InstanceCreate(position geom.Vec, objectIndex object.ObjectIndex, roomInstanceIndex, layerIndex int) object.ObjectType {
+func (manager *instanceManager) InstanceCreate(position geom.Vec, objectIndex ObjectIndex, roomInstanceIndex RoomInstanceIndex, layerIndex int) ObjectType {
 	// Create and add to entity list
 	index := len(manager.instances)
 
 	// Get instance
-	inst := object.NewRawInstance(objectIndex, index, roomInstanceIndex, layerIndex)
+	inst := newRawInstance(objectIndex, index, roomInstanceIndex, layerIndex)
 	manager.instances = append(manager.instances, inst)
 
 	// Init and Set position
@@ -86,13 +116,13 @@ func (manager *instanceManager) InstanceCreate(position geom.Vec, objectIndex ob
 	return inst
 }
 
-func instanceRemove(inst object.ObjectType) {
+func instanceRemove(inst ObjectType) {
 	baseObj := inst.BaseObject()
 
 	// Get slots
 	roomInstanceIndex := baseObj.RoomInstanceIndex()
-	layerIndex := object.LayerInstanceIndex(baseObj)
-	index := object.InstanceIndex(baseObj)
+	layerIndex := LayerInstanceIndex(baseObj)
+	index := InstanceIndex(baseObj)
 
 	// Get manager
 	roomInst := &gState.roomInstances[roomInstanceIndex]
@@ -124,13 +154,13 @@ func instanceRemove(inst object.ObjectType) {
 	//
 	lastEntry := manager.instances[len(manager.instances)-1]
 	manager.instances[index] = lastEntry
-	object.SetInstanceIndex(lastEntry.BaseObject(), index)
+	SetInstanceIndex(lastEntry.BaseObject(), index)
 	manager.instances = manager.instances[:len(manager.instances)-1]
 }
 
-func InstanceDestroy(inst object.ObjectType) {
+func InstanceDestroy(inst ObjectType) {
 	baseObj := inst.BaseObject()
-	if object.IsDestroyed(baseObj) {
+	if IsDestroyed(baseObj) {
 		// NOTE(Jake): 2018-10-07
 		// Maybe making this just silently returning will be better / less error
 		// prone? For now lets be strict.
@@ -142,7 +172,7 @@ func InstanceDestroy(inst object.ObjectType) {
 	inst.Destroy()
 
 	// Mark as destroyed
-	object.MarkAsDestroyed(baseObj)
+	MarkAsDestroyed(baseObj)
 
 	// NOTE(Jake): 2018-10-07
 	// Remove at the end of the frame (gState.update)

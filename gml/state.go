@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
-	"github.com/silbinarywolf/gml-go/gml/internal/object"
 	"github.com/silbinarywolf/gml-go/gml/internal/room"
 	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
 )
@@ -25,8 +24,8 @@ func GameRestart() {
 
 type state struct {
 	globalInstances            *instanceManager
-	roomInstances              []RoomInstance
-	instancesMarkedForDelete   []object.ObjectType
+	roomInstances              []roomInstance
+	instancesMarkedForDelete   []ObjectType
 	isCreatingRoomInstance     bool
 	gWidth                     int
 	gHeight                    int
@@ -36,7 +35,7 @@ type state struct {
 func newState() *state {
 	return &state{
 		globalInstances: newInstanceManager(),
-		roomInstances:   make([]RoomInstance, 1, 10),
+		roomInstances:   make([]roomInstance, 1, 10),
 	}
 }
 
@@ -56,8 +55,8 @@ func IsCreatingRoomInstance() bool {
 	return gState.isCreatingRoomInstance
 }
 
-func (state *state) createNewRoomInstance(room *room.Room) *RoomInstance {
-	state.roomInstances = append(state.roomInstances, RoomInstance{
+func (state *state) createNewRoomInstance(room *room.Room) *roomInstance {
+	state.roomInstances = append(state.roomInstances, roomInstance{
 		used: true,
 		room: room,
 	})
@@ -67,7 +66,7 @@ func (state *state) createNewRoomInstance(room *room.Room) *RoomInstance {
 	}()
 	index := len(state.roomInstances) - 1
 	roomInst := &state.roomInstances[index]
-	roomInst.index = index
+	roomInst.index = RoomInstanceIndex(index)
 
 	if room == nil ||
 		len(room.InstanceLayers) == 0 {
@@ -94,7 +93,7 @@ func (state *state) createNewRoomInstance(room *room.Room) *RoomInstance {
 				layer := &roomInst.instanceLayers[i]
 				layer.drawOrder = layerData.Config.Order
 				for _, obj := range layerData.Instances {
-					instanceCreateLayer(geom.Vec{float64(obj.X), float64(obj.Y)}, layer, roomInst, object.ObjectIndex(obj.ObjectIndex))
+					instanceCreateLayer(geom.Vec{float64(obj.X), float64(obj.Y)}, layer, roomInst, ObjectIndex(obj.ObjectIndex))
 				}
 				roomInst.drawLayers = append(roomInst.drawLayers, layer)
 			}
@@ -144,7 +143,7 @@ func (state *state) createNewRoomInstance(room *room.Room) *RoomInstance {
 	return roomInst
 }
 
-func (state *state) deleteRoomInstance(roomInst *RoomInstance) {
+func (state *state) deleteRoomInstance(roomInst *roomInstance) {
 	for _, layer := range roomInst.instanceLayers {
 		// NOTE(Jake): 2018-08-21
 		//
@@ -160,7 +159,7 @@ func (state *state) deleteRoomInstance(roomInst *RoomInstance) {
 	}
 
 	roomInst.used = false
-	*roomInst = RoomInstance{}
+	*roomInst = roomInstance{}
 }
 
 func (state *state) update(animationUpdate bool) {

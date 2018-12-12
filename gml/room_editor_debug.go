@@ -16,9 +16,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/silbinarywolf/gml-go/gml/internal/debugobj"
 	"github.com/silbinarywolf/gml-go/gml/internal/file"
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
-	"github.com/silbinarywolf/gml-go/gml/internal/object"
 	"github.com/silbinarywolf/gml-go/gml/internal/reditor"
 	"github.com/silbinarywolf/gml-go/gml/internal/room"
 	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
@@ -45,7 +45,6 @@ type roomEditor struct {
 	editingRoom  *room.Room
 	editingLayer room.RoomLayer
 
-	objectIndexToData []object.ObjectType
 	//spriteList        []*sprite.Sprite
 	//spriteMap         map[string]*sprite.Sprite
 
@@ -57,10 +56,10 @@ type roomEditor struct {
 	menuLayerKind     room.RoomLayerKind
 	hasUnsavedChanges bool
 
-	entityMenuFiltered []object.ObjectType
+	entityMenuFiltered []debugobj.ObjectMeta
 	//spriteMenuFiltered []*sprite.Sprite
 
-	objectSelected object.ObjectType
+	objectSelected ObjectType
 	spriteSelected SpriteIndex
 
 	mouseHold   [MbSize]bool
@@ -93,30 +92,14 @@ var (
 )
 
 func newRoomEditor() *roomEditor {
-	// NOTE(Jake): 2018-07-11
-	//
-	// Create stub instances to use for rendering map view.
-	//
-	// This provides us:
-	// - The entity size (as set in Create())
-	// - The default sprite of the object
-	//
-	objectIndexList := object.ObjectIndexList()
-	objectIndexToData := make([]object.ObjectType, len(objectIndexList))
-	for i, objectIndex := range objectIndexList {
-		inst := object.NewRawInstance(objectIndex, i, 0, 0)
-		inst.Create()
-		objectIndexToData[i] = inst
-	}
-
 	return &roomEditor{
-		initialized:       true,
-		objectIndexToData: objectIndexToData,
+		initialized: true,
+		//objectIndexToData: objectIndexToData,
 		//objectNameToData:   objectNameToData,
 		//spriteList:         spriteList,
 		//spriteMap:          spriteMap,
 		lastMousePos:       MousePosition(),
-		entityMenuFiltered: make([]object.ObjectType, 0, len(objectIndexToData)),
+		entityMenuFiltered: make([]debugobj.ObjectMeta, 0, len(debugobj.DebugObjectMetaList())),
 		//spriteMenuFiltered: make([]*sprite.Sprite, 0, len(spriteList)),
 		roomDirectory: file.AssetDirectory + "/" + room.RoomDirectoryBase + "/",
 		tempLayers:    make([]room.RoomLayer, 0, 25),
@@ -176,11 +159,6 @@ func (editor *roomEditor) layers() []room.RoomLayer {
 
 func roomEditorEditingRoom() *room.Room {
 	return gRoomEditor.editingRoom
-}
-
-func roomEditorObjectIndexToData(objectIndex int32) object.ObjectType {
-	index := object.ObjectIndex(objectIndex)
-	return gRoomEditor.objectIndexToData[index]
 }
 
 func snapToGrid(val float64, grid float64) float64 {
@@ -1334,7 +1312,7 @@ func editorUpdate() {
 	}
 }
 
-func drawObjectPreview(inst object.ObjectType, pos geom.Vec, fitToSize geom.Vec) {
+func drawObjectPreview(inst ObjectType, pos geom.Vec, fitToSize geom.Vec) {
 	baseObj := inst.BaseObject()
 	sprite := baseObj.SpriteIndex()
 	spriteSize := sprite.Size()
@@ -1348,7 +1326,7 @@ func drawObjectPreview(inst object.ObjectType, pos geom.Vec, fitToSize geom.Vec)
 	DrawSpriteScaled(sprite, 0, pos, scale)
 }
 
-func drawObject(inst object.ObjectType, pos geom.Vec) {
+func drawObject(inst ObjectType, pos geom.Vec) {
 	baseObj := inst.BaseObject()
 	//baseObj.Vec = pos
 	DrawSprite(baseObj.SpriteIndex(), 0, pos)
@@ -1664,7 +1642,7 @@ func (roomEditor *roomEditor) loadRoom(name string) {
 		roomEditor.setStatusText("Room \"" + name + "\" does not exist.")
 		return
 	}
-	editingRoom := LoadRoom(name)
+	editingRoom := room.LoadRoom(name)
 	if editingRoom == nil {
 		roomEditor.setStatusText("Room \"" + name + "\" could not be loaded.")
 		return

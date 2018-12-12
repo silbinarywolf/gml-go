@@ -2,7 +2,6 @@ package gml
 
 import (
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
-	"github.com/silbinarywolf/gml-go/gml/internal/object"
 )
 
 const (
@@ -13,7 +12,7 @@ type collisionObject interface {
 	BaseObject() *Object
 }
 
-func CollisionRectList(instType collisionObject, position geom.Vec) []object.ObjectType {
+func CollisionRectList(instType collisionObject, position geom.Vec) []ObjectType {
 	inst := instType.BaseObject()
 	room := roomGetInstance(inst.BaseObject().RoomInstanceIndex())
 	if room == nil {
@@ -26,13 +25,13 @@ func CollisionRectList(instType collisionObject, position geom.Vec) []object.Obj
 	r1.Size = inst.Size
 
 	// todo(Jake): 2018-12-01 - #18
-	// Consider pooling reusable object.ObjectType slices to
+	// Consider pooling reusable ObjectType slices to
 	// improve performance.
-	var list []object.ObjectType
+	var list []ObjectType
 	for i := 0; i < len(room.instanceLayers); i++ {
 		for _, otherT := range room.instanceLayers[i].manager.instances {
 			other := otherT.BaseObject()
-			if !object.IsDestroyed(other) &&
+			if !IsDestroyed(other) &&
 				r1.CollisionRectangle(other.Rect) &&
 				inst != other {
 				list = append(list, otherT)

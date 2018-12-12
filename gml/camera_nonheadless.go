@@ -8,7 +8,6 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
-	"github.com/silbinarywolf/gml-go/gml/internal/object"
 )
 
 var (
@@ -22,7 +21,7 @@ type cameraManager struct {
 
 type camera struct {
 	enabled bool
-	follow  object.ObjectType
+	follow  ObjectType
 	geom.Vec
 	windowPos geom.Vec
 	size      geom.Vec
@@ -137,7 +136,7 @@ func CameraSetViewSize(index int, size geom.Vec) {
 	view.size = size
 }
 
-func CameraSetViewTarget(index int, inst object.ObjectType) {
+func CameraSetViewTarget(index int, inst ObjectType) {
 	view := &gCameraManager.cameras[index]
 	view.follow = inst
 }
@@ -155,7 +154,7 @@ func cameraDraw(index int) {
 	gScreen.DrawImage(view.screen, &op)
 }
 
-func cameraInstanceDestroy(inst object.ObjectType) {
+func cameraInstanceDestroy(inst ObjectType) {
 	manager := gCameraManager
 	for i := 0; i < len(manager.cameras); i++ {
 		view := &manager.cameras[i]
