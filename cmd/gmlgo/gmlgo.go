@@ -462,6 +462,15 @@ func (g *Generator) generateObjectMetaAndMethods(structsUsingGMLObject []Struct)
 		}
 		g.Printf("\n}\n")
 	}
+	{
+		g.Printf("var _gen_%s_index_to_data = []gml.ObjectType{\n", prefix)
+		for _, record := range structsUsingGMLObject {
+			assetName := record.Name
+			// ie. ObjPlayer: new(Player)
+			g.Printf("	%s%s: new(%s),\n", prefix, assetName, assetName)
+		}
+		g.Printf("\n}\n")
+	}
 
 	{
 		// Write Object types
@@ -474,7 +483,7 @@ func (g *Generator) generateObjectMetaAndMethods(structsUsingGMLObject []Struct)
 		g.Printf(`
 
 func init() {
-	gml.InitObjectGeneratedData(_gen_Obj_index_to_name, _gen_Obj_name_to_index)
+	gml.InitObjectGeneratedData(_gen_Obj_index_to_name, _gen_Obj_name_to_index, _gen_Obj_index_to_data)
 }
 `)
 	}

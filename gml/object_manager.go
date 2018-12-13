@@ -30,7 +30,8 @@ func InitObjectGeneratedData(indexToName []string, nameToIndex map[string]Object
 	}
 	manager.indexToName = indexToName
 	manager.nameToID = nameToIndex
-	debugInitObjectMetaList(objTypes)
+	manager.idToEntityData = objTypes
+	debugInitObjectMetaList(objTypes[1:])
 }
 
 //func ObjectIndexList() []ObjectIndex {

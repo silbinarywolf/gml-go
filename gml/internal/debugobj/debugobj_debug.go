@@ -10,8 +10,9 @@ import (
 var gDebugObjectMetaList []ObjectMeta
 
 type ObjectMeta struct {
-	geom.Vec
-	Size        geom.Size
+	geom.Rect
+	ObjectIndex int32
+	ObjectName  string
 	SpriteIndex sprite.SpriteIndex
 }
 
@@ -21,4 +22,12 @@ func InitDebugObjectMetaList(debugObjectMetaList []ObjectMeta) {
 
 func DebugObjectMetaList() []ObjectMeta {
 	return gDebugObjectMetaList
+}
+
+func DebugObjectMetaGet(index int32) *ObjectMeta {
+	return &gDebugObjectMetaList[index]
+}
+
+func (meta *ObjectMeta) Pos() geom.Vec {
+	return meta.Vec
 }
