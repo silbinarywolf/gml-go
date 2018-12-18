@@ -77,7 +77,7 @@ func PlaceFree(instType collisionObject, position geom.Vec) bool {
 				// handle as much logic in one if-statement as possible.
 				//
 				// For native binaries, it doesn't seem to change performance noticeably
-				// at all if I add "if inst == other || !instanceManager.spaces.IsUsed(i) { continue; }"
+				// at all if I add "if inst == other || !roomInstanceManager.spaces.IsUsed(i) { continue; }"
 				//
 				// ("gjbt" and Chrome 67 Windows were for benchmarking)
 				//

@@ -38,10 +38,6 @@ func InitObjectGeneratedData(indexToName []string, nameToIndex map[string]Object
 //	return gObjectManager.objectIndexList
 //}
 
-func IDToEntityData() []ObjectType {
-	return gObjectManager.idToEntityData
-}
-
 //
 // This is used to get an object index by the object name.
 //

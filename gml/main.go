@@ -51,7 +51,7 @@ func update() error {
 	}
 	if g_game.hasGameRestarted {
 		panic("todo: Fix / test this. I assume its broken")
-		gState.globalInstances.reset()
+		//gState.globalInstances.reset()
 		gMainFunctions.gameStart()
 		g_game.hasGameRestarted = false
 	}

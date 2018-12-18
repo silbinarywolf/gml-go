@@ -15,7 +15,7 @@ import (
 type ObjectIndex int32
 
 type ObjectType interface {
-	BaseObject() *Object
+	BaseObject() *Object // remove this or unexport it once ObjectIndex is used in the engine
 	ObjectIndex() ObjectIndex
 	ObjectName() string
 	Create()

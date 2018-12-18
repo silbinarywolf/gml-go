@@ -243,7 +243,7 @@ func loadRoomFromDirectoryFiles(name string) *Room {
 						//
 						/*inst, ok := objectTypeToInitState[objectIndex]
 						if !ok {
-							inst = NewRawInstance(objectIndex, 0, 0, 0)
+							inst = New_Deprecated_RawInstance(objectIndex, 0, 0, 0)
 							inst.Create()
 							objectTypeToInitState[objectIndex] = inst
 						}

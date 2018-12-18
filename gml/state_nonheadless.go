@@ -14,7 +14,7 @@ func (state *state) draw() {
 		cameraClear(i)
 
 		// Render global instances
-		state.globalInstances.draw()
+		//state.globalInstances.draw()
 
 		if view.follow != nil {
 			// Render instances in same room as instance following

@@ -23,7 +23,8 @@ func GameRestart() {
 }
 
 type state struct {
-	globalInstances            *instanceManager
+	//globalInstances            *roomInstanceManager
+	instanceManager            instanceManager
 	roomInstances              []roomInstance
 	instancesMarkedForDelete   []ObjectType
 	isCreatingRoomInstance     bool
@@ -34,8 +35,8 @@ type state struct {
 
 func newState() *state {
 	return &state{
-		globalInstances: newInstanceManager(),
-		roomInstances:   make([]roomInstance, 1, 10),
+		//globalInstances: newroomInstanceManager(),
+		roomInstances: make([]roomInstance, 1, 10),
 	}
 }
 
@@ -164,15 +165,15 @@ func (state *state) deleteRoomInstance(roomInst *roomInstance) {
 
 func (state *state) update(animationUpdate bool) {
 	// Simulate global instances
-	state.globalInstances.update(animationUpdate)
+	//state.globalInstances.update(animationUpdate)
 
-	// Simulate each instance in each room instance
-	for i := 1; i < len(state.roomInstances); i++ {
-		roomInst := &state.roomInstances[i]
-		if !roomInst.used {
-			continue
-		}
-		roomInst.update(animationUpdate)
+	// Simulate each active instance
+	for i := 1; i < len(state.instanceManager.instances); i++ {
+		inst := state.instanceManager.instances[i]
+		baseObj := inst.BaseObject()
+
+		inst.Update()
+		baseObj.SpriteState.ImageUpdate()
 	}
 
 	// Remove deleted entities

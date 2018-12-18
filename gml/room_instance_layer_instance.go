@@ -4,7 +4,7 @@ type roomInstanceLayerInstance struct {
 	roomInstanceLayerDrawBase
 	index   int
 	name    string
-	manager instanceManager
+	manager roomInstanceManager
 	//_parent *RoomInstance
 }
 

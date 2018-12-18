@@ -1,10 +1,49 @@
 package gml
 
 import (
+	"reflect"
+
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 )
 
 type instanceManager struct {
+	instances   []ObjectType
+	indexToData map[ObjectIndex]int
+}
+
+func allocateNewInstance(objectIndex ObjectIndex) ObjectType {
+	manager := &gState.instanceManager
+
+	// Allocate new instance
+	valToCopy := gObjectManager.idToEntityData[objectIndex]
+	if valToCopy == nil {
+		panic("Invalid objectIndex")
+	}
+	// todo(Jake): 2018-12-18
+	// Explore allocating from a large fixed-size pool
+	inst := reflect.New(reflect.ValueOf(valToCopy).Elem().Type()).Interface().(ObjectType)
+	baseObj := inst.BaseObject()
+	manager.instances = append(manager.instances, inst)
+	slot := len(manager.instances) - 1
+	baseObj.index = slot
+	return manager.instances[slot]
+}
+
+func (manager *instanceManager) Get(index ObjectIndex) ObjectType {
+	dataIndex, ok := manager.indexToData[index]
+	if !ok {
+		return nil
+	}
+	inst := manager.instances[dataIndex]
+	if inst.BaseObject().isDestroyed {
+		return nil
+	}
+	return inst
+}
+
+// todo: Jake: 2018-12-16
+// Deprecate this in favour of one storage area for all entities
+type roomInstanceManager struct {
 	instances []ObjectType
 }
 
@@ -39,14 +78,14 @@ func LayerInstanceIndex(inst *Object) int {
 	return inst.layerInstanceIndex
 }
 
-func newInstanceManager() *instanceManager {
-	manager := new(instanceManager)
+func newroomInstanceManager() *roomInstanceManager {
+	manager := new(roomInstanceManager)
 	manager.reset()
 	return manager
 }
 
-func (manager *instanceManager) reset() {
-	*manager = instanceManager{}
+func (manager *roomInstanceManager) reset() {
+	*manager = roomInstanceManager{}
 }
 
 func instanceCreateLayer(position geom.Vec, layer *roomInstanceLayerInstance, roomInst *roomInstance, objectIndex ObjectIndex) ObjectType {
@@ -73,13 +112,25 @@ func InstanceChangeRoom(inst ObjectType, roomInstanceIndex int) {
 }
 
 func InstanceCreateRoom(position geom.Vec, roomInstanceIndex RoomInstanceIndex, objectIndex ObjectIndex) ObjectType {
-	roomInst := &gState.roomInstances[roomInstanceIndex]
+	inst := allocateNewInstance(objectIndex)
+	{
+		baseObj := inst.BaseObject()
+		baseObj.Vec = position
+		baseObj.objectIndex = objectIndex
+		baseObj.roomInstanceIndex = roomInstanceIndex
+		inst.Create()
+	}
+
+	return inst
+	/*roomInst := &gState.roomInstances[roomInstanceIndex]
 	// NOTE(Jake): 2018-07-22
 	// For now instances default to the last instance layer
 	layerIndex := len(roomInst.instanceLayers) - 1
 	layer := &roomInst.instanceLayers[layerIndex]
+	layer.manager.instances =
+	//manager.instances = append(manager.instances, inst)
 	//fmt.Printf("InstanceCreateRoom: Create on layer %d\n", layerIndex)
-	return layer.manager.InstanceCreate(position, objectIndex, roomInst.index, layer.index)
+	return layer.manager.InstanceCreate(position, objectIndex, roomInst.index, layer.index)*/
 }
 
 func InstanceExists(inst ObjectType) bool {
@@ -95,14 +146,15 @@ func InstanceExists(inst ObjectType) bool {
 	return roomInst != nil
 }
 
-func (manager *instanceManager) instanceAdd(inst ObjectType, roomInstanceIndex RoomInstanceIndex, layerIndex int) {
+func (manager *roomInstanceManager) instanceAdd(inst ObjectType, roomInstanceIndex RoomInstanceIndex, layerIndex int) {
 	// Move entity to new list
 	index := len(manager.instances)
 	moveInstance(inst, index, roomInstanceIndex, layerIndex)
 	manager.instances = append(manager.instances, inst)
 }
 
-func (manager *instanceManager) InstanceCreate(position geom.Vec, objectIndex ObjectIndex, roomInstanceIndex RoomInstanceIndex, layerIndex int) ObjectType {
+func (manager *roomInstanceManager) InstanceCreate(position geom.Vec, objectIndex ObjectIndex, roomInstanceIndex RoomInstanceIndex, layerIndex int) ObjectType {
+
 	// Create and add to entity list
 	index := len(manager.instances)
 
@@ -179,7 +231,7 @@ func InstanceDestroy(inst ObjectType) {
 	gState.instancesMarkedForDelete = append(gState.instancesMarkedForDelete, inst)
 }
 
-func (manager *instanceManager) update(animationUpdate bool) {
+func (manager *roomInstanceManager) update(animationUpdate bool) {
 	{
 		instances := manager.instances
 		for _, inst := range instances {
@@ -198,7 +250,7 @@ func (manager *instanceManager) update(animationUpdate bool) {
 	}
 }
 
-func (manager *instanceManager) draw() {
+func (manager *roomInstanceManager) draw() {
 	for _, inst := range manager.instances {
 		if inst == nil {
 			continue

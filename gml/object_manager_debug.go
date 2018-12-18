@@ -16,15 +16,20 @@ func debugInitObjectMetaList(objTypes []ObjectType) {
 		if objectIndex == 0 {
 			continue
 		}
-		inst := newRawInstance(objectIndex, 0, 0, 0)
+		inst := allocateNewInstance(objectIndex)
+		// todo(Jake): 2018-12-16:
+		// Deprecate calling inst.Create() when determining
+		// object size / sprite.
 		inst.Create()
 		baseObj := inst.BaseObject()
-
-		debugObjectMetaList = append(debugObjectMetaList, debugobj.ObjectMeta{
+		meta := debugobj.ObjectMeta{
 			Rect:        baseObj.Rect,
+			SpriteIndex: baseObj.SpriteIndex(),
 			ObjectName:  inst.ObjectName(),
 			ObjectIndex: int32(inst.ObjectIndex()),
-		})
+		}
+
+		debugObjectMetaList = append(debugObjectMetaList, meta)
 	}
 
 	debugobj.InitDebugObjectMetaList(debugObjectMetaList)
