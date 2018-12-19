@@ -32,6 +32,10 @@ func (self *Bullet) Update() {
 		owner.Score += 1
 		gml.InstanceDestroy(other)
 	}
+
+	if self.Y < 0 {
+		gml.InstanceDestroy(self)
+	}
 }
 
 func (self *Bullet) Draw() {

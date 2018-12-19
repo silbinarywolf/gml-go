@@ -189,10 +189,19 @@ func (state *state) update(animationUpdate bool) {
 		if !ok {
 			continue
 		}
+		if dataIndex == len(manager.instances)-1 {
+			// Remove last entry
+			delete(manager.instanceIndexToIndex, instanceIndex)
+			manager.instances = manager.instances[:len(manager.instances)-1]
+			continue
+		}
+		// Swap deleted entry for last entry
+		delete(manager.instanceIndexToIndex, instanceIndex)
 		lastEntry := manager.instances[len(manager.instances)-1]
 		manager.instances[dataIndex] = lastEntry
+		manager.instanceIndexToIndex[lastEntry.BaseObject().InstanceIndex()] = dataIndex
 		manager.instances = manager.instances[:len(manager.instances)-1]
-		delete(manager.instanceIndexToIndex, instanceIndex)
 	}
+
 	state.instancesMarkedForDelete = state.instancesMarkedForDelete[:0]
 }

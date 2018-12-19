@@ -4,7 +4,6 @@ package gml
 
 import (
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
-	"github.com/silbinarywolf/gml-go/gml/internal/object"
 )
 
 type cameraManager struct {
@@ -48,7 +47,7 @@ func CameraSetViewPos(index int, pos geom.Vec) {
 func CameraSetViewSize(index int, size geom.Vec) {
 }
 
-func CameraSetViewTarget(index int, inst object.ObjectType) {
+func CameraSetViewTarget(index int, inst ObjectType) {
 }
 
 func cameraClear(index int) {
@@ -57,7 +56,7 @@ func cameraClear(index int) {
 func cameraDraw(index int) {
 }
 
-func cameraInstanceDestroy(inst object.ObjectType) {
+func cameraInstanceDestroy(inst ObjectType) {
 }
 
 func (view *camera) update() {
