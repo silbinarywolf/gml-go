@@ -1,6 +1,7 @@
 package gml
 
 import (
+	"fmt"
 	"sort"
 	"strconv"
 
@@ -26,7 +27,7 @@ type state struct {
 	//globalInstances            *roomInstanceManager
 	instanceManager            instanceManager
 	roomInstances              []roomInstance
-	instancesMarkedForDelete   []ObjectType
+	instancesMarkedForDelete   []InstanceIndex
 	isCreatingRoomInstance     bool
 	gWidth                     int
 	gHeight                    int
@@ -34,10 +35,10 @@ type state struct {
 }
 
 func newState() *state {
-	return &state{
-		//globalInstances: newroomInstanceManager(),
-		roomInstances: make([]roomInstance, 1, 10),
-	}
+	s := new(state)
+	s.roomInstances = make([]roomInstance, 1, 10)
+	s.instanceManager.instanceIndexToIndex = make(map[InstanceIndex]int)
+	return s
 }
 
 // FrameUsage returns a string like "1% (55ns)" to tell you how much
@@ -94,7 +95,9 @@ func (state *state) createNewRoomInstance(room *room.Room) *roomInstance {
 				layer := &roomInst.instanceLayers[i]
 				layer.drawOrder = layerData.Config.Order
 				for _, obj := range layerData.Instances {
-					instanceCreateLayer(geom.Vec{float64(obj.X), float64(obj.Y)}, layer, roomInst, ObjectIndex(obj.ObjectIndex))
+					pos := geom.Vec{float64(obj.X), float64(obj.Y)}
+					InstanceCreateRoom(pos, roomInst.index, ObjectIndex(obj.ObjectIndex))
+					fmt.Printf("todo(Jake): 2018-12-19: Fix room instance creation to create on correct layer.\n")
 				}
 				roomInst.drawLayers = append(roomInst.drawLayers, layer)
 			}
@@ -151,12 +154,15 @@ func (state *state) deleteRoomInstance(roomInst *roomInstance) {
 		// Running Destroy() on each rather than InstanceDestroy()
 		// for speed purposes
 		//
-		for _, inst := range layer.manager.instances {
-			//InstanceDestroy()
+		for _, instanceIndex := range layer.instances {
+			inst := InstanceGet(instanceIndex)
+			if inst == nil {
+				continue
+			}
 			inst.Destroy()
 			cameraInstanceDestroy(inst)
 		}
-		layer.manager.reset()
+		layer.instances = nil
 	}
 
 	roomInst.used = false
@@ -168,7 +174,7 @@ func (state *state) update(animationUpdate bool) {
 	//state.globalInstances.update(animationUpdate)
 
 	// Simulate each active instance
-	for i := 1; i < len(state.instanceManager.instances); i++ {
+	for i := 0; i < len(state.instanceManager.instances); i++ {
 		inst := state.instanceManager.instances[i]
 		baseObj := inst.BaseObject()
 
@@ -177,8 +183,16 @@ func (state *state) update(animationUpdate bool) {
 	}
 
 	// Remove deleted entities
-	for _, inst := range state.instancesMarkedForDelete {
-		instanceRemove(inst)
+	manager := &state.instanceManager
+	for _, instanceIndex := range state.instancesMarkedForDelete {
+		dataIndex, ok := manager.instanceIndexToIndex[instanceIndex]
+		if !ok {
+			continue
+		}
+		lastEntry := manager.instances[len(manager.instances)-1]
+		manager.instances[dataIndex] = lastEntry
+		manager.instances = manager.instances[:len(manager.instances)-1]
+		delete(manager.instanceIndexToIndex, instanceIndex)
 	}
 	state.instancesMarkedForDelete = state.instancesMarkedForDelete[:0]
 }

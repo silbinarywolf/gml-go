@@ -1,5 +1,34 @@
 package gml
 
+/*type instanceIterator struct {
+	index InstanceIndex
+	list  []InstanceIndex
+}
+
+func newInstanceIterator(list []InstanceIndex) instanceIterator {
+	return instanceIterator{
+		index: -1,
+		list:  list,
+	}
+}
+
+func (iterator *instanceIterator) Next() {
+	length := InstanceIndex(len(iterator.list))
+	for iterator.index < length {
+		iterator.index++
+		instanceIndex := iterator.list[iterator.index]
+		inst := InstanceGet(instanceIndex)
+		baseObj := inst.BaseObject()
+		if baseObj.isDestroyed {
+			iterator.index++
+		}
+	}
+}
+
+func (iterator *instanceIterator) Value() ObjectType {
+	return iterator.list[iterator.index]
+}*/
+
 /*type instanceIteratorObjectState struct {
 	roomInstanceIndex int
 	layerIndex        int

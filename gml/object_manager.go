@@ -42,13 +42,13 @@ func InitObjectGeneratedData(indexToName []string, nameToIndex map[string]Object
 // This is used to get an object index by the object name.
 //
 
-func moveInstance(inst ObjectType, index int, roomInstanceIndex RoomInstanceIndex, layerIndex int) {
+/*func moveInstance(inst ObjectType, roomInstanceIndex RoomInstanceIndex, layerIndex int) {
 	// Initialize object
 	baseObj := inst.BaseObject()
 	baseObj.index = index
 	baseObj.roomInstanceIndex = roomInstanceIndex
 	baseObj.layerInstanceIndex = layerIndex
-}
+}*/
 
 func newRawInstance(objectIndex ObjectIndex, index int, roomInstanceIndex RoomInstanceIndex, layerIndex int) ObjectType {
 	valToCopy := gObjectManager.idToEntityData[objectIndex]
@@ -56,8 +56,11 @@ func newRawInstance(objectIndex ObjectIndex, index int, roomInstanceIndex RoomIn
 		panic("Invalid objectIndex given")
 	}
 	inst := reflect.New(reflect.ValueOf(valToCopy).Elem().Type()).Interface().(ObjectType)
-	moveInstance(inst, index, roomInstanceIndex, layerIndex)
+	//moveInstance(inst, index, roomInstanceIndex, layerIndex)
 	baseObj := inst.BaseObject()
+	//baseObj.index = index
+	baseObj.roomInstanceIndex = roomInstanceIndex
+	baseObj.layerInstanceIndex = layerIndex
 	baseObj.objectIndex = objectIndex
 	baseObj.create()
 	return inst

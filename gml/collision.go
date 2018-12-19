@@ -29,10 +29,13 @@ func CollisionRectList(instType collisionObject, position geom.Vec) []ObjectType
 	// improve performance.
 	var list []ObjectType
 	for i := 0; i < len(room.instanceLayers); i++ {
-		for _, otherT := range room.instanceLayers[i].manager.instances {
+		for _, otherIndex := range room.instanceLayers[i].instances {
+			otherT := InstanceGet(otherIndex)
+			if otherT == nil {
+				continue
+			}
 			other := otherT.BaseObject()
-			if !IsDestroyed(other) &&
-				r1.CollisionRectangle(other.Rect) &&
+			if r1.CollisionRectangle(other.Rect) &&
 				inst != other {
 				list = append(list, otherT)
 			}
@@ -59,41 +62,18 @@ func PlaceFree(instType collisionObject, position geom.Vec) bool {
 	//var debugString string
 	hasCollision := false
 	for i := 0; i < len(room.instanceLayers); i++ {
-		for _, other := range room.instanceLayers[i].manager.instances {
-			other := other.BaseObject()
+		for _, otherIndex := range room.instanceLayers[i].instances {
+			otherT := InstanceGet(otherIndex)
+			if otherT == nil {
+				continue
+			}
+			other := otherT.BaseObject()
 			if other.Solid() &&
 				r1.CollisionRectangle(other.Rect) &&
 				inst != other {
 				hasCollision = true
 			}
 		}
-		/*spaces := &room.instanceLayers[i].manager.spaces
-		for _, bucket := range spaces.Buckets() {
-			for i := 0; i < bucket.Len(); i++ {
-				other := bucket.Get(i)
-				// NOTE(Jake): 2018-07-08
-				//
-				// For JavaScript performance, we get a 1.2x speedup if we
-				// handle as much logic in one if-statement as possible.
-				//
-				// For native binaries, it doesn't seem to change performance noticeably
-				// at all if I add "if inst == other || !roomInstanceManager.spaces.IsUsed(i) { continue; }"
-				//
-				// ("gjbt" and Chrome 67 Windows were for benchmarking)
-				//
-				// NOTE(Jake): 2018-08-11
-				//
-				// Heavily refactored this since the above benchmark. But who cares really. I'll probably
-				// need to re-do this collision engine so it supports spatial hashing.
-				//
-				if other.Solid() &&
-					r1.CollisionRectangle(other.Rect) &&
-					inst != other &&
-					bucket.IsUsed(i) {
-					hasCollision = true
-				}
-			}
-		}*/
 	}
 	for i := 0; i < len(room.spriteLayers); i++ {
 		layer := &room.spriteLayers[i]
@@ -105,17 +85,6 @@ func PlaceFree(instType collisionObject, position geom.Vec) bool {
 				hasCollision = true
 			}
 		}
-		/*spaces := layer.sprites
-		for _, bucket := range spaces.Buckets() {
-			for i := 0; i < bucket.Len(); i++ {
-				other := bucket.Get(i)
-				if r1.CollisionRectangle(other.Rect) &&
-					inst != other &&
-					bucket.IsUsed(i) {
-					hasCollision = true
-				}
-			}
-		}*/
 	}
 
 	/*if DEBUG_COLLISION &&

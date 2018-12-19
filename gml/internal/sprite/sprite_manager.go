@@ -33,6 +33,13 @@ func InitSpriteGeneratedData(indexToName []string, nameToIndex map[string]Sprite
 	gSpriteManager.assetIndexToName = indexToName
 	gSpriteManager.assetNameToIndex = nameToIndex
 	gSpriteManager.assetList = make([]Sprite, len(gSpriteManager.assetIndexToName))
+
+	// todo(Jake): 2018-12-19 -
+	// Improve by loading concurrently in Go routine?
+	// Pack into 1 or chunked data files?
+	for _, spriteIndex := range nameToIndex {
+		SpriteLoad(spriteIndex)
+	}
 }
 
 func SpriteNames() []string {
@@ -47,11 +54,14 @@ func sprite(index SpriteIndex) *Sprite {
 	return nil
 }
 
+// SpriteLoadByName is used internally by the room editor, animation editor,
+// live-sprite reloading watcher and more
 func SpriteLoadByName(name string) SpriteIndex {
 	index, ok := gSpriteManager.assetNameToIndex[name]
 	if !ok {
 		return SprUndefined
 	}
+	SpriteLoad(index)
 	return index
 }
 

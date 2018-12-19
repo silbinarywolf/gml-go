@@ -68,9 +68,9 @@ func roomGetInstance(roomInstanceIndex RoomInstanceIndex) *roomInstance {
 }
 
 func (roomInst *roomInstance) update(animationUpdate bool) {
-	for _, layer := range roomInst.instanceLayers {
-		layer.update(animationUpdate)
-	}
+	//for _, layer := range roomInst.instanceLayers {
+	//	layer.update(animationUpdate)
+	//}
 }
 
 func (roomInst *roomInstance) draw() {

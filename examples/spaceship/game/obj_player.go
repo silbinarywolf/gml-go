@@ -45,6 +45,5 @@ func (self *Player) Update() {
 
 func (self *Player) Draw() {
 	gml.DrawSelf(&self.SpriteState, self.Pos())
-
 	gml.DrawTextF(gml.Vec{0, 32}, "Score: %d", self.Score)
 }
