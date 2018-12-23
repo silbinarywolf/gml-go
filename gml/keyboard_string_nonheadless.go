@@ -22,6 +22,8 @@ func SetKeyboardString(text string) {
 	keyboardString.WriteString(text)
 }
 
+// KeyboardString returns the last letters typed by the user since ClearKeyboardString was called
+// this is useful for input boxes and easily getting input from a user.
 func KeyboardString() string {
 	return keyboardString.String()
 }

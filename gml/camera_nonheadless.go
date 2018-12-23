@@ -8,7 +8,6 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
-	"github.com/silbinarywolf/gml-go/gml/internal/object"
 )
 
 var (
@@ -22,7 +21,7 @@ type cameraManager struct {
 
 type camera struct {
 	enabled bool
-	follow  object.ObjectType
+	follow  InstanceIndex
 	geom.Vec
 	windowPos geom.Vec
 	size      geom.Vec
@@ -103,33 +102,7 @@ func CameraSetViewPos(index int, pos geom.Vec) {
 	view := &gCameraManager.cameras[index]
 	view.Vec = pos
 
-	if inst := view.follow; inst != nil {
-		roomInst := roomGetInstance(inst.BaseObject().RoomInstanceIndex())
-		if roomInst != nil {
-			room := roomInst.room
-			left := float64(room.Left)
-			right := float64(room.Right)
-			top := float64(room.Top)
-			bottom := float64(room.Bottom)
-
-			view.X = pos.X - (view.size.X / 2)
-			view.Y = pos.Y - (view.size.Y / 2)
-			if view.X < left {
-				view.X = left
-			}
-			if view.X+view.size.X > right {
-				view.X = right - view.size.X
-			}
-			if view.Y < top {
-				view.Y = top
-			}
-			if view.Y+view.size.Y > bottom {
-				view.Y = bottom - view.size.Y
-			}
-			view.X = math.Floor(view.X)
-			view.Y = math.Floor(view.Y)
-		}
-	}
+	view.cameraFitToRoomDimensions()
 }
 
 func CameraSetViewSize(index int, size geom.Vec) {
@@ -137,7 +110,7 @@ func CameraSetViewSize(index int, size geom.Vec) {
 	view.size = size
 }
 
-func CameraSetViewTarget(index int, inst object.ObjectType) {
+func CameraSetViewTarget(index int, inst InstanceIndex) {
 	view := &gCameraManager.cameras[index]
 	view.follow = inst
 }
@@ -155,12 +128,12 @@ func cameraDraw(index int) {
 	gScreen.DrawImage(view.screen, &op)
 }
 
-func cameraInstanceDestroy(inst object.ObjectType) {
+func cameraInstanceDestroy(instanceIndex InstanceIndex) {
 	manager := gCameraManager
 	for i := 0; i < len(manager.cameras); i++ {
 		view := &manager.cameras[i]
-		if view.follow == inst {
-			view.follow = nil
+		if view.follow == instanceIndex {
+			view.follow = Noone
 		}
 	}
 }
@@ -188,35 +161,42 @@ func (view *camera) update() {
 		}
 	}
 
-	// Update player follow
-	if view.follow != nil {
-		inst := view.follow.BaseObject()
-		if inst != nil {
-			roomInst := roomGetInstance(inst.BaseObject().RoomInstanceIndex())
-			if roomInst != nil {
-				room := roomInst.room
-				left := float64(room.Left)
-				right := float64(room.Right)
-				top := float64(room.Top)
-				bottom := float64(room.Bottom)
+	//
+	if inst := InstanceGet(view.follow).BaseObject(); inst != nil {
+		view.X = inst.X - (view.size.X / 2)
+		view.Y = inst.Y - (view.size.Y / 2)
+	}
+	view.cameraFitToRoomDimensions()
+}
 
-				view.X = inst.X - (view.size.X / 2)
-				view.Y = inst.Y - (view.size.Y / 2)
-				if view.X < left {
-					view.X = left
-				}
-				if view.X+view.size.X > right {
-					view.X = right - view.size.X
-				}
-				if view.Y < top {
-					view.Y = top
-				}
-				if view.Y+view.size.Y > bottom {
-					view.Y = bottom - view.size.Y
-				}
-				view.X = math.Floor(view.X)
-				view.Y = math.Floor(view.Y)
+func (view *camera) cameraFitToRoomDimensions() {
+	// If we're following an object, snap the camera to fit to the room
+	if inst := InstanceGet(view.follow).BaseObject(); inst != nil {
+		roomInst := roomGetInstance(inst.BaseObject().RoomInstanceIndex())
+		if roomInst != nil {
+			var left, right, top, bottom float64
+			left = 0                         // float64(room.Left)
+			right = float64(roomInst.size.X) // float64(room.Right)
+			top = 0                          // float64(room.Top)
+			bottom = float64(roomInst.size.Y)
+
+			if view.X < left {
+				view.X = left
 			}
+			if view.X+view.size.X > right {
+				view.X = right - view.size.X
+			}
+			if view.Y < top {
+				view.Y = top
+			}
+			if view.Y+view.size.Y > bottom {
+				view.Y = bottom - view.size.Y
+			}
+			// NOTE(Jake): 2018-12-23
+			// IIRC, Need to round these values otherwise draw calls show
+			// gaps/artifacts.
+			view.X = math.Floor(view.X)
+			view.Y = math.Floor(view.Y)
 		}
 	}
 }

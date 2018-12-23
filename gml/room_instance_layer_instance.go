@@ -2,9 +2,10 @@ package gml
 
 type roomInstanceLayerInstance struct {
 	roomInstanceLayerDrawBase
-	index   int
-	name    string
-	manager instanceManager
+	index     int
+	name      string
+	instances []InstanceIndex
+	//manager roomInstanceManager
 	//_parent *RoomInstance
 }
 
@@ -12,10 +13,18 @@ type roomInstanceLayerInstance struct {
 //	return layer._parent
 //}
 
-func (layer *roomInstanceLayerInstance) update(animationUpdate bool) {
-	layer.manager.update(animationUpdate)
-}
+//func (layer *roomInstanceLayerInstance) update(animationUpdate bool) {
+//	for _, room := range layer.instances {
+//
+//	}
+//}
 
 func (layer *roomInstanceLayerInstance) draw() {
-	layer.manager.draw()
+	for _, instanceIndex := range layer.instances {
+		inst := InstanceGet(instanceIndex)
+		if inst == nil {
+			continue
+		}
+		inst.Draw()
+	}
 }

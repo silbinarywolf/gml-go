@@ -14,11 +14,11 @@ func (state *state) draw() {
 		cameraClear(i)
 
 		// Render global instances
-		state.globalInstances.draw()
+		//state.globalInstances.draw()
 
-		if view.follow != nil {
+		if inst := InstanceGet(view.follow); inst != nil {
 			// Render instances in same room as instance following
-			inst := view.follow.BaseObject()
+			inst := inst.BaseObject()
 			roomInst := roomGetInstance(inst.RoomInstanceIndex())
 			if roomInst == nil {
 				panic("RoomInstance this object belongs to has been destroyed")

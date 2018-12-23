@@ -16,9 +16,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/silbinarywolf/gml-go/gml/internal/debugobj"
 	"github.com/silbinarywolf/gml-go/gml/internal/file"
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
-	"github.com/silbinarywolf/gml-go/gml/internal/object"
 	"github.com/silbinarywolf/gml-go/gml/internal/reditor"
 	"github.com/silbinarywolf/gml-go/gml/internal/room"
 	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
@@ -45,7 +45,6 @@ type roomEditor struct {
 	editingRoom  *room.Room
 	editingLayer room.RoomLayer
 
-	objectIndexToData []object.ObjectType
 	//spriteList        []*sprite.Sprite
 	//spriteMap         map[string]*sprite.Sprite
 
@@ -57,10 +56,10 @@ type roomEditor struct {
 	menuLayerKind     room.RoomLayerKind
 	hasUnsavedChanges bool
 
-	entityMenuFiltered []object.ObjectType
+	entityMenuFiltered []*debugobj.ObjectMeta
 	//spriteMenuFiltered []*sprite.Sprite
 
-	objectSelected object.ObjectType
+	objectSelected *debugobj.ObjectMeta
 	spriteSelected SpriteIndex
 
 	mouseHold   [MbSize]bool
@@ -93,30 +92,14 @@ var (
 )
 
 func newRoomEditor() *roomEditor {
-	// NOTE(Jake): 2018-07-11
-	//
-	// Create stub instances to use for rendering map view.
-	//
-	// This provides us:
-	// - The entity size (as set in Create())
-	// - The default sprite of the object
-	//
-	objectIndexList := object.ObjectIndexList()
-	objectIndexToData := make([]object.ObjectType, len(objectIndexList))
-	for i, objectIndex := range objectIndexList {
-		inst := object.NewRawInstance(objectIndex, i, 0, 0)
-		inst.Create()
-		objectIndexToData[i] = inst
-	}
-
 	return &roomEditor{
-		initialized:       true,
-		objectIndexToData: objectIndexToData,
+		initialized: true,
+		//objectIndexToData: objectIndexToData,
 		//objectNameToData:   objectNameToData,
 		//spriteList:         spriteList,
 		//spriteMap:          spriteMap,
 		lastMousePos:       MousePosition(),
-		entityMenuFiltered: make([]object.ObjectType, 0, len(objectIndexToData)),
+		entityMenuFiltered: make([]*debugobj.ObjectMeta, 0, len(debugobj.DebugObjectMetaList())),
 		//spriteMenuFiltered: make([]*sprite.Sprite, 0, len(spriteList)),
 		roomDirectory: file.AssetDirectory + "/" + room.RoomDirectoryBase + "/",
 		tempLayers:    make([]room.RoomLayer, 0, 25),
@@ -178,11 +161,6 @@ func roomEditorEditingRoom() *room.Room {
 	return gRoomEditor.editingRoom
 }
 
-func roomEditorObjectIndexToData(objectIndex int32) object.ObjectType {
-	index := object.ObjectIndex(objectIndex)
-	return gRoomEditor.objectIndexToData[index]
-}
-
 func snapToGrid(val float64, grid float64) float64 {
 	base := math.Floor(val / grid)
 	return base * grid
@@ -239,7 +217,7 @@ func (roomEditor *roomEditor) editorChangeRoom(room *room.Room) bool {
 	//
 	roomEditor.camPos = CameraGetViewPos(0)
 	CameraSetViewSize(0, geom.Vec{float64(WindowWidth()), float64(WindowHeight())})
-	CameraSetViewTarget(0, nil)
+	CameraSetViewTarget(0, Noone)
 	return true
 }
 
@@ -526,14 +504,11 @@ func editorUpdate() {
 				case *room.RoomLayerInstance:
 					// Draw room instances
 					for _, obj := range layer.Instances {
-						inst := roomEditorObjectIndexToData(obj.ObjectIndex)
-						if inst == nil {
+						meta := debugobj.DebugObjectMetaGet(obj.ObjectIndex)
+						if meta == nil {
 							continue
 						}
-						baseObj := inst.BaseObject()
-						baseObj.X = float64(obj.X)
-						baseObj.Y = float64(obj.Y)
-						DrawSpriteScaled(baseObj.SpriteIndex(), 0, baseObj.Pos(), baseObj.ImageScale)
+						DrawSprite(meta.SpriteIndex, 0, meta.Pos())
 					}
 				case *room.RoomLayerBackground:
 					if layer.SpriteName == "" {
@@ -823,7 +798,7 @@ func editorUpdate() {
 				// Left click
 				if roomEditor.MouseCheckButton(MbLeft) &&
 					roomEditor.objectSelected != nil {
-					objectIndexSelected := roomEditor.objectSelected.ObjectIndex()
+					objectIndexSelected := roomEditor.objectSelected.ObjectIndex
 					// NOTE(Jake): 2018-06-10
 					//
 					// We need to handle mouse click between the last mouse position
@@ -840,18 +815,18 @@ func editorUpdate() {
 							// of an existing entity
 							hasCollision := false
 							for _, obj := range layer.Instances {
-								inst := roomEditorObjectIndexToData(obj.ObjectIndex)
-								if inst == nil {
+								meta := debugobj.DebugObjectMetaGet(obj.ObjectIndex)
+								if meta == nil {
 									continue
 								}
-								pos := geom.Vec{float64(obj.X), float64(obj.Y)}
+								/*pos := geom.Vec{float64(obj.X), float64(obj.Y)}
 								size := inst.BaseObject().Size
 								left := pos.X
 								right := left + float64(size.X)
 								top := pos.Y
-								bottom := top + float64(size.Y)
-								if mousePos.X >= left && mousePos.X < right &&
-									mousePos.Y >= top && mousePos.Y < bottom {
+								bottom := top + float64(size.Y)*/
+								if mousePos.X >= meta.Left() && mousePos.X < meta.Right() &&
+									mousePos.Y >= meta.Top() && mousePos.Y < meta.Bottom() {
 									hasCollision = true
 								}
 							}
@@ -903,18 +878,18 @@ func editorUpdate() {
 
 							// Mark deleted entities
 							for i, obj := range layer.Instances {
-								inst := roomEditorObjectIndexToData(obj.ObjectIndex)
-								if inst == nil {
+								meta := debugobj.DebugObjectMetaGet(obj.ObjectIndex)
+								if meta == nil {
 									continue
 								}
-								pos := geom.Vec{float64(obj.X), float64(obj.Y)}
+								/*pos := geom.Vec{float64(obj.X), float64(obj.Y)}
 								size := inst.BaseObject().Size
 								left := pos.X
 								right := left + float64(size.X)
 								top := pos.Y
-								bottom := top + float64(size.Y)
-								if mousePos.X >= left && mousePos.X < right &&
-									mousePos.Y >= top && mousePos.Y < bottom {
+								bottom := top + float64(size.Y)*/
+								if mousePos.X >= meta.Left() && mousePos.X < meta.Right() &&
+									mousePos.Y >= meta.Top() && mousePos.Y < meta.Bottom() {
 									//
 									record := layer.Instances[i]
 
@@ -1172,26 +1147,24 @@ func editorUpdate() {
 				}
 				typingText := KeyboardString()
 				roomEditor.entityMenuFiltered = roomEditor.entityMenuFiltered[:0]
-				for _, obj := range roomEditor.objectIndexToData {
-					if obj == nil {
-						continue
-					}
-					name := obj.ObjectName()
-					hasMatch := hasFilterMatch(name, typingText)
+
+				//
+				metaList := debugobj.DebugObjectMetaList()
+				for i, _ := range metaList {
+					meta := &metaList[i]
+					hasMatch := hasFilterMatch(meta.ObjectName, typingText)
 					if !hasMatch {
 						continue
 					}
-					// NOTE(Jake): 2018-07-11
-					//
-					// Animating in the object list isn't particularly useful.
-					//
-					//obj.BaseObject().ImageUpdate()
-					roomEditor.entityMenuFiltered = append(roomEditor.entityMenuFiltered, obj)
+					roomEditor.entityMenuFiltered = append(roomEditor.entityMenuFiltered, meta)
 				}
 
 				//
 				if inputSelectPressed() &&
 					len(roomEditor.entityMenuFiltered) > 0 {
+					// todo(Jake): 2018-12-13 - #
+					// Improve this selector to allow selection with mouse/keyboard
+					// rather than it having to be at the top.
 					selectedObj := roomEditor.entityMenuFiltered[0]
 					// Set
 					roomEditor.objectSelected = selectedObj
@@ -1212,31 +1185,19 @@ func editorUpdate() {
 					ui.Y += 24
 				}
 				previewSize := geom.Vec{32, 32}
-				for _, obj := range roomEditor.entityMenuFiltered {
-					//
-					baseObj := obj.BaseObject()
-					pos := baseObj.Vec
-					//size := baseObj.Size
-					//oldImageScale := baseObj.ImageScale
-
+				for _, meta := range roomEditor.entityMenuFiltered {
 					// NOTE(Jake): 2018-07-10
-					//
 					// I've already wasted time thinking about centering this
 					// and the text above. Lets not look into this until we
 					// feel the need.
 					//
 					// Also look at other similar UI experiences, because
 					// maybe we wont need to center this to get good UX.
-					//
+					pos := meta.Pos()
 					pos.X = ui.X - 40
 					pos.Y = ui.Y - (previewSize.Y / 2)
-					//baseObj.ImageScale.X = previewSize.X / float64(size.X)
-					//baseObj.ImageScale.Y = previewSize.Y / float64(size.Y)
-					//obj.Draw()
-					drawObjectPreview(obj, pos, previewSize)
-					name := obj.ObjectName()
-					DrawText(ui, name)
-					//baseObj.ImageScale = oldImageScale
+					drawObjectPreview(meta, pos, previewSize)
+					DrawText(ui, meta.ObjectName)
 					ui.Y += previewSize.Y + 16
 				}
 			case reditor.MenuSprite,
@@ -1320,7 +1281,7 @@ func editorUpdate() {
 				editingString += " | " + text
 			}
 			if selectedObj := roomEditor.objectSelected; selectedObj != nil {
-				editingString += " | Selected: " + selectedObj.ObjectName()
+				editingString += " | Selected: " + selectedObj.ObjectName
 				//DrawText(geom.V(0, 16), "Selected: "+selectedObj.ObjectName())
 			}
 			editingString += " | Frame Usage: " + FrameUsage()
@@ -1334,9 +1295,8 @@ func editorUpdate() {
 	}
 }
 
-func drawObjectPreview(inst object.ObjectType, pos geom.Vec, fitToSize geom.Vec) {
-	baseObj := inst.BaseObject()
-	sprite := baseObj.SpriteIndex()
+func drawObjectPreview(meta *debugobj.ObjectMeta, pos geom.Vec, fitToSize geom.Vec) {
+	sprite := meta.SpriteIndex
 	spriteSize := sprite.Size()
 	scale := geom.Vec{fitToSize.X / float64(spriteSize.X), fitToSize.Y / float64(spriteSize.Y)}
 	if scale.X > 1 {
@@ -1348,18 +1308,16 @@ func drawObjectPreview(inst object.ObjectType, pos geom.Vec, fitToSize geom.Vec)
 	DrawSpriteScaled(sprite, 0, pos, scale)
 }
 
-func drawObject(inst object.ObjectType, pos geom.Vec) {
-	baseObj := inst.BaseObject()
-	//baseObj.Vec = pos
-	DrawSprite(baseObj.SpriteIndex(), 0, pos)
+func drawObject(meta *debugobj.ObjectMeta, pos geom.Vec) {
+	DrawSprite(meta.SpriteIndex, 0, pos)
 }
 
 func drawRoomObject(roomObject *room.RoomObject, pos geom.Vec) {
-	inst := roomEditorObjectIndexToData(roomObject.ObjectIndex)
-	if inst == nil {
+	meta := debugobj.DebugObjectMetaGet(roomObject.ObjectIndex)
+	if meta == nil {
 		return
 	}
-	drawObject(inst, pos)
+	drawObject(meta, pos)
 }
 
 func drawTextButton(pos geom.Vec, text string) bool {
@@ -1565,15 +1523,14 @@ func (roomEditor *roomEditor) calculateRoomBounds() {
 		switch layer := layer.(type) {
 		case *room.RoomLayerInstance:
 			for _, obj := range layer.Instances {
-				inst := roomEditorObjectIndexToData(obj.ObjectIndex)
-				if inst == nil {
+				meta := debugobj.DebugObjectMetaGet(obj.ObjectIndex)
+				if meta == nil {
 					continue
 				}
-				x := int32(obj.X)
-				y := int32(obj.Y)
-				size := inst.BaseObject().Size
-				width := int32(size.X)
-				height := int32(size.Y)
+				x := int32(meta.X)
+				y := int32(meta.Y)
+				width := int32(meta.Size.X)
+				height := int32(meta.Size.Y)
 				if x < editingRoom.Left {
 					editingRoom.Left = x
 				}
@@ -1664,7 +1621,7 @@ func (roomEditor *roomEditor) loadRoom(name string) {
 		roomEditor.setStatusText("Room \"" + name + "\" does not exist.")
 		return
 	}
-	editingRoom := LoadRoom(name)
+	editingRoom := room.LoadRoom(name)
 	if editingRoom == nil {
 		roomEditor.setStatusText("Room \"" + name + "\" could not be loaded.")
 		return
@@ -1742,10 +1699,12 @@ func (roomEditor *roomEditor) editorConfigLoad() {
 				break
 			}
 		case *room.RoomLayerInstance:
-			for _, obj := range roomEditor.objectIndexToData {
-				if obj != nil &&
-					obj.ObjectName() == editorConfig.BrushSelected {
-					roomEditor.objectSelected = obj
+			metaList := debugobj.DebugObjectMetaList()
+			for i, _ := range metaList {
+				meta := &metaList[i]
+				if meta != nil &&
+					meta.ObjectName == editorConfig.BrushSelected {
+					roomEditor.objectSelected = meta
 					break
 				}
 			}
@@ -1763,7 +1722,7 @@ func (roomEditor *roomEditor) editorConfigSave() {
 		switch roomEditor.editingLayer.(type) {
 		case *room.RoomLayerInstance:
 			if roomEditor.objectSelected != nil {
-				editorConfig.BrushSelected = roomEditor.objectSelected.ObjectName()
+				editorConfig.BrushSelected = roomEditor.objectSelected.ObjectName
 			}
 		case *room.RoomLayerSprite:
 			if roomEditor.spriteSelected.IsValid() {
@@ -1872,7 +1831,7 @@ func editorSave() {
 				// Write instances
 				if instances := layer.Instances; len(instances) > 0 {
 					for _, obj := range instances {
-						data := roomEditorObjectIndexToData(obj.ObjectIndex)
+						name := debugobj.DebugObjectMetaGet(obj.ObjectIndex).ObjectName
 						uuid := obj.UUID
 						filepath := layerDirectory + "/" + uuid + ".txt"
 
@@ -1888,7 +1847,6 @@ func editorSave() {
 							continue
 						}
 
-						name := data.ObjectName()
 						x := obj.X
 						y := obj.Y
 

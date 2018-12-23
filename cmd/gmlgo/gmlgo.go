@@ -410,14 +410,14 @@ func (g *Generator) generateAssets(dir string) {
 		case "font":
 			g.Printf(`
 func init() {
-	gml.FontInitializeIndexToName(_gen_Fnt_index_to_name, _gen_Fnt_name_to_index)
+	gml.InitFontGeneratedData(_gen_Fnt_index_to_name, _gen_Fnt_name_to_index)
 }
 
 `)
 		case "sprite":
 			g.Printf(`
 func init() {
-	gml.SpriteInitializeIndexToName(_gen_Spr_index_to_name, _gen_Spr_name_to_index)
+	gml.InitSpriteGeneratedData(_gen_Spr_index_to_name, _gen_Spr_name_to_index)
 }
 
 `)
@@ -440,38 +440,50 @@ const (
 }
 
 func (g *Generator) generateObjectMetaAndMethods(structsUsingGMLObject []Struct) {
+	var prefix, gotype string
+	prefix = "Obj"
+	gotype = "gml.ObjectIndex"
+
 	{
-		// Write object index list
-		g.Printf("var _gen_Obj_index_list = []gml.ObjectIndex{\n")
+		g.Printf("var _gen_%s_index_to_name = []string{\n", prefix)
 		for _, record := range structsUsingGMLObject {
-			// ie. ObjPlayer,
-			g.Printf("	Obj%s,\n", record.Name)
+			assetName := record.Name
+			// ie. ObjPlayer: "Player"
+			g.Printf("	%s%s: \"%s\",\n", prefix, assetName, assetName)
 		}
 		g.Printf("\n}\n\n")
 	}
-
 	{
-		// Write object index to data list
-		g.Printf("var _gen_Obj_index_to_data = []gml.ObjectType{\n")
+		g.Printf("var _gen_%s_name_to_index = map[string]%s{\n", prefix, gotype)
 		for _, record := range structsUsingGMLObject {
-			// ie. ObjPlayer:    new(Player),
-			g.Printf("	Obj%s: new(%s),\n", record.Name, record.Name)
+			assetName := record.Name
+			// ie. "Player": ObjPlayer
+			g.Printf("	\"%s\": %s%s,\n", assetName, prefix, assetName)
 		}
 		g.Printf("\n}\n\n")
+	}
+	{
+		g.Printf("var _gen_%s_index_to_data = []gml.ObjectType{\n", prefix)
+		for _, record := range structsUsingGMLObject {
+			assetName := record.Name
+			// ie. ObjPlayer: new(Player)
+			g.Printf("	%s%s: new(%s),\n", prefix, assetName, assetName)
+		}
+		g.Printf("\n}\n")
 	}
 
 	{
 		// Write Object types
-		for _, record := range structsUsingGMLObject {
+		/*for _, record := range structsUsingGMLObject {
 			//g.Printf("func (inst *" + record.Name + ") ObjectIndex() gml.ObjectIndex { return Obj" + record.Name + " }\n")
 			g.Printf("func (inst *" + record.Name + ") ObjectName() string { return \"" + record.Name + "\" }\n")
 			g.Printf("\n")
 		}
-		g.Printf("\n")
+		.ObjectIndex{*/
 		g.Printf(`
 
 func init() {
-	gml.ObjectInitTypes(_gen_Obj_index_to_data, _gen_Obj_index_list)
+	gml.InitObjectGeneratedData(_gen_Obj_index_to_name, _gen_Obj_name_to_index, _gen_Obj_index_to_data)
 }
 `)
 	}

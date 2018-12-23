@@ -40,10 +40,6 @@ func (spriteIndex SpriteIndex) IsLoaded() bool {
 	return len(gSpriteManager.assetList[spriteIndex].frames) > 0
 }
 
-func Frames(spriteIndex SpriteIndex) []SpriteFrame {
-	return gSpriteManager.assetList[spriteIndex].frames
-}
-
 /*func (spr *Sprite) GetFrame(index int) *SpriteFrame {
 	return &spr.frames[index]
 }*/

@@ -1,6 +1,6 @@
 package gml
 
-type roomInstanceIteratorState struct {
+/*type roomInstanceIteratorState struct {
 	roomInstanceIndex int
 }
 
@@ -28,3 +28,4 @@ func (iterator *roomInstanceIteratorState) Next() bool {
 func (iterator *roomInstanceIteratorState) Value() int {
 	return iterator.roomInstanceIndex
 }
+*/

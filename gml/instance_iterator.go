@@ -1,12 +1,35 @@
 package gml
 
-import (
-	"reflect"
+/*type instanceIterator struct {
+	index InstanceIndex
+	list  []InstanceIndex
+}
 
-	"github.com/silbinarywolf/gml-go/gml/internal/object"
-)
+func newInstanceIterator(list []InstanceIndex) instanceIterator {
+	return instanceIterator{
+		index: -1,
+		list:  list,
+	}
+}
 
-type instanceIteratorObjectState struct {
+func (iterator *instanceIterator) Next() {
+	length := InstanceIndex(len(iterator.list))
+	for iterator.index < length {
+		iterator.index++
+		instanceIndex := iterator.list[iterator.index]
+		inst := InstanceGet(instanceIndex)
+		baseObj := inst.BaseObject()
+		if baseObj.isDestroyed {
+			iterator.index++
+		}
+	}
+}
+
+func (iterator *instanceIterator) Value() ObjectType {
+	return iterator.list[iterator.index]
+}*/
+
+/*type instanceIteratorObjectState struct {
 	roomInstanceIndex int
 	layerIndex        int
 	instanceIndex     int
@@ -55,4 +78,4 @@ loop:
 
 func (iterator *instanceIteratorObjectState) Value() object.ObjectType {
 	return gState.roomInstances[iterator.roomInstanceIndex].instanceLayers[iterator.layerIndex].manager.instances[iterator.instanceIndex]
-}
+}*/

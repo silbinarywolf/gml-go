@@ -19,7 +19,7 @@ import (
 	"time"
 
 	"github.com/silbinarywolf/gml-go/gml/internal/file"
-	"github.com/silbinarywolf/gml-go/gml/internal/object"
+	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
 )
 
@@ -74,7 +74,7 @@ func LoadRoom(name string) *Room {
 }
 
 func loadRoomFromDirectoryFiles(name string) *Room {
-	objectTypeToInitState := make(map[object.ObjectIndex]object.ObjectType)
+	/*objectTypeToInitState := make(map[ObjectIndex]ObjectType)
 	defer func() {
 		for _, inst := range objectTypeToInitState {
 			// NOTE(Jake): 2018-09-15
@@ -84,7 +84,7 @@ func loadRoomFromDirectoryFiles(name string) *Room {
 			// Destroy() wasn't here.
 			inst.Destroy()
 		}
-	}()
+	}()*/
 
 	//
 	room := new(Room)
@@ -221,11 +221,13 @@ func loadRoomFromDirectoryFiles(name string) *Room {
 						println("Error parsing entity, error: ", err.Error())
 						continue
 					}
-					objectIndex, ok := object.ObjectGetIndex(entityName)
+					objectIndex := 1
+					panic("todo: ObjectIndex fix this")
+					/*objectIndex, ok := ObjectGetIndex(entityName)
 					if !ok {
 						println("Missing mapping of name \"" + entityName + "\" to entity ID. Is this name defined in your gml.Init()?")
 						continue
-					}
+					}*/
 
 					// Set room dimensions
 					{
@@ -239,18 +241,22 @@ func loadRoomFromDirectoryFiles(name string) *Room {
 						// hitbox etc as Create() can cause bugs, like multiple
 						// networked entities because I didn't call gml.Destroy()
 						//
-						inst, ok := objectTypeToInitState[objectIndex]
+						/*inst, ok := objectTypeToInitState[objectIndex]
 						if !ok {
-							inst = object.NewRawInstance(objectIndex, 0, 0, 0)
+							inst = New_Deprecated_RawInstance(objectIndex, 0, 0, 0)
 							inst.Create()
 							objectTypeToInitState[objectIndex] = inst
 						}
 						baseObj := inst.BaseObject()
+						size := baseObj.Size
+						*/
+						size := geom.Size{}
+						panic("todo: Fix this to get object width/height")
 
 						x := int32(x)
 						y := int32(y)
-						width := int32(baseObj.Size.X)
-						height := int32(baseObj.Size.Y)
+						width := int32(size.X)
+						height := int32(size.Y)
 
 						if x < room.Left {
 							room.Left = x

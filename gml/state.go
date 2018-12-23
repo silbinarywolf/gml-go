@@ -1,11 +1,11 @@
 package gml
 
 import (
+	"fmt"
 	"sort"
 	"strconv"
 
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
-	"github.com/silbinarywolf/gml-go/gml/internal/object"
 	"github.com/silbinarywolf/gml-go/gml/internal/room"
 	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
 )
@@ -24,9 +24,10 @@ func GameRestart() {
 }
 
 type state struct {
-	globalInstances            *instanceManager
-	roomInstances              []RoomInstance
-	instancesMarkedForDelete   []object.ObjectType
+	//globalInstances            *roomInstanceManager
+	instanceManager            instanceManager
+	roomInstances              []roomInstance
+	instancesMarkedForDelete   []InstanceIndex
 	isCreatingRoomInstance     bool
 	gWidth                     int
 	gHeight                    int
@@ -34,10 +35,10 @@ type state struct {
 }
 
 func newState() *state {
-	return &state{
-		globalInstances: newInstanceManager(),
-		roomInstances:   make([]RoomInstance, 1, 10),
-	}
+	s := new(state)
+	s.roomInstances = make([]roomInstance, 1, 10)
+	s.instanceManager.instanceIndexToIndex = make(map[InstanceIndex]int)
+	return s
 }
 
 // FrameUsage returns a string like "1% (55ns)" to tell you how much
@@ -50,14 +51,14 @@ func FrameUsage() string {
 	return text + "% (" + strconv.Itoa(int(gState.frameBudgetNanosecondsUsed)) + "ns)"
 }
 
-// IsCreatingRoomInstance returns whether this instance was created by a room or not, rather
-// than programmatically.
+// IsCreatingRoomInstance is to be used in the Create() event of your objects, this will only
+// return true if the object is being created from room data, not code.
 func IsCreatingRoomInstance() bool {
 	return gState.isCreatingRoomInstance
 }
 
-func (state *state) createNewRoomInstance(room *room.Room) *RoomInstance {
-	state.roomInstances = append(state.roomInstances, RoomInstance{
+func (state *state) createNewRoomInstance(room *room.Room) *roomInstance {
+	state.roomInstances = append(state.roomInstances, roomInstance{
 		used: true,
 		room: room,
 	})
@@ -67,7 +68,11 @@ func (state *state) createNewRoomInstance(room *room.Room) *RoomInstance {
 	}()
 	index := len(state.roomInstances) - 1
 	roomInst := &state.roomInstances[index]
-	roomInst.index = index
+	roomInst.index = RoomInstanceIndex(index)
+	roomInst.size = geom.Size{
+		X: int32(WindowWidth()),
+		Y: int32(WindowHeight()),
+	}
 
 	if room == nil ||
 		len(room.InstanceLayers) == 0 {
@@ -83,6 +88,11 @@ func (state *state) createNewRoomInstance(room *room.Room) *RoomInstance {
 
 	// If non-blank room instance, use room data to create
 	if roomInst.room != nil {
+		roomInst.size = geom.Size{
+			X: roomInst.room.Right - roomInst.room.Left,
+			Y: roomInst.room.Bottom - roomInst.room.Top,
+		}
+
 		// Instance layers
 		if len(room.InstanceLayers) > 0 {
 			roomInst.instanceLayers = make([]roomInstanceLayerInstance, len(room.InstanceLayers))
@@ -94,7 +104,8 @@ func (state *state) createNewRoomInstance(room *room.Room) *RoomInstance {
 				layer := &roomInst.instanceLayers[i]
 				layer.drawOrder = layerData.Config.Order
 				for _, obj := range layerData.Instances {
-					instanceCreateLayer(geom.Vec{float64(obj.X), float64(obj.Y)}, layer, roomInst, object.ObjectIndex(obj.ObjectIndex))
+					InstanceCreate(float64(obj.X), float64(obj.Y), roomInst.index, ObjectIndex(obj.ObjectIndex))
+					fmt.Printf("todo(Jake): 2018-12-19: Fix room instance creation to create on correct layer.\n")
 				}
 				roomInst.drawLayers = append(roomInst.drawLayers, layer)
 			}
@@ -144,41 +155,61 @@ func (state *state) createNewRoomInstance(room *room.Room) *RoomInstance {
 	return roomInst
 }
 
-func (state *state) deleteRoomInstance(roomInst *RoomInstance) {
+func (state *state) deleteRoomInstance(roomInst *roomInstance) {
 	for _, layer := range roomInst.instanceLayers {
 		// NOTE(Jake): 2018-08-21
 		//
 		// Running Destroy() on each rather than InstanceDestroy()
 		// for speed purposes
 		//
-		for _, inst := range layer.manager.instances {
-			//InstanceDestroy()
+		for _, instanceIndex := range layer.instances {
+			inst := InstanceGet(instanceIndex)
+			if inst == nil {
+				continue
+			}
 			inst.Destroy()
-			cameraInstanceDestroy(inst)
+			cameraInstanceDestroy(instanceIndex)
 		}
-		layer.manager.reset()
+		layer.instances = nil
 	}
 
 	roomInst.used = false
-	*roomInst = RoomInstance{}
+	*roomInst = roomInstance{}
 }
 
 func (state *state) update(animationUpdate bool) {
 	// Simulate global instances
-	state.globalInstances.update(animationUpdate)
+	//state.globalInstances.update(animationUpdate)
 
-	// Simulate each instance in each room instance
-	for i := 1; i < len(state.roomInstances); i++ {
-		roomInst := &state.roomInstances[i]
-		if !roomInst.used {
-			continue
-		}
-		roomInst.update(animationUpdate)
+	// Simulate each active instance
+	for i := 0; i < len(state.instanceManager.instances); i++ {
+		inst := state.instanceManager.instances[i]
+		baseObj := inst.BaseObject()
+
+		inst.Update()
+		baseObj.SpriteState.ImageUpdate()
 	}
 
 	// Remove deleted entities
-	for _, inst := range state.instancesMarkedForDelete {
-		instanceRemove(inst)
+	manager := &state.instanceManager
+	for _, instanceIndex := range state.instancesMarkedForDelete {
+		dataIndex, ok := manager.instanceIndexToIndex[instanceIndex]
+		if !ok {
+			continue
+		}
+		if dataIndex == len(manager.instances)-1 {
+			// Remove last entry
+			delete(manager.instanceIndexToIndex, instanceIndex)
+			manager.instances = manager.instances[:len(manager.instances)-1]
+			continue
+		}
+		// Swap deleted entry for last entry
+		delete(manager.instanceIndexToIndex, instanceIndex)
+		lastEntry := manager.instances[len(manager.instances)-1]
+		manager.instances[dataIndex] = lastEntry
+		manager.instanceIndexToIndex[lastEntry.BaseObject().InstanceIndex()] = dataIndex
+		manager.instances = manager.instances[:len(manager.instances)-1]
 	}
+
 	state.instancesMarkedForDelete = state.instancesMarkedForDelete[:0]
 }

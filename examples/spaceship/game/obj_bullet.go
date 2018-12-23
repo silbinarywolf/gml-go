@@ -6,18 +6,11 @@ import (
 
 type Bullet struct {
 	gml.Object
-	// todo(Jake): 2018-12-02 - #24
-	// Swap this to gml.InstanceIndex when ready
-	// Maybe also add "vet" functionality - #25
-	Owner gml.ObjectType
+	Owner gml.InstanceIndex
 }
 
 func (self *Bullet) Create() {
 	self.SetSprite(SprBullet)
-}
-
-func (self *Bullet) Destroy() {
-
 }
 
 func (self *Bullet) Update() {
@@ -28,12 +21,12 @@ func (self *Bullet) Update() {
 		if !ok {
 			continue
 		}
-		owner := self.Owner.(*Player)
+		owner := gml.InstanceGet(self.Owner).(*Player)
 		owner.Score += 1
 		gml.InstanceDestroy(other)
 	}
-}
 
-func (self *Bullet) Draw() {
-	gml.DrawSelf(&self.SpriteState, self.Pos())
+	if self.Y < 0 {
+		gml.InstanceDestroy(self)
+	}
 }

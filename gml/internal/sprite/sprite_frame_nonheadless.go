@@ -110,5 +110,5 @@ func GetRawFrame(spriteIndex SpriteIndex, index int) *ebiten.Image {
 	//
 	// https://stackoverflow.com/questions/35115868/how-to-round-to-nearest-int-when-casting-float-to-int-in-go
 	//
-	return Frames(spriteIndex)[index].image
+	return gSpriteManager.assetList[spriteIndex].frames[index].image
 }
