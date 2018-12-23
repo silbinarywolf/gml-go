@@ -5,5 +5,3 @@ import (
 )
 
 type Vec = geom.Vec
-
-type Size = geom.Size

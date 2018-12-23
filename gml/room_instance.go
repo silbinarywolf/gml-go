@@ -11,7 +11,7 @@ type roomInstance struct {
 	used  bool
 	index RoomInstanceIndex
 	room  *room.Room
-	size  geom.Size
+	size  geom.Vec
 
 	instanceLayers []roomInstanceLayerInstance
 	spriteLayers   []roomInstanceLayerSprite
@@ -49,7 +49,7 @@ func RoomInstanceDestroy(roomInstanceIndex RoomInstanceIndex) {
 }
 
 // RoomInstanceSize returns the size of the given room instance
-func RoomInstanceSize(roomInstanceIndex RoomInstanceIndex) geom.Size {
+func RoomInstanceSize(roomInstanceIndex RoomInstanceIndex) geom.Vec {
 	if roomInst := roomGetInstance(roomInstanceIndex); roomInst != nil {
 		return roomInst.size
 	}

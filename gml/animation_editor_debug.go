@@ -104,15 +104,15 @@ func (editor *debugAnimationEditor) animationEditorToggleMenu(menu animMenu) {
 		case animMenuSpriteBboxLeft:
 			diff := value - collisionMask.Rect.X
 			collisionMask.Rect.X = value
-			collisionMask.Rect.Size.X -= int32(diff)
+			collisionMask.Rect.Size.X -= diff
 		case animMenuSpriteBboxTop:
 			diff := value - collisionMask.Rect.Y
 			collisionMask.Rect.Y = value
-			collisionMask.Rect.Size.Y -= int32(diff)
+			collisionMask.Rect.Size.Y -= diff
 		case animMenuSpriteBboxRight:
-			collisionMask.Rect.Size.X = int32(value - collisionMask.Rect.X)
+			collisionMask.Rect.Size.X = value - collisionMask.Rect.X
 		case animMenuSpriteBboxBottom:
-			collisionMask.Rect.Size.Y = int32(value - collisionMask.Rect.Y)
+			collisionMask.Rect.Size.Y = value - collisionMask.Rect.Y
 		}
 	}
 	editor.menuOpened = menu
@@ -212,7 +212,7 @@ func animationEditorUpdate() {
 		{
 			// Draw backdrop
 			pos := pos
-			DrawRectangle(pos, size.Vec(), color.RGBA{195, 195, 195, 255})
+			DrawRectangle(pos, size, color.RGBA{195, 195, 195, 255})
 		}
 
 		// Sprite
@@ -226,7 +226,7 @@ func animationEditorUpdate() {
 			var rect geom.Rect = collisionMask.Rect
 			rect.X += pos.X
 			rect.Y += pos.Y
-			DrawRectangle(rect.Vec, rect.Size.Vec(), color.RGBA{255, 0, 0, 128})
+			DrawRectangle(rect.Vec, rect.Size, color.RGBA{255, 0, 0, 128})
 		}
 
 		if collisionMask != nil &&
@@ -250,91 +250,91 @@ func animationEditorUpdate() {
 			{
 				// Top-Left
 				rect := geom.Rect{}
-				rect.Size = geom.Size{12, 12}
+				rect.Size = geom.Vec{12, 12}
 				rect.X = offset.X + collisionMask.Rect.Left() - float64(rect.Size.X/2)
 				rect.Y = offset.Y + collisionMask.Rect.Top() - float64(rect.Size.Y/2)
 
 				// Handle hitbox handles
 				if editor.handleDragging == handleDragLeftTop {
 					collisionMask.Rect.X += diffX
-					collisionMask.Rect.Size.X -= int32(diffX)
+					collisionMask.Rect.Size.X -= diffX
 					collisionMask.Rect.Y += diffY
-					collisionMask.Rect.Size.Y -= int32(diffY)
+					collisionMask.Rect.Size.Y -= diffY
 				}
 				col := color.RGBA{255, 255, 255, 255}
-				if debugDrawIsMouseOver(rect.Pos(), rect.Size.Vec()) {
+				if debugDrawIsMouseOver(rect.Pos(), rect.Size) {
 					if MouseCheckPressed(MbLeft) {
 						editor.handleDragging = handleDragLeftTop
 					}
 					col = color.RGBA{200, 200, 200, 255}
 				}
-				DrawRectangle(rect.Pos(), rect.Size.Vec(), col)
+				DrawRectangle(rect.Pos(), rect.Size, col)
 			}
 			{
 				// Top-Right
 				rect := geom.Rect{}
-				rect.Size = geom.Size{12, 12}
+				rect.Size = geom.Vec{12, 12}
 				rect.X = offset.X + collisionMask.Rect.Right() - float64(rect.Size.X/2)
 				rect.Y = offset.Y + collisionMask.Rect.Top() - float64(rect.Size.Y/2)
 
 				// Handle hitbox handles
 				if editor.handleDragging == handleDragRightTop {
-					collisionMask.Rect.Size.X += int32(diffX)
+					collisionMask.Rect.Size.X += diffX
 					collisionMask.Rect.Y += diffY
-					collisionMask.Rect.Size.Y -= int32(diffY)
+					collisionMask.Rect.Size.Y -= diffY
 				}
 				col := color.RGBA{255, 255, 255, 255}
-				if debugDrawIsMouseOver(rect.Pos(), rect.Size.Vec()) {
+				if debugDrawIsMouseOver(rect.Pos(), rect.Size) {
 					if MouseCheckPressed(MbLeft) {
 						editor.handleDragging = handleDragRightTop
 					}
 					col = color.RGBA{200, 200, 200, 255}
 				}
-				DrawRectangle(rect.Pos(), rect.Size.Vec(), col)
+				DrawRectangle(rect.Pos(), rect.Size, col)
 			}
 			{
 				// Bottom-Left
 				rect := geom.Rect{}
-				rect.Size = geom.Size{12, 12}
+				rect.Size = geom.Vec{12, 12}
 				rect.X = offset.X + collisionMask.Rect.Left() - float64(rect.Size.X/2)
 				rect.Y = offset.Y + collisionMask.Rect.Bottom() - float64(rect.Size.Y/2)
 
 				// Handle hitbox handles
 				if editor.handleDragging == handleDragLeftBottom {
 					collisionMask.Rect.X += diffX
-					collisionMask.Rect.Size.X -= int32(diffX)
+					collisionMask.Rect.Size.X -= diffX
 					//collisionMask.Rect.Y = diffY
-					collisionMask.Rect.Size.Y += int32(diffY)
+					collisionMask.Rect.Size.Y += diffY
 				}
 				col := color.RGBA{255, 255, 255, 255}
-				if debugDrawIsMouseOver(rect.Pos(), rect.Size.Vec()) {
+				if debugDrawIsMouseOver(rect.Pos(), rect.Size) {
 					if MouseCheckPressed(MbLeft) {
 						editor.handleDragging = handleDragLeftBottom
 					}
 					col = color.RGBA{200, 200, 200, 255}
 				}
-				DrawRectangle(rect.Pos(), rect.Size.Vec(), col)
+				DrawRectangle(rect.Pos(), rect.Size, col)
 			}
 			{
 				// Bottom-Right
 				rect := geom.Rect{}
-				rect.Size = geom.Size{12, 12}
+				rect.Size = geom.Vec{12, 12}
 				rect.X = offset.X + collisionMask.Rect.Right() - float64(rect.Size.X/2)
 				rect.Y = offset.Y + collisionMask.Rect.Bottom() - float64(rect.Size.Y/2)
 
 				// Handle hitbox handles
 				if editor.handleDragging == handleDragRightBottom {
-					collisionMask.Rect.Size.X += int32(diffX)
-					collisionMask.Rect.Size.Y += int32(diffY)
+					collisionMask.Rect.Size.X += diffX
+					collisionMask.Rect.Size.Y += diffY
 				}
 				col := color.RGBA{255, 255, 255, 255}
-				if debugDrawIsMouseOver(rect.Pos(), rect.Size.Vec()) {
+				if debugDrawIsMouseOver(rect.Pos(), rect.Size) {
 					if MouseCheckPressed(MbLeft) {
 						editor.handleDragging = handleDragRightBottom
 					}
 					col = color.RGBA{200, 200, 200, 255}
 				}
-				DrawRectangle(rect.Pos(), rect.Size.Vec(), col)
+				DrawRectangle(rect.Pos(), rect.Size, col)
 			}
 			{
 				// Update State

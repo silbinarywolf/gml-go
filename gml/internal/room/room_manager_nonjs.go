@@ -250,7 +250,7 @@ func loadRoomFromDirectoryFiles(name string) *Room {
 						baseObj := inst.BaseObject()
 						size := baseObj.Size
 						*/
-						size := geom.Size{}
+						size := geom.Vec{}
 						panic("todo: Fix this to get object width/height")
 
 						x := int32(x)

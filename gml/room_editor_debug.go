@@ -1344,7 +1344,7 @@ func drawTextButton(pos geom.Vec, text string) bool {
 	return MouseCheckPressed(MbLeft) && isMouseOver
 }
 
-func (roomEditor *roomEditor) getSnapPosition(pos geom.Vec, brushSize geom.Size, layer *room.RoomLayerSprite) (geom.Vec, bool) {
+func (roomEditor *roomEditor) getSnapPosition(pos geom.Vec, brushSize geom.Vec, layer *room.RoomLayerSprite) (geom.Vec, bool) {
 	offsetX := float64(brushSize.X)
 	offsetY := float64(brushSize.Y)
 	var horizTarget, vertTarget geom.Rect

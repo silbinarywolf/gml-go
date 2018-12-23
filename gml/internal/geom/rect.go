@@ -1,8 +1,8 @@
 package geom
 
 type Rect struct {
-	Vec       // Position (contains X,Y)
-	Size Size // Size (X,Y)
+	Vec      // Position (contains X,Y)
+	Size Vec // Size (X,Y)
 }
 
 func (rect *Rect) Pos() Vec {
@@ -10,9 +10,9 @@ func (rect *Rect) Pos() Vec {
 }
 
 func (rect *Rect) Left() float64   { return rect.Vec.X }
-func (rect *Rect) Right() float64  { return rect.Vec.X + float64(rect.Size.X) }
+func (rect *Rect) Right() float64  { return rect.Vec.X + rect.Size.X }
 func (rect *Rect) Top() float64    { return rect.Vec.Y }
-func (rect *Rect) Bottom() float64 { return rect.Vec.Y + float64(rect.Size.Y) }
+func (rect *Rect) Bottom() float64 { return rect.Vec.Y + rect.Size.Y }
 
 func (rect *Rect) DistancePoint(point Vec) float64 {
 	yDist := 0.0

@@ -67,10 +67,10 @@ func update() error {
 	return nil
 }
 
-func WindowSize() geom.Size {
-	return geom.Size{
-		X: int32(gWindowWidth),
-		Y: int32(gWindowHeight),
+func WindowSize() geom.Vec {
+	return geom.Vec{
+		X: float64(gWindowWidth),
+		Y: float64(gWindowHeight),
 	}
 }
 

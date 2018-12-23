@@ -69,10 +69,7 @@ func (state *state) createNewRoomInstance(room *room.Room) *roomInstance {
 	index := len(state.roomInstances) - 1
 	roomInst := &state.roomInstances[index]
 	roomInst.index = RoomInstanceIndex(index)
-	roomInst.size = geom.Size{
-		X: int32(WindowWidth()),
-		Y: int32(WindowHeight()),
-	}
+	roomInst.size = WindowSize()
 
 	if room == nil ||
 		len(room.InstanceLayers) == 0 {
@@ -88,9 +85,9 @@ func (state *state) createNewRoomInstance(room *room.Room) *roomInstance {
 
 	// If non-blank room instance, use room data to create
 	if roomInst.room != nil {
-		roomInst.size = geom.Size{
-			X: roomInst.room.Right - roomInst.room.Left,
-			Y: roomInst.room.Bottom - roomInst.room.Top,
+		roomInst.size = geom.Vec{
+			X: float64(roomInst.room.Right - roomInst.room.Left),
+			Y: float64(roomInst.room.Bottom - roomInst.room.Top),
 		}
 
 		// Instance layers
