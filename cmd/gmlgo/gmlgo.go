@@ -25,6 +25,7 @@ import (
 const (
 	defaultImportName = "gml"
 	genFile           = "gmlgo_gen.go"
+	objectPath        = "github.com/silbinarywolf/gml-go/gml.Object"
 	importString      = "\"github.com/silbinarywolf/gml-go/gml\""
 	version           = "0.1.0"
 )
@@ -268,38 +269,29 @@ func (g *Generator) generate() {
 			// type XXXX struct
 			case *ast.TypeSpec:
 				structName := n.Name.Name
-				switch n := n.Type.(type) {
-				// type XXXX struct
-				case *ast.StructType:
-					if n.Incomplete ||
-						gmlPackageName == "" {
-						return false
-					}
-					for _, field := range n.Fields.List {
-						switch fieldType := field.Type.(type) {
-						case *ast.SelectorExpr:
-							switch kind := fieldType.X.(type) {
-							case *ast.Ident:
-								// Find embedded "gml.Object"
-								if kind.Name == gmlPackageName &&
-									fieldType.Sel.Name == "Object" {
-									structsUsingGMLObject = append(structsUsingGMLObject, Struct{
-										Name: structName,
-									})
-								}
-							}
-						}
-					}
+				typeInfo, ok := g.pkg.typesPkg.Scope().Lookup(structName).Type().(*types.Named)
+				if !ok {
+					// Skip if can't determine type
 					return false
+				}
+				structTypeInfo := typeInfo.Underlying().(*types.Struct)
+				for i := 0; i < structTypeInfo.NumFields(); i++ {
+					field := structTypeInfo.Field(i)
+					fieldTypeInfo, ok := field.Type().(*types.Named)
+					// Search for embedded "gml.Object" field
+					if ok &&
+						field.Embedded() &&
+						fieldTypeInfo.String() == objectPath {
+						structsUsingGMLObject = append(structsUsingGMLObject, Struct{
+							Name: structName,
+						})
+						break
+					}
 				}
 				return false
 			}
 			return true
 		})
-	}
-
-	if len(structsUsingGMLObject) == 0 {
-		return
 	}
 
 	// Sort alphabetically
