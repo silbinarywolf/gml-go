@@ -47,7 +47,7 @@ func CameraSetViewPos(index int, pos geom.Vec) {
 func CameraSetViewSize(index int, size geom.Vec) {
 }
 
-func CameraSetViewTarget(index int, inst ObjectType) {
+func CameraSetViewTarget(index int, instanceIndex InstanceIndex) {
 }
 
 func cameraClear(index int) {
