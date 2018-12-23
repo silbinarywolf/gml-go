@@ -14,18 +14,17 @@ func (self *EnemyShip) Create() {
 }
 
 func (self *EnemyShip) Destroy() {
-
+	global.ShipsSighted += 1
 }
 
 func (self *EnemyShip) Update() {
 	self.Y += 8
+
+	// todo(Jake): 2018-12-06 - #38
+	// Add function to get RoomSize from RoomInstanceIndex
+	// (once gml.RoomInstanceIndex is implemented)
 	if self.Y > WindowHeight {
-		//fmt.Printf("todo: Uncomment InstanceDestroy() in obj_enemy_ship, fix InstanceDestroy() method\n")
 		gml.InstanceDestroy(self)
 		return
 	}
-}
-
-func (self *EnemyShip) Draw() {
-	gml.DrawSelf(&self.SpriteState, self.Pos())
 }

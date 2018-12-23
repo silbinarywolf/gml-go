@@ -33,6 +33,16 @@ type Object struct {
 	imageAngleRadians float64 // Image Angle
 }
 
+func (inst *Object) Create() {}
+
+func (inst *Object) Update() {}
+
+func (inst *Object) Destroy() {}
+
+func (inst *Object) Draw() {
+	DrawSelf(&inst.SpriteState, inst.Pos())
+}
+
 func (inst *Object) create() {
 	inst.ImageScale.X = 1.0
 	inst.ImageScale.Y = 1.0
@@ -44,6 +54,7 @@ func (inst *Object) SetSolid(isSolid bool) {
 
 func (inst *Object) Solid() bool                { return inst.solid }
 func (inst *Object) BaseObject() *Object        { return inst }
+func (inst *Object) ObjectName() string         { return gObjectManager.indexToName[inst.objectIndex] }
 func (inst *Object) ObjectIndex() ObjectIndex   { return inst.objectIndex }
 func (inst *Object) ImageAngleRadians() float64 { return inst.imageAngleRadians }
 func (inst *Object) ImageAngle() float64        { return inst.imageAngleRadians * (180 / math.Pi) }
@@ -70,8 +81,4 @@ func (inst *Object) SetImageAngle(angleInDegrees float64) {
 
 func (inst *Object) SetImageAngleRadians(angleInRadians float64) {
 	inst.imageAngleRadians = angleInRadians
-}
-
-func (inst *Object) CollisionInstance(otherInst ObjectType) bool {
-	return inst.Rect.CollisionRectangle(otherInst.BaseObject().Rect)
 }

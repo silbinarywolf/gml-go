@@ -6,6 +6,9 @@ import (
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 )
 
+// Noone is to be used when checking if there is no instance with InstanceIndex type
+const Noone InstanceIndex = 0
+
 type InstanceIndex int32
 
 type instanceManager struct {
@@ -78,7 +81,7 @@ func InstanceGet(index InstanceIndex) ObjectType {
 		return nil
 	}
 	inst := gState.instanceManager.instances[dataIndex]
-	if inst.BaseObject().isDestroyed {
+	if !InstanceExists(inst) {
 		return nil
 	}
 	return inst
@@ -110,11 +113,11 @@ func InstanceChangeRoom(inst ObjectType, roomInstanceIndex RoomInstanceIndex) {
 	//manager.instances = append(manager.instances, inst)
 }
 
-func InstanceCreateRoom(position geom.Vec, roomInstanceIndex RoomInstanceIndex, objectIndex ObjectIndex) ObjectType {
+func InstanceCreate(x, y float64, roomInstanceIndex RoomInstanceIndex, objectIndex ObjectIndex) ObjectType {
 	inst := allocateNewInstance(objectIndex)
 	{
 		baseObj := inst.BaseObject()
-		baseObj.Vec = position
+		baseObj.Vec = geom.Vec{x, y}
 		baseObj.objectIndex = objectIndex
 		baseObj.roomInstanceIndex = roomInstanceIndex
 		roomInst := &gState.roomInstances[roomInstanceIndex]
@@ -139,17 +142,13 @@ func InstanceCreateRoom(position geom.Vec, roomInstanceIndex RoomInstanceIndex, 
 	return layer.manager.InstanceCreate(position, objectIndex, roomInst.index, layer.index)*/
 }
 
+// InstanceExists will return true if an object has not been destroyed and belongs to a room
 func InstanceExists(inst ObjectType) bool {
 	baseObj := inst.BaseObject()
-	if baseObj == nil {
-		return false
-	}
 	roomInst := roomGetInstance(baseObj.RoomInstanceIndex())
-	// todo(Jake): 2018-08-20
-	//
-	// Check to see if current entity is destroyed
-	//
-	return roomInst != nil
+	return baseObj != nil &&
+		!baseObj.isDestroyed &&
+		roomInst != nil
 }
 
 func (manager *roomInstanceManager) InstanceCreate(position geom.Vec, objectIndex ObjectIndex, roomInstanceIndex RoomInstanceIndex, layerIndex int) ObjectType {

@@ -35,7 +35,7 @@ func debugMenuOpenOrToggleClosed(id debugMenu) {
 
 		// Reset camera
 		CameraSetViewSize(0, geom.Vec{float64(WindowWidth()), float64(WindowHeight())})
-		CameraSetViewTarget(0, nil)
+		CameraSetViewTarget(0, Noone)
 	}
 }
 

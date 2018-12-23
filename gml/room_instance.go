@@ -1,6 +1,7 @@
 package gml
 
 import (
+	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 	"github.com/silbinarywolf/gml-go/gml/internal/room"
 )
 
@@ -10,6 +11,7 @@ type roomInstance struct {
 	used  bool
 	index RoomInstanceIndex
 	room  *room.Room
+	size  geom.Size
 
 	instanceLayers []roomInstanceLayerInstance
 	spriteLayers   []roomInstanceLayerSprite

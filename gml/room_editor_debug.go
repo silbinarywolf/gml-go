@@ -217,7 +217,7 @@ func (roomEditor *roomEditor) editorChangeRoom(room *room.Room) bool {
 	//
 	roomEditor.camPos = CameraGetViewPos(0)
 	CameraSetViewSize(0, geom.Vec{float64(WindowWidth()), float64(WindowHeight())})
-	CameraSetViewTarget(0, nil)
+	CameraSetViewTarget(0, Noone)
 	return true
 }
 

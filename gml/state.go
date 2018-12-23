@@ -51,8 +51,8 @@ func FrameUsage() string {
 	return text + "% (" + strconv.Itoa(int(gState.frameBudgetNanosecondsUsed)) + "ns)"
 }
 
-// IsCreatingRoomInstance returns whether this instance was created by a room or not, rather
-// than programmatically.
+// IsCreatingRoomInstance is to be used in the Create() event of your objects, this will only
+// return true if the object is being created from room data, not code.
 func IsCreatingRoomInstance() bool {
 	return gState.isCreatingRoomInstance
 }
@@ -69,6 +69,10 @@ func (state *state) createNewRoomInstance(room *room.Room) *roomInstance {
 	index := len(state.roomInstances) - 1
 	roomInst := &state.roomInstances[index]
 	roomInst.index = RoomInstanceIndex(index)
+	roomInst.size = geom.Size{
+		X: int32(WindowWidth()),
+		Y: int32(WindowHeight()),
+	}
 
 	if room == nil ||
 		len(room.InstanceLayers) == 0 {
@@ -84,6 +88,11 @@ func (state *state) createNewRoomInstance(room *room.Room) *roomInstance {
 
 	// If non-blank room instance, use room data to create
 	if roomInst.room != nil {
+		roomInst.size = geom.Size{
+			X: roomInst.room.Right - roomInst.room.Left,
+			Y: roomInst.room.Bottom - roomInst.room.Top,
+		}
+
 		// Instance layers
 		if len(room.InstanceLayers) > 0 {
 			roomInst.instanceLayers = make([]roomInstanceLayerInstance, len(room.InstanceLayers))
@@ -95,8 +104,7 @@ func (state *state) createNewRoomInstance(room *room.Room) *roomInstance {
 				layer := &roomInst.instanceLayers[i]
 				layer.drawOrder = layerData.Config.Order
 				for _, obj := range layerData.Instances {
-					pos := geom.Vec{float64(obj.X), float64(obj.Y)}
-					InstanceCreateRoom(pos, roomInst.index, ObjectIndex(obj.ObjectIndex))
+					InstanceCreate(float64(obj.X), float64(obj.Y), roomInst.index, ObjectIndex(obj.ObjectIndex))
 					fmt.Printf("todo(Jake): 2018-12-19: Fix room instance creation to create on correct layer.\n")
 				}
 				roomInst.drawLayers = append(roomInst.drawLayers, layer)
@@ -160,7 +168,7 @@ func (state *state) deleteRoomInstance(roomInst *roomInstance) {
 				continue
 			}
 			inst.Destroy()
-			cameraInstanceDestroy(inst)
+			cameraInstanceDestroy(instanceIndex)
 		}
 		layer.instances = nil
 	}

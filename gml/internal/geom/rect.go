@@ -30,8 +30,10 @@ func (rect *Rect) DistancePoint(point Vec) float64 {
 	return Vec{xDist, yDist}.Norm()
 }
 
-// https://stackoverflow.com/questions/4978323/how-to-calculate-distance-between-two-rectangles-context-a-game-in-lua
+// DistanceRect will give you the distance in pixels between two rectangles
+// this is useful for seeing how far an object is from another object.
 func (rect *Rect) DistanceRect(otherRect Rect) float64 {
+	// source: https://stackoverflow.com/questions/4978323/how-to-calculate-distance-between-two-rectangles-context-a-game-in-lua
 	left := otherRect.Right() < rect.Left()
 	right := rect.Right() < otherRect.Left()
 	bottom := otherRect.Bottom() < rect.Top()
