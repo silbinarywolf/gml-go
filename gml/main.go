@@ -74,21 +74,23 @@ func WindowSize() geom.Size {
 	}
 }
 
-func WindowWidth() int {
-	return gWindowWidth
+func WindowWidth() float64 {
+	return float64(gWindowWidth)
 }
 
-func WindowHeight() int {
-	return gWindowHeight
+func WindowHeight() float64 {
+	return float64(gWindowHeight)
 }
 
 func WindowScale() float64 {
 	return gWindowScale
 }
 
-func Update(animationUpdate bool) {
+// Update runs the game logic, this includes object Update methods, room animation updates
+// and more
+func Update() {
 	cameraSetActive(0)
 	defer cameraClearActive()
 
-	gState.update(animationUpdate)
+	gState.update()
 }

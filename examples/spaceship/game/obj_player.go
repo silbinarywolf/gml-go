@@ -19,7 +19,8 @@ func (self *Player) Create() {
 func (self *Player) Update() {
 	if self.enemyCreateAlarm.Update(60) {
 		// Spawn enemies at the top of the frame, every 60 frames
-		gml.InstanceCreate(float64(rand.Intn(gml.WindowWidth())), 0, self.RoomInstanceIndex(), ObjEnemyShip)
+		roomSize := gml.RoomInstanceSize(self.RoomInstanceIndex())
+		gml.InstanceCreate(float64(rand.Intn(int(roomSize.X))), 0, self.RoomInstanceIndex(), ObjEnemyShip)
 	}
 
 	if gml.KeyboardCheck(gml.VkLeft) {
