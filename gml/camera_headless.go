@@ -56,7 +56,7 @@ func cameraClear(index int) {
 func cameraDraw(index int) {
 }
 
-func cameraInstanceDestroy(inst ObjectType) {
+func cameraInstanceDestroy(instanceIndex InstanceIndex) {
 }
 
 func (view *camera) update() {

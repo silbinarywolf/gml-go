@@ -6,7 +6,7 @@ func GameStart() {
 	gml.DrawSetFont(FntDefault)
 
 	// Setup global variables
-	global.ShipsDestroyed = 0
+	global.ShipsSighted = 0
 
 	// Setup camera
 	// todo(Jake): 2018-11-24 - #3
