@@ -25,6 +25,7 @@ import (
 const (
 	defaultImportName = "gml"
 	genFile           = "gmlgo_gen.go"
+	objectPath        = "github.com/silbinarywolf/gml-go/gml.Object"
 	importString      = "\"github.com/silbinarywolf/gml-go/gml\""
 	version           = "0.1.0"
 )
@@ -244,62 +245,61 @@ type AssetKind struct {
 	Assets []string
 }
 
+// hasEmbeddedObjectRecursive checks to see if "gml.Object" has been embedded
+// into this struct, it will search each embedded struct to see if that struct
+// also contains the "gml.Object" struct. This is to allow people to create
+// base struct objects wherein all other objects can inherit that object.
+func hasEmbeddedObjectRecursive(structTypeInfo *types.Struct) bool {
+	for i := 0; i < structTypeInfo.NumFields(); i++ {
+		field := structTypeInfo.Field(i)
+		fieldTypeInfo, ok := field.Type().(*types.Named)
+		if !ok {
+			continue
+		}
+		structTypeInfo, ok := fieldTypeInfo.Underlying().(*types.Struct)
+		if !ok {
+			continue
+		}
+		// Search for embedded "gml.Object" field
+		if field.Embedded() {
+			if fieldTypeInfo.String() == objectPath {
+				return true
+			} else if hasEmbeddedObjectRecursive(structTypeInfo) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // generate produces the code for object indexes
 func (g *Generator) generate() {
 	var structsUsingGMLObject []Struct
 	for _, file := range g.pkg.files {
-		gmlPackageName := ""
 		if file.file == nil {
 			continue
 		}
 		//fmt.Printf("file: %s\n---------------\n\n", file.file.Name.String())
 		ast.Inspect(file.file, func(n ast.Node) bool {
 			switch n := n.(type) {
-			// import "github.com/silbinarywolf/gml-go/gml"
-			case *ast.ImportSpec:
-				if n.Path.Value == importString {
-					gmlPackageName = defaultImportName
-					if n.Name != nil {
-						// import gml "github.com/silbinarywolf/gml-go/gml"
-						gmlPackageName = n.Name.Name
-					}
-				}
-				return false
 			// type XXXX struct
 			case *ast.TypeSpec:
 				structName := n.Name.Name
-				switch n := n.Type.(type) {
-				// type XXXX struct
-				case *ast.StructType:
-					if n.Incomplete ||
-						gmlPackageName == "" {
-						return false
-					}
-					for _, field := range n.Fields.List {
-						switch fieldType := field.Type.(type) {
-						case *ast.SelectorExpr:
-							switch kind := fieldType.X.(type) {
-							case *ast.Ident:
-								// Find embedded "gml.Object"
-								if kind.Name == gmlPackageName &&
-									fieldType.Sel.Name == "Object" {
-									structsUsingGMLObject = append(structsUsingGMLObject, Struct{
-										Name: structName,
-									})
-								}
-							}
-						}
-					}
+				typeInfo, ok := g.pkg.typesPkg.Scope().Lookup(structName).Type().(*types.Named)
+				if !ok {
+					// Skip if can't determine type
 					return false
+				}
+				structTypeInfo := typeInfo.Underlying().(*types.Struct)
+				if hasEmbeddedObjectRecursive(structTypeInfo) {
+					structsUsingGMLObject = append(structsUsingGMLObject, Struct{
+						Name: structName,
+					})
 				}
 				return false
 			}
 			return true
 		})
-	}
-
-	if len(structsUsingGMLObject) == 0 {
-		return
 	}
 
 	// Sort alphabetically
