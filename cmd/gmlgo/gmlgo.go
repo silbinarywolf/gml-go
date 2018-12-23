@@ -460,7 +460,7 @@ func (g *Generator) generateObjectMetaAndMethods(structsUsingGMLObject []Struct)
 			// ie. "Player": ObjPlayer
 			g.Printf("	\"%s\": %s%s,\n", assetName, prefix, assetName)
 		}
-		g.Printf("\n}\n")
+		g.Printf("\n}\n\n")
 	}
 	{
 		g.Printf("var _gen_%s_index_to_data = []gml.ObjectType{\n", prefix)
@@ -479,7 +479,7 @@ func (g *Generator) generateObjectMetaAndMethods(structsUsingGMLObject []Struct)
 			g.Printf("func (inst *" + record.Name + ") ObjectName() string { return \"" + record.Name + "\" }\n")
 			g.Printf("\n")
 		}
-		g.Printf("\n")*/
+		.ObjectIndex{*/
 		g.Printf(`
 
 func init() {
