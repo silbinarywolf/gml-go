@@ -9,7 +9,6 @@ const (
 
 var global Globals
 
-// Globals is a structure where you can define all your global variables
 type Globals struct {
 	ShipsSighted int
 }

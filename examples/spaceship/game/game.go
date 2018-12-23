@@ -14,15 +14,12 @@ func GameStart() {
 	gml.CameraCreate(0, 0, 0, float64(gml.WindowWidth()), float64(gml.WindowHeight()))
 	currentRoomIndex := gml.RoomInstanceNew()
 
-	// todo(Jake): 2018-12-06 - #38
-	// Add function to get RoomSize from RoomInstanceIndex
-	// (once gml.RoomInstanceIndex is implemented)
-	windowSize := gml.WindowSize().Vec()
-	inst := gml.InstanceCreate(windowSize.X/2, windowSize.Y/2, currentRoomIndex, ObjPlayer)
+	roomSize := gml.RoomInstanceSize(currentRoomIndex)
+	inst := gml.InstanceCreate(float64(roomSize.X/2), float64(roomSize.Y/2), currentRoomIndex, ObjPlayer)
 	gml.CameraSetViewTarget(0, inst.BaseObject().InstanceIndex())
 }
 
 func GameUpdate() {
-	gml.Update(true)
+	gml.Update()
 	gml.Draw()
 }

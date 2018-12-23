@@ -177,10 +177,7 @@ func (state *state) deleteRoomInstance(roomInst *roomInstance) {
 	*roomInst = roomInstance{}
 }
 
-func (state *state) update(animationUpdate bool) {
-	// Simulate global instances
-	//state.globalInstances.update(animationUpdate)
-
+func (state *state) update() {
 	// Simulate each active instance
 	for i := 0; i < len(state.instanceManager.instances); i++ {
 		inst := state.instanceManager.instances[i]

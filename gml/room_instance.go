@@ -43,8 +43,17 @@ func todo__roomInstanceCreate(room *room.Room) RoomInstanceIndex {
 
 // RoomInstanceDestroy destroys a room instance
 func RoomInstanceDestroy(roomInstanceIndex RoomInstanceIndex) {
-	roomInst := &gState.roomInstances[roomInstanceIndex]
-	gState.deleteRoomInstance(roomInst)
+	if roomInst := roomGetInstance(roomInstanceIndex); roomInst != nil {
+		gState.deleteRoomInstance(roomInst)
+	}
+}
+
+// RoomInstanceSize returns the size of the given room instance
+func RoomInstanceSize(roomInstanceIndex RoomInstanceIndex) geom.Size {
+	if roomInst := roomGetInstance(roomInstanceIndex); roomInst != nil {
+		return roomInst.size
+	}
+	panic("Invalid roomInstanceIndex given")
 }
 
 type roomInstanceObject interface {
