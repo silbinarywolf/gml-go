@@ -8,13 +8,12 @@ func GameStart() {
 	// Setup global variables
 	global.ShipsSighted = 0
 
-	// Setup camera
-	gml.CameraCreate(0, 0, 0, gml.WindowWidth(), gml.WindowHeight())
+	// Create new empty room
 	roomInstanceIndex := gml.RoomInstanceNew()
-
 	roomSize := gml.RoomInstanceSize(roomInstanceIndex)
-	inst := gml.InstanceCreate(roomSize.X/2, roomSize.Y/2, roomInstanceIndex, ObjPlayer)
-	gml.CameraSetViewTarget(0, inst.BaseObject().InstanceIndex())
+
+	// Create player in the center of the room
+	gml.InstanceCreate(roomSize.X/2, roomSize.Y/2, roomInstanceIndex, ObjPlayer)
 }
 
 func GameUpdate() {

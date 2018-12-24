@@ -16,8 +16,8 @@ func (self *Bullet) Create() {
 func (self *Bullet) Update() {
 	self.Y -= 8
 
-	for _, other := range gml.CollisionRectList(self, self.Pos()) {
-		other, ok := other.(*EnemyShip)
+	for _, otherId := range gml.CollisionRectList(self, self.Pos()) {
+		other, ok := gml.InstanceGet(otherId).(*EnemyShip)
 		if !ok {
 			continue
 		}
