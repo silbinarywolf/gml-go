@@ -4,7 +4,12 @@ asset/font/data/*.rtf#
 # Ignore code generated files
 gmlgo_gen.go
 **/gmlgo_gen.go
-# Ignore binary for Windows
+# Ignore Windows build
 *.exe
+# Ignore GopherJS build
+*.js
+*.js.map
+# Ignore WebAssembly build
+*.wasm
 # Ignore binary for Linux / Mac
 ./spaceship

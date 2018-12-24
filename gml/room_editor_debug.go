@@ -216,7 +216,7 @@ func (roomEditor *roomEditor) editorChangeRoom(room *room.Room) bool {
 	// editor. Retain the same camera position.
 	//
 	roomEditor.camPos = CameraGetViewPos(0)
-	CameraSetViewSize(0, geom.Vec{float64(WindowWidth()), float64(WindowHeight())})
+	CameraSetViewSize(0, WindowWidth(), WindowHeight())
 	CameraSetViewTarget(0, Noone)
 	return true
 }
@@ -443,7 +443,7 @@ func editorUpdate() {
 			} else if KeyboardCheck(VkDown) || KeyboardCheck(VkS) {
 				camPos.Y += speed
 			}
-			CameraSetViewPos(0, *camPos)
+			CameraSetViewPos(0, camPos.X, camPos.Y)
 		}
 
 		lastMouseScreenPos := roomEditor.lastMouseScreenPos
@@ -466,7 +466,7 @@ func editorUpdate() {
 				} else if mouseDistMoved.Y < 0 {
 					camPos.Y += mouseDistMoved.Y * sensitivity
 				}
-				CameraSetViewPos(0, *camPos)
+				CameraSetViewPos(0, camPos.X, camPos.Y)
 			}
 		}
 	}
@@ -476,7 +476,7 @@ func editorUpdate() {
 
 	// Draw
 	{
-		cameraSize := cameraGetActive().size
+		cameraSize := cameraGetActive().Size
 
 		{
 			// Fill screen with gray
@@ -1344,7 +1344,7 @@ func drawTextButton(pos geom.Vec, text string) bool {
 	return MouseCheckPressed(MbLeft) && isMouseOver
 }
 
-func (roomEditor *roomEditor) getSnapPosition(pos geom.Vec, brushSize geom.Size, layer *room.RoomLayerSprite) (geom.Vec, bool) {
+func (roomEditor *roomEditor) getSnapPosition(pos geom.Vec, brushSize geom.Vec, layer *room.RoomLayerSprite) (geom.Vec, bool) {
 	offsetX := float64(brushSize.X)
 	offsetY := float64(brushSize.Y)
 	var horizTarget, vertTarget geom.Rect

@@ -2,15 +2,21 @@
 
 package gml
 
-import "time"
+import (
+	"time"
+
+	"github.com/silbinarywolf/gml-go/gml/internal/geom"
+)
 
 func Draw() {
 	// no-op
 }
 
-func Run(gameStartFunc func(), updateFunc func(), width int, height int, scale float64, title string) {
-	gWindowWidth = width
-	gWindowHeight = height
+func Run(gameStartFunc func(), updateFunc func(), width, height float64, scale float64, title string) {
+	gWindowSize = geom.Vec{
+		X: width,
+		Y: height,
+	}
 	gWindowScale = scale
 
 	gMainFunctions.gameStart = gameStartFunc

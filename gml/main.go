@@ -13,9 +13,8 @@ type mainFunctions struct {
 var gMainFunctions *mainFunctions = new(mainFunctions)
 
 var (
-	gWindowWidth  int
-	gWindowHeight int
-	gWindowScale  float64 // Window scale
+	gWindowSize  geom.Vec
+	gWindowScale float64 // Window scale
 )
 
 func update() error {
@@ -67,19 +66,16 @@ func update() error {
 	return nil
 }
 
-func WindowSize() geom.Size {
-	return geom.Size{
-		X: int32(gWindowWidth),
-		Y: int32(gWindowHeight),
-	}
+func WindowSize() geom.Vec {
+	return gWindowSize
 }
 
 func WindowWidth() float64 {
-	return float64(gWindowWidth)
+	return gWindowSize.X
 }
 
 func WindowHeight() float64 {
-	return float64(gWindowHeight)
+	return gWindowSize.Y
 }
 
 func WindowScale() float64 {

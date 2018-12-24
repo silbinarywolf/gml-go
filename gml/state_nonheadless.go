@@ -3,6 +3,15 @@
 package gml
 
 func (state *state) draw() {
+	if gCameraManager.camerasEnabledCount == 0 {
+		// If no camera is configured, just render the first active room found
+		roomInst := roomGetInstance(1)
+		if roomInst == nil {
+			panic("Unable to find room instance: 1")
+		}
+		roomInst.draw()
+		return
+	}
 	for i := 0; i < len(gCameraManager.cameras); i++ {
 		view := &gCameraManager.cameras[i]
 		if !view.enabled {

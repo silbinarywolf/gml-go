@@ -12,7 +12,7 @@ type collisionObject interface {
 	BaseObject() *Object
 }
 
-func CollisionRectList(instType collisionObject, position geom.Vec) []ObjectType {
+func CollisionRectList(instType collisionObject, position geom.Vec) []InstanceIndex {
 	inst := instType.BaseObject()
 	room := roomGetInstance(inst.BaseObject().RoomInstanceIndex())
 	if room == nil {
@@ -25,9 +25,9 @@ func CollisionRectList(instType collisionObject, position geom.Vec) []ObjectType
 	r1.Size = inst.Size
 
 	// todo(Jake): 2018-12-01 - #18
-	// Consider pooling reusable ObjectType slices to
+	// Consider pooling reusable InstanceIndex slices to
 	// improve performance.
-	var list []ObjectType
+	var list []InstanceIndex
 	for i := 0; i < len(room.instanceLayers); i++ {
 		for _, otherIndex := range room.instanceLayers[i].instances {
 			otherT := InstanceGet(otherIndex)
@@ -36,8 +36,9 @@ func CollisionRectList(instType collisionObject, position geom.Vec) []ObjectType
 			}
 			other := otherT.BaseObject()
 			if r1.CollisionRectangle(other.Rect) &&
+				!other.isDestroyed &&
 				inst != other {
-				list = append(list, otherT)
+				list = append(list, otherIndex)
 			}
 		}
 	}

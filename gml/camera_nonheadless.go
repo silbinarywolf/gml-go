@@ -15,16 +15,16 @@ var (
 )
 
 type cameraManager struct {
-	cameras [8]camera
-	current *camera
+	cameras             [8]camera
+	current             *camera
+	camerasEnabledCount int
 }
 
 type camera struct {
 	enabled bool
 	follow  InstanceIndex
-	geom.Vec
+	geom.Rect
 	windowPos geom.Vec
-	size      geom.Vec
 	scale     geom.Vec
 	screen    *ebiten.Image
 }
@@ -39,18 +39,9 @@ func newCameraState() *cameraManager {
 }
 
 func (view *camera) Reset() {
-	view.size.X = float64(WindowWidth())
-	view.size.Y = float64(WindowHeight())
+	view.Size = WindowSize()
 	view.scale.X = 1
 	view.scale.Y = 1
-}
-
-//func (view *camera) Size() geom.Vec {
-//	return view.size
-//}
-
-func (view *camera) Scale() geom.Vec {
-	return view.scale
 }
 
 func CameraCreate(index int, windowX, windowY, windowWidth, windowHeight float64) {
@@ -65,9 +56,20 @@ func CameraCreate(index int, windowX, windowY, windowWidth, windowHeight float64
 	}
 	view.windowPos.X = windowX
 	view.windowPos.Y = windowY
-	view.size.X = windowWidth
-	view.size.Y = windowHeight
+	view.Size.X = windowWidth
+	view.Size.Y = windowHeight
 	view.enabled = true
+	gCameraManager.camerasEnabledCount++
+}
+
+func CameraDestroy(index int) {
+	view := &gCameraManager.cameras[index]
+	if !view.enabled {
+		panic("Camera " + strconv.Itoa(index) + " is not enabled.")
+		return
+	}
+	view.enabled = false
+	gCameraManager.camerasEnabledCount--
 }
 
 func CameraSetSize(index int, windowWidth, windowHeight float64) {
@@ -75,8 +77,8 @@ func CameraSetSize(index int, windowWidth, windowHeight float64) {
 	if !view.enabled {
 		panic("Camera " + strconv.Itoa(index) + " is not enabled.")
 	}
-	view.size.X = windowWidth
-	view.size.Y = windowHeight
+	view.Size.X = windowWidth
+	view.Size.Y = windowHeight
 }
 
 // cameraGetActive gets the current camera we're drawing objects onto
@@ -98,16 +100,22 @@ func CameraGetViewPos(index int) geom.Vec {
 	return view.Vec
 }
 
-func CameraSetViewPos(index int, pos geom.Vec) {
+func CameraSetViewPos(index int, x, y float64) {
 	view := &gCameraManager.cameras[index]
-	view.Vec = pos
+	view.Vec = geom.Vec{
+		X: x,
+		Y: y,
+	}
 
 	view.cameraFitToRoomDimensions()
 }
 
-func CameraSetViewSize(index int, size geom.Vec) {
+func CameraSetViewSize(index int, width, height float64) {
 	view := &gCameraManager.cameras[index]
-	view.size = size
+	view.Size = geom.Vec{
+		X: width,
+		Y: height,
+	}
 }
 
 func CameraSetViewTarget(index int, inst InstanceIndex) {
@@ -147,13 +155,13 @@ func (view *camera) update() {
 			mustCreateNewRenderTarget = true
 		} else {
 			// Resize camera
-			if int(view.size.X) != view.screen.Bounds().Max.X ||
-				int(view.size.Y) != view.screen.Bounds().Max.Y {
+			if int(view.Size.X) != view.screen.Bounds().Max.X ||
+				int(view.Size.Y) != view.screen.Bounds().Max.Y {
 				mustCreateNewRenderTarget = true
 			}
 		}
 		if mustCreateNewRenderTarget {
-			image, err := ebiten.NewImage(int(view.size.X), int(view.size.Y), ebiten.FilterDefault)
+			image, err := ebiten.NewImage(int(view.Size.X), int(view.Size.Y), ebiten.FilterDefault)
 			if err != nil {
 				panic(err)
 			}
@@ -164,8 +172,8 @@ func (view *camera) update() {
 	//
 	if inst := InstanceGet(view.follow); inst != nil {
 		inst := inst.BaseObject()
-		view.X = inst.X - (view.size.X / 2)
-		view.Y = inst.Y - (view.size.Y / 2)
+		view.X = inst.X - (view.Size.X / 2)
+		view.Y = inst.Y - (view.Size.Y / 2)
 	}
 	view.cameraFitToRoomDimensions()
 }
@@ -176,22 +184,22 @@ func (view *camera) cameraFitToRoomDimensions() {
 		roomInst := roomGetInstance(inst.BaseObject().RoomInstanceIndex())
 		if roomInst != nil {
 			var left, right, top, bottom float64
-			left = 0                         // float64(room.Left)
-			right = float64(roomInst.size.X) // float64(room.Right)
-			top = 0                          // float64(room.Top)
-			bottom = float64(roomInst.size.Y)
+			left = roomInst.Left()
+			right = roomInst.Right()
+			top = roomInst.Top()
+			bottom = roomInst.Bottom()
 
 			if view.X < left {
 				view.X = left
 			}
-			if view.X+view.size.X > right {
-				view.X = right - view.size.X
+			if view.X+view.Size.X > right {
+				view.X = right - view.Size.X
 			}
 			if view.Y < top {
 				view.Y = top
 			}
-			if view.Y+view.size.Y > bottom {
-				view.Y = bottom - view.size.Y
+			if view.Y+view.Size.Y > bottom {
+				view.Y = bottom - view.Size.Y
 			}
 			// NOTE(Jake): 2018-12-23
 			// IIRC, Need to round these values otherwise draw calls show

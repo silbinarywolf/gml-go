@@ -13,7 +13,7 @@ const SprUndefined SpriteIndex = 0
 type Sprite struct {
 	name       string
 	frames     []SpriteFrame
-	size       geom.Size
+	size       geom.Vec
 	imageSpeed float64
 }
 
@@ -28,8 +28,8 @@ func (spr *Sprite) rect() geom.Rect {
 
 type SpriteIndex int32
 
-func (spriteIndex SpriteIndex) Name() string    { return gSpriteManager.assetList[spriteIndex].name }
-func (spriteIndex SpriteIndex) Size() geom.Size { return gSpriteManager.assetList[spriteIndex].size }
+func (spriteIndex SpriteIndex) Name() string   { return gSpriteManager.assetList[spriteIndex].name }
+func (spriteIndex SpriteIndex) Size() geom.Vec { return gSpriteManager.assetList[spriteIndex].size }
 func (spriteIndex SpriteIndex) ImageSpeed() float64 {
 	return gSpriteManager.assetList[spriteIndex].imageSpeed
 }
@@ -63,9 +63,9 @@ func newSprite(name string, frames []SpriteFrame, config spriteConfig) *Sprite {
 			}
 			//frame.collisionMasks = make([]SpriteCollisionMask, maxCollisionMasks)
 		}
-		spr.size = geom.Size{
-			X: int32(width),
-			Y: int32(height),
+		spr.size = geom.Vec{
+			X: float64(width),
+			Y: float64(height),
 		}
 	}
 	return spr
