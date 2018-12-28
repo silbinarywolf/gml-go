@@ -17,7 +17,7 @@ type ObjectMeta struct {
 }
 
 func InitDebugObjectMetaList(debugObjectMetaList []ObjectMeta) {
-	debugObjectMetaList = debugObjectMetaList
+	gDebugObjectMetaList = debugObjectMetaList
 }
 
 func DebugObjectMetaList() []ObjectMeta {

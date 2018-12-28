@@ -71,9 +71,13 @@ func (manager *roomInstanceManager) reset() {
 	*manager = roomInstanceManager{}
 }
 
-/*func instanceCreateLayer(position geom.Vec, layer *roomInstanceLayerInstance, roomInst *roomInstance, objectIndex ObjectIndex) ObjectType {
-	return layer.manager.InstanceCreate(position, objectIndex, roomInst.index, layer.index)
-}*/
+// instanceGetBaseObject get the base object for an instance
+func instanceGetBaseObject(index InstanceIndex) *Object {
+	if inst := InstanceGet(index); inst != nil {
+		return inst.BaseObject()
+	}
+	return nil
+}
 
 func InstanceGet(index InstanceIndex) ObjectType {
 	dataIndex, ok := gState.instanceManager.instanceIndexToIndex[index]
@@ -86,14 +90,6 @@ func InstanceGet(index InstanceIndex) ObjectType {
 	}
 	return inst
 }
-
-/*func instanceGetBase(index InstanceIndex) *Object {
-	r := gState.instanceManager.Get(index)
-	if r == nil {
-		return nil
-	}
-	return r.BaseObject()
-}*/
 
 func InstanceChangeRoom(inst ObjectType, roomInstanceIndex RoomInstanceIndex) {
 	roomInst := &gState.roomInstances[roomInstanceIndex]

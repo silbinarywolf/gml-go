@@ -1,21 +1,77 @@
 package gml
 
 import (
+	"path/filepath"
+	"runtime"
+
+	"github.com/silbinarywolf/gml-go/gml/internal/file"
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
+	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
 	"github.com/silbinarywolf/gml-go/gml/internal/timegml"
 )
 
-type mainFunctions struct {
-	gameStart func()
-	update    func()
+type GameSettings struct {
+	GameStart    func()
+	GameUpdate   func()
+	WindowTitle  string
+	WindowWidth  float64
+	WindowHeight float64
+	WindowScale  float64
+
+	updateCallback func() bool
 }
 
-var gMainFunctions *mainFunctions = new(mainFunctions)
+var gGameSettings GameSettings
 
-var (
-	gWindowSize  geom.Vec
-	gWindowScale float64 // Window scale
-)
+func (gameSettings *GameSettings) setup() {
+	// Setup defaults
+	if gameSettings.WindowWidth == 0 {
+		gameSettings.WindowWidth = 1024
+	}
+	if gameSettings.WindowHeight == 0 {
+		gameSettings.WindowScale = 768
+	}
+	if gameSettings.WindowScale == 0 {
+		gameSettings.WindowScale = 1
+	}
+
+	//
+	file.InitAssetDir()
+	sprite.LoadAllSprites()
+
+	//
+	gGameSettings = *gameSettings
+	gGameSettings.GameStart()
+}
+
+// TestBootstrap the game to give control over continuing / stopping execution per-frame
+// this method is for additional control when testing
+func TestBootstrap(gameSettings GameSettings, updateCallback func() bool) {
+	// Set asset directory relative to the test code file path
+	// for `go test` support
+	_, filename, _, _ := runtime.Caller(1)
+	dir := filepath.Clean(filepath.Dir(filename) + "/../" + file.AssetDirectoryBase)
+	file.SetAssetDir(dir)
+
+	gameSettings.updateCallback = updateCallback
+	gameSettings.setup()
+	for {
+		if err := update(); err != nil {
+			return
+		}
+		if gGameSettings.updateCallback != nil &&
+			!gGameSettings.updateCallback() {
+			return
+		}
+	}
+}
+
+// Run
+func Run(gameSettings GameSettings) {
+	// Setup defaults
+	gameSettings.setup()
+	run(gameSettings)
+}
 
 func update() error {
 	frameStartTime := timegml.Now()
@@ -27,7 +83,13 @@ func update() error {
 
 	switch debugMenuID {
 	case debugMenuNone:
-		gMainFunctions.update()
+		if gGameSettings.GameUpdate == nil {
+			// Default to simple Update/Draw()
+			Update()
+			draw()
+		} else {
+			gGameSettings.GameUpdate()
+		}
 	case debugMenuRoomEditor:
 		cameraSetActive(0)
 		cameraClear(0)
@@ -48,17 +110,11 @@ func update() error {
 	default:
 		panic("Invalid debug mode.")
 	}
-	if g_game.hasGameRestarted {
-		panic("todo: Fix / test this. I assume its broken")
-		//gState.globalInstances.reset()
-		gMainFunctions.gameStart()
-		g_game.hasGameRestarted = false
-	}
 
 	// NOTE(Jake): 2018-09-29
 	// Ignoring when 0 is reported. This happens on Windows
-	// and just makes the frame usage timer completely helpful.
-	// Not a good workaround.
+	// and just makes the frame usage timer completely unhelpful.
+	// Not a great workaround but eh.
 	frameBudgetUsed := timegml.Now() - frameStartTime
 	if frameBudgetUsed > 0 {
 		gState.frameBudgetNanosecondsUsed = frameBudgetUsed
@@ -67,19 +123,22 @@ func update() error {
 }
 
 func WindowSize() geom.Vec {
-	return gWindowSize
+	return geom.Vec{
+		X: gGameSettings.WindowWidth,
+		Y: gGameSettings.WindowHeight,
+	}
 }
 
 func WindowWidth() float64 {
-	return gWindowSize.X
+	return gGameSettings.WindowWidth
 }
 
 func WindowHeight() float64 {
-	return gWindowSize.Y
+	return gGameSettings.WindowHeight
 }
 
 func WindowScale() float64 {
-	return gWindowScale
+	return gGameSettings.WindowScale
 }
 
 // Update runs the game logic, this includes object Update methods, room animation updates

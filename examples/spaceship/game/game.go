@@ -15,8 +15,3 @@ func GameStart() {
 	// Create player in the center of the room
 	gml.InstanceCreate(roomSize.X/2, roomSize.Y/2, roomInstanceIndex, ObjPlayer)
 }
-
-func GameUpdate() {
-	gml.Update()
-	gml.Draw()
-}

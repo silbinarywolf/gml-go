@@ -100,6 +100,11 @@ func CameraGetViewPos(index int) geom.Vec {
 	return view.Vec
 }
 
+func CameraGetViewSize(index int) geom.Vec {
+	view := &gCameraManager.cameras[index]
+	return view.Size
+}
+
 func CameraSetViewPos(index int, x, y float64) {
 	view := &gCameraManager.cameras[index]
 	view.Vec = geom.Vec{

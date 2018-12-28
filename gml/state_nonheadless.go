@@ -2,6 +2,7 @@
 
 package gml
 
+// draw the room that the camera is in
 func (state *state) draw() {
 	if gCameraManager.camerasEnabledCount == 0 {
 		// If no camera is configured, just render the first active room found
@@ -22,9 +23,6 @@ func (state *state) draw() {
 
 		cameraClear(i)
 
-		// Render global instances
-		//state.globalInstances.draw()
-
 		if inst := InstanceGet(view.follow); inst != nil {
 			// Render instances in same room as instance following
 			inst := inst.BaseObject()
@@ -33,7 +31,7 @@ func (state *state) draw() {
 				panic("RoomInstance this object belongs to has been destroyed")
 			}
 			roomInst.draw()
-		} else {
+		} /* else {
 			// Render each instance in each room instance
 			for i := 1; i < len(state.roomInstances); i++ {
 				roomInst := &state.roomInstances[i]
@@ -42,7 +40,7 @@ func (state *state) draw() {
 				}
 				roomInst.draw()
 			}
-		}
+		}*/
 
 		// Render camera onto OS-window
 		cameraDraw(i)

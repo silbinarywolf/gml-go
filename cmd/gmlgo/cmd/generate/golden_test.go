@@ -18,8 +18,6 @@ var golden = []Golden{
 	{"deep_2", deep_2_in, deep_2_out},
 }
 
-// Each example starts with "type XXX [u]int", with a single space separating them.
-
 // Simple test: enumeration of type int starting at 0.
 const simple_in = `
 import (

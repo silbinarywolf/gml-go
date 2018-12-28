@@ -476,7 +476,7 @@ func editorUpdate() {
 
 	// Draw
 	{
-		cameraSize := cameraGetActive().Size
+		cameraSize := CameraGetViewSize(0)
 
 		{
 			// Fill screen with gray

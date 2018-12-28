@@ -6,5 +6,10 @@ import (
 )
 
 func main() {
-	gml.Run(game.GameStart, game.GameUpdate, game.WindowWidth, game.WindowHeight, game.WindowScale, game.WindowTitle)
+	gml.Run(gml.GameSettings{
+		GameStart:    game.GameStart,
+		WindowWidth:  game.WindowWidth,
+		WindowHeight: game.WindowHeight,
+		WindowTitle:  game.WindowTitle,
+	})
 }
