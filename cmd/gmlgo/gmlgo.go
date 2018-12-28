@@ -19,12 +19,16 @@ var rootCmd = &cobra.Command{
 }
 
 var generateCmd = &cobra.Command{
-	Use:   "generate [--dir]",
+	Use:   "generate [dir]",
 	Short: "Generate code so that assets and objects can be referenced by constant IDs",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
+		dir := ""
+		if len(args) > 0 {
+			dir = args[0]
+		}
 		generate.Run(generate.Arguments{
-			Directory: Directory,
+			Directory: dir,
 		})
 	},
 }
@@ -34,7 +38,7 @@ func main() {
 	log.SetPrefix("gmlgo: ")
 
 	rootCmd.AddCommand(generateCmd)
-	rootCmd.PersistentFlags().StringVarP(&Directory, "dir", "d", ".", "directory")
+	//rootCmd.PersistentFlags().StringVarP(&Directory, "dir", "d", ".", "directory")
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

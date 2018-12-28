@@ -33,6 +33,9 @@ type Arguments struct {
 
 func Run(args Arguments) {
 	dir := args.Directory
+	if dir == "" {
+		dir = "."
+	}
 
 	// todo(Jake): 2018-12-03 - #33
 	// Replace "game" with scanning each sub-package, throw an error if multiple packages

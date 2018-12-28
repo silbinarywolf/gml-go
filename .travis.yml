@@ -10,6 +10,8 @@ cache:
     - $HOME/gopath/pkg/mod
 
 addons:
+  sonarcloud:
+    organization: "silbinarywolf-github"
   apt:
     sources:
       - ubuntu-toolchain-r-test
@@ -51,6 +53,7 @@ script:
   - go build -tags headless -v ./examples/...
   - go build -v ./examples/...
   - go test -v ./cmd/...
+  - sonar-scanner
   # NOTE(Jake): 2018-06-20
   # No tests exist yet
   #- go test -tags debug -v ./gml/...
