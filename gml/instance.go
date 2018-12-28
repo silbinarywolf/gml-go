@@ -211,7 +211,6 @@ func InstanceDestroy(inst ObjectType) {
 		// Maybe making this just silently returning will be better / less error
 		// prone? For now lets be strict.
 		panic("Cannot call InstanceDestroy on an object more than once.")
-		return
 	}
 
 	// Run user-destroy code

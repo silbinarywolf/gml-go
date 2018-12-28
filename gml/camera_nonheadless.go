@@ -48,7 +48,6 @@ func CameraCreate(index int, windowX, windowY, windowWidth, windowHeight float64
 	view := &gCameraManager.cameras[index]
 	if view.enabled {
 		panic("Camera " + strconv.Itoa(index) + " is already enabled.")
-		return
 	}
 	if windowWidth == 0 ||
 		windowHeight == 0 {
@@ -66,7 +65,6 @@ func CameraDestroy(index int) {
 	view := &gCameraManager.cameras[index]
 	if !view.enabled {
 		panic("Camera " + strconv.Itoa(index) + " is not enabled.")
-		return
 	}
 	view.enabled = false
 	gCameraManager.camerasEnabledCount--
