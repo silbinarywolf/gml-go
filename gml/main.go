@@ -55,6 +55,11 @@ func TestBootstrap(gameSettings GameSettings, updateCallback func() bool) {
 
 	gameSettings.updateCallback = updateCallback
 	gameSettings.setup()
+
+	// NOTE(Jake): 2018-12-30
+	// We currently run the update loop as fast as possible as
+	// the simulation is fixed 60 FPS and we don't have a concept of delta-time
+	// or anything like that (yet?)
 	for {
 		if err := update(); err != nil {
 			return
