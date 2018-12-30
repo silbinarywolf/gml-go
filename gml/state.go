@@ -12,24 +12,15 @@ import (
 
 var (
 	gState *state = newState()
-	g_game gameState
 )
-
-type gameState struct {
-	hasGameRestarted bool
-}
-
-func GameRestart() {
-	g_game.hasGameRestarted = true
-}
 
 type state struct {
 	//globalInstances            *roomInstanceManager
-	instanceManager            instanceManager
-	roomInstances              []roomInstance
-	instancesMarkedForDelete   []InstanceIndex
-	isCreatingRoomInstance     bool
-	gWidth                     int
+	instanceManager          instanceManager
+	roomInstances            []roomInstance
+	instancesMarkedForDelete []InstanceIndex
+	isCreatingRoomInstance   bool
+	//gWidth                     int
 	gHeight                    int
 	frameBudgetNanosecondsUsed int64
 }
@@ -158,17 +149,13 @@ func (state *state) createNewRoomInstance(room *room.Room) *roomInstance {
 func (state *state) deleteRoomInstance(roomInst *roomInstance) {
 	for _, layer := range roomInst.instanceLayers {
 		// NOTE(Jake): 2018-08-21
-		//
 		// Running Destroy() on each rather than InstanceDestroy()
 		// for speed purposes
-		//
 		for _, instanceIndex := range layer.instances {
-			inst := InstanceGet(instanceIndex)
-			if inst == nil {
-				continue
+			if inst := InstanceGet(instanceIndex); inst != nil {
+				inst.Destroy()
+				cameraInstanceDestroy(instanceIndex)
 			}
-			inst.Destroy()
-			cameraInstanceDestroy(instanceIndex)
 		}
 		layer.instances = nil
 	}

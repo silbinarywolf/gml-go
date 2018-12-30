@@ -20,6 +20,15 @@ func (self *EnemyShip) Destroy() {
 func (self *EnemyShip) Update() {
 	self.Y += 8
 
+	// Kill player
+	/*for _, otherId := range gml.CollisionRectList(self, self.Pos()) {
+		other, ok := gml.InstanceGet(otherId).(*Player)
+		if !ok {
+			continue
+		}
+		gml.InstanceDestroy(other)
+	}*/
+
 	// todo(Jake): 2018-12-06 - #38
 	// Add function to get RoomSize from RoomInstanceIndex
 	// (once gml.RoomInstanceIndex is implemented)

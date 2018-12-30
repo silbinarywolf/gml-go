@@ -6,7 +6,7 @@
 
 **NOTE: This project is currently undergoing a large refactoring effort to help ease workflow and serialization. I'm also aiming to improve the documentation, add examples and improve test coverage. This is still just a hobby project for now!**
 
-This is a library / framework that aims to create workflow like Game Maker, but utilizing the Go programming language.
+This is an engine that aims to strike a balance between capturing the simplicity of the Game Maker API whilst not losing any performance given to you by Go. It has been designed with multiplayer games in mind and differs itself from Game Maker by allowing you to "run" multiple rooms at once so that every player does not have to be in the same room.
 
 ## Install
 
@@ -40,5 +40,5 @@ This project is mostly for fun and I have no intentions to get anything done unl
 
 ## Credits
 
-* [Hajime Hoshi](https://github.com/hajimehoshi/ebiten) for their fantastically simple 2D game library, [https://github.com/hajimehoshi/ebiten](Ebiten).
+* [Hajime Hoshi](https://github.com/hajimehoshi/ebiten) for their fantastically simple 2D game library, [Ebiten](https://github.com/hajimehoshi/ebiten).
 * [Yann Le Coroller](http://www.yannlecoroller.com) for their free to use Helvetica style font. 

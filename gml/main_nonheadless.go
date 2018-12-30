@@ -4,7 +4,6 @@ package gml
 
 import (
 	"github.com/hajimehoshi/ebiten"
-	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 )
 
 var (
@@ -13,24 +12,19 @@ var (
 
 func updateEbiten(s *ebiten.Image) error {
 	gScreen = s
-	return update()
+	err := update()
+	//if gGameSettings.updateCallback != nil &&
+	//	!gGameSettings.updateCallback() {
+	//	return errors.New("todo")
+	//}
+	return err
 }
 
-func Draw() {
+func draw() {
 	gState.draw()
 }
 
-func Run(gameStartFunc func(), updateFunc func(), width, height float64, scale float64, title string) {
-	gWindowSize = geom.Vec{
-		X: width,
-		Y: height,
-	}
-	gWindowScale = scale
-
-	gMainFunctions.gameStart = gameStartFunc
-	gMainFunctions.update = updateFunc
-	gMainFunctions.gameStart()
-
+func run(gameSettings GameSettings) {
 	ebiten.SetRunnableInBackground(true)
-	ebiten.Run(updateEbiten, int(width), int(height), scale, title)
+	ebiten.Run(updateEbiten, int(gameSettings.WindowWidth), int(gameSettings.WindowHeight), gameSettings.WindowScale, gameSettings.WindowTitle)
 }

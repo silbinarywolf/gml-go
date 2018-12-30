@@ -4,31 +4,26 @@ package gml
 
 import (
 	"time"
-
-	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 )
 
-func Draw() {
+func draw() {
 	// no-op
 }
 
-func Run(gameStartFunc func(), updateFunc func(), width, height float64, scale float64, title string) {
-	gWindowSize = geom.Vec{
-		X: width,
-		Y: height,
-	}
-	gWindowScale = scale
-
-	gMainFunctions.gameStart = gameStartFunc
-	gMainFunctions.update = updateFunc
-	gMainFunctions.gameStart()
-
+func run(gameSettings GameSettings) {
 	// Loop
 	tick := time.Tick(16 * time.Millisecond)
 	for {
 		select {
 		case <-tick:
-			updateFunc()
+			if err := update(); err != nil {
+				return
+			}
+
+			if gGameSettings.updateCallback != nil &&
+				!gGameSettings.updateCallback() {
+				return
+			}
 			// todo(Jake): 2018-07-10
 			//
 			// Should improve this to be more robust!

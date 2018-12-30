@@ -33,11 +33,14 @@ func InitSpriteGeneratedData(indexToName []string, nameToIndex map[string]Sprite
 	gSpriteManager.assetIndexToName = indexToName
 	gSpriteManager.assetNameToIndex = nameToIndex
 	gSpriteManager.assetList = make([]Sprite, len(gSpriteManager.assetIndexToName))
+}
 
+// LoadAllSprites is called before the game start
+func LoadAllSprites() {
 	// todo(Jake): 2018-12-19 -
-	// Improve by loading concurrently in Go routine?
+	// Stop blocking by loading in Go routine?
 	// Pack into 1 or chunked data files?
-	for _, spriteIndex := range nameToIndex {
+	for _, spriteIndex := range gSpriteManager.assetNameToIndex {
 		SpriteLoad(spriteIndex)
 	}
 }

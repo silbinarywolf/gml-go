@@ -2,20 +2,20 @@ package file
 
 import (
 	"io"
-	"os"
+)
+
+const (
+	AssetDirectoryBase  = "asset"
+	assetDirectoryUnset = "▲not-set▲"
 )
 
 var (
-	AssetDirectory string = "▲not-set▲"
+	AssetDirectory string = assetDirectoryUnset
 
 	// todo(Jake): 2018-11-24
 	// Think of a better name? ProgramPath?
 	// The name should work as both a full URL (web output) and full directory path.
-	ProgramDirectory string = computeProgramDirectory()
-)
-
-const (
-	assetDirectoryBase = "asset"
+	ProgramDirectory string
 )
 
 // ReadSeekCloser is io.ReadSeeker and io.Closer.
@@ -24,13 +24,15 @@ type readSeekCloser interface {
 	io.Closer
 }
 
-func init() {
-	// NOTE(Jake): 2018-06-03
-	// Allow setting asset dir via environment variable for `go test` support
-	AssetDirectory = os.Getenv("GML_ASSET_DIR")
-	if AssetDirectory != "" {
-		AssetDirectory = AssetDirectory + "/" + assetDirectoryBase
-	} else {
-		AssetDirectory = ProgramDirectory + "/" + assetDirectoryBase
+func InitAssetDir() {
+	if ProgramDirectory == "" {
+		ProgramDirectory = computeProgramDirectory()
 	}
+	if AssetDirectory == assetDirectoryUnset {
+		AssetDirectory = ProgramDirectory + "/" + AssetDirectoryBase
+	}
+}
+
+func SetAssetDir(dir string) {
+	AssetDirectory = dir
 }

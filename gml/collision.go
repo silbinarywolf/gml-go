@@ -30,11 +30,10 @@ func CollisionRectList(instType collisionObject, position geom.Vec) []InstanceIn
 	var list []InstanceIndex
 	for i := 0; i < len(room.instanceLayers); i++ {
 		for _, otherIndex := range room.instanceLayers[i].instances {
-			otherT := InstanceGet(otherIndex)
-			if otherT == nil {
+			other := instanceGetBaseObject(otherIndex)
+			if other == nil {
 				continue
 			}
-			other := otherT.BaseObject()
 			if r1.CollisionRectangle(other.Rect) &&
 				!other.isDestroyed &&
 				inst != other {
@@ -64,11 +63,10 @@ func PlaceFree(instType collisionObject, position geom.Vec) bool {
 	hasCollision := false
 	for i := 0; i < len(room.instanceLayers); i++ {
 		for _, otherIndex := range room.instanceLayers[i].instances {
-			otherT := InstanceGet(otherIndex)
-			if otherT == nil {
+			other := instanceGetBaseObject(otherIndex)
+			if other == nil {
 				continue
 			}
-			other := otherT.BaseObject()
 			if other.Solid() &&
 				r1.CollisionRectangle(other.Rect) &&
 				inst != other {

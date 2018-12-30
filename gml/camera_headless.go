@@ -41,10 +41,14 @@ func CameraGetViewPos(index int) geom.Vec {
 	return geom.Vec{0, 0}
 }
 
-func CameraSetViewPos(index int, pos geom.Vec) {
+func CameraGetViewSize(index int) geom.Vec {
+	return geom.Vec{0, 0}
 }
 
-func CameraSetViewSize(index int, size geom.Vec) {
+func CameraSetViewPos(index int, x, y float64) {
+}
+
+func CameraSetViewSize(index int, width, height float64) {
 }
 
 func CameraSetViewTarget(index int, instanceIndex InstanceIndex) {

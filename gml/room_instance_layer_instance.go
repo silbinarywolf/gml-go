@@ -21,10 +21,8 @@ type roomInstanceLayerInstance struct {
 
 func (layer *roomInstanceLayerInstance) draw() {
 	for _, instanceIndex := range layer.instances {
-		inst := InstanceGet(instanceIndex)
-		if inst == nil {
-			continue
+		if inst := InstanceGet(instanceIndex); inst != nil {
+			inst.Draw()
 		}
-		inst.Draw()
 	}
 }
