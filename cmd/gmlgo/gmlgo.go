@@ -6,10 +6,14 @@ import (
 	"os"
 
 	"github.com/silbinarywolf/gml-go/cmd/gmlgo/cmd/generate"
+	"github.com/silbinarywolf/gml-go/cmd/gmlgo/cmd/serve"
 	"github.com/spf13/cobra"
 )
 
-var Directory string
+var (
+	Directory string
+	Tags      string
+)
 
 var rootCmd = &cobra.Command{
 	Use:   "gmlgo",
@@ -33,11 +37,29 @@ var generateCmd = &cobra.Command{
 	},
 }
 
+var serveCmd = &cobra.Command{
+	Use:   "serve [dir]",
+	Short: "Serve a build of your game for playing in a web browser, defaults to port 8080",
+	Long:  ``,
+	Run: func(cmd *cobra.Command, args []string) {
+		dir := ""
+		if len(args) > 0 {
+			dir = args[0]
+		}
+		serve.Run(serve.Arguments{
+			Directory: dir,
+			Tags:      Tags,
+		})
+	},
+}
+
 func main() {
 	log.SetFlags(0)
 	log.SetPrefix("gmlgo: ")
 
 	rootCmd.AddCommand(generateCmd)
+	rootCmd.AddCommand(serveCmd)
+	serveCmd.Flags().StringVar(&Tags, "tags", "", "a list of build tags to consider satisfied during the build")
 	//rootCmd.PersistentFlags().StringVarP(&Directory, "dir", "d", ".", "directory")
 
 	if err := rootCmd.Execute(); err != nil {
