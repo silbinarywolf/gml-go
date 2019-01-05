@@ -13,5 +13,5 @@ gmlgo_gen.go
 # Ignore WebAssembly build
 *.wasm
 # Ignore binary for Linux / Mac
-./spaceship
+./worm
 ## GMLGO END ##

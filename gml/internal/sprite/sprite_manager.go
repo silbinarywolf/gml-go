@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 
 	"github.com/silbinarywolf/gml-go/gml/internal/file"
+	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 )
 
 const (
@@ -87,6 +88,11 @@ func SpriteLoad(index SpriteIndex) {
 	// todo(Jake): change loadSprite() to return Sprite, not *Sprite
 	result := loadSprite(name)
 	*sprite = *result
+}
+
+func SpriteSize(index SpriteIndex) geom.Vec {
+	spr := sprite(index)
+	return spr.size
 }
 
 func loadSpriteFromData(name string) *spriteAsset {

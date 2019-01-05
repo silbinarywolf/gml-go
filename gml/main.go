@@ -95,20 +95,20 @@ func update() error {
 		} else {
 			gGameSettings.GameUpdate()
 		}
-	case debugMenuRoomEditor:
+	case debugMenuRoomEditor,
+		debugMenuAnimationEditor:
 		cameraSetActive(0)
 		cameraClear(0)
 
-		editorLazyInit()
-		editorUpdate()
-
-		cameraDraw(0)
-		cameraClearActive()
-	case debugMenuAnimationEditor:
-		cameraSetActive(0)
-		cameraClear(0)
-
-		animationEditorUpdate()
+		switch debugMenuID {
+		case debugMenuRoomEditor:
+			editorLazyInit()
+			editorUpdate()
+		case debugMenuAnimationEditor:
+			animationEditorUpdate()
+		default:
+			panic("Invalid inner debug mode.")
+		}
 
 		cameraDraw(0)
 		cameraClearActive()
