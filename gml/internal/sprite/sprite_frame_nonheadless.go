@@ -102,13 +102,13 @@ func createFrame(frameData spriteAssetFrame) (SpriteFrame, error) {
 // so that it can draw the image.
 //
 func GetRawFrame(spriteIndex SpriteIndex, index int) *ebiten.Image {
-	// NOTE(Jake): 2018-06-17
-	//
-	// Golang does not "cast", it uses type conversion, which means
-	// a float64 -> int will *round* not simply *floor* as you might
-	// expect in C/C++.
-	//
-	// https://stackoverflow.com/questions/35115868/how-to-round-to-nearest-int-when-casting-float-to-int-in-go
-	//
+	// NOTE(Jake): 2019-01-06
+	// Maybe allow out of bounds indexes to work safely
+	/*if index < 0 {
+		index = 0
+	}
+	if index >= len(gSpriteManager.assetList[spriteIndex].frames) {
+		index = len(gSpriteManager.assetList[spriteIndex].frames) - 1
+	}*/
 	return gSpriteManager.assetList[spriteIndex].frames[index].image
 }

@@ -21,6 +21,7 @@ type WormBody struct {
 
 func (self *WormBody) Create() {
 	self.SetSprite(SprWormBody)
+
 	self.SeperationWidth = self.Size.X/2 + self.Size.X/6
 	self.YDrag = self.Y
 }

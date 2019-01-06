@@ -38,6 +38,10 @@ func DrawSpriteScaled(spriteIndex sprite.SpriteIndex, subimage float64, position
 }
 
 func DrawSpriteExt(spriteIndex sprite.SpriteIndex, subimage float64, position geom.Vec, scale geom.Vec, alpha float64) {
+	if spriteIndex == sprite.SprUndefined {
+		// If no sprite in use, draw nothing
+		return
+	}
 	// draw_sprite_ext( sprite, subimg, x, y, xscale, yscale, rot, colour, alpha );
 	position = maybeApplyOffsetByCamera(position)
 

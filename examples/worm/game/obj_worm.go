@@ -7,17 +7,22 @@ import (
 )
 
 const (
-	WormStartingBodyParts = 1
+	WormStartingBodyParts = 4
+	WormLeapPower         = 21
 )
 
 type Worm struct {
 	gml.Object
 	WormDrag
 
-	Start      gml.Vec
-	SinCounter float64
-	Last       gml.InstanceIndex
-	Dead       bool
+	Speed   gml.Vec
+	Gravity float64
+
+	Start        gml.Vec
+	SinCounter   float64
+	LastBodyPart gml.InstanceIndex
+	Dead         bool
+	InAir        bool
 }
 
 func (self *Worm) Create() {
@@ -37,13 +42,56 @@ func (self *Worm) Create() {
 		inst.Index = inst.Index + 1
 		parentIndex = inst.InstanceIndex()
 	}
-	self.Last = parentIndex
+	self.LastBodyPart = parentIndex
+
+	//
+	SpawnWall(self.RoomInstanceIndex())
 }
 
 func (self *Worm) Update() {
+	self.Speed.Y += self.Gravity
+	self.Y += self.Speed.Y
+
+	if self.Dead {
+		return
+	}
+
 	self.WormDrag.Update(self.BaseObject())
 	self.SinCounter += 0.5
-	self.Y = self.Start.Y + math.Round(math.Sin(self.SinCounter*0.15)*21) // y = ystart + round(sin(alarm[1]*0.15)*21); // 0.15, 21
 
-	//gml.InstanceCreate(self.X, self.Y, self.RoomInstanceIndex(), ObjWormHole)
+	// Jump
+	{
+		hasPressedJumpButton := gml.MouseCheckPressed(gml.MbLeft) ||
+			gml.KeyboardCheckPressed(gml.VkSpace)
+		if hasPressedJumpButton &&
+			!self.InAir &&
+			self.Top() > 0 {
+			self.Speed.Y = -WormLeapPower
+			self.Y = self.Start.Y
+			self.InAir = true
+		}
+	}
+
+	//
+	if self.Speed.Y < 0 &&
+		!self.InAir {
+		self.SetImageIndex(0)
+		self.InAir = true
+	} else if self.Speed.Y > 0 &&
+		self.Y > self.Start.Y {
+		self.InAir = false
+	}
+
+	//
+	if !self.InAir {
+		self.Gravity = 0
+		self.Speed.Y = 0
+		self.Y = self.Start.Y + math.Round(math.Sin(self.SinCounter*0.15)*21)
+	} else {
+		if self.Speed.Y < 0 {
+			self.Gravity = 0.66
+		} else {
+			self.Gravity = 0.56
+		}
+	}
 }
