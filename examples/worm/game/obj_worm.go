@@ -44,8 +44,9 @@ func (self *Worm) Create() {
 	}
 	self.LastBodyPart = parentIndex
 
-	//
-	SpawnWall(self.RoomInstanceIndex())
+	// todo(Jake): 2019-01-06
+	// Move this to an alarm
+	GameSpawnWall(self.RoomInstanceIndex())
 }
 
 func (self *Worm) Update() {

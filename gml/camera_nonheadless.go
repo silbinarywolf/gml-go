@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	gCameraManager *cameraManager = newCameraState()
+	gCameraManager cameraManager
 )
 
 type cameraManager struct {
@@ -24,24 +24,20 @@ type camera struct {
 	enabled bool
 	follow  InstanceIndex
 	geom.Rect
-	windowPos geom.Vec
-	scale     geom.Vec
-	screen    *ebiten.Image
+	scale  geom.Vec
+	screen *ebiten.Image
 }
 
-func newCameraState() *cameraManager {
-	manager := new(cameraManager)
+func (manager *cameraManager) reset() {
 	for i := 0; i < len(manager.cameras); i++ {
 		view := &manager.cameras[i]
-		view.Reset()
+		view.Size = WindowSize()
+		view.scale.X = 1
+		view.scale.Y = 1
 	}
-	return manager
-}
 
-func (view *camera) Reset() {
-	view.Size = WindowSize()
-	view.scale.X = 1
-	view.scale.Y = 1
+	//manager.cameras[0].enabled = true
+	//manager.camerasEnabledCount++
 }
 
 func CameraCreate(index int, windowX, windowY, windowWidth, windowHeight float64) {
@@ -53,8 +49,8 @@ func CameraCreate(index int, windowX, windowY, windowWidth, windowHeight float64
 		windowHeight == 0 {
 		panic("Cannot have camera window width or height of 0")
 	}
-	view.windowPos.X = windowX
-	view.windowPos.Y = windowY
+	view.X = windowX
+	view.Y = windowY
 	view.Size.X = windowWidth
 	view.Size.Y = windowHeight
 	view.enabled = true
@@ -135,7 +131,7 @@ func cameraDraw(index int) {
 	view := &gCameraManager.cameras[index]
 	op := ebiten.DrawImageOptions{}
 	op.GeoM.Scale(view.scale.X, view.scale.Y)
-	op.GeoM.Translate(view.windowPos.X, view.windowPos.Y)
+	op.GeoM.Translate(view.X, view.Y)
 	gScreen.DrawImage(view.screen, &op)
 }
 

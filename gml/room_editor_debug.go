@@ -196,7 +196,7 @@ func (roomEditor *roomEditor) editorChangeRoom(room *room.Room) bool {
 	if room == nil {
 		roomEditor.editingRoom = nil
 		// Reset camera settings back
-		*gCameraManager = roomEditor.cameraStateBeforeEnteringEditingMode
+		gCameraManager = roomEditor.cameraStateBeforeEnteringEditingMode
 		debugMenuOpenOrToggleClosed(debugMenuNone)
 		// Execute custom user-code logic
 		//if gRoomEditor.exitEditorFunc != nil {
@@ -206,7 +206,7 @@ func (roomEditor *roomEditor) editorChangeRoom(room *room.Room) bool {
 	}
 	roomEditor.editingRoom = room
 	roomEditor.editingLayer = nil
-	roomEditor.cameraStateBeforeEnteringEditingMode = *gCameraManager
+	roomEditor.cameraStateBeforeEnteringEditingMode = gCameraManager
 	roomEditor.calculateAndSortLayers()
 	roomEditor.calculateRoomBounds()
 

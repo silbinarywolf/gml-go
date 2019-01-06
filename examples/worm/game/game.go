@@ -23,7 +23,7 @@ func GameStart() {
 	gml.InstanceCreate(0, 0, roomInstanceIndex, ObjWorm)
 }
 
-func SpawnWall(roomInstanceIndex gml.RoomInstanceIndex) {
+func GameSpawnWall(roomInstanceIndex gml.RoomInstanceIndex) {
 	const WallX = 976
 	wallSets := wall.WallSets()
 	wallSet := wallSets[rand.Intn(len(wallSets))]

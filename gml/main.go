@@ -35,12 +35,15 @@ func (gameSettings *GameSettings) setup() {
 		gameSettings.WindowScale = 1
 	}
 
-	//
+	// Copy settings
+	gGameSettings = *gameSettings
+
+	// Initialize!
 	file.InitAssetDir()
 	sprite.LoadAllSprites()
+	gCameraManager.reset()
 
-	//
-	gGameSettings = *gameSettings
+	// Bootup game
 	gGameSettings.GameStart()
 }
 
@@ -97,6 +100,7 @@ func update() error {
 		}
 	case debugMenuRoomEditor,
 		debugMenuAnimationEditor:
+		CameraCreate(0, 0, 0, WindowWidth(), WindowHeight())
 		cameraSetActive(0)
 		cameraClear(0)
 
