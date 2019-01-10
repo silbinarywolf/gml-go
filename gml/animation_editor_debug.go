@@ -387,58 +387,60 @@ func animationEditorUpdate() {
 			drawMask = collisionMask
 		}
 
-		{
-			text := strconv.FormatFloat(drawMask.Rect.Left(), 'f', -1, 64)
-			if KeyboardCheck(VkControl) && KeyboardCheckPressed(Vk1) {
-				editor.animationEditorToggleMenu(animMenuSpriteBboxLeft)
-				if editor.menuOpened == animMenuSpriteBboxLeft {
-					SetKeyboardString(text)
+		if drawMask != nil {
+			{
+				text := strconv.FormatFloat(drawMask.Rect.Left(), 'f', -1, 64)
+				if KeyboardCheck(VkControl) && KeyboardCheckPressed(Vk1) {
+					editor.animationEditorToggleMenu(animMenuSpriteBboxLeft)
+					if editor.menuOpened == animMenuSpriteBboxLeft {
+						SetKeyboardString(text)
+					}
+				}
+				if drawInputText(&pos, "Left (CTRL + 1)", text, editor.menuOpened == animMenuSpriteBboxLeft) {
+					editor.animationEditorToggleMenu(animMenuSpriteBboxLeft)
 				}
 			}
-			if drawInputText(&pos, "Left (CTRL + 1)", text, editor.menuOpened == animMenuSpriteBboxLeft) {
-				editor.animationEditorToggleMenu(animMenuSpriteBboxLeft)
-			}
-		}
-		{
-			pos.Y += 24
+			{
+				pos.Y += 24
 
-			text := strconv.FormatFloat(drawMask.Rect.Bottom(), 'f', -1, 64)
-			if KeyboardCheck(VkControl) && KeyboardCheckPressed(Vk3) {
-				editor.animationEditorToggleMenu(animMenuSpriteBboxBottom)
-				if editor.menuOpened == animMenuSpriteBboxBottom {
-					SetKeyboardString(text)
+				text := strconv.FormatFloat(drawMask.Rect.Bottom(), 'f', -1, 64)
+				if KeyboardCheck(VkControl) && KeyboardCheckPressed(Vk3) {
+					editor.animationEditorToggleMenu(animMenuSpriteBboxBottom)
+					if editor.menuOpened == animMenuSpriteBboxBottom {
+						SetKeyboardString(text)
+					}
+				}
+				if drawInputText(&pos, "Bottom (CTRL + 3)", text, editor.menuOpened == animMenuSpriteBboxBottom) {
+					editor.animationEditorToggleMenu(animMenuSpriteBboxBottom)
 				}
 			}
-			if drawInputText(&pos, "Bottom (CTRL + 3)", text, editor.menuOpened == animMenuSpriteBboxBottom) {
-				editor.animationEditorToggleMenu(animMenuSpriteBboxBottom)
-			}
-		}
-		pos = basePos
-		pos.X += 160
-		{
-			text := strconv.FormatFloat(drawMask.Rect.Top(), 'f', -1, 64)
-			if KeyboardCheck(VkControl) && KeyboardCheckPressed(Vk2) {
-				editor.animationEditorToggleMenu(animMenuSpriteBboxTop)
-				if editor.menuOpened == animMenuSpriteBboxTop {
-					SetKeyboardString(text)
+			pos = basePos
+			pos.X += 160
+			{
+				text := strconv.FormatFloat(drawMask.Rect.Top(), 'f', -1, 64)
+				if KeyboardCheck(VkControl) && KeyboardCheckPressed(Vk2) {
+					editor.animationEditorToggleMenu(animMenuSpriteBboxTop)
+					if editor.menuOpened == animMenuSpriteBboxTop {
+						SetKeyboardString(text)
+					}
+				}
+				if drawInputText(&pos, "Top (CTRL + 2)", text, editor.menuOpened == animMenuSpriteBboxTop) {
+					editor.animationEditorToggleMenu(animMenuSpriteBboxTop)
 				}
 			}
-			if drawInputText(&pos, "Top (CTRL + 2)", text, editor.menuOpened == animMenuSpriteBboxTop) {
-				editor.animationEditorToggleMenu(animMenuSpriteBboxTop)
-			}
-		}
-		{
-			pos.Y += 24
+			{
+				pos.Y += 24
 
-			text := strconv.FormatFloat(drawMask.Rect.Right(), 'f', -1, 64)
-			if KeyboardCheck(VkControl) && KeyboardCheckPressed(Vk4) {
-				editor.animationEditorToggleMenu(animMenuSpriteBboxRight)
-				if editor.menuOpened == animMenuSpriteBboxRight {
-					SetKeyboardString(text)
+				text := strconv.FormatFloat(drawMask.Rect.Right(), 'f', -1, 64)
+				if KeyboardCheck(VkControl) && KeyboardCheckPressed(Vk4) {
+					editor.animationEditorToggleMenu(animMenuSpriteBboxRight)
+					if editor.menuOpened == animMenuSpriteBboxRight {
+						SetKeyboardString(text)
+					}
 				}
-			}
-			if drawInputText(&pos, "Right (CTRL + 4)", text, editor.menuOpened == animMenuSpriteBboxRight) {
-				editor.animationEditorToggleMenu(animMenuSpriteBboxRight)
+				if drawInputText(&pos, "Right (CTRL + 4)", text, editor.menuOpened == animMenuSpriteBboxRight) {
+					editor.animationEditorToggleMenu(animMenuSpriteBboxRight)
+				}
 			}
 		}
 	}

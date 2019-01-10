@@ -1667,7 +1667,7 @@ func inputSelectPressed() bool {
 
 func hasFilterMatch(s string, filterBy string) bool {
 	return filterBy == "" ||
-		strings.Index(s, filterBy) >= 0
+		strings.Index(strings.ToLower(s), strings.ToLower(filterBy)) >= 0
 }
 
 func (roomEditor *roomEditor) editorConfigLoad() {

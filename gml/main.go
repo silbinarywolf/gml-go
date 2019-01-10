@@ -100,7 +100,6 @@ func update() error {
 		}
 	case debugMenuRoomEditor,
 		debugMenuAnimationEditor:
-		CameraCreate(0, 0, 0, WindowWidth(), WindowHeight())
 		cameraSetActive(0)
 		cameraClear(0)
 

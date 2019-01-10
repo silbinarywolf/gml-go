@@ -8,15 +8,16 @@ import (
 
 const (
 	WormStartingBodyParts = 4
-	WormLeapPower         = 21
+	WormLeapPower         = -21
+	WormJumpGravity       = 0.66
+	WormFallGravity       = 0.56
+	WormDieGravity        = 0.58
 )
 
 type Worm struct {
 	gml.Object
+	Physics
 	WormDrag
-
-	Speed   gml.Vec
-	Gravity float64
 
 	Start        gml.Vec
 	SinCounter   float64
@@ -30,8 +31,8 @@ func (self *Worm) Create() {
 
 	self.Start.X = 304
 	self.Start.Y = 528
-
 	self.Vec = self.Start
+	self.YDrag = self.Y
 
 	// Create body
 	parentIndex := self.InstanceIndex()
@@ -49,15 +50,25 @@ func (self *Worm) Create() {
 	GameSpawnWall(self.RoomInstanceIndex())
 }
 
+func (self *Worm) TriggerDeath() {
+	if !self.Dead {
+		self.SetSprite(SprWormHeadDead)
+		self.Dead = true
+
+		// Leap into air at death
+		self.Speed.Y = WormLeapPower
+		self.Gravity = WormDieGravity
+	}
+}
+
 func (self *Worm) Update() {
-	self.Speed.Y += self.Gravity
-	self.Y += self.Speed.Y
+	self.Physics.Update(&self.Object)
+	self.WormDrag.Update(&self.Object)
 
 	if self.Dead {
 		return
 	}
 
-	self.WormDrag.Update(self.BaseObject())
 	self.SinCounter += 0.5
 
 	// Jump
@@ -67,7 +78,7 @@ func (self *Worm) Update() {
 		if hasPressedJumpButton &&
 			!self.InAir &&
 			self.Top() > 0 {
-			self.Speed.Y = -WormLeapPower
+			self.Speed.Y = WormLeapPower
 			self.Y = self.Start.Y
 			self.InAir = true
 		}
@@ -90,9 +101,19 @@ func (self *Worm) Update() {
 		self.Y = self.Start.Y + math.Round(math.Sin(self.SinCounter*0.15)*21)
 	} else {
 		if self.Speed.Y < 0 {
-			self.Gravity = 0.66
+			self.Gravity = WormJumpGravity
 		} else {
-			self.Gravity = 0.56
+			self.Gravity = WormFallGravity
 		}
+	}
+
+	// Collide with Wall
+	for _, id := range gml.CollisionRectList(self, self.Pos()) {
+		_, ok := gml.InstanceGet(id).(*Wall)
+		if !ok {
+			continue
+		}
+		self.TriggerDeath()
+		break
 	}
 }

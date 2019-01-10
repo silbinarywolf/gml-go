@@ -31,13 +31,12 @@ type camera struct {
 func (manager *cameraManager) reset() {
 	for i := 0; i < len(manager.cameras); i++ {
 		view := &manager.cameras[i]
-		view.Size = WindowSize()
 		view.scale.X = 1
 		view.scale.Y = 1
 	}
 
-	//manager.cameras[0].enabled = true
-	//manager.camerasEnabledCount++
+	// Setup 1st camera
+	CameraCreate(0, 0, 0, WindowWidth(), WindowHeight())
 }
 
 func CameraCreate(index int, windowX, windowY, windowWidth, windowHeight float64) {

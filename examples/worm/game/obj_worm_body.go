@@ -27,9 +27,10 @@ func (self *WormBody) Create() {
 }
 
 func (self *WormBody) Update() {
-	self.WormDrag.Update(self.BaseObject())
-	master := gml.InstanceGet(self.Master).(*Worm)
-	if !master.Dead {
+	self.WormDrag.Update(&self.Object)
+
+	//
+	{
 		seperationWidth := self.SeperationWidth
 		switch parent := gml.InstanceGet(self.Parent); parent := parent.(type) {
 		case *Worm:
@@ -62,10 +63,18 @@ func (self *WormBody) Update() {
 		    y = parent.ylag;
 		}*/
 		//}
-	} else {
-		// Fall off screen
-		// vspeed += gravity;
-		// y += vspeed;
-		self.Y += 6
+	}
+
+	master := gml.InstanceGet(self.Master).(*Worm)
+	if !master.Dead {
+		// Wall
+		for _, id := range gml.CollisionRectList(self, self.Pos()) {
+			_, ok := gml.InstanceGet(id).(*Wall)
+			if !ok {
+				continue
+			}
+			master.TriggerDeath()
+			break
+		}
 	}
 }
