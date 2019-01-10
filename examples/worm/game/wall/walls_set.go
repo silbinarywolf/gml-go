@@ -1,14 +1,14 @@
 package wall
 
-func WallSets() [][]wallInfo {
+func WallSets() [][]WallInfo {
 	return wallSets
 }
 
-var wallSets = [][]wallInfo{
+var wallSets = [][]WallInfo{
 	wallSetFlat,
 }
 
-var wallSetFlat = []wallInfo{
+var wallSetFlat = []WallInfo{
 	wallLoose,
 	wallSemitight,
 	wallSemiloose,

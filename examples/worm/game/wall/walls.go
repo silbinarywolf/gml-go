@@ -1,13 +1,13 @@
 package wall
 
 // WallInfo is the data structure used to describe a spawned in piece of wall data
-type wallInfo struct {
+type WallInfo struct {
 	WallYList          []float64
-	TimeTillNext       float64
-	TimeTillNextRandom float64
+	TimeTillNext       int
+	TimeTillNextRandom int
 }
 
-var wallLoose = wallInfo{
+var wallLoose = WallInfo{
 	WallYList: []float64{
 		-302,
 		426,
@@ -15,7 +15,7 @@ var wallLoose = wallInfo{
 	TimeTillNext: 15,
 }
 
-var wallSemitight = wallInfo{
+var wallSemitight = WallInfo{
 	WallYList: []float64{
 		-272,
 		345,
@@ -24,14 +24,14 @@ var wallSemitight = wallInfo{
 	TimeTillNextRandom: 10,
 }
 
-var wallSemiloose = wallInfo{
+var wallSemiloose = WallInfo{
 	WallYList: []float64{
 		346,
 	},
 	TimeTillNext: 10,
 }
 
-var wallAbovesurface = wallInfo{
+var wallAbovesurface = WallInfo{
 	WallYList: []float64{
 		68,
 	},

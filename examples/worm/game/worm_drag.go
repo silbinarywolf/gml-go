@@ -10,7 +10,7 @@ type WormDrag struct {
 }
 
 func (drag *WormDrag) Update(self *gml.Object) {
-	if drag.DragTimer.Update(2) {
+	if drag.DragTimer.Repeat(2) {
 		drag.YDrag = self.Y
 	}
 }

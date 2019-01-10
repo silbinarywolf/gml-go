@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	WormStartingBodyParts = 4
+	WormStartingBodyParts = 1
 	WormLeapPower         = -21
 	WormJumpGravity       = 0.66
 	WormFallGravity       = 0.56
@@ -18,6 +18,7 @@ type Worm struct {
 	gml.Object
 	Physics
 	WormDrag
+	WallSpawner
 
 	Start        gml.Vec
 	SinCounter   float64
@@ -33,6 +34,7 @@ func (self *Worm) Create() {
 	self.Start.Y = 528
 	self.Vec = self.Start
 	self.YDrag = self.Y
+	self.WallSpawner.Reset()
 
 	// Create body
 	parentIndex := self.InstanceIndex()
@@ -45,9 +47,6 @@ func (self *Worm) Create() {
 	}
 	self.LastBodyPart = parentIndex
 
-	// todo(Jake): 2019-01-06
-	// Move this to an alarm
-	GameSpawnWall(self.RoomInstanceIndex())
 }
 
 func (self *Worm) TriggerDeath() {
@@ -62,6 +61,7 @@ func (self *Worm) TriggerDeath() {
 }
 
 func (self *Worm) Update() {
+	self.WallSpawner.Update(self.RoomInstanceIndex())
 	self.Physics.Update(&self.Object)
 	self.WormDrag.Update(&self.Object)
 
@@ -78,8 +78,8 @@ func (self *Worm) Update() {
 		if hasPressedJumpButton &&
 			!self.InAir &&
 			self.Top() > 0 {
-			self.Speed.Y = WormLeapPower
 			self.Y = self.Start.Y
+			self.Speed.Y = WormLeapPower
 			self.InAir = true
 		}
 	}
