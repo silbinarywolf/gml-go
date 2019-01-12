@@ -320,7 +320,8 @@ func (g *Generator) generateAssets(dir string) {
 			for _, f := range files {
 				if f.IsDir() {
 					assetName := f.Name()
-					if assetName == "data" {
+					if assetName == "data" &&
+						name == "font" {
 						// Ignore special "data" folder that's used
 						// by "font"
 						continue
@@ -334,6 +335,19 @@ func (g *Generator) generateAssets(dir string) {
 					Assets: assetNames,
 				})
 			}
+		//case "layer":
+		/*files, err := ioutil.ReadDir(filepath.Join(assetDir, name))
+		if err != nil {
+			log.Fatal(err)
+		}
+		var assetNames []string
+		for _, f := range files {
+			if !f.IsDir() {
+				assetName := f.Name()
+				assetNames = append(assetNames, f.Name())
+			}
+		}
+		*/
 		default:
 			if !f.IsDir() {
 				// Ignore files
@@ -355,6 +369,9 @@ func (g *Generator) generateAssets(dir string) {
 		case "sprite":
 			prefix = "Spr"
 			gotype = "gml.SpriteIndex"
+		/*case "layer":
+		prefix = "Lay"
+		gotype = "gml.LayerIndex"*/
 		default:
 			panic("Unimplemented asset kind: " + assetKind.Name)
 		}

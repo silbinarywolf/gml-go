@@ -7,6 +7,13 @@ const (
 	WindowScale  = 1
 )
 
+const (
+	DepthWorm       = -10
+	DepthWormBody   = -5
+	DepthDirt       = 1
+	DepthBackground = 10
+)
+
 var global Globals
 
 type Globals struct {

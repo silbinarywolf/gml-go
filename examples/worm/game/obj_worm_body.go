@@ -21,13 +21,15 @@ type WormBody struct {
 
 func (self *WormBody) Create() {
 	self.SetSprite(SprWormBody)
+	self.SetDepth(DepthWormBody)
 
 	self.SeperationWidth = self.Size.X/2 + self.Size.X/6
 	self.YDrag = self.Y
 }
 
 func (self *WormBody) Update() {
-	self.WormDrag.Update(&self.Object)
+	// Update immediately as body parts lag behind
+	self.YDrag = self.Y
 
 	//
 	{
@@ -67,14 +69,6 @@ func (self *WormBody) Update() {
 
 	master := gml.InstanceGet(self.Master).(*Worm)
 	if !master.Dead {
-		// Wall
-		for _, id := range gml.CollisionRectList(self, self.Pos()) {
-			_, ok := gml.InstanceGet(id).(*Wall)
-			if !ok {
-				continue
-			}
-			master.TriggerDeath()
-			break
-		}
+		HandleCollisionForWormOrWormPart(&self.Object, master)
 	}
 }

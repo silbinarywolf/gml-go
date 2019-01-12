@@ -3,11 +3,12 @@ package game
 import (
 	"math"
 
+	"github.com/silbinarywolf/gml-go/examples/worm/game/input"
 	"github.com/silbinarywolf/gml-go/gml"
 )
 
 const (
-	WormStartingBodyParts = 1
+	WormStartingBodyParts = 2
 	WormLeapPower         = -21
 	WormJumpGravity       = 0.66
 	WormFallGravity       = 0.56
@@ -19,6 +20,7 @@ type Worm struct {
 	Physics
 	WormDrag
 	WallSpawner
+	dirtCreateTimer gml.Alarm
 
 	Start        gml.Vec
 	SinCounter   float64
@@ -29,7 +31,7 @@ type Worm struct {
 
 func (self *Worm) Create() {
 	self.SetSprite(SprWormHead)
-
+	self.SetDepth(DepthWorm)
 	self.Start.X = 304
 	self.Start.Y = 528
 	self.Vec = self.Start
@@ -63,23 +65,28 @@ func (self *Worm) TriggerDeath() {
 func (self *Worm) Update() {
 	self.WallSpawner.Update(self.RoomInstanceIndex())
 	self.Physics.Update(&self.Object)
-	self.WormDrag.Update(&self.Object)
+	if self.DragTimer.Repeat(1) {
+		self.YDrag = self.Y
+	}
 
 	if self.Dead {
 		return
 	}
 
-	self.SinCounter += 0.5
+	if self.dirtCreateTimer.Repeat(2) {
+		if !self.InAir {
+			gml.InstanceCreate(self.X, self.Y, self.RoomInstanceIndex(), ObjWormHole)
+		}
+	}
 
 	// Jump
 	{
-		hasPressedJumpButton := gml.MouseCheckPressed(gml.MbLeft) ||
-			gml.KeyboardCheckPressed(gml.VkSpace)
-		if hasPressedJumpButton &&
+		if input.JumpPressed() &&
 			!self.InAir &&
 			self.Top() > 0 {
 			self.Y = self.Start.Y
 			self.Speed.Y = WormLeapPower
+			self.SinCounter = 0
 			self.InAir = true
 		}
 	}
@@ -98,6 +105,8 @@ func (self *Worm) Update() {
 	if !self.InAir {
 		self.Gravity = 0
 		self.Speed.Y = 0
+
+		self.SinCounter += 0.5
 		self.Y = self.Start.Y + math.Round(math.Sin(self.SinCounter*0.15)*21)
 	} else {
 		if self.Speed.Y < 0 {
@@ -107,13 +116,5 @@ func (self *Worm) Update() {
 		}
 	}
 
-	// Collide with Wall
-	for _, id := range gml.CollisionRectList(self, self.Pos()) {
-		_, ok := gml.InstanceGet(id).(*Wall)
-		if !ok {
-			continue
-		}
-		self.TriggerDeath()
-		break
-	}
+	HandleCollisionForWormOrWormPart(&self.Object, self)
 }

@@ -33,9 +33,11 @@ func (alarm *Alarm) Repeat(frames int) bool {
 	if !alarm.isTimerSet {
 		alarm.timeLeft = frames
 		alarm.isTimerSet = true
+		return false
 	}
 	alarm.timeLeft -= 1
 	if alarm.timeLeft <= 0 {
+		alarm.timeLeft = frames
 		alarm.isTimerSet = false
 		return true
 	}

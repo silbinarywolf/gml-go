@@ -1,9 +1,15 @@
 package game
 
-import "github.com/silbinarywolf/gml-go/gml"
+import (
+	"github.com/silbinarywolf/gml-go/gml"
+)
 
 type Background struct {
 	gml.Object
+}
+
+func (self *Background) Create() {
+	self.SetDepth(DepthBackground)
 }
 
 func (self *Background) Draw() {
@@ -33,4 +39,6 @@ func (self *Background) Draw() {
 		gml.DrawSprite(SprFrontGrass, 0, gml.Vec{size.X, roomSize.Y - size.Y})
 		gml.DrawSprite(SprFrontGrass, 0, gml.Vec{size.X * 2, roomSize.Y - size.Y})
 	}
+
+	gml.DrawTextF(gml.Vec{32, 32}, "%s", gml.FrameUsage())
 }

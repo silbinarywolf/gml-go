@@ -94,7 +94,7 @@ func update() error {
 		if gGameSettings.GameUpdate == nil {
 			// Default to simple Update/Draw()
 			Update()
-			draw()
+			gState.draw()
 		} else {
 			gGameSettings.GameUpdate()
 		}

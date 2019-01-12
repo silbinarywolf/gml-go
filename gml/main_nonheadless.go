@@ -20,10 +20,6 @@ func updateEbiten(s *ebiten.Image) error {
 	return err
 }
 
-func draw() {
-	gState.draw()
-}
-
 func run(gameSettings GameSettings) {
 	ebiten.SetRunnableInBackground(true)
 	ebiten.Run(updateEbiten, int(gameSettings.WindowWidth), int(gameSettings.WindowHeight), gameSettings.WindowScale, gameSettings.WindowTitle)

@@ -1,5 +1,7 @@
 package gml
 
+import "sort"
+
 type roomInstanceLayerInstance struct {
 	roomInstanceLayerDrawBase
 	index     int
@@ -20,6 +22,19 @@ type roomInstanceLayerInstance struct {
 //}
 
 func (layer *roomInstanceLayerInstance) draw() {
+	// Sort by order
+	sort.SliceStable(layer.instances, func(i, j int) bool {
+		a := InstanceGet(layer.instances[i])
+		if a == nil {
+			return false
+		}
+		b := InstanceGet(layer.instances[j])
+		if b == nil {
+			return false
+		}
+		return a.BaseObject().Depth() > b.BaseObject().Depth()
+	})
+
 	for _, instanceIndex := range layer.instances {
 		if inst := InstanceGet(instanceIndex); inst != nil {
 			inst.Draw()

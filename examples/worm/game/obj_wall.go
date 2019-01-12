@@ -10,6 +10,7 @@ const (
 
 type Wall struct {
 	gml.Object
+	DontKillPlayerIfInDirt bool
 }
 
 func (self *Wall) Create() {

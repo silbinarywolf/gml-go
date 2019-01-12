@@ -14,6 +14,7 @@ type WormHole struct {
 
 func (self *WormHole) Create() {
 	self.SetSprite(SprWormHole)
+	self.SetDepth(1)
 }
 
 func (self *WormHole) Update() {

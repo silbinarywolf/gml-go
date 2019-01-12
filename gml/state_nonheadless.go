@@ -2,8 +2,16 @@
 
 package gml
 
+import (
+	"github.com/hajimehoshi/ebiten"
+)
+
 // draw the room that the camera is in
 func (state *state) draw() {
+	if ebiten.IsRunningSlowly() {
+		return
+	}
+
 	for i := 0; i < len(gCameraManager.cameras); i++ {
 		view := &gCameraManager.cameras[i]
 		if !view.enabled {
