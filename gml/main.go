@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"github.com/hajimehoshi/ebiten"
 	"github.com/silbinarywolf/gml-go/gml/internal/file"
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
@@ -45,6 +46,18 @@ func (gameSettings *GameSettings) setup() {
 
 	// Bootup game
 	gGameSettings.GameStart()
+}
+
+// MaxTPS returns the current maximum TPS.
+func MaxTPS() int {
+	return ebiten.MaxTPS()
+}
+
+// SetMaxTPS sets the maximum TPS (ticks per second), that represents how many updating function is called per second. The initial value is 60.
+//
+// If tps is UncappedTPS, TPS is uncapped and the game is updated per frame. If tps is negative but not UncappedTPS, SetMaxTPS panics.
+func SetMaxTPS(tps int) {
+	ebiten.SetMaxTPS(tps)
 }
 
 // TestBootstrap the game to give control over continuing / stopping execution per-frame

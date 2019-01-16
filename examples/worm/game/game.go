@@ -7,8 +7,6 @@ import (
 func GameStart() {
 	gml.DrawSetFont(FntDefault)
 
-	//ebiten.SetMaxTPS(300)
-
 	// Setup global variables
 	// ...
 
