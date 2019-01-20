@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/silbinarywolf/gml-go/cmd/gmlgo/cmd/fix"
 	"github.com/silbinarywolf/gml-go/cmd/gmlgo/cmd/generate"
 	"github.com/silbinarywolf/gml-go/cmd/gmlgo/cmd/serve"
 	"github.com/spf13/cobra"
@@ -53,12 +54,28 @@ var serveCmd = &cobra.Command{
 	},
 }
 
+var fixCmd = &cobra.Command{
+	Use:   "fix [dir]",
+	Short: fix.ShortDescription,
+	Long:  ``,
+	Run: func(cmd *cobra.Command, args []string) {
+		dir := ""
+		if len(args) > 0 {
+			dir = args[0]
+		}
+		fix.Run(fix.Arguments{
+			Directory: dir,
+		})
+	},
+}
+
 func main() {
 	log.SetFlags(0)
 	log.SetPrefix("gmlgo: ")
 
 	rootCmd.AddCommand(generateCmd)
 	rootCmd.AddCommand(serveCmd)
+	rootCmd.AddCommand(fixCmd)
 	serveCmd.Flags().StringVar(&Tags, "tags", "", "a list of build tags to consider satisfied during the build")
 	//rootCmd.PersistentFlags().StringVarP(&Directory, "dir", "d", ".", "directory")
 

@@ -29,20 +29,24 @@ func DrawSetGUI(guiMode bool) {
 	isDrawGuiMode = guiMode
 }
 
-func DrawSprite(spriteIndex sprite.SpriteIndex, subimage float64, position geom.Vec) {
-	DrawSpriteExt(spriteIndex, subimage, position, geom.Vec{1, 1}, 1.0)
+func DrawSprite(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64) {
+	DrawSpriteExt(spriteIndex, subimage, x, y, geom.Vec{1, 1}, 1.0)
 }
 
-func DrawSpriteScaled(spriteIndex sprite.SpriteIndex, subimage float64, position geom.Vec, scale geom.Vec) {
-	DrawSpriteExt(spriteIndex, subimage, position, scale, 1.0)
+func DrawSpriteScaled(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64, scale geom.Vec) {
+	DrawSpriteExt(spriteIndex, subimage, x, y, scale, 1.0)
 }
 
-func DrawSpriteExt(spriteIndex sprite.SpriteIndex, subimage float64, position geom.Vec, scale geom.Vec, alpha float64) {
+func DrawSpriteExt(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64, scale geom.Vec, alpha float64) {
 	if spriteIndex == sprite.SprUndefined {
 		// If no sprite in use, draw nothing
 		return
 	}
 	// draw_sprite_ext( sprite, subimg, x, y, xscale, yscale, rot, colour, alpha );
+	position := geom.Vec{
+		X: x,
+		Y: y,
+	}
 	position = maybeApplyOffsetByCamera(position)
 
 	frame := sprite.GetRawFrame(spriteIndex, int(math.Floor(subimage)))
@@ -56,13 +60,21 @@ func DrawSpriteExt(spriteIndex sprite.SpriteIndex, subimage float64, position ge
 	drawGetTarget().DrawImage(frame, &op)
 }
 
-func DrawRectangle(position geom.Vec, size geom.Vec, col color.Color) {
+func DrawRectangle(x, y float64, size geom.Vec, col color.Color) {
+	position := geom.Vec{
+		X: x,
+		Y: y,
+	}
 	position = maybeApplyOffsetByCamera(position)
 
 	ebitenutil.DrawRect(drawGetTarget(), position.X, position.Y, size.X, size.Y, col)
 }
 
-func DrawRectangleBorder(position geom.Vec, size geom.Vec, color color.Color, borderSize float64, borderColor color.Color) {
+func DrawRectangleBorder(x, y float64, size geom.Vec, color color.Color, borderSize float64, borderColor color.Color) {
+	position := geom.Vec{
+		X: x,
+		Y: y,
+	}
 	position = maybeApplyOffsetByCamera(position)
 	ebitenutil.DrawRect(drawGetTarget(), position.X, position.Y, size.X, size.Y, borderColor)
 	position.X += borderSize
@@ -72,11 +84,11 @@ func DrawRectangleBorder(position geom.Vec, size geom.Vec, color color.Color, bo
 	ebitenutil.DrawRect(drawGetTarget(), position.X, position.Y, size.X, size.Y, color)
 }
 
-func DrawText(position geom.Vec, message string) {
-	DrawTextColor(position, message, color.White)
+func DrawText(x, y float64, message string) {
+	DrawTextColor(x, y, message, color.White)
 }
 
-func DrawTextColor(position geom.Vec, message string, col color.Color) {
+func DrawTextColor(x, y float64, message string, col color.Color) {
 	if !hasFontSet() {
 		panic("Must call DrawSetFont() before calling DrawText.")
 	}
@@ -87,7 +99,7 @@ func DrawTextColor(position geom.Vec, message string, col color.Color) {
 	text.Draw(drawGetTarget(), message, fontFont(gFontManager.currentFont), int(position.X), int(position.Y), color.White)
 }*/
 
-func DrawTextF(position Vec, format string, args ...interface{}) {
+func DrawTextF(x, y float64, format string, args ...interface{}) {
 	DrawText(position, fmt.Sprintf(format, args...))
 }
 
