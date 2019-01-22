@@ -65,38 +65,14 @@ func Run(args Arguments) {
 		return fixes[i].date < fixes[j].date
 	})
 
-	// typeCheck
-	/*{
-		config := types.Config{
-			Importer:                 importer.Default(),
-			FakeImportC:              true,
-			DisableUnusedImportCheck: true,
-		}
-		for _, astFile := range astFiles {
-			pkg, err := config.Check(dir, fileSet, []*ast.File{astFile}, nil)
-			if err != nil {
-				// todo: Catch all errors and` report nicely
-				log.Printf("ignoring file due to parse error: %s\n", err)
-				continue
-			}
-			lookup := pkg.Scope().Lookup("DrawSetFont")
-			if lookup == nil {
-				continue
-			}
-
-			log.Fatalf("%v\n", lookup.Type())
-		}
-		log.Fatal("todo: Keep workin on typeCheck")
-	}*/
-
 	//
-	/*for _, astFile := range astFiles {
+	for _, file := range astFiles {
 		for _, fix := range fixes {
-			if fix.f(astFile) {
+			if fix.f(file) {
 				// todo: Handle what happens if file is fixed
 			}
 		}
-	}*/
+	}
 }
 
 // getValidFilesRecursive will recursively walk the directory structure using the following rules:
@@ -135,12 +111,8 @@ func (dirInfo *dirWalker) getValidFilesRecursive(dir string) {
 	if len(goFiles) > 0 {
 		var astFiles []*ast.File
 
-		//
-		goPackage := &Package{}
-		goPackage.dir = dir
-
 		// Parse files in package
-		usesThisLibrary := false
+		packageUsesThisLibrary := false
 		for _, path := range goFiles {
 			text, err := ioutil.ReadFile(path)
 			if err != nil {
@@ -150,15 +122,13 @@ func (dirInfo *dirWalker) getValidFilesRecursive(dir string) {
 			if err != nil {
 				log.Fatal(err)
 			}
-			usesThisLibrary := false
 			for _, goImport := range astFile.Imports {
-				usesThisLibrary = usesThisLibrary || goImport.Path.Value == importPath
+				packageUsesThisLibrary = packageUsesThisLibrary || goImport.Path.Value == importPath
 			}
 			astFiles = append(astFiles, astFile)
 		}
 
-		if !usesThisLibrary {
-			// Exit early.
+		if !packageUsesThisLibrary {
 			// Keep parsing directories recursively
 			for _, dir := range dirs {
 				dirInfo.getValidFilesRecursive(dir)
@@ -167,6 +137,8 @@ func (dirInfo *dirWalker) getValidFilesRecursive(dir string) {
 		}
 
 		//
+		goPackage := &Package{}
+		goPackage.dir = dir
 		for _, astFile := range astFiles {
 			dirInfo.goFiles = append(dirInfo.goFiles, &File{
 				pkg:  goPackage,
@@ -180,12 +152,13 @@ func (dirInfo *dirWalker) getValidFilesRecursive(dir string) {
 			config := types.Config{
 				Importer: importer.Default(),
 				// NOTE(Jake): 2019-01-22: Might need to support this later
-				//FakeImportC: true,
+				// FakeImportC: true,
 			}
-			info := &types.Info{
-				Defs: make(map[*ast.Ident]types.Object),
-			}
-			typesPkg, err := config.Check(goPackage.dir, dirInfo.fileSet, astFiles, info)
+			//info := &types.Info{
+			//	Defs: make(map[*ast.Ident]types.Object),
+			//}
+			//typesPkg, err := config.Check(goPackage.dir, dirInfo.fileSet, astFiles, info)
+			typesPkg, err := config.Check(goPackage.dir, dirInfo.fileSet, astFiles, nil)
 			if err != nil {
 				log.Fatal(err)
 			}

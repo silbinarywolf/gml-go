@@ -1,11 +1,9 @@
 package fix
 
-import "go/ast"
-
 type fix struct {
 	name string
 	date string // date that fix was introduced, in YYYY-MM-DD format
-	f    func(*ast.File) bool
+	f    func(*File) bool
 	desc string
 	//disabled bool // whether this fix should be disabled by default
 }

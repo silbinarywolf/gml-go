@@ -3,6 +3,7 @@ package fix
 import (
 	"fmt"
 	"go/ast"
+	"go/types"
 	"log"
 )
 
@@ -19,25 +20,35 @@ var drawPosFix = fix{
 	desc: `Change all Draw* functions to pass "x, y" instead of geom.Vec for positions. Github Issue #81`,
 }
 
-func drawposfix(f *ast.File) bool {
-	ast.Inspect(f, func(n ast.Node) bool {
+func drawposfix(f *File) bool {
+	astFile := f.file
+	ast.Inspect(astFile, func(n ast.Node) bool {
 		switch n := n.(type) {
 		case *ast.CallExpr:
 			switch fun := n.Fun.(type) {
 			case *ast.SelectorExpr:
-				var packageName string
+				//var packagePath string
 				switch x := fun.X.(type) {
 				case *ast.Ident:
-					//packageName = x.Name
+					scope := f.pkg.typesPkg.Scope().Innermost(x.NamePos)
+					scope, obj := scope.LookupParent(x.Name, x.NamePos)
+					pkgName, ok := obj.(*types.PkgName)
+					if !ok {
+						break
+					}
+					if pkgName.Imported().Path() == "github.com/silbinarywolf/gml-go/gml" {
+						panic("continue this")
+					}
+					log.Printf("%v -- %v -- %v\n", packageName, pkgName.Imported().Path())
 					//log.Printf("hilda: %v\n", x)
 				case *ast.SelectorExpr:
 					// this is for receiver calls only I *think*
 				default:
 					panic(fmt.Sprintf("Unhandled call expr using: %T\n", x))
 				}
-				if packageName == "gml" {
+				/*if packageName == "gml" {
 					log.Printf("%s %v %s\n", fun.Sel.Name, n.Args, packageName)
-				}
+				}*/
 			default:
 				panic(fmt.Sprint("Unhandled type at root: %T", n))
 			}
