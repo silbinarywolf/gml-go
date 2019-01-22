@@ -20,11 +20,14 @@ import (
 )
 
 const (
-	defaultImportName = "gml"
-	genFile           = "gmlgo_gen.go"
-	objectPath        = "github.com/silbinarywolf/gml-go/gml.Object"
-	importString      = "\"github.com/silbinarywolf/gml-go/gml\""
-	version           = "0.1.0"
+	Use              = "generate [dir]"
+	ShortDescription = "Generate code so that assets and objects can be referenced by constant IDs"
+)
+
+const (
+	genFile    = "gmlgo_gen.go"
+	objectPath = "github.com/silbinarywolf/gml-go/gml.Object"
+	version    = "0.1.0"
 )
 
 type Arguments struct {

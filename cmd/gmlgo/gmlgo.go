@@ -24,8 +24,8 @@ var rootCmd = &cobra.Command{
 }
 
 var generateCmd = &cobra.Command{
-	Use:   "generate [dir]",
-	Short: "Generate code so that assets and objects can be referenced by constant IDs",
+	Use:   generate.Use,
+	Short: generate.ShortDescription,
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		dir := ""
@@ -39,8 +39,8 @@ var generateCmd = &cobra.Command{
 }
 
 var serveCmd = &cobra.Command{
-	Use:   "serve [dir]",
-	Short: "Serve a build of your game for playing in a web browser, defaults to port 8080",
+	Use:   serve.Use,
+	Short: serve.ShortDescription,
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		dir := ""
@@ -55,7 +55,7 @@ var serveCmd = &cobra.Command{
 }
 
 var fixCmd = &cobra.Command{
-	Use:   "fix [dir]",
+	Use:   fix.Use,
 	Short: fix.ShortDescription,
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
