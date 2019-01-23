@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/silbinarywolf/gml-go/cmd/gmlgo/cmd/fix"
 	"github.com/silbinarywolf/gml-go/cmd/gmlgo/cmd/generate"
 	"github.com/silbinarywolf/gml-go/cmd/gmlgo/cmd/serve"
 	"github.com/spf13/cobra"
@@ -54,20 +53,23 @@ var serveCmd = &cobra.Command{
 	},
 }
 
-var fixCmd = &cobra.Command{
-	Use:   fix.Use,
-	Short: fix.ShortDescription,
-	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
-		dir := ""
-		if len(args) > 0 {
-			dir = args[0]
-		}
-		fix.Run(fix.Arguments{
-			Directory: dir,
-		})
-	},
-}
+// NOTE(Jake): 2019-01-23 - Github #89
+// The effort/cost of writing the fixing tool right now is not worth it.
+// It would be less time consuming to manually fix everything.
+//var fixCmd = &cobra.Command{
+//	Use:   fix.Use,
+//	Short: fix.ShortDescription,
+//	Long:  ``,
+//	Run: func(cmd *cobra.Command, args []string) {
+//		dir := ""
+//		if len(args) > 0 {
+//			dir = args[0]
+//		}
+//		fix.Run(fix.Arguments{
+//			Directory: dir,
+//		})
+//	},
+//}
 
 func main() {
 	log.SetFlags(0)
@@ -75,7 +77,7 @@ func main() {
 
 	rootCmd.AddCommand(generateCmd)
 	rootCmd.AddCommand(serveCmd)
-	rootCmd.AddCommand(fixCmd)
+	//rootCmd.AddCommand(fixCmd)
 	serveCmd.Flags().StringVar(&Tags, "tags", "", "a list of build tags to consider satisfied during the build")
 	//rootCmd.PersistentFlags().StringVarP(&Directory, "dir", "d", ".", "directory")
 
