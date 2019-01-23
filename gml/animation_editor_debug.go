@@ -218,7 +218,7 @@ func animationEditorUpdate() {
 		{
 			// Draw backdrop
 			pos := pos
-			DrawRectangle(pos.X, pos.Y, size, color.RGBA{195, 195, 195, 255})
+			DrawRectangle(pos.X, pos.Y, size.X, size.Y, color.RGBA{195, 195, 195, 255})
 		}
 
 		// Sprite
@@ -232,7 +232,7 @@ func animationEditorUpdate() {
 			var rect geom.Rect = collisionMask.Rect
 			rect.X += pos.X
 			rect.Y += pos.Y
-			DrawRectangle(rect.X, rect.Y, rect.Size, color.RGBA{255, 0, 0, 128})
+			DrawRectangle(rect.X, rect.Y, rect.Size.X, rect.Size.Y, color.RGBA{255, 0, 0, 128})
 		}
 
 		if collisionMask != nil &&
@@ -274,7 +274,7 @@ func animationEditorUpdate() {
 					}
 					col = color.RGBA{200, 200, 200, 255}
 				}
-				DrawRectangle(rect.X, rect.Y, rect.Size, col)
+				DrawRectangle(rect.X, rect.Y, rect.Size.X, rect.Size.Y, col)
 			}
 			{
 				// Top-Right
@@ -296,7 +296,7 @@ func animationEditorUpdate() {
 					}
 					col = color.RGBA{200, 200, 200, 255}
 				}
-				DrawRectangle(rect.X, rect.Y, rect.Size, col)
+				DrawRectangle(rect.X, rect.Y, rect.Size.X, rect.Size.Y, col)
 			}
 			{
 				// Bottom-Left
@@ -319,7 +319,7 @@ func animationEditorUpdate() {
 					}
 					col = color.RGBA{200, 200, 200, 255}
 				}
-				DrawRectangle(rect.X, rect.Y, rect.Size, col)
+				DrawRectangle(rect.X, rect.Y, rect.Size.X, rect.Size.Y, col)
 			}
 			{
 				// Bottom-Right
@@ -340,7 +340,7 @@ func animationEditorUpdate() {
 					}
 					col = color.RGBA{200, 200, 200, 255}
 				}
-				DrawRectangle(rect.X, rect.Y, rect.Size, col)
+				DrawRectangle(rect.X, rect.Y, rect.Size.X, rect.Size.Y, col)
 			}
 			{
 				// Update State

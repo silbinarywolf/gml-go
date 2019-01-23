@@ -24,10 +24,10 @@ func DrawSpriteScaled(spr sprite.SpriteIndex, subimage float64, x, y float64, sc
 func DrawSpriteExt(spr sprite.SpriteIndex, subimage float64, x, y float64, scale Vec, alpha float64) {
 }
 
-func DrawRectangle(pos Vec, size Vec, col color.Color) {
+func DrawRectangle(x, y, w, h float64, col color.Color) {
 }
 
-func DrawRectangleBorder(x, y float64, size Vec, color color.Color, borderSize float64, borderColor color.Color) {
+func DrawRectangleBorder(x, y, w, h float64, color color.Color, borderSize float64, borderColor color.Color) {
 }
 
 func DrawText(x, y float64, message string) {

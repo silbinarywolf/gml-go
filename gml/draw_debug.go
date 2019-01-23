@@ -21,7 +21,7 @@ func drawInputText(pos *geom.Vec, label string, text string, isFocused bool) boo
 		text = KeyboardString() + "|"
 		borderCol = color.RGBA{255, 0, 0, 255}
 	}
-	DrawRectangleBorder(pos.X, pos.Y, size, color.Black, 2, borderCol)
+	DrawRectangleBorder(pos.X, pos.Y, size.X, size.Y, color.Black, 2, borderCol)
 	DrawTextColor(pos.X+8, pos.Y+16, text, color.White)
 	pos.Y += size.Y
 	if MouseCheckPressed(MbLeft) && isMouseOver {
@@ -53,7 +53,7 @@ func drawButton(pos geom.Vec, text string) bool {
 	}
 
 	// Draw Border (outer rect)
-	DrawRectangleBorder(pos.X, pos.Y, size, innerRectColor, borderWidth, color.RGBA{0, 162, 232, 255})
+	DrawRectangleBorder(pos.X, pos.Y, size.X, size.Y, innerRectColor, borderWidth, color.RGBA{0, 162, 232, 255})
 	/*	pos.X += borderWidth
 		pos.Y += borderWidth
 		size.X -= borderWidth * 2

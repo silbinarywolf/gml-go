@@ -74,7 +74,7 @@ func (viewer *debugSpriteViewer) update() (sprite.SpriteIndex, bool) {
 	{
 		DrawSetGUI(true)
 		// Add black opacity over screen with menu open
-		DrawRectangle(0, 0, geom.Vec{2048, 2048}, color.RGBA{0, 0, 0, 190})
+		DrawRectangle(0, 0, 2048, 2048, color.RGBA{0, 0, 0, 190})
 
 		ui := geom.Vec{
 			X: float64(WindowWidth()) / 2,

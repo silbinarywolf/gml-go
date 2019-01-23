@@ -60,20 +60,24 @@ func DrawSpriteExt(spriteIndex sprite.SpriteIndex, subimage float64, x, y float6
 	drawGetTarget().DrawImage(frame, &op)
 }
 
-func DrawRectangle(x, y float64, size geom.Vec, col color.Color) {
+func DrawRectangle(x, y, w, h float64, col color.Color) {
 	position := geom.Vec{
 		X: x,
 		Y: y,
 	}
 	position = maybeApplyOffsetByCamera(position)
 
-	ebitenutil.DrawRect(drawGetTarget(), position.X, position.Y, size.X, size.Y, col)
+	ebitenutil.DrawRect(drawGetTarget(), position.X, position.Y, w, h, col)
 }
 
-func DrawRectangleBorder(x, y float64, size geom.Vec, color color.Color, borderSize float64, borderColor color.Color) {
+func DrawRectangleBorder(x, y, w, h float64, color color.Color, borderSize float64, borderColor color.Color) {
 	position := geom.Vec{
 		X: x,
 		Y: y,
+	}
+	size := geom.Vec{
+		X: w,
+		Y: h,
 	}
 	position = maybeApplyOffsetByCamera(position)
 	ebitenutil.DrawRect(drawGetTarget(), position.X, position.Y, size.X, size.Y, borderColor)
