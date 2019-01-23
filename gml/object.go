@@ -41,7 +41,7 @@ func (inst *Object) Update() {}
 func (inst *Object) Destroy() {}
 
 func (inst *Object) Draw() {
-	DrawSelf(&inst.SpriteState, inst.Vec)
+	DrawSprite(inst.SpriteIndex(), inst.ImageIndex(), inst.X, inst.Y)
 }
 
 func (inst *Object) create() {

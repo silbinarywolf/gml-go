@@ -92,7 +92,7 @@ func DrawTextColor(x, y float64, message string, col color.Color) {
 	if !hasFontSet() {
 		panic("Must call DrawSetFont() before calling DrawText.")
 	}
-	text.Draw(drawGetTarget(), message, fontFont(gFontManager.currentFont), int(position.X), int(position.Y), col)
+	text.Draw(drawGetTarget(), message, fontFont(gFontManager.currentFont), int(x), int(y), col)
 }
 
 /*func drawText(font FontIndex, message string) {
@@ -100,7 +100,7 @@ func DrawTextColor(x, y float64, message string, col color.Color) {
 }*/
 
 func DrawTextF(x, y float64, format string, args ...interface{}) {
-	DrawText(position, fmt.Sprintf(format, args...))
+	DrawText(x, y, fmt.Sprintf(format, args...))
 }
 
 func drawGetTarget() *ebiten.Image {

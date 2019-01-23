@@ -16,7 +16,7 @@ func newCameraState() *cameraManager {
 	return nil
 }
 
-func (view *camera) Reset() {
+func (manager *cameraManager) reset() {
 }
 
 func CameraCreate(index int, windowX, windowY, windowWidth, windowHeight float64) {

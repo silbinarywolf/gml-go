@@ -1,9 +1,5 @@
 package gml
 
-import (
-	"github.com/silbinarywolf/gml-go/gml/internal/geom"
-)
-
 const (
 	DEBUG_COLLISION = false
 )
@@ -12,7 +8,7 @@ type collisionObject interface {
 	BaseObject() *Object
 }
 
-func CollisionRectList(instType collisionObject, position geom.Vec) []InstanceIndex {
+func CollisionRectList(instType collisionObject, x, y float64) []InstanceIndex {
 	inst := instType.BaseObject()
 	room := roomGetInstance(inst.BaseObject().RoomInstanceIndex())
 	if room == nil {
@@ -21,7 +17,8 @@ func CollisionRectList(instType collisionObject, position geom.Vec) []InstanceIn
 
 	// Create collision rect at position provided in function
 	r1 := inst.Rect
-	r1.Vec = position
+	r1.X = x
+	r1.Y = y
 	r1.Size = inst.Size
 
 	// todo(Jake): 2018-12-01 - #18
@@ -47,7 +44,7 @@ func CollisionRectList(instType collisionObject, position geom.Vec) []InstanceIn
 	return list
 }
 
-func PlaceFree(instType collisionObject, position geom.Vec) bool {
+func PlaceFree(instType collisionObject, x, y float64) bool {
 	inst := instType.BaseObject()
 	room := roomGetInstance(inst.BaseObject().RoomInstanceIndex())
 	if room == nil {
@@ -56,7 +53,8 @@ func PlaceFree(instType collisionObject, position geom.Vec) bool {
 
 	// Create collision rect at position provided in function
 	r1 := inst.Rect
-	r1.Vec = position
+	r1.X = x
+	r1.Y = y
 	r1.Size = inst.Size
 
 	//var debugString string

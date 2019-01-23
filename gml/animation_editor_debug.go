@@ -125,16 +125,19 @@ func animationEditorUpdate() {
 
 	//
 	{
-		pos := geom.Vec{16, 16}
-		DrawTextColor(pos, "Animation Editor", color.White)
+		pos := geom.Vec{
+			X: 16,
+			Y: 16,
+		}
+		DrawTextColor(pos.X, pos.Y, "Animation Editor", color.White)
 		pos.Y += 24
-		DrawTextColor(pos, "Space = Play/Pause Animation", color.White)
+		DrawTextColor(pos.X, pos.Y, "Space = Play/Pause Animation", color.White)
 		pos.Y += 24
-		DrawTextColor(pos, "CTRL + P = Open Sprite List", color.White)
+		DrawTextColor(pos.X, pos.Y, "CTRL + P = Open Sprite List", color.White)
 
 		if spriteIndex := editor.spriteViewing.SpriteIndex(); spriteIndex != sprite.SprUndefined {
 			pos.Y += 24
-			DrawTextColor(pos, "CTRL + S = Save", color.White)
+			DrawTextColor(pos.X, pos.Y, "CTRL + S = Save", color.White)
 
 			if KeyboardCheck(VkControl) && KeyboardCheckPressed(VkS) {
 				err := sprite.DebugWriteSpriteConfig(spriteIndex)
@@ -207,26 +210,29 @@ func animationEditorUpdate() {
 
 	if spriteIndex := editor.spriteViewing.SpriteIndex(); spriteIndex.IsValid() {
 		size := spriteIndex.Size()
-		pos := geom.Vec{float64(WindowWidth()/2) - (float64(size.X) / 2), float64(WindowHeight()/2) - (float64(size.Y) / 2)}
+		pos := geom.Vec{
+			X: float64(WindowWidth()/2) - (float64(size.X) / 2),
+			Y: float64(WindowHeight()/2) - (float64(size.Y) / 2),
+		}
 
 		{
 			// Draw backdrop
 			pos := pos
-			DrawRectangle(pos, size, color.RGBA{195, 195, 195, 255})
+			DrawRectangle(pos.X, pos.Y, size, color.RGBA{195, 195, 195, 255})
 		}
 
 		// Sprite
 		if editor.isInPlayback {
 			editor.spriteViewing.ImageUpdate()
 		}
-		DrawSprite(spriteIndex, editor.spriteViewing.ImageIndex(), pos)
+		DrawSprite(spriteIndex, editor.spriteViewing.ImageIndex(), pos.X, pos.Y)
 
 		if collisionMask != nil {
 			// Draw collision box
 			var rect geom.Rect = collisionMask.Rect
 			rect.X += pos.X
 			rect.Y += pos.Y
-			DrawRectangle(rect.Vec, rect.Size, color.RGBA{255, 0, 0, 128})
+			DrawRectangle(rect.X, rect.Y, rect.Size, color.RGBA{255, 0, 0, 128})
 		}
 
 		if collisionMask != nil &&
@@ -268,7 +274,7 @@ func animationEditorUpdate() {
 					}
 					col = color.RGBA{200, 200, 200, 255}
 				}
-				DrawRectangle(rect.Pos(), rect.Size, col)
+				DrawRectangle(rect.X, rect.Y, rect.Size, col)
 			}
 			{
 				// Top-Right
@@ -290,7 +296,7 @@ func animationEditorUpdate() {
 					}
 					col = color.RGBA{200, 200, 200, 255}
 				}
-				DrawRectangle(rect.Pos(), rect.Size, col)
+				DrawRectangle(rect.X, rect.Y, rect.Size, col)
 			}
 			{
 				// Bottom-Left
@@ -313,7 +319,7 @@ func animationEditorUpdate() {
 					}
 					col = color.RGBA{200, 200, 200, 255}
 				}
-				DrawRectangle(rect.Pos(), rect.Size, col)
+				DrawRectangle(rect.X, rect.Y, rect.Size, col)
 			}
 			{
 				// Bottom-Right
@@ -334,7 +340,7 @@ func animationEditorUpdate() {
 					}
 					col = color.RGBA{200, 200, 200, 255}
 				}
-				DrawRectangle(rect.Pos(), rect.Size, col)
+				DrawRectangle(rect.X, rect.Y, rect.Size, col)
 			}
 			{
 				// Update State
@@ -363,7 +369,7 @@ func animationEditorUpdate() {
 		basePos.Y -= 210
 
 		imageIndex := int(math.Floor(editor.spriteViewing.ImageIndex()))
-		DrawTextF(basePos, "Frame: %d", imageIndex)
+		DrawTextF(basePos.X, basePos.Y, "Frame: %d", imageIndex)
 		basePos.Y += 24
 		if drawButton(basePos, "Kind: Inherit") {
 			collisionMask = sprite.GetCollisionMask(spriteIndex, imageIndex, 0)

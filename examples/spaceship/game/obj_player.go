@@ -42,7 +42,7 @@ func (self *Player) Update() {
 }
 
 func (self *Player) Draw() {
-	gml.DrawSelf(&self.SpriteState, self.Pos())
-	gml.DrawTextF(gml.Vec{0, 32}, "Score: %v", self.Score)
-	gml.DrawTextF(gml.Vec{0, 64}, "Ships Sighted: %v", global.ShipsSighted)
+	self.Object.Draw()
+	gml.DrawTextF(0, 32, "Score: %v", self.Score)
+	gml.DrawTextF(0, 64, "Ships Sighted: %v", global.ShipsSighted)
 }

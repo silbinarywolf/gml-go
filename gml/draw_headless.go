@@ -5,7 +5,6 @@ package gml
 import (
 	"image/color"
 
-	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
 )
 
@@ -34,7 +33,7 @@ func DrawRectangleBorder(x, y float64, size Vec, color color.Color, borderSize f
 func DrawText(x, y float64, message string) {
 }
 
-func DrawTextColor(position geom.Vec, message string, col color.Color) {
+func DrawTextColor(x, y float64, message string, col color.Color) {
 }
 
 func DrawTextF(x, y float64, message string, args ...interface{}) {

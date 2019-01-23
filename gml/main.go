@@ -111,15 +111,15 @@ func update() error {
 		} else {
 			gGameSettings.GameUpdate()
 		}
-	case debugMenuRoomEditor,
-		debugMenuAnimationEditor:
+	case debugMenuAnimationEditor:
+		//debugMenuRoomEditor,
 		cameraSetActive(0)
 		cameraClear(0)
 
 		switch debugMenuID {
-		case debugMenuRoomEditor:
-			editorLazyInit()
-			editorUpdate()
+		//case debugMenuRoomEditor:
+		//editorLazyInit()
+		//editorUpdate()
 		case debugMenuAnimationEditor:
 			animationEditorUpdate()
 		default:

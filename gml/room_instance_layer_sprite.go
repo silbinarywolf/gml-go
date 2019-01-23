@@ -37,6 +37,6 @@ func (layer *roomInstanceLayerSprite) draw() {
 		op := ebiten.DrawImageOptions{}
 		op.GeoM.Translate(position.X, position.Y)
 		screen.DrawImage(frame, &op)*/
-		DrawSprite(record.sprite, 0, geom.Vec{record.X, record.Y})
+		DrawSprite(record.sprite, 0, record.X, record.Y)
 	}
 }
