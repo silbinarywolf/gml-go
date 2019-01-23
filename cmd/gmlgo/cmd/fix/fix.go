@@ -40,10 +40,6 @@ func Run(args Arguments) {
 	}
 	dir := args.Directory
 	fileSet := token.NewFileSet()
-	//dir, err := filepath.Abs(dir)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
 
 	// getValidAndSortFiles
 	var astFiles []*File

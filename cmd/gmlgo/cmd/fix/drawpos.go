@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/types"
-	"log"
+	"strings"
 )
 
 func init() {
@@ -27,7 +27,6 @@ func drawposfix(f *File) bool {
 		case *ast.CallExpr:
 			switch fun := n.Fun.(type) {
 			case *ast.SelectorExpr:
-				//var packagePath string
 				switch x := fun.X.(type) {
 				case *ast.Ident:
 					scope := f.pkg.typesPkg.Scope().Innermost(x.NamePos)
@@ -36,21 +35,30 @@ func drawposfix(f *File) bool {
 					if !ok {
 						break
 					}
-					if pkgName.Imported().Path() == "github.com/silbinarywolf/gml-go/gml" {
-						panic("continue this")
+					switch pkgName.Imported().Path() {
+					case "github.com/silbinarywolf/gml-go/gml":
+						if strings.HasPrefix(fun.Sel.Name, "DrawSelf") {
+							fmt.Printf("%s\n", fun)
+							for _, arg := range n.Args {
+								arg, ok := arg.(*ast.UnaryExpr)
+								if !ok {
+									panic(fmt.Sprintf("%T\n", arg))
+								}
+								x := arg.X.(*ast.SelectorExpr)
+								panic(fmt.Sprintf("%s\n", x.Sel.String()))
+							}
+							panic(fmt.Sprintf("continue this: %s %s", fun.Sel.Name, n.Args))
+						}
 					}
-					log.Printf("%v -- %v -- %v\n", packageName, pkgName.Imported().Path())
-					//log.Printf("hilda: %v\n", x)
 				case *ast.SelectorExpr:
 					// this is for receiver calls only I *think*
 				default:
 					panic(fmt.Sprintf("Unhandled call expr using: %T\n", x))
 				}
-				/*if packageName == "gml" {
-					log.Printf("%s %v %s\n", fun.Sel.Name, n.Args, packageName)
-				}*/
+			case *ast.Ident:
+				// ignore "new()"
 			default:
-				panic(fmt.Sprint("Unhandled type at root: %T", n))
+				panic(fmt.Sprintf("Unhandled type at root: %T", fun))
 			}
 		}
 		return true
