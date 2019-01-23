@@ -2,7 +2,6 @@ package gml
 
 import (
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
-	"github.com/silbinarywolf/gml-go/gml/internal/room"
 )
 
 type RoomInstanceIndex int32
@@ -10,7 +9,7 @@ type RoomInstanceIndex int32
 type roomInstance struct {
 	used  bool
 	index RoomInstanceIndex
-	room  *room.Room
+	//room  *room.Room // deprecate room data
 	geom.Rect
 
 	instanceLayers []roomInstanceLayerInstance
@@ -30,14 +29,7 @@ type roomInstance struct {
 
 // RoomInstanceNew create a new empty room instance programmatically
 func RoomInstanceNew() RoomInstanceIndex {
-	roomInst := gState.createNewRoomInstance(nil)
-	return roomInst.index
-}
-
-// RoomInstanceCreate will create a new instance of the room given
-// todo(Jake): 2018-12-01: #6: Change *Room to be gml.RoomIndex
-func todo__roomInstanceCreate(room *room.Room) RoomInstanceIndex {
-	roomInst := gState.createNewRoomInstance(room)
+	roomInst := gState.createNewRoomInstance()
 	return roomInst.index
 }
 

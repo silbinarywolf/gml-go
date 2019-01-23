@@ -1,13 +1,7 @@
 package gml
 
 import (
-	"fmt"
-	"sort"
 	"strconv"
-
-	"github.com/silbinarywolf/gml-go/gml/internal/geom"
-	"github.com/silbinarywolf/gml-go/gml/internal/room"
-	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
 )
 
 var (
@@ -48,10 +42,9 @@ func IsCreatingRoomInstance() bool {
 	return gState.isCreatingRoomInstance
 }
 
-func (state *state) createNewRoomInstance(room *room.Room) *roomInstance {
+func (state *state) createNewRoomInstance() *roomInstance {
 	state.roomInstances = append(state.roomInstances, roomInstance{
 		used: true,
-		room: room,
 	})
 	state.isCreatingRoomInstance = true
 	defer func() {
@@ -61,88 +54,19 @@ func (state *state) createNewRoomInstance(room *room.Room) *roomInstance {
 	roomInst := &state.roomInstances[index]
 	roomInst.index = RoomInstanceIndex(index)
 
-	if room == nil ||
-		len(room.InstanceLayers) == 0 {
-		// Create default instance layer if...
-		// - No instance layers exist in the room data
-		// - Creating blank room
-		roomInst.instanceLayers = make([]roomInstanceLayerInstance, 1)
-		roomInst.instanceLayers[0] = roomInstanceLayerInstance{
-			index: 0,
-		}
-		roomInst.drawLayers = append(roomInst.drawLayers, &roomInst.instanceLayers[0])
-
-		// If creating room programmatically, default the room size
-		// to the size of the screen
-		roomInst.Size = WindowSize()
+	// Create default instance layer if...
+	// - No instance layers exist in the room data
+	// - Creating blank room
+	roomInst.instanceLayers = make([]roomInstanceLayerInstance, 1)
+	roomInst.instanceLayers[0] = roomInstanceLayerInstance{
+		index: 0,
 	}
+	roomInst.drawLayers = append(roomInst.drawLayers, &roomInst.instanceLayers[0])
 
-	// If non-blank room instance, use room data to create
-	if roomInst.room != nil {
-		roomInst.Size = geom.Vec{
-			X: float64(roomInst.room.Right - roomInst.room.Left),
-			Y: float64(roomInst.room.Bottom - roomInst.room.Top),
-		}
+	// If creating room programmatically, default the room size
+	// to the size of the screen
+	roomInst.Size = WindowSize()
 
-		// Instance layers
-		if len(room.InstanceLayers) > 0 {
-			roomInst.instanceLayers = make([]roomInstanceLayerInstance, len(room.InstanceLayers))
-			for i := 0; i < len(room.InstanceLayers); i++ {
-				layerData := room.InstanceLayers[i]
-				roomInst.instanceLayers[i] = roomInstanceLayerInstance{
-					index: i,
-				}
-				layer := &roomInst.instanceLayers[i]
-				layer.drawOrder = layerData.Config.Order
-				for _, obj := range layerData.Instances {
-					InstanceCreate(float64(obj.X), float64(obj.Y), roomInst.index, ObjectIndex(obj.ObjectIndex))
-					fmt.Printf("todo(Jake): 2018-12-19: Fix room instance creation to create on correct layer.\n")
-				}
-				roomInst.drawLayers = append(roomInst.drawLayers, layer)
-			}
-		}
-		// Background layers
-		for i := 0; i < len(room.BackgroundLayers); i++ {
-			layerData := room.BackgroundLayers[i]
-			spriteName := layerData.SpriteName
-			if spriteName == "" {
-				continue
-			}
-			layer := new(roomInstanceLayerBackground)
-			layer.x = float64(layerData.X)
-			layer.y = float64(layerData.Y)
-			layer.roomLeft = float64(room.Left)
-			layer.roomRight = float64(room.Right)
-			layer.sprite = sprite.SpriteLoadByName(spriteName)
-			layer.drawOrder = layerData.Config.Order
-			roomInst.drawLayers = append(roomInst.drawLayers, layer)
-		}
-		// Sprite layers
-		for i := 0; i < len(room.SpriteLayers); i++ {
-			layerData := room.SpriteLayers[i]
-			hasCollision := layerData.Config.HasCollision
-			layer := roomInstanceLayerSprite{}
-			layer.hasCollision = hasCollision
-			layer.sprites = make([]roomInstanceLayerSpriteObject, 0, len(layerData.Sprites))
-			for _, sprObj := range layerData.Sprites {
-				// Add draw sprite
-				spr := sprite.SpriteLoadByName(sprObj.SpriteName)
-				record := roomInstanceLayerSpriteObject{
-					sprite: spr,
-				}
-				record.X = float64(sprObj.X)
-				record.Y = float64(sprObj.Y)
-				layer.sprites = append(layer.sprites, record)
-			}
-			layer.drawOrder = layerData.Config.Order
-			roomInst.spriteLayers = append(roomInst.spriteLayers, layer)
-			roomInst.drawLayers = append(roomInst.drawLayers, &roomInst.spriteLayers[len(roomInst.spriteLayers)-1])
-		}
-		// Sort draw layers by order
-		sort.Slice(roomInst.drawLayers, func(i, j int) bool {
-			return roomInst.drawLayers[i].order() < roomInst.drawLayers[j].order()
-		})
-	}
 	return roomInst
 }
 
