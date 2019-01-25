@@ -6,7 +6,6 @@ import (
 	"go/ast"
 	"go/build"
 	"go/format"
-	"go/importer"
 	"go/parser"
 	"go/token"
 	"go/types"
@@ -32,6 +31,7 @@ const (
 
 type Arguments struct {
 	Directory string
+	Verbose   bool
 }
 
 func Run(args Arguments) {
@@ -113,7 +113,9 @@ func Run(args Arguments) {
 		if err != nil {
 			log.Fatalf("error writing output: %s\n", err)
 		}
-		//log.Printf("updated %s\n", outputName)
+		if args.Verbose {
+			log.Printf("%s\n", outputName)
+		}
 	}
 }
 
@@ -217,8 +219,8 @@ func (g *Generator) parsePackage(directory string, names []string, text interfac
 func (pkg *Package) typeCheck(fs *token.FileSet, astFiles []*ast.File) {
 	pkg.defs = make(map[*ast.Ident]types.Object)
 	config := types.Config{
-		IgnoreFuncBodies:         true,               // We only need to evaluate constants.
-		Importer:                 importer.Default(), // func defaultImporter() types.Importer
+		IgnoreFuncBodies:         true, // We only need to evaluate constants.
+		Importer:                 defaultImporter(),
 		FakeImportC:              true,
 		DisableUnusedImportCheck: true,
 	}
@@ -227,7 +229,7 @@ func (pkg *Package) typeCheck(fs *token.FileSet, astFiles []*ast.File) {
 	}
 	typesPkg, err := config.Check(pkg.dir, fs, astFiles, info)
 	if err != nil {
-		log.Fatalf("checking package: %s", err)
+		log.Fatalf("type checking package: %s", err)
 	}
 	pkg.typesPkg = typesPkg
 }

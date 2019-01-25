@@ -11,8 +11,8 @@ import (
 )
 
 var (
-	Directory string
-	Tags      string
+	Tags    string
+	Verbose bool
 )
 
 var rootCmd = &cobra.Command{
@@ -33,6 +33,7 @@ var generateCmd = &cobra.Command{
 		}
 		generate.Run(generate.Arguments{
 			Directory: dir,
+			Verbose:   Verbose,
 		})
 	},
 }
@@ -78,6 +79,7 @@ func main() {
 	rootCmd.AddCommand(generateCmd)
 	rootCmd.AddCommand(serveCmd)
 	//rootCmd.AddCommand(fixCmd)
+	generateCmd.Flags().BoolVar(&Verbose, "v", false, "verbose")
 	serveCmd.Flags().StringVar(&Tags, "tags", "", "a list of build tags to consider satisfied during the build")
 	//rootCmd.PersistentFlags().StringVarP(&Directory, "dir", "d", ".", "directory")
 
