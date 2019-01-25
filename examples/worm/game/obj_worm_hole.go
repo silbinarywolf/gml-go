@@ -4,10 +4,6 @@ import (
 	"github.com/silbinarywolf/gml-go/gml"
 )
 
-const (
-	WormHoleSpeed = 7
-)
-
 type WormHole struct {
 	gml.Object
 }
@@ -18,7 +14,7 @@ func (self *WormHole) Create() {
 }
 
 func (self *WormHole) Update() {
-	self.X -= WormHoleSpeed
+	self.X -= WallSpeed
 	if self.X+self.Size.X < 0 {
 		gml.InstanceDestroy(self)
 	}

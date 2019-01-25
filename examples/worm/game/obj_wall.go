@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	WallSpeed = 7
+	WallSpeed = 8
 )
 
 type Wall struct {
@@ -15,8 +15,12 @@ type Wall struct {
 
 func (self *Wall) Create() {
 	self.SetSprite(SprWall)
+	self.SetDepth(2)
 }
 
 func (self *Wall) Update() {
 	self.X -= WallSpeed
+	if self.X+self.Size.X < 0 {
+		gml.InstanceDestroy(self)
+	}
 }

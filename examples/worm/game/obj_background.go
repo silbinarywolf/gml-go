@@ -4,12 +4,49 @@ import (
 	"github.com/silbinarywolf/gml-go/gml"
 )
 
+const (
+	FrontCityHspeed = -2
+	BackCityHspeed  = -1
+)
+
 type Background struct {
 	gml.Object
+	BackCityOffset   float64
+	FrontCityOffset  float64
+	FrontGrassOffset float64
 }
 
 func (self *Background) Create() {
 	self.SetDepth(DepthBackground)
+}
+
+func (self *Background) Update() {
+	// Update back city
+	{
+		size := gml.SpriteSize(SprBackCity)
+		self.BackCityOffset += BackCityHspeed
+		if self.BackCityOffset < -size.X {
+			self.BackCityOffset += size.X
+		}
+	}
+
+	// Update front city
+	{
+		size := gml.SpriteSize(SprFrontCity)
+		self.FrontCityOffset += FrontCityHspeed
+		if self.FrontCityOffset < -size.X {
+			self.FrontCityOffset += size.X
+		}
+	}
+
+	// Update grass
+	{
+		size := gml.SpriteSize(SprFrontGrass)
+		self.FrontGrassOffset += -WallSpeed
+		if self.FrontGrassOffset < -size.X {
+			self.FrontGrassOffset += size.X
+		}
+	}
 }
 
 func (self *Background) Draw() {
@@ -21,23 +58,26 @@ func (self *Background) Draw() {
 	// Draw back city
 	{
 		size := gml.SpriteSize(SprBackCity)
-		gml.DrawSprite(SprBackCity, 0, 15, 350)
-		gml.DrawSprite(SprBackCity, 0, 15+size.X, 350)
+		gml.DrawSprite(SprBackCity, 0, self.BackCityOffset+15, 350)
+		gml.DrawSprite(SprBackCity, 0, self.BackCityOffset+15+size.X, 350)
+		gml.DrawSprite(SprBackCity, 0, self.BackCityOffset+15+(size.X*2), 350)
 	}
 
 	// Draw front city
 	{
 		size := gml.SpriteSize(SprFrontCity)
-		gml.DrawSprite(SprFrontCity, 0, 15, 350)
-		gml.DrawSprite(SprFrontCity, 0, 15+size.X, 350)
+		gml.DrawSprite(SprFrontCity, 0, self.FrontCityOffset+15, 350)
+		gml.DrawSprite(SprFrontCity, 0, self.FrontCityOffset+15+size.X, 350)
+		gml.DrawSprite(SprFrontCity, 0, self.FrontCityOffset+15+(size.X*2), 350)
 	}
 
 	// Draw grass
 	{
 		size := gml.SpriteSize(SprFrontGrass)
-		gml.DrawSprite(SprFrontGrass, 0, 0, roomSize.Y-size.Y)
-		gml.DrawSprite(SprFrontGrass, 0, size.X, roomSize.Y-size.Y)
-		gml.DrawSprite(SprFrontGrass, 0, size.X*2, roomSize.Y-size.Y)
+		gml.DrawSprite(SprFrontGrass, 0, self.FrontGrassOffset, roomSize.Y-size.Y)
+		gml.DrawSprite(SprFrontGrass, 0, self.FrontGrassOffset+size.X, roomSize.Y-size.Y)
+		gml.DrawSprite(SprFrontGrass, 0, self.FrontGrassOffset+(size.X*2), roomSize.Y-size.Y)
+		gml.DrawSprite(SprFrontGrass, 0, self.FrontGrassOffset+(size.X*3), roomSize.Y-size.Y)
 	}
 
 	gml.DrawTextF(32, 32, "%s", gml.FrameUsage())
