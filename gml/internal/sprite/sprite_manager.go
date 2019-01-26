@@ -6,6 +6,8 @@ import (
 	"errors"
 	"io/ioutil"
 
+	_ "image/png"
+
 	"github.com/silbinarywolf/gml-go/gml/internal/file"
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 )

@@ -121,17 +121,38 @@ func CameraSetViewTarget(index int, inst InstanceIndex) {
 	view.follow = inst
 }
 
+// cameraHasMultipleEnabled is generally used to disable
+// rendering to an offscreen surface if using 1 camera.
+func cameraHasMultipleEnabled() bool {
+	return gCameraManager.camerasEnabledCount > 1
+}
+
 func cameraClear(index int) {
-	view := &gCameraManager.cameras[index]
-	view.screen.Clear()
+	// NOTE(Jake): 2019-01-26
+	// We don't render an offscreen image to the screen if
+	// only 1 camera is enabled.
+	if cameraHasMultipleEnabled() {
+		view := &gCameraManager.cameras[index]
+		view.screen.Clear()
+	}
 }
 
 func cameraDraw(index int) {
-	view := &gCameraManager.cameras[index]
-	op := ebiten.DrawImageOptions{}
-	op.GeoM.Scale(view.scale.X, view.scale.Y)
-	op.GeoM.Translate(view.X, view.Y)
-	gScreen.DrawImage(view.screen, &op)
+	// NOTE(Jake): 2019-01-26
+	// We don't render an offscreen image to the screen if
+	// only 1 camera is enabled.
+	if cameraHasMultipleEnabled() {
+		view := &gCameraManager.cameras[index]
+
+		// NOTE(Jake): 2019-01-26
+		// op is a global variable in "draw"
+		op.GeoM.Reset()
+		if view.scale.X != 1 || view.scale.Y != 1 {
+			op.GeoM.Scale(view.scale.X, view.scale.Y)
+		}
+		op.GeoM.Translate(view.X, view.Y)
+		gScreen.DrawImage(view.screen, op)
+	}
 }
 
 func cameraInstanceDestroy(instanceIndex InstanceIndex) {
@@ -145,8 +166,10 @@ func cameraInstanceDestroy(instanceIndex InstanceIndex) {
 }
 
 func (view *camera) update() {
-	// Update screen render target
-	{
+	// NOTE(Jake): 2019-01-26
+	// We don't render an offscreen image to the screen if
+	// only 1 camera is enabled.
+	if cameraHasMultipleEnabled() {
 		mustCreateNewRenderTarget := false
 		if view.screen == nil {
 			// Create new camera
