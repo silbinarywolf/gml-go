@@ -31,7 +31,26 @@ func DrawSetGUI(guiMode bool) {
 }
 
 func DrawSprite(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64) {
-	DrawSpriteExt(spriteIndex, subimage, x, y, geom.Vec{1, 1}, 1.0)
+	if spriteIndex == sprite.SprUndefined {
+		// If no sprite in use, draw nothing
+		return
+	}
+	// draw_sprite_ext( sprite, subimg, x, y, xscale, yscale, rot, colour, alpha );
+	position := geom.Vec{
+		X: x,
+		Y: y,
+	}
+	position = maybeApplyOffsetByCamera(position)
+
+	// NOTE(Jake): 2019-01-26 - #91
+	// DrawSprite is like DrawSpriteExt except we apply no scaling or colorM
+	// changes. To avoid unnecessary allocations, we pulled out the code from
+	// DrawSpriteExt and placed it here with a few modifications.
+	frame := sprite.GetRawFrame(spriteIndex, int(math.Floor(subimage)))
+	op.GeoM.Reset()
+	op.GeoM.Translate(position.X, position.Y)
+
+	drawGetTarget().DrawImage(frame, op)
 }
 
 func DrawSpriteScaled(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64, scale geom.Vec) {

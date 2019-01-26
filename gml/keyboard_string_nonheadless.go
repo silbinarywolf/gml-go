@@ -6,11 +6,11 @@ import (
 	"bytes"
 
 	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/inpututil"
 )
 
 var (
-	keyboardString bytes.Buffer
+	keyboardString                 bytes.Buffer
+	keyboardStringBackspaceCounter = 0
 )
 
 func ClearKeyboardString() {
@@ -46,8 +46,26 @@ func keyboardStringUpdate() {
 	//}
 
 	// If the backspace key is pressed, remove one character.
-	if repeatingKeyPressed(ebiten.KeyBackspace) {
-		if keyboardString.Len() >= 1 {
+	if KeyboardCheck(VkBackspace) {
+		shouldDoBackspace := false
+		keyboardStringBackspaceCounter++
+		if keyboardStringBackspaceCounter == 1 {
+			shouldDoBackspace = true
+		}
+		{
+			// Taken from "repeatingKeyPressed" on Ebiten Typewriter example
+			// This should probably have tests.
+			const (
+				delay    = 30
+				interval = 3
+			)
+			if keyboardStringBackspaceCounter >= delay && (keyboardStringBackspaceCounter-delay)%interval == 0 {
+				shouldDoBackspace = true
+			}
+		}
+
+		if shouldDoBackspace &&
+			keyboardString.Len() >= 1 {
 			var lastPos int = -1
 			for pos, _ := range keyboardString.String() {
 				lastPos = pos
@@ -64,7 +82,7 @@ func keyboardStringUpdate() {
 // Taken as-is from Ebiten Typewriter example
 //
 // repeatingKeyPressed return true when key is pressed considering the repeat state.
-func repeatingKeyPressed(key ebiten.Key) bool {
+/*func repeatingKeyPressed(key int16) bool {
 	const (
 		delay    = 30
 		interval = 3
@@ -78,3 +96,4 @@ func repeatingKeyPressed(key ebiten.Key) bool {
 	}
 	return false
 }
+*/
