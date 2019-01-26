@@ -12,6 +12,14 @@ import (
 	"github.com/gopherjs/gopherwasm/js"
 )
 
+type file struct {
+	*bytes.Reader
+}
+
+func (f *file) Close() error {
+	return nil
+}
+
 func OpenFile(path string) (readSeekCloser, error) {
 	// NOTE(Jake): 2019-01-26
 	// Copied this from ebitenutil.OpenFile().
