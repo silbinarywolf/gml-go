@@ -1,6 +1,8 @@
 package gml
 
-import "sort"
+import (
+	"sort"
+)
 
 type roomInstanceLayerInstance struct {
 	roomInstanceLayerDrawBase
@@ -34,10 +36,13 @@ func (layer *roomInstanceLayerInstance) draw() {
 		}
 		return a.BaseObject().Depth() > b.BaseObject().Depth()
 	})
+	//log.Printf("Stable sort count: %d, cap: %d\n", len(layer.instances), cap(layer.instances))
 
 	for _, instanceIndex := range layer.instances {
-		if inst := InstanceGet(instanceIndex); inst != nil {
-			inst.Draw()
+		inst := InstanceGet(instanceIndex)
+		if inst == nil {
+			panic("instance index not removed from draw list when destroyed")
 		}
+		inst.Draw()
 	}
 }

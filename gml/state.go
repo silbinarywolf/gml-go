@@ -105,12 +105,36 @@ func (state *state) update() {
 		if !ok {
 			continue
 		}
+
+		// Remove from room instance draw list
+		{
+			roomInstanceIndex := manager.instances[dataIndex].BaseObject().RoomInstanceIndex()
+			roomInstance := roomGetInstance(roomInstanceIndex)
+			roomInstanceInstances := roomInstance.instanceLayers[0].instances
+			if len(roomInstanceInstances) == 1 {
+				if instanceIndex == roomInstanceInstances[0] {
+					roomInstanceInstances = roomInstanceInstances[:len(roomInstanceInstances)-1]
+				}
+			} else {
+				for dataIndex, otherInstanceIndex := range roomInstanceInstances {
+					if instanceIndex == otherInstanceIndex {
+						lastEntry := roomInstanceInstances[len(roomInstanceInstances)-1]
+						roomInstanceInstances[dataIndex] = lastEntry
+						roomInstanceInstances = roomInstanceInstances[:len(manager.instances)-1]
+						break
+					}
+				}
+			}
+			roomInstance.instanceLayers[0].instances = roomInstanceInstances
+		}
+
 		if dataIndex == len(manager.instances)-1 {
 			// Remove last entry
 			delete(manager.instanceIndexToIndex, instanceIndex)
 			manager.instances = manager.instances[:len(manager.instances)-1]
 			continue
 		}
+
 		// Swap deleted entry for last entry
 		delete(manager.instanceIndexToIndex, instanceIndex)
 		lastEntry := manager.instances[len(manager.instances)-1]
