@@ -8,7 +8,8 @@ import (
 
 // draw the room that the camera is in
 func (state *state) draw() {
-	if ebiten.IsRunningSlowly() {
+	if ebiten.IsDrawingSkipped() {
+		// log.Printf("Warning: Rendering is slow, skipping render this frame\n")
 		return
 	}
 

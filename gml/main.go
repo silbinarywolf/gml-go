@@ -132,14 +132,11 @@ func update() error {
 		panic("Invalid debug mode.")
 	}
 
-	// NOTE(Jake): 2018-09-29
-	// Ignoring when 0 is reported. This happens on Windows
-	// and just makes the frame usage timer completely unhelpful.
-	// Not a great workaround but eh.
+	// NOTE(Jake): 2019-01-26
+	// Swapped to high precision timer on Windows.
+	// So this should be accurate.
 	frameBudgetUsed := timegml.Now() - frameStartTime
-	if frameBudgetUsed > 0 {
-		gState.frameBudgetNanosecondsUsed = frameBudgetUsed
-	}
+	gState.frameBudgetNanosecondsUsed = frameBudgetUsed
 	return nil
 }
 
