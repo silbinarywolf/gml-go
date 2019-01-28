@@ -4,8 +4,18 @@ import (
 	"github.com/silbinarywolf/gml-go/gml"
 )
 
+const (
+	// DesignedMaxTPS states that game logic is designed to simulate at 1/60 of a second
+	// ie. alarms, move speed, animation speed
+	DesignedMaxTPS = 60
+)
+
 func GameStart() {
 	gml.DrawSetFont(FntDefault)
+
+	// Setup "kinda" delta time
+	gml.SetDesignedTPS(DesignedMaxTPS)
+	//gml.SetMaxTPS(80)
 
 	// Setup global variables
 	// ...

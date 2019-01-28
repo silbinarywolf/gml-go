@@ -85,6 +85,6 @@ func (self *WallSpawner) Update(roomInstanceIndex gml.RoomInstanceIndex) {
 		//    additional_time += room_speed * 4;
 		//    flight_extended_timer_used = true;
 		//}
-		self.SpawnWallTimer.Set(ticksTillNextWall)
+		self.SpawnWallTimer.Set(float64(ticksTillNextWall))
 	}
 }

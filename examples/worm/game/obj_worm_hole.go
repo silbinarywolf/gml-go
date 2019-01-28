@@ -14,7 +14,7 @@ func (self *WormHole) Create() {
 }
 
 func (self *WormHole) Update() {
-	self.X -= WallSpeed
+	self.X -= WallSpeed()
 	if self.X+self.Size.X < 0 {
 		gml.InstanceDestroy(self)
 	}

@@ -107,11 +107,11 @@ func (self *Worm) Update() {
 		// The original game gave the worm an image speed of 0.21 when
 		// in the ground. To recreate this just add 0.08. The 0.13 should come
 		// from the default processing of the animation.
-		self.SetImageIndex(self.ImageIndex() + 0.08)
+		self.SetImageIndex(self.ImageIndex() + (0.08 * gml.DeltaTime()))
 		self.Gravity = 0
 		self.Speed.Y = 0
 
-		self.SinCounter += 1
+		self.SinCounter += 1 * gml.DeltaTime()
 		self.Y = self.Start.Y + math.Round(math.Sin(self.SinCounter*0.15)*21)
 	} else {
 		if self.Speed.Y < 0 {

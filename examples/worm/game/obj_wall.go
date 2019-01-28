@@ -4,9 +4,10 @@ import (
 	"github.com/silbinarywolf/gml-go/gml"
 )
 
-const (
-	WallSpeed = 8
-)
+func WallSpeed() float64 {
+	const wallSpeed = 8
+	return wallSpeed * gml.DeltaTime()
+}
 
 type Wall struct {
 	gml.Object
@@ -19,7 +20,7 @@ func (self *Wall) Create() {
 }
 
 func (self *Wall) Update() {
-	self.X -= WallSpeed
+	self.X -= WallSpeed()
 	if self.X+self.Size.X < 0 {
 		gml.InstanceDestroy(self)
 	}

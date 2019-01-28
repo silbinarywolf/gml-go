@@ -1,6 +1,7 @@
 package sprite
 
 import (
+	"github.com/silbinarywolf/gml-go/gml/internal/dt"
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 )
 
@@ -48,18 +49,24 @@ func (state *SpriteState) SetSprite(spriteIndex SpriteIndex) {
 
 func (state *SpriteState) SetImageIndex(imageIndex float64) {
 	state.imageIndex = imageIndex
-	if state.imageIndex >= state.ImageNumber() {
-		state.imageIndex = 0
-	}
-	if state.imageIndex < 0 {
-		state.imageIndex = 0
+	imageNumber := state.ImageNumber()
+	if imageNumber > 0 {
+		for state.imageIndex >= imageNumber {
+			state.imageIndex -= imageNumber
+		}
+		if state.imageIndex < 0 {
+			state.imageIndex = 0
+		}
 	}
 }
 
 func (state *SpriteState) ImageUpdate() {
-	imageSpeed := state.ImageSpeed() // * dt
-	state.imageIndex += imageSpeed
-	if state.imageIndex >= state.ImageNumber() {
-		state.imageIndex = 0
+	imageNumber := state.ImageNumber()
+	if imageNumber > 0 {
+		imageSpeed := state.ImageSpeed() * dt.DeltaTime()
+		state.imageIndex += imageSpeed
+		for state.imageIndex >= state.ImageNumber() {
+			state.imageIndex -= state.ImageNumber()
+		}
 	}
 }

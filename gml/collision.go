@@ -8,6 +8,8 @@ type collisionObject interface {
 	BaseObject() *Object
 }
 
+//var list []InstanceIndex
+
 func CollisionRectList(instType collisionObject, x, y float64) []InstanceIndex {
 	inst := instType.BaseObject()
 	room := roomGetInstance(inst.BaseObject().RoomInstanceIndex())
@@ -25,6 +27,7 @@ func CollisionRectList(instType collisionObject, x, y float64) []InstanceIndex {
 	// Consider pooling reusable InstanceIndex slices to
 	// improve performance.
 	var list []InstanceIndex
+	//list = list[:0]
 	for i := 0; i < len(room.instanceLayers); i++ {
 		for _, otherIndex := range room.instanceLayers[i].instances {
 			other := instanceGetBaseObject(otherIndex)

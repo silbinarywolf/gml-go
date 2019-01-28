@@ -24,7 +24,7 @@ func (self *Background) Update() {
 	// Update back city
 	{
 		size := gml.SpriteSize(SprBackCity)
-		self.BackCityOffset += BackCityHspeed
+		self.BackCityOffset += BackCityHspeed * gml.DeltaTime()
 		if self.BackCityOffset < -size.X {
 			self.BackCityOffset += size.X
 		}
@@ -33,7 +33,7 @@ func (self *Background) Update() {
 	// Update front city
 	{
 		size := gml.SpriteSize(SprFrontCity)
-		self.FrontCityOffset += FrontCityHspeed
+		self.FrontCityOffset += FrontCityHspeed * gml.DeltaTime()
 		if self.FrontCityOffset < -size.X {
 			self.FrontCityOffset += size.X
 		}
@@ -42,7 +42,7 @@ func (self *Background) Update() {
 	// Update grass
 	{
 		size := gml.SpriteSize(SprFrontGrass)
-		self.FrontGrassOffset += -WallSpeed
+		self.FrontGrassOffset += -WallSpeed()
 		if self.FrontGrassOffset < -size.X {
 			self.FrontGrassOffset += size.X
 		}
