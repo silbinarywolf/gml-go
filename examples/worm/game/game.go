@@ -26,6 +26,11 @@ func GameStart() {
 	// Create background drawer
 	gml.InstanceCreate(0, 0, roomInstanceIndex, ObjBackground)
 
+	// Create menu
+	menuInst := gml.InstanceCreate(0, 0, roomInstanceIndex, ObjMenu).(*Menu)
+
 	// Create player in the center of the room
-	gml.InstanceCreate(0, 0, roomInstanceIndex, ObjWorm)
+	playerInst := gml.InstanceCreate(0, 0, roomInstanceIndex, ObjWorm).(*Worm)
+
+	menuInst.Player = playerInst.InstanceIndex()
 }

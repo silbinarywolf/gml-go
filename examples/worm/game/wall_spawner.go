@@ -14,7 +14,7 @@ type WallSpawner struct {
 
 func (self *WallSpawner) Reset() {
 	self.PreviousWallSpawned = -1
-	self.SpawnWallTimer.Set(1)
+	self.SpawnWallTimer.Set(DesignedMaxTPS * 1.25)
 }
 
 func (self *WallSpawner) Update(roomInstanceIndex gml.RoomInstanceIndex) {

@@ -49,8 +49,13 @@ func DrawSprite(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64) 
 	frame := sprite.GetRawFrame(spriteIndex, int(math.Floor(subimage)))
 	op.GeoM.Reset()
 	op.GeoM.Translate(position.X, position.Y)
+	op.ColorM.Reset()
 
 	drawGetTarget().DrawImage(frame, op)
+}
+
+func DrawSpriteAlpha(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64, alpha float64) {
+	DrawSpriteExt(spriteIndex, subimage, x, y, geom.Vec{1, 1}, alpha)
 }
 
 func DrawSpriteScaled(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64, scale geom.Vec) {
@@ -73,6 +78,7 @@ func DrawSpriteExt(spriteIndex sprite.SpriteIndex, subimage float64, x, y float6
 	op.GeoM.Reset()
 	op.GeoM.Scale(scale.X, scale.Y)
 	op.GeoM.Translate(position.X, position.Y)
+	op.ColorM.Reset()
 	op.ColorM.Scale(1.0, 1.0, 1.0, alpha)
 	//op.Colorgeom.RotateHue(float64(360))
 
@@ -109,6 +115,16 @@ func DrawRectangleBorder(x, y, w, h float64, color color.Color, borderSize float
 
 func DrawText(x, y float64, message string) {
 	DrawTextColor(x, y, message, color.White)
+}
+
+func DrawTextColorAlpha(x, y float64, message string, col color.Color, alpha float64) {
+	if !hasFontSet() {
+		panic("Must call DrawSetFont() before calling DrawText.")
+	}
+	r, g, b, a := col.RGBA()
+	c := color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
+	c.A = uint8(float64(c.A) * alpha)
+	text.Draw(drawGetTarget(), message, fontFont(gFontManager.currentFont), int(x), int(y), c)
 }
 
 func DrawTextColor(x, y float64, message string, col color.Color) {

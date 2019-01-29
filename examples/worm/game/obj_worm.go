@@ -20,13 +20,15 @@ type Worm struct {
 	Physics
 	WormDrag
 	WallSpawner
-	dirtCreateTimer gml.Alarm
+	dirtCreateTimer    gml.Alarm
+	inputDisabledTimer gml.Alarm
 
 	Start        gml.Vec
 	SinCounter   float64
 	LastBodyPart gml.InstanceIndex
 	Dead         bool
 	InAir        bool
+	DisableInput bool
 }
 
 func (self *Worm) Create() {
@@ -36,7 +38,6 @@ func (self *Worm) Create() {
 	self.Start.Y = 528
 	self.Vec = self.Start
 	self.YDrag = self.Y
-	self.WallSpawner.Reset()
 
 	// Create body
 	parentIndex := self.InstanceIndex()
@@ -68,6 +69,9 @@ func (self *Worm) Update() {
 	if self.DragTimer.Repeat(1) {
 		self.YDrag = self.Y
 	}
+	if self.inputDisabledTimer.Tick() {
+		self.DisableInput = false
+	}
 
 	if self.Dead {
 		return
@@ -81,7 +85,8 @@ func (self *Worm) Update() {
 
 	// Jump
 	{
-		if input.JumpPressed() &&
+		if !self.DisableInput &&
+			input.JumpPressed() &&
 			!self.InAir &&
 			self.Top() > 0 {
 			self.Y = self.Start.Y

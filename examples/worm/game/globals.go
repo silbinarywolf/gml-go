@@ -8,6 +8,7 @@ const (
 )
 
 const (
+	DepthMenu       = -15
 	DepthWorm       = -10
 	DepthWormBody   = -5
 	DepthDirt       = 1
