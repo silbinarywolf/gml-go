@@ -73,6 +73,7 @@ func (self *WallSpawner) Update(roomInstanceIndex gml.RoomInstanceIndex) {
 			self.PreviousWallSpawned = wallInfoIndex
 
 			wallInfo := wallSet[wallInfoIndex]
+			gml.InstanceCreate(WallX, 0, roomInstanceIndex, ObjCheckpoint)
 			for _, wall := range wallInfo.WallList {
 				inst := gml.InstanceCreate(WallX, wall.Y, roomInstanceIndex, ObjWall).(*Wall)
 				inst.DontKillPlayerIfInDirt = wall.IsInDirt

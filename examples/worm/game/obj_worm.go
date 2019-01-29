@@ -1,6 +1,8 @@
 package game
 
 import (
+	"fmt"
+	"image/color"
 	"math"
 
 	"github.com/silbinarywolf/gml-go/examples/worm/game/input"
@@ -24,6 +26,7 @@ type Worm struct {
 	inputDisabledTimer gml.Alarm
 
 	Start        gml.Vec
+	Score        float64
 	SinCounter   float64
 	LastBodyPart gml.InstanceIndex
 	Dead         bool
@@ -36,6 +39,7 @@ func (self *Worm) Create() {
 	self.SetDepth(DepthWorm)
 	self.Start.X = 304
 	self.Start.Y = 528
+	self.Score = 0
 	self.Vec = self.Start
 	self.YDrag = self.Y
 
@@ -60,6 +64,24 @@ func (self *Worm) TriggerDeath() {
 		// Leap into air at death
 		self.Speed.Y = WormLeapPower
 		self.Gravity = WormDieGravity
+	}
+}
+
+func (self *Worm) Draw() {
+	// Draw self
+	self.Object.Draw()
+
+	// Draw score
+	{
+		// todo(Jake): 2019-01-29
+		// Change this to draw with the sprite
+		text := fmt.Sprintf("%v", self.Score)
+		screenSize := gml.CameraGetViewSize(0)
+		x := (screenSize.X / 2) - (gml.StringWidth(text) / 2) + 4
+		y := 30.0
+
+		gml.DrawTextColor(x-1, y, text, color.Black)
+		gml.DrawTextColor(x, y+1, text, color.White)
 	}
 }
 
@@ -127,4 +149,12 @@ func (self *Worm) Update() {
 	}
 
 	HandleCollisionForWormOrWormPart(&self.Object, self)
+	for _, id := range gml.CollisionRectList(self, self.X, self.Y) {
+		inst, ok := gml.InstanceGet(id).(*Checkpoint)
+		if !ok {
+			continue
+		}
+		self.Score += 1
+		gml.InstanceDestroy(inst)
+	}
 }
