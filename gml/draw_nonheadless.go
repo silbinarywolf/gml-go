@@ -85,6 +85,28 @@ func DrawSpriteExt(spriteIndex sprite.SpriteIndex, subimage float64, x, y float6
 	drawGetTarget().DrawImage(frame, op)
 }
 
+// DrawSpriteColor will draw a sprite with a color blend
+func DrawSpriteColor(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64, col color.Color) {
+	if spriteIndex == sprite.SprUndefined {
+		// If no sprite in use, draw nothing
+		return
+	}
+	position := geom.Vec{
+		X: x,
+		Y: y,
+	}
+	position = maybeApplyOffsetByCamera(position)
+
+	r, g, b, a := col.RGBA()
+	frame := sprite.GetRawFrame(spriteIndex, int(math.Floor(subimage)))
+	op.GeoM.Reset()
+	op.GeoM.Translate(position.X, position.Y)
+	op.ColorM.Reset()
+	op.ColorM.Scale(float64(r)/255, float64(g)/255, float64(b)/255, float64(a)/255)
+
+	drawGetTarget().DrawImage(frame, op)
+}
+
 func DrawRectangle(x, y, w, h float64, col color.Color) {
 	position := geom.Vec{
 		X: x,

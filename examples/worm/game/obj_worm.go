@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	"image/color"
 	"math"
 
@@ -73,15 +72,31 @@ func (self *Worm) Draw() {
 
 	// Draw score
 	{
-		// todo(Jake): 2019-01-29
-		// Change this to draw with the sprite
-		text := fmt.Sprintf("%v", self.Score)
-		screenSize := gml.CameraGetViewSize(0)
-		x := (screenSize.X / 2) - (gml.StringWidth(text) / 2) + 4
-		y := 30.0
+		var scoreIndexes [8]float64
 
-		gml.DrawTextColor(x-1, y, text, color.Black)
-		gml.DrawTextColor(x, y+1, text, color.White)
+		// Split score into seperate numbers
+		i := 0
+		score := self.Score
+		fontWidth := gml.SpriteSize(SprScoreFont).X
+		textWidth := 0.0
+		for score >= 1 {
+			index := math.Mod(score, 10)
+			score = math.Floor(score / 10)
+			scoreIndexes[i] = index
+			i++
+			textWidth += fontWidth
+		}
+
+		// Draw numbers in correct order
+		x := (gml.CameraGetViewSize(0).X / 2) - (textWidth / 2)
+		y := 32.0
+		for i > 0 {
+			i--
+			index := scoreIndexes[i]
+			gml.DrawSpriteColor(SprScoreFont, index, x-1, y, color.Black)
+			gml.DrawSprite(SprScoreFont, index, x, y+1)
+			x += fontWidth
+		}
 	}
 }
 
