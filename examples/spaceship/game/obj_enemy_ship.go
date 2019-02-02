@@ -14,7 +14,7 @@ func (self *EnemyShip) Create() {
 }
 
 func (self *EnemyShip) Destroy() {
-	global.ShipsSighted += 1
+	Global.ShipsSighted += 1
 }
 
 func (self *EnemyShip) Update() {

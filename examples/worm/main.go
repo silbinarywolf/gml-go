@@ -22,8 +22,7 @@ func main() {
 	// Set here so that if we add tests, they're deterministic.
 	rand.Seed(time.Now().UTC().UnixNano())
 
-	gml.Run(gml.GameSettings{
-		GameStart:    game.GameStart,
+	gml.Run(game.Global, gml.GameSettings{
 		WindowWidth:  game.WindowWidth,
 		WindowHeight: game.WindowHeight,
 		WindowTitle:  game.WindowTitle,

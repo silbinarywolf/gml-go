@@ -15,19 +15,18 @@ type Menu struct {
 	gml.Object
 	ImageAlpha       float64
 	IsHoveringOnMenu bool
-	Player           gml.InstanceIndex
 	IsFadingAway     bool
 }
 
 func (self *Menu) Create() {
 	self.SetDepth(DepthMenu)
-	self.SetSprite(SprPlayButton)
 	self.ImageAlpha = 1.0
 
-	size := gml.SpriteSize(self.SpriteIndex())
+	size := gml.SpriteSize(SprPlayButton)
 	screenSize := gml.CameraGetViewSize(0)
 	self.X = (screenSize.X / 2) - (size.X / 2)
 	self.Y = (screenSize.Y / 2) - (size.Y / 2)
+	self.Size = size
 }
 
 func (self *Menu) Update() {
@@ -35,14 +34,13 @@ func (self *Menu) Update() {
 		self.ImageAlpha -= MenuFadeOutSpeed
 		if self.ImageAlpha < 0 {
 			self.ImageAlpha = 0
-			gml.InstanceDestroy(self)
 		}
 		return
 	}
 	self.IsHoveringOnMenu = self.CollisionPoint(gml.MousePosition())
 	if gml.MouseCheckPressed(gml.MbLeft) &&
 		self.IsHoveringOnMenu {
-		inst, ok := gml.InstanceGet(self.Player).(*Worm)
+		inst, ok := gml.InstanceGet(Global.Player).(*Worm)
 		if !ok {
 			panic("Cannot find Worm")
 		}
@@ -78,7 +76,7 @@ func (self *Menu) Draw() {
 		if self.IsHoveringOnMenu {
 			frame = 1
 		}
-		gml.DrawSpriteAlpha(self.SpriteIndex(), frame, self.X, self.Y, self.ImageAlpha)
+		gml.DrawSpriteAlpha(SprPlayButton, frame, self.X, self.Y, self.ImageAlpha)
 	}
 
 	// Draw credits
@@ -89,8 +87,4 @@ func (self *Menu) Draw() {
 		gml.DrawTextColorAlpha(x-1, y, CreditText, color.Black, self.ImageAlpha)
 		gml.DrawTextColorAlpha(x, y+1, CreditText, color.White, self.ImageAlpha)
 	}
-	//draw_set_color(c_black)
-	//draw_text(text_x-1, display_get_gui_height()-35, string_hash_to_newline(text_str))
-	//draw_set_color(c_white)
-	//draw_text(text_x, display_get_gui_height()-34, string_hash_to_newline(text_str))
 }

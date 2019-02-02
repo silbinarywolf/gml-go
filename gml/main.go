@@ -14,31 +14,39 @@ import (
 )
 
 type GameSettings struct {
-	GameStart    func()
-	GameUpdate   func()
 	WindowTitle  string
 	WindowWidth  float64
 	WindowHeight float64
 	WindowScale  float64
 
+	// Used for tests only
 	updateCallback func() bool
 }
 
-var gGameSettings GameSettings
+const (
+	defaultWindowWidth  = 1024
+	defaultWindowHeight = 768
+)
 
-func (gameSettings *GameSettings) setup() {
+var (
+	gController   gameController
+	gGameSettings GameSettings
+)
+
+func setup(controller gameController, gameSettings *GameSettings) {
 	// Setup defaults
 	if gameSettings.WindowWidth == 0 {
-		gameSettings.WindowWidth = 1024
+		gameSettings.WindowWidth = defaultWindowWidth
 	}
 	if gameSettings.WindowHeight == 0 {
-		gameSettings.WindowScale = 768
+		gameSettings.WindowHeight = defaultWindowHeight
 	}
 	if gameSettings.WindowScale == 0 {
 		gameSettings.WindowScale = 1
 	}
 
-	// Copy settings
+	// Copy controller and settings
+	gController = controller
 	gGameSettings = *gameSettings
 
 	// Initialize
@@ -54,7 +62,7 @@ func (gameSettings *GameSettings) setup() {
 	SetMaxTPS(dt.DefaultMaxTPS)
 
 	// Bootup game
-	gGameSettings.GameStart()
+	controller.GameStart()
 }
 
 // MaxTPS returns the current maximum TPS.
@@ -85,7 +93,7 @@ func DeltaTime() float64 {
 
 // TestBootstrap the game to give control over continuing / stopping execution per-frame
 // this method is for additional control when testing
-func TestBootstrap(gameSettings GameSettings, updateCallback func() bool) {
+func TestBootstrap(controller gameController, gameSettings GameSettings, updateCallback func() bool) {
 	// Set asset directory relative to the test code file path
 	// for `go test` support
 	_, filename, _, _ := runtime.Caller(1)
@@ -93,7 +101,7 @@ func TestBootstrap(gameSettings GameSettings, updateCallback func() bool) {
 	file.SetAssetDir(dir)
 
 	gameSettings.updateCallback = updateCallback
-	gameSettings.setup()
+	setup(controller, &gameSettings)
 
 	// NOTE(Jake): 2018-12-30
 	// We currently run the update loop as fast as possible as
@@ -111,9 +119,9 @@ func TestBootstrap(gameSettings GameSettings, updateCallback func() bool) {
 }
 
 // Run
-func Run(gameSettings GameSettings) {
+func Run(controller gameController, gameSettings GameSettings) {
 	// Setup defaults
-	gameSettings.setup()
+	setup(controller, &gameSettings)
 	run(gameSettings)
 }
 
@@ -127,13 +135,15 @@ func update() error {
 
 	switch debugMenuID {
 	case debugMenuNone:
-		if gGameSettings.GameUpdate == nil {
-			// Default to simple Update/Draw()
-			Update()
-			gState.draw()
-		} else {
-			gGameSettings.GameUpdate()
-		}
+		// Update
+		gController.GamePreUpdate()
+		gState.update()
+		gController.GamePostUpdate()
+
+		// Draw
+		gController.GamePreDraw()
+		gState.draw()
+		gController.GamePostDraw()
 	case debugMenuAnimationEditor:
 		//debugMenuRoomEditor,
 		cameraSetActive(0)
@@ -180,13 +190,4 @@ func WindowHeight() float64 {
 
 func WindowScale() float64 {
 	return gGameSettings.WindowScale
-}
-
-// Update runs the game logic, this includes object Update methods, room animation updates
-// and more
-func Update() {
-	cameraSetActive(0)
-	defer cameraClearActive()
-
-	gState.update()
 }

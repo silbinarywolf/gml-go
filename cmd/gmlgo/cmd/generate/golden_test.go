@@ -38,7 +38,11 @@ package test
 
 import (
 	"github.com/silbinarywolf/gml-go/gml"
+	"github.com/silbinarywolf/gml-go/gml/audio"
 )
+
+// Silence errors if audio is unused
+var _ = audio.InitSoundGeneratedData
 
 const (
 	ObjGameObjectA gml.ObjectIndex = 1
@@ -85,7 +89,11 @@ package test
 
 import (
 	"github.com/silbinarywolf/gml-go/gml"
+	"github.com/silbinarywolf/gml-go/gml/audio"
 )
+
+// Silence errors if audio is unused
+var _ = audio.InitSoundGeneratedData
 
 const (
 	ObjGameObject  gml.ObjectIndex = 1
@@ -140,7 +148,11 @@ package test
 
 import (
 	"github.com/silbinarywolf/gml-go/gml"
+	"github.com/silbinarywolf/gml-go/gml/audio"
 )
+
+// Silence errors if audio is unused
+var _ = audio.InitSoundGeneratedData
 
 const (
 	ObjGameObject      gml.ObjectIndex = 1

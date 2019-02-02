@@ -11,8 +11,7 @@ import (
 
 func TestGame(t *testing.T) {
 	frames := 0
-	gml.TestBootstrap(gml.GameSettings{
-		GameStart:    game.GameStart,
+	gml.TestBootstrap(game.Global, gml.GameSettings{
 		WindowWidth:  game.WindowWidth,
 		WindowHeight: game.WindowHeight,
 		WindowTitle:  game.WindowTitle,

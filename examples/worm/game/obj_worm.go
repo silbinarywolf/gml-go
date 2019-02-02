@@ -1,7 +1,6 @@
 package game
 
 import (
-	"image/color"
 	"math"
 
 	"github.com/silbinarywolf/gml-go/examples/worm/game/input"
@@ -30,7 +29,6 @@ type Worm struct {
 	LastBodyPart gml.InstanceIndex
 	Dead         bool
 	InAir        bool
-	//DisableInput bool
 }
 
 func (self *Worm) Create() {
@@ -68,40 +66,6 @@ func (self *Worm) TriggerDeath() {
 		// Leap into air at death
 		self.Speed.Y = WormLeapPower
 		self.Gravity = WormDieGravity
-	}
-}
-
-func (self *Worm) Draw() {
-	// Draw self
-	self.Object.Draw()
-
-	// Draw score
-	{
-		var scoreIndexes [8]float64
-
-		// Split score into seperate numbers
-		i := 0
-		score := self.Score
-		fontWidth := gml.SpriteSize(SprScoreFont).X
-		textWidth := 0.0
-		for score >= 1 {
-			index := math.Mod(score, 10)
-			score = math.Floor(score / 10)
-			scoreIndexes[i] = index
-			i++
-			textWidth += fontWidth
-		}
-
-		// Draw numbers in correct order
-		x := (gml.CameraGetViewSize(0).X / 2) - (textWidth / 2)
-		y := 32.0
-		for i > 0 {
-			i--
-			index := scoreIndexes[i]
-			gml.DrawSpriteColor(SprScoreFont, index, x-1, y, color.Black)
-			gml.DrawSprite(SprScoreFont, index, x, y+1)
-			x += fontWidth
-		}
 	}
 }
 

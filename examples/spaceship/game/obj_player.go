@@ -44,5 +44,5 @@ func (self *Player) Update() {
 func (self *Player) Draw() {
 	self.Object.Draw()
 	gml.DrawTextF(0, 32, "Score: %v", self.Score)
-	gml.DrawTextF(0, 64, "Ships Sighted: %v", global.ShipsSighted)
+	gml.DrawTextF(0, 64, "Ships Sighted: %v", Global.ShipsSighted)
 }

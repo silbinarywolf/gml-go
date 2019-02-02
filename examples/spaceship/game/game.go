@@ -2,11 +2,18 @@ package game
 
 import "github.com/silbinarywolf/gml-go/gml"
 
-func GameStart() {
+var Global = new(GameController)
+
+type GameController struct {
+	gml.Controller
+	ShipsSighted int
+}
+
+func (_ *GameController) GameStart() {
 	gml.DrawSetFont(FntDefault)
 
 	// Setup global variables
-	global.ShipsSighted = 0
+	Global.ShipsSighted = 0
 
 	// Create new empty room
 	roomInstanceIndex := gml.RoomInstanceNew()

@@ -317,6 +317,9 @@ import (
 	"github.com/silbinarywolf/gml-go/gml"
 	"github.com/silbinarywolf/gml-go/gml/audio"
 )
+
+// Silence errors if audio is unused
+var _ = audio.InitSoundGeneratedData
 `)
 	g.generateObjectIndexes(structsUsingGMLObject)
 	g.generateObjectMetaAndMethods(structsUsingGMLObject)

@@ -6,9 +6,3 @@ const (
 	WindowHeight = 480
 	WindowScale  = 1
 )
-
-var global Globals
-
-type Globals struct {
-	ShipsSighted int
-}

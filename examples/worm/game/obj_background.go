@@ -79,6 +79,4 @@ func (self *Background) Draw() {
 		gml.DrawSprite(SprFrontGrass, 0, self.FrontGrassOffset+(size.X*2), roomSize.Y-size.Y)
 		gml.DrawSprite(SprFrontGrass, 0, self.FrontGrassOffset+(size.X*3), roomSize.Y-size.Y)
 	}
-
-	gml.DrawTextF(32, 32, "%s", gml.FrameUsage())
 }
