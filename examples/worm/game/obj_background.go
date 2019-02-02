@@ -11,6 +11,7 @@ const (
 
 type Background struct {
 	gml.Object
+	IsPaused         bool
 	BackCityOffset   float64
 	FrontCityOffset  float64
 	FrontGrassOffset float64
@@ -21,6 +22,10 @@ func (self *Background) Create() {
 }
 
 func (self *Background) Update() {
+	if Global.HasWormStopped() {
+		return
+	}
+
 	// Update back city
 	{
 		size := gml.SpriteSize(SprBackCity)

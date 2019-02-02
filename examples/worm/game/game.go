@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/silbinarywolf/gml-go/gml"
+	"github.com/silbinarywolf/gml-go/gml/audio"
 )
 
 var Global = new(GameController)
@@ -12,9 +13,19 @@ var Global = new(GameController)
 type GameController struct {
 	gml.Controller
 	Player        gml.InstanceIndex
+	MusicPlaying  audio.SoundIndex
 	Score         int
 	SoundDisabled bool
 	MusicDisabled bool
+}
+
+func (*GameController) HasWormStopped() bool {
+	if inst, ok := gml.InstanceGet(Global.Player).(*Worm); ok {
+		if inst.Dead {
+			return true
+		}
+	}
+	return false
 }
 
 func (*GameController) GameStart() {
@@ -41,8 +52,13 @@ func (*GameController) GameStart() {
 	Global.Player = playerInst.InstanceIndex()
 
 	// Play song
-	SndSunnyFields.Play()
+	Global.MusicPlaying = SndSunnyFields
+	Global.MusicPlaying.Play()
 }
+
+//func (*GameController) GameRestart() {
+//	Global.MusicPlaying.Stop()
+//}
 
 func (*GameController) GamePostDraw() {
 	// Draw frame usage

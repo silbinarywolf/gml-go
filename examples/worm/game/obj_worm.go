@@ -59,9 +59,10 @@ func (self *Worm) TriggerDeath() {
 		self.Dead = true
 
 		// Sounds
-		SndSunnyFields.Stop()
+		Global.MusicPlaying.Stop()
+		Global.MusicPlaying = SndGameover
 		SndWormDie.Play()
-		SndGameover.Play()
+		Global.MusicPlaying.Play()
 
 		// Leap into air at death
 		self.Speed.Y = WormLeapPower
