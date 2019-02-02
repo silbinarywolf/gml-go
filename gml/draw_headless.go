@@ -18,7 +18,13 @@ func DrawSetGUI(guiMode bool) {
 func DrawSprite(spr sprite.SpriteIndex, subimage float64, x, y float64) {
 }
 
+func DrawSpriteAlpha(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64, alpha float64) {
+}
+
 func DrawSpriteScaled(spr sprite.SpriteIndex, subimage float64, x, y float64, scale Vec) {
+}
+
+func DrawSpriteColor(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64, col color.Color) {
 }
 
 func DrawSpriteExt(spr sprite.SpriteIndex, subimage float64, x, y float64, scale Vec, alpha float64) {
@@ -31,6 +37,9 @@ func DrawRectangleBorder(x, y, w, h float64, color color.Color, borderSize float
 }
 
 func DrawText(x, y float64, message string) {
+}
+
+func DrawTextColorAlpha(x, y float64, message string, col color.Color, alpha float64) {
 }
 
 func DrawTextColor(x, y float64, message string, col color.Color) {
