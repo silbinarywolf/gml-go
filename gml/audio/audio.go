@@ -6,10 +6,13 @@ import (
 	"github.com/hajimehoshi/ebiten/audio"
 	"github.com/hajimehoshi/ebiten/audio/mp3"
 	"github.com/hajimehoshi/ebiten/audio/wav"
-	"github.com/silbinarywolf/gml-go/gml/internal/file"
 )
 
 type SoundIndex int32
+
+const (
+	SoundDirectoryBase = "sound"
+)
 
 // Play will play a sound
 func (index SoundIndex) Play() {
@@ -31,8 +34,14 @@ func (index SoundIndex) Stop() {
 }
 
 const (
-	sampleRate         = 48000
-	SoundDirectoryBase = "sound"
+	sampleRate = 48000
+)
+
+type soundKind int32
+
+const (
+	soundKindWAV soundKind = 1
+	soundKindMP3 soundKind = 2
 )
 
 var (
@@ -50,44 +59,51 @@ var (
 )
 
 type sound struct {
-	data        io.ReadCloser
 	audioPlayer *audio.Player
+}
+
+type soundAsset struct {
+	kind soundKind
+	data []byte
 }
 
 func loadSound(index SoundIndex) {
 	name := soundManager.assetIndexToName[index]
-	// todo(Jake): 2019-02-02
-	// Think about how to know about the type of sound file before hand
-	// either pack it into a zip/asset packer or maybe use "gmlgo generate" to
-	// determine the type.
-	path := file.AssetDirectory + "/" + SoundDirectoryBase + "/" + name + "/sound.wav"
-	f, err := file.OpenFile(path)
-	sound := sound{}
-	if err != nil {
-		// Fallback to MP3
-		path := file.AssetDirectory + "/" + SoundDirectoryBase + "/" + name + "/sound.mp3"
-		f, err = file.OpenFile(path)
-		if err != nil {
-			panic(err)
-		}
-		d, err := mp3.Decode(audioContext, f)
-		if err != nil {
-			panic(err)
-		}
-		sound.data = d
-	} else {
-		// Load WAV
-		d, err := wav.Decode(audioContext, f)
-		if err != nil {
-			panic(err)
-		}
-		sound.data = d
+
+	soundAsset := debugLoadAndWriteSoundAsset(name)
+	if soundAsset == nil {
+		panic("missing sound: " + name)
 	}
-	sound.audioPlayer, err = audio.NewPlayer(audioContext, sound.data)
+
+	var soundSteam io.ReadCloser
+	soundData := audio.BytesReadSeekCloser(soundAsset.data)
+	switch soundAsset.kind {
+	case soundKindWAV:
+		d, err := wav.Decode(audioContext, soundData)
+		if err != nil {
+			panic(err)
+		}
+		soundSteam = d
+	case soundKindMP3:
+		d, err := mp3.Decode(audioContext, soundData)
+		if err != nil {
+			panic(err)
+		}
+		soundSteam = d
+	default:
+		panic("invalid sound type")
+	}
+	if soundSteam == nil {
+		panic("soundStream is nil")
+	}
+	var err error
+	audioPlayer, err := audio.NewPlayer(audioContext, soundSteam)
 	if err != nil {
 		panic(err)
 	}
-	soundManager.assetList[index] = sound
+	soundManager.assetList[index] = sound{
+		audioPlayer: audioPlayer,
+	}
 }
 
 // InitAndLoadAllSprites is used by gmlgo when initializing the engine
