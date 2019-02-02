@@ -5,6 +5,7 @@ import (
 	"runtime"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/silbinarywolf/gml-go/gml/audio"
 	"github.com/silbinarywolf/gml-go/gml/internal/dt"
 	"github.com/silbinarywolf/gml-go/gml/internal/file"
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
@@ -40,10 +41,13 @@ func (gameSettings *GameSettings) setup() {
 	// Copy settings
 	gGameSettings = *gameSettings
 
-	// Initialize!
+	// Initialize
 	file.InitAssetDir()
-	sprite.LoadAllSprites()
 	gCameraManager.reset()
+
+	// Load all assets
+	audio.InitAndLoadAllSprites()
+	sprite.LoadAllSprites()
 
 	// Setup TPS
 	SetDesignedTPS(dt.DefaultMaxTPS)

@@ -315,6 +315,7 @@ func (g *Generator) generate() {
 	g.Printf(`
 import (
 	"github.com/silbinarywolf/gml-go/gml"
+	"github.com/silbinarywolf/gml-go/gml/audio"
 )
 `)
 	g.generateObjectIndexes(structsUsingGMLObject)
@@ -332,7 +333,8 @@ func (g *Generator) generateAssets(dir string) {
 	for _, f := range files {
 		switch name := f.Name(); name {
 		case "font",
-			"sprite":
+			"sprite",
+			"sound":
 			files, err := ioutil.ReadDir(filepath.Join(assetDir, name))
 			if err != nil {
 				log.Fatal(err)
@@ -390,9 +392,9 @@ func (g *Generator) generateAssets(dir string) {
 		case "sprite":
 			prefix = "Spr"
 			gotype = "gml.SpriteIndex"
-		/*case "layer":
-		prefix = "Lay"
-		gotype = "gml.LayerIndex"*/
+		case "sound":
+			prefix = "Snd"
+			gotype = "audio.SoundIndex"
 		default:
 			panic("Unimplemented asset kind: " + assetKind.Name)
 		}
@@ -433,6 +435,13 @@ func init() {
 			g.Printf(`
 func init() {
 	gml.InitSpriteGeneratedData(_gen_Spr_index_to_name, _gen_Spr_name_to_index)
+}
+
+`)
+		case "sound":
+			g.Printf(`
+func init() {
+	audio.InitSoundGeneratedData(_gen_Snd_index_to_name, _gen_Snd_name_to_index)
 }
 
 `)

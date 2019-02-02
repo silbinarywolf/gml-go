@@ -33,4 +33,7 @@ func GameStart() {
 	playerInst := gml.InstanceCreate(0, 0, roomInstanceIndex, ObjWorm).(*Worm)
 
 	menuInst.Player = playerInst.InstanceIndex()
+
+	// Play song
+	SndSunnyFields.Play()
 }

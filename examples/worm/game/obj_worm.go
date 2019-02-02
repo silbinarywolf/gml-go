@@ -30,7 +30,7 @@ type Worm struct {
 	LastBodyPart gml.InstanceIndex
 	Dead         bool
 	InAir        bool
-	DisableInput bool
+	//DisableInput bool
 }
 
 func (self *Worm) Create() {
@@ -59,6 +59,11 @@ func (self *Worm) TriggerDeath() {
 	if !self.Dead {
 		self.SetSprite(SprWormHeadDead)
 		self.Dead = true
+
+		// Sounds
+		SndSunnyFields.Stop()
+		SndWormDie.Play()
+		SndGameover.Play()
 
 		// Leap into air at death
 		self.Speed.Y = WormLeapPower
@@ -106,9 +111,9 @@ func (self *Worm) Update() {
 	if self.DragTimer.Repeat(1) {
 		self.YDrag = self.Y
 	}
-	if self.inputDisabledTimer.Tick() {
-		self.DisableInput = false
-	}
+	//if self.inputDisabledTimer.Tick() {
+	//	self.DisableInput = false
+	//}
 
 	if self.Dead {
 		return
@@ -122,14 +127,14 @@ func (self *Worm) Update() {
 
 	// Jump
 	{
-		if !self.DisableInput &&
-			input.JumpPressed() &&
+		if input.JumpPressed() &&
 			!self.InAir &&
 			self.Top() > 0 {
 			self.Y = self.Start.Y
 			self.Speed.Y = WormLeapPower
 			self.SinCounter = 0
 			self.InAir = true
+			SndPlay.Play()
 		}
 	}
 
