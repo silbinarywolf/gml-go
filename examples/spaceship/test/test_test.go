@@ -24,7 +24,7 @@ func TestGame(t *testing.T) {
 			// todo(Jake): 2018-12-29 -
 			// Replace this hardcoded #1 with the ability to query by
 			// object type (just use the first player found / expect 1 player alive)
-			if _, ok := gml.InstanceGet(1).(*game.Player); !ok {
+			if _, ok := gml.InstanceIndex(1).Get().(*game.Player); !ok {
 				t.Errorf("Expected Player ship to still be alive after %d frames.", frames)
 			}
 			return false
