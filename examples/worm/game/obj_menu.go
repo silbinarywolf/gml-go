@@ -22,7 +22,7 @@ func (self *Menu) Create() {
 	self.SetDepth(DepthMenu)
 	self.ImageAlpha = 1.0
 
-	size := gml.SpriteSize(SprPlayButton)
+	size := SprPlayButton.Size()
 	screenSize := gml.CameraGetViewSize(0)
 	self.X = (screenSize.X / 2) - (size.X / 2)
 	self.Y = (screenSize.Y / 2) - (size.Y / 2)
@@ -59,16 +59,15 @@ func (self *Menu) Draw() {
 	// Draw sound icon
 	{
 		spr := SprSoundIcon
-		size := gml.SpriteSize(spr)
 		gml.DrawSpriteAlpha(spr, 0, x, y, self.ImageAlpha)
-		x += size.X
+		x += spr.Size().X
 	}
 
 	// Draw music icon
 	gml.DrawSpriteAlpha(SprMusicIcon, 0, x+4, y, self.ImageAlpha)
 
 	// Draw title
-	gml.DrawSpriteAlpha(SprTitle, 0, (screenSize.X/2)-(gml.SpriteSize(SprTitle).X/2), 20, self.ImageAlpha)
+	gml.DrawSpriteAlpha(SprTitle, 0, (screenSize.X/2)-(SprTitle.Size().X/2), 20, self.ImageAlpha)
 
 	// Draw button
 	{

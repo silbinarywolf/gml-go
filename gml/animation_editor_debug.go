@@ -159,7 +159,7 @@ func animationEditorUpdate() {
 	}
 
 	// Change frame viewing
-	if spr := editor.spriteViewing.SpriteIndex(); spr.IsValid() {
+	if spr := editor.spriteViewing.SpriteIndex(); spr != 0 {
 		imageIndex := math.Floor(editor.spriteViewing.ImageIndex())
 		if KeyboardCheckPressed(VkLeft) {
 			imageIndex -= 1
@@ -180,7 +180,7 @@ func animationEditorUpdate() {
 	//
 	var collisionMask *sprite.CollisionMask
 	var inheritCollisionMask *sprite.CollisionMask
-	if spriteIndex := editor.spriteViewing.SpriteIndex(); spriteIndex.IsValid() {
+	if spriteIndex := editor.spriteViewing.SpriteIndex(); spriteIndex != 0 {
 		imageIndex := int(math.Floor(editor.spriteViewing.ImageIndex()))
 		collisionMask = sprite.GetCollisionMask(spriteIndex, imageIndex, 0)
 		switch collisionMask.Kind {
@@ -208,7 +208,7 @@ func animationEditorUpdate() {
 		}
 	}
 
-	if spriteIndex := editor.spriteViewing.SpriteIndex(); spriteIndex.IsValid() {
+	if spriteIndex := editor.spriteViewing.SpriteIndex(); spriteIndex != 0 {
 		size := spriteIndex.Size()
 		pos := geom.Vec{
 			X: float64(WindowWidth()/2) - (float64(size.X) / 2),
@@ -364,7 +364,7 @@ func animationEditorUpdate() {
 		}
 	}
 
-	if spriteIndex := editor.spriteViewing.SpriteIndex(); spriteIndex.IsValid() {
+	if spriteIndex := editor.spriteViewing.SpriteIndex(); spriteIndex != 0 {
 		basePos := geom.Vec{(float64(WindowWidth()) / 2) - 140, float64(WindowHeight())}
 		basePos.Y -= 210
 

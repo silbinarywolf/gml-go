@@ -69,7 +69,7 @@ FileWatchLoop:
 		if spriteIndex == SprUndefined {
 			continue
 		}
-		spr := sprite(spriteIndex)
+		spr := spriteIndex.get()
 		newSprData := loadSprite(spriteName)
 		*spr = *newSprData
 	}
@@ -77,7 +77,7 @@ FileWatchLoop:
 
 // DebugWriteSpriteConfig is called by the animation editor
 func DebugWriteSpriteConfig(spriteIndex SpriteIndex) error {
-	spr := sprite(spriteIndex)
+	spr := spriteIndex.get()
 	name := spr.Name()
 	config := loadConfig(name)
 

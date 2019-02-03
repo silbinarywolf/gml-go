@@ -28,7 +28,7 @@ func (self *Background) Update() {
 
 	// Update back city
 	{
-		size := gml.SpriteSize(SprBackCity)
+		size := SprBackCity.Size()
 		self.BackCityOffset += BackCityHspeed * gml.DeltaTime()
 		if self.BackCityOffset < -size.X {
 			self.BackCityOffset += size.X
@@ -37,7 +37,7 @@ func (self *Background) Update() {
 
 	// Update front city
 	{
-		size := gml.SpriteSize(SprFrontCity)
+		size := SprFrontCity.Size()
 		self.FrontCityOffset += FrontCityHspeed * gml.DeltaTime()
 		if self.FrontCityOffset < -size.X {
 			self.FrontCityOffset += size.X
@@ -46,7 +46,7 @@ func (self *Background) Update() {
 
 	// Update grass
 	{
-		size := gml.SpriteSize(SprFrontGrass)
+		size := SprFrontGrass.Size()
 		self.FrontGrassOffset += -WallSpeed()
 		if self.FrontGrassOffset < -size.X {
 			self.FrontGrassOffset += size.X
@@ -62,7 +62,7 @@ func (self *Background) Draw() {
 
 	// Draw back city
 	{
-		size := gml.SpriteSize(SprBackCity)
+		size := SprBackCity.Size()
 		gml.DrawSprite(SprBackCity, 0, self.BackCityOffset+15, 350)
 		gml.DrawSprite(SprBackCity, 0, self.BackCityOffset+15+size.X, 350)
 		gml.DrawSprite(SprBackCity, 0, self.BackCityOffset+15+(size.X*2), 350)
@@ -70,7 +70,7 @@ func (self *Background) Draw() {
 
 	// Draw front city
 	{
-		size := gml.SpriteSize(SprFrontCity)
+		size := SprFrontCity.Size()
 		gml.DrawSprite(SprFrontCity, 0, self.FrontCityOffset+15, 350)
 		gml.DrawSprite(SprFrontCity, 0, self.FrontCityOffset+15+size.X, 350)
 		gml.DrawSprite(SprFrontCity, 0, self.FrontCityOffset+15+(size.X*2), 350)
@@ -78,7 +78,7 @@ func (self *Background) Draw() {
 
 	// Draw grass
 	{
-		size := gml.SpriteSize(SprFrontGrass)
+		size := SprFrontGrass.Size()
 		gml.DrawSprite(SprFrontGrass, 0, self.FrontGrassOffset, roomSize.Y-size.Y)
 		gml.DrawSprite(SprFrontGrass, 0, self.FrontGrassOffset+size.X, roomSize.Y-size.Y)
 		gml.DrawSprite(SprFrontGrass, 0, self.FrontGrassOffset+(size.X*2), roomSize.Y-size.Y)

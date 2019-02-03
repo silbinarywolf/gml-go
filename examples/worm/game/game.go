@@ -71,7 +71,7 @@ func (*GameController) GamePostDraw() {
 		// Split score into seperate numbers
 		i := 0
 		score := playerInst.Score
-		fontWidth := gml.SpriteSize(SprScoreFont).X
+		fontWidth := SprScoreFont.Size().X
 		textWidth := 0.0
 		for score >= 1 {
 			index := math.Mod(score, 10)

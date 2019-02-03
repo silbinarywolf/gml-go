@@ -18,8 +18,3 @@ func SpriteLoad(index SpriteIndex) SpriteIndex {
 	sprite.SpriteLoad(index)
 	return index
 }
-
-// SpriteSize will return the width and height of the sprite
-func SpriteSize(index SpriteIndex) Vec {
-	return sprite.SpriteSize(index)
-}

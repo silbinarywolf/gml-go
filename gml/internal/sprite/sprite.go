@@ -12,13 +12,14 @@ const SprUndefined SpriteIndex = 0
 
 type Sprite struct {
 	name       string
+	isLoaded   bool
 	frames     []SpriteFrame
 	size       geom.Vec
 	imageSpeed float64
 }
 
-func (spr *Sprite) Name() string   { return spr.name }
-func (spr *Sprite) isLoaded() bool { return len(spr.frames) > 0 }
+func (spr *Sprite) Name() string { return spr.name }
+
 func (spr *Sprite) rect() geom.Rect {
 	return geom.Rect{
 		Vec:  geom.Vec{},
@@ -28,16 +29,41 @@ func (spr *Sprite) rect() geom.Rect {
 
 type SpriteIndex int32
 
-func (spriteIndex SpriteIndex) Name() string   { return gSpriteManager.assetList[spriteIndex].name }
-func (spriteIndex SpriteIndex) Size() geom.Vec { return gSpriteManager.assetList[spriteIndex].size }
+func (spriteIndex SpriteIndex) Name() string {
+	sprite := &gSpriteManager.assetList[spriteIndex]
+	if !sprite.isLoaded {
+		panic("sprite is not loaded, cannot retrieve name")
+	}
+	return sprite.name
+}
+
+func (spriteIndex SpriteIndex) Size() geom.Vec {
+	sprite := &gSpriteManager.assetList[spriteIndex]
+	if !sprite.isLoaded {
+		panic("sprite is not loaded, cannot retrieve size")
+	}
+	return sprite.size
+}
+
 func (spriteIndex SpriteIndex) ImageSpeed() float64 {
-	return gSpriteManager.assetList[spriteIndex].imageSpeed
+	sprite := &gSpriteManager.assetList[spriteIndex]
+	if !sprite.isLoaded {
+		panic("sprite is not loaded, cannot retrieve imageSpeed")
+	}
+	return sprite.imageSpeed
 }
-func (spriteIndex SpriteIndex) IsValid() bool {
-	return spriteIndex > 0
+
+func (spriteIndex SpriteIndex) isLoaded() bool {
+	sprite := &gSpriteManager.assetList[spriteIndex]
+	return sprite.isLoaded
 }
-func (spriteIndex SpriteIndex) IsLoaded() bool {
-	return len(gSpriteManager.assetList[spriteIndex].frames) > 0
+
+func (spriteIndex SpriteIndex) get() *Sprite {
+	sprite := &gSpriteManager.assetList[spriteIndex]
+	if !sprite.isLoaded {
+		panic("sprite is not loaded")
+	}
+	return sprite
 }
 
 /*func (spr *Sprite) GetFrame(index int) *SpriteFrame {
@@ -46,6 +72,7 @@ func (spriteIndex SpriteIndex) IsLoaded() bool {
 
 func newSprite(name string, frames []SpriteFrame, config spriteConfig) *Sprite {
 	spr := new(Sprite)
+	spr.isLoaded = true
 	spr.name = name
 	spr.frames = frames
 	spr.imageSpeed = config.ImageSpeed

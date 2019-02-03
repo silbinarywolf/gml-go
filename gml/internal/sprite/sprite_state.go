@@ -12,7 +12,7 @@ type SpriteState struct {
 }
 
 func GetCollisionMask(spriteIndex SpriteIndex, imageIndex int, kind int) *CollisionMask {
-	spr := sprite(spriteIndex)
+	spr := spriteIndex.get()
 	if spr == nil {
 		return nil
 	}
@@ -26,20 +26,19 @@ func (state *SpriteState) ImageSpeed() float64 {
 	if state.spriteIndex == SprUndefined {
 		return 0
 	}
-	spr := sprite(state.spriteIndex)
-	return spr.imageSpeed
+	return state.spriteIndex.ImageSpeed()
 }
 func (state *SpriteState) ImageNumber() float64 {
 	if state.spriteIndex == SprUndefined {
 		return 0
 	}
-	spr := sprite(state.spriteIndex)
+	spr := state.spriteIndex.get()
 	return float64(len(spr.frames))
 }
 
 func (state *SpriteState) SetSprite(spriteIndex SpriteIndex) {
 	if state.spriteIndex != spriteIndex {
-		if !spriteIndex.IsLoaded() {
+		if !spriteIndex.isLoaded() {
 			SpriteLoad(spriteIndex)
 		}
 		state.spriteIndex = spriteIndex
