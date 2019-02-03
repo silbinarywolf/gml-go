@@ -3,6 +3,8 @@
 package audio
 
 import (
+	"bytes"
+	"encoding/gob"
 	"errors"
 	"io/ioutil"
 
@@ -31,8 +33,22 @@ func debugLoadAndWriteSoundAsset(name string) *soundAsset {
 	}
 	fileData.Close()
 
-	return &soundAsset{
-		kind: kind,
-		data: data,
+	//
+	result := &soundAsset{
+		Kind: kind,
+		Data: data,
 	}
+
+	// Write to file
+	{
+		path := file.AssetDirectory + "/" + SoundDirectoryBase + "/" + name + ".data"
+		var data bytes.Buffer
+		gob.NewEncoder(&data).Encode(result)
+		err := ioutil.WriteFile(path, data.Bytes(), 0644)
+		if err != nil {
+			panic(errors.New("Unable to write sprite out to file: " + path))
+		}
+	}
+
+	return result
 }

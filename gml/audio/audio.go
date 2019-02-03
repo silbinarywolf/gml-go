@@ -63,8 +63,8 @@ type sound struct {
 }
 
 type soundAsset struct {
-	kind soundKind
-	data []byte
+	Kind soundKind
+	Data []byte
 }
 
 func loadSound(index SoundIndex) {
@@ -76,8 +76,8 @@ func loadSound(index SoundIndex) {
 	}
 
 	var soundSteam io.ReadCloser
-	soundData := audio.BytesReadSeekCloser(soundAsset.data)
-	switch soundAsset.kind {
+	soundData := audio.BytesReadSeekCloser(soundAsset.Data)
+	switch soundAsset.Kind {
 	case soundKindWAV:
 		d, err := wav.Decode(audioContext, soundData)
 		if err != nil {
@@ -106,8 +106,8 @@ func loadSound(index SoundIndex) {
 	}
 }
 
-// InitAndLoadAllSprites is used by gmlgo when initializing the engine
-func InitAndLoadAllSprites() error {
+// InitAndLoadAllSounds is used by gmlgo when initializing the engine
+func InitAndLoadAllSounds() error {
 	var err error
 	audioContext, err = audio.NewContext(sampleRate)
 	if err != nil {

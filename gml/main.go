@@ -54,7 +54,7 @@ func setup(controller gameController, gameSettings *GameSettings) {
 	gCameraManager.reset()
 
 	// Load all assets
-	audio.InitAndLoadAllSprites()
+	audio.InitAndLoadAllSounds()
 	sprite.LoadAllSprites()
 
 	// Setup TPS
