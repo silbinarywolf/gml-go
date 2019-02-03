@@ -162,6 +162,28 @@ func (manager *roomInstanceManager) InstanceCreate(position geom.Vec, objectInde
 	return inst
 }
 
+func WithAll(instType collisionObject) []InstanceIndex {
+	inst := instType.BaseObject()
+	room := roomGetInstance(inst.BaseObject().RoomInstanceIndex())
+	if room == nil {
+		panic("RoomInstance this object belongs to has been destroyed")
+	}
+	var list []InstanceIndex
+	for i := 0; i < len(room.instanceLayers); i++ {
+		for _, otherIndex := range room.instanceLayers[i].instances {
+			other := otherIndex.getBaseObject()
+			if other == nil {
+				continue
+			}
+			list = append(list, otherIndex)
+		}
+	}
+	if len(list) == 0 {
+		return nil
+	}
+	return list
+}
+
 /*
 func instanceRemove(inst ObjectType) {
 	baseObj := inst.BaseObject()

@@ -11,7 +11,15 @@ func WallSpeed() float64 {
 
 type Wall struct {
 	gml.Object
+
+	// Special flag where wall is jutting into the ground
+	// but not enough that the player should die.
 	DontKillPlayerIfInDirt bool
+
+	// Special flag for when you reset the game, walls that
+	// existed from the previous game will still render on-screen
+	// but they won't kill you
+	DontKillPlayer bool
 }
 
 func (self *Wall) Create() {

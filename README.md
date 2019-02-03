@@ -21,22 +21,8 @@ go get github.com/silbinarywolf/gml-go
 ## Documentation
 
 * TODO when this library has been refactored
+* [Design](DESIGN.md)
 * [License](LICENSE.md)
-
-# Rough Roadmap
-
-Below are some rough ideas on where I want this project to go. 
-This project is mostly for fun and I have no intentions to get anything done unless public interest is shown.
-
-* Implement various frequently used Game Maker functions, ideally with the same names / parameter count.
-* Have tutorials for using VSCode and/or Sublime Text.
-	- Getting started, Hello world
-	 	- This should be easy enough for someone with no knowledge of programming to follow.
-		- This should cover installing "gofmt" / "goimports"
-	- Transitioning from GML to Golang, major / minor differences
-* Add build tools to help with:
-	- [x] Auto generating entity IDs and the like.
-	- Packing assets into texture atlases
 
 ## Credits
 

@@ -33,21 +33,19 @@ func (self *Menu) Update() {
 		self.ImageAlpha -= MenuFadeOutSpeed
 		if self.ImageAlpha < 0 {
 			self.ImageAlpha = 0
+			gml.InstanceDestroy(self)
 		}
 		return
 	}
 	self.IsHoveringOnMenu = self.CollisionPoint(gml.MousePosition())
 	if gml.MouseCheckPressed(gml.MbLeft) &&
 		self.IsHoveringOnMenu {
-		inst, ok := Global.Player.Get().(*Worm)
-		if !ok {
-			panic("Cannot find Worm")
-		}
-		inst.WallSpawner.Reset()
-		//inst.inputDisabledTimer.Set(DesignedMaxTPS * 0.5)
-		//inst.DisableInput = true
 		self.IsFadingAway = true
 	}
+}
+
+func (self *Menu) Destroy() {
+	Global.GameReset()
 }
 
 func (self *Menu) Draw() {

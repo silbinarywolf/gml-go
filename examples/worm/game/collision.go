@@ -16,6 +16,12 @@ func HandleCollisionForWormOrWormPart(self *gml.Object, master *Worm) {
 			// but not enough that the player should die.
 			continue
 		}
+		if inst.DontKillPlayer {
+			// Special case for when you reset the game, walls that
+			// existed from the previous game will still render on-screen
+			// but they won't kill you
+			continue
+		}
 		master.TriggerDeath()
 		break
 	}

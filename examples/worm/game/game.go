@@ -46,6 +46,7 @@ func (*GameController) GameStart() {
 
 	// Create menu
 	gml.InstanceCreate(0, 0, roomInstanceIndex, ObjMenu)
+	//gml.InstanceCreate(0, 0, roomInstanceIndex, ObjMenuGameover)
 
 	// Create player in the center of the room
 	playerInst := gml.InstanceCreate(0, 0, roomInstanceIndex, ObjWorm).(*Worm)
@@ -56,9 +57,36 @@ func (*GameController) GameStart() {
 	Global.MusicPlaying.Play()
 }
 
-//func (*GameController) GameRestart() {
-//	Global.MusicPlaying.Stop()
-//}
+func (*GameController) GameReset() {
+	inst, ok := Global.Player.Get().(*Worm)
+	if !ok {
+		panic("Cannot find Player object to call GameReset")
+	}
+	inst.WallSpawner.Reset()
+	Global.MusicPlaying.Stop()
+
+	// Make walls from previous playthrough become disabled
+	screenSize := gml.CameraGetViewSize(0)
+	for _, id := range gml.WithAll(inst) {
+		inst := id.Get()
+		switch inst := inst.(type) {
+		case *Wall:
+			if inst.X+inst.Size.X > screenSize.X {
+				// Destroy walls that were spawned off-screen
+				gml.InstanceDestroy(inst)
+			}
+			inst.DontKillPlayer = true
+		}
+	}
+
+	if inst.Dead {
+		inst.Vec = inst.Start
+		inst.Y = -140
+		inst.Speed.Y = 0
+		inst.SetSprite(SprWormHead)
+		inst.Dead = false
+	}
+}
 
 func (*GameController) GamePostDraw() {
 	// Draw frame usage

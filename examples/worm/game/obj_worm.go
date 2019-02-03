@@ -55,14 +55,12 @@ func (self *Worm) Create() {
 
 func (self *Worm) TriggerDeath() {
 	if !self.Dead {
+		SndWormDie.Play()
 		self.SetSprite(SprWormHeadDead)
 		self.Dead = true
 
-		// Sounds
-		Global.MusicPlaying.Stop()
-		Global.MusicPlaying = SndGameover
-		SndWormDie.Play()
-		Global.MusicPlaying.Play()
+		// Show game over menu
+		gml.InstanceCreate(0, 0, self.RoomInstanceIndex(), ObjMenuGameover)
 
 		// Leap into air at death
 		self.Speed.Y = WormLeapPower
