@@ -34,7 +34,7 @@ func (self *WormBody) Update() {
 	//
 	{
 		seperationWidth := self.SeperationWidth
-		switch parent := gml.InstanceGet(self.Parent); parent := parent.(type) {
+		switch parent := self.Parent.Get(); parent := parent.(type) {
 		case *Worm:
 			self.X = parent.X - seperationWidth
 			self.Y = parent.YDrag
@@ -67,7 +67,7 @@ func (self *WormBody) Update() {
 		//}
 	}
 
-	master := gml.InstanceGet(self.Master).(*Worm)
+	master := self.Master.Get().(*Worm)
 	if !master.Dead {
 		HandleCollisionForWormOrWormPart(&self.Object, master)
 	}

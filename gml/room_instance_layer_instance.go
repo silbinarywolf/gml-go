@@ -26,20 +26,20 @@ type roomInstanceLayerInstance struct {
 func (layer *roomInstanceLayerInstance) draw() {
 	// Sort by order
 	sort.SliceStable(layer.instances, func(i, j int) bool {
-		a := InstanceGet(layer.instances[i])
+		a := layer.instances[i].getBaseObject()
 		if a == nil {
 			return false
 		}
-		b := InstanceGet(layer.instances[j])
+		b := layer.instances[j].getBaseObject()
 		if b == nil {
 			return false
 		}
-		return a.BaseObject().Depth() > b.BaseObject().Depth()
+		return a.Depth() > b.Depth()
 	})
 	//log.Printf("Stable sort count: %d, cap: %d\n", len(layer.instances), cap(layer.instances))
 
 	for _, instanceIndex := range layer.instances {
-		inst := InstanceGet(instanceIndex)
+		inst := instanceIndex.Get()
 		if inst == nil {
 			panic("instance index not removed from draw list when destroyed")
 		}

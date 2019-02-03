@@ -30,7 +30,7 @@ func CollisionRectList(instType collisionObject, x, y float64) []InstanceIndex {
 	//list = list[:0]
 	for i := 0; i < len(room.instanceLayers); i++ {
 		for _, otherIndex := range room.instanceLayers[i].instances {
-			other := instanceGetBaseObject(otherIndex)
+			other := otherIndex.getBaseObject()
 			if other == nil {
 				continue
 			}
@@ -64,7 +64,7 @@ func PlaceFree(instType collisionObject, x, y float64) bool {
 	hasCollision := false
 	for i := 0; i < len(room.instanceLayers); i++ {
 		for _, otherIndex := range room.instanceLayers[i].instances {
-			other := instanceGetBaseObject(otherIndex)
+			other := otherIndex.getBaseObject()
 			if other == nil {
 				continue
 			}

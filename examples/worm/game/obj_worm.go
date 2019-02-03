@@ -135,7 +135,7 @@ func (self *Worm) Update() {
 
 	HandleCollisionForWormOrWormPart(&self.Object, self)
 	for _, id := range gml.CollisionRectList(self, self.X, self.Y) {
-		inst, ok := gml.InstanceGet(id).(*Checkpoint)
+		inst, ok := id.Get().(*Checkpoint)
 		if !ok {
 			continue
 		}

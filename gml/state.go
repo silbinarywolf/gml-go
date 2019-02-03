@@ -76,7 +76,7 @@ func (state *state) deleteRoomInstance(roomInst *roomInstance) {
 		// Running Destroy() on each rather than InstanceDestroy()
 		// for speed purposes
 		for _, instanceIndex := range layer.instances {
-			if inst := InstanceGet(instanceIndex); inst != nil {
+			if inst := instanceIndex.Get(); inst != nil {
 				inst.Destroy()
 				cameraInstanceDestroy(instanceIndex)
 			}

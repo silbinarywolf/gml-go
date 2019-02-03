@@ -71,15 +71,15 @@ func (manager *roomInstanceManager) reset() {
 	*manager = roomInstanceManager{}
 }
 
-// instanceGetBaseObject get the base object for an instance
-func instanceGetBaseObject(index InstanceIndex) *Object {
-	if inst := InstanceGet(index); inst != nil {
+// getBaseObject get the base object for an instance
+func (index InstanceIndex) getBaseObject() *Object {
+	if inst := index.Get(); inst != nil {
 		return inst.BaseObject()
 	}
 	return nil
 }
 
-func InstanceGet(index InstanceIndex) ObjectType {
+func (index InstanceIndex) Get() ObjectType {
 	dataIndex, ok := gState.instanceManager.instanceIndexToIndex[index]
 	if !ok {
 		return nil

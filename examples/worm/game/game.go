@@ -20,7 +20,7 @@ type GameController struct {
 }
 
 func (*GameController) HasWormStopped() bool {
-	if inst, ok := gml.InstanceGet(Global.Player).(*Worm); ok {
+	if inst, ok := Global.Player.Get().(*Worm); ok {
 		if inst.Dead {
 			return true
 		}
@@ -65,7 +65,7 @@ func (*GameController) GamePostDraw() {
 	gml.DrawTextF(32, 32, "%s", gml.FrameUsage())
 
 	// Draw score
-	if playerInst, ok := gml.InstanceGet(Global.Player).(*Worm); ok {
+	if playerInst, ok := Global.Player.Get().(*Worm); ok {
 		var scoreIndexes [8]float64
 
 		// Split score into seperate numbers

@@ -23,9 +23,8 @@ func (state *state) draw() {
 
 		cameraClear(i)
 
-		if inst := InstanceGet(view.follow); inst != nil {
+		if inst := view.follow.getBaseObject(); inst != nil {
 			// Render instances in same room as instance following
-			inst := inst.BaseObject()
 			roomInst := roomGetInstance(inst.RoomInstanceIndex())
 			if roomInst == nil {
 				panic("RoomInstance this object belongs to has been destroyed")

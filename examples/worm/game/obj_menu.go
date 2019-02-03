@@ -40,7 +40,7 @@ func (self *Menu) Update() {
 	self.IsHoveringOnMenu = self.CollisionPoint(gml.MousePosition())
 	if gml.MouseCheckPressed(gml.MbLeft) &&
 		self.IsHoveringOnMenu {
-		inst, ok := gml.InstanceGet(Global.Player).(*Worm)
+		inst, ok := Global.Player.Get().(*Worm)
 		if !ok {
 			panic("Cannot find Worm")
 		}

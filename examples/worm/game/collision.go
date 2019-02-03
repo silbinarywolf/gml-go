@@ -6,7 +6,7 @@ import (
 
 func HandleCollisionForWormOrWormPart(self *gml.Object, master *Worm) {
 	for _, id := range gml.CollisionRectList(self, self.X, self.Y) {
-		inst, ok := gml.InstanceGet(id).(*Wall)
+		inst, ok := id.Get().(*Wall)
 		if !ok {
 			continue
 		}

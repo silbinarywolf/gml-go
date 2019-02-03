@@ -191,7 +191,7 @@ func (view *camera) update() {
 	}
 
 	//
-	if inst := InstanceGet(view.follow); inst != nil {
+	if inst := view.follow.Get(); inst != nil {
 		inst := inst.BaseObject()
 		view.X = inst.X - (view.Size.X / 2)
 		view.Y = inst.Y - (view.Size.Y / 2)
@@ -201,7 +201,7 @@ func (view *camera) update() {
 
 func (view *camera) cameraFitToRoomDimensions() {
 	// If we're following an object, snap the camera to fit to the room
-	if inst := InstanceGet(view.follow); inst != nil {
+	if inst := view.follow.Get(); inst != nil {
 		roomInst := roomGetInstance(inst.BaseObject().RoomInstanceIndex())
 		if roomInst != nil {
 			var left, right, top, bottom float64
