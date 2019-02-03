@@ -25,12 +25,12 @@ func newObjectManager() *objectManager {
 // InitObjectGeneratedData is required to be called so the engine can create game objects
 func InitObjectGeneratedData(indexToName []string, nameToIndex map[string]ObjectIndex, objTypes []ObjectType) {
 	manager := gObjectManager
-	if manager.idToEntityData != nil {
-		panic("Cannot call init type function more than once.")
-	}
+	//if manager.idToEntityData == objTypes {
+	//	panic("Cannot call init type function more than once.")
+	//}
+	manager.idToEntityData = objTypes
 	manager.indexToName = indexToName
 	manager.nameToID = nameToIndex
-	manager.idToEntityData = objTypes
 	debugInitObjectMetaList(objTypes[1:])
 }
 
