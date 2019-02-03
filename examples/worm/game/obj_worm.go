@@ -9,6 +9,7 @@ import (
 
 const (
 	WormStartingBodyParts = 2
+	WormMaxBodyParts      = 10
 	WormLeapPower         = -21
 	WormJumpGravity       = 0.66
 	WormFallGravity       = 0.56
@@ -18,8 +19,10 @@ const (
 type Worm struct {
 	gml.Object
 	Physics
-	WormDrag
+	WormLag
 	WallSpawner
+	bodyParts [WormMaxBodyParts]WormBody
+
 	dirtCreateTimer    gml.Alarm
 	inputDisabledTimer gml.Alarm
 
@@ -38,10 +41,20 @@ func (self *Worm) Create() {
 	self.Start.Y = 528
 	self.Score = 0
 	self.Vec = self.Start
-	self.YDrag = self.Y
+	self.YLag = self.Y
+
+	startPos := self.Vec
+	for i := 0; i < WormStartingBodyParts; i++ {
+		bodyPart := &self.bodyParts[i]
+		bodyPart.X = startPos.X - bodyPart.SeperationWidth()
+		bodyPart.Y = startPos.Y
+		bodyPart.HasSprouted = true
+
+		startPos = bodyPart.Vec
+	}
 
 	// Create body
-	parentIndex := self.InstanceIndex()
+	/*parentIndex := self.InstanceIndex()
 	for i := 0; i < WormStartingBodyParts; i++ {
 		inst := gml.InstanceCreate(self.X, self.Y, self.RoomInstanceIndex(), ObjWormBody).(*WormBody)
 		inst.Parent = parentIndex
@@ -49,7 +62,7 @@ func (self *Worm) Create() {
 		inst.Index = inst.Index + 1
 		parentIndex = inst.InstanceIndex()
 	}
-	self.LastBodyPart = parentIndex
+	self.LastBodyPart = parentIndex*/
 
 }
 
@@ -68,12 +81,76 @@ func (self *Worm) TriggerDeath() {
 	}
 }
 
+func (self *Worm) Draw() {
+	// Draw body parts
+	// in reverse so they layer correctly
+	for i := len(self.bodyParts) - 1; i >= 0; i-- {
+		bodyPart := self.bodyParts[i]
+		if !bodyPart.HasSprouted {
+			continue
+		}
+		gml.DrawSprite(SprWormBody, 0, bodyPart.X, bodyPart.Y)
+	}
+
+	// Draw worm
+	self.Object.Draw()
+}
+
 func (self *Worm) Update() {
 	self.WallSpawner.Update(self.RoomInstanceIndex())
 	self.Physics.Update(&self.Object)
-	if self.DragTimer.Repeat(1) {
-		self.YDrag = self.Y
+
+	{
+		// NOTE(Jake): 2019-02-03 - #82
+		// We must update ylag timers after the vspeed/physics and
+		// we must loop it like this so it feels like the Game Maker
+		// version
+		if self.LagTimer.Repeat(2) {
+			self.YLag = self.Y
+		}
+		for i := 0; i < len(self.bodyParts); i++ {
+			// Alarm 11
+			bodyPart := &self.bodyParts[i]
+			//if bodyPart.LagTimer.Repeat(2) {
+			bodyPart.YLag = bodyPart.Y
+			//}
+		}
 	}
+	for i := 0; i < len(self.bodyParts); i++ {
+		// Begin Step
+		bodyPart := &self.bodyParts[i]
+		var parentX, parentYLag float64
+		if i == 0 {
+			parentX = self.X
+			parentYLag = self.YLag // self.Vec
+		} else {
+			prevBodyPart := &self.bodyParts[i-1]
+			parentX = prevBodyPart.X
+			parentYLag = prevBodyPart.YLag
+		}
+		bodyPart.X = parentX - bodyPart.SeperationWidth()
+		bodyPart.Y = parentYLag
+	}
+
+	/*prevPosY := self.Y
+	if self.DragTimer.Repeat(1) {
+		bodyPart := &self.bodyParts[0]
+		if bodyPart.HasSprouted {
+			bodyPart.Y = prevPosY
+			prevPosY = bodyPart.Y
+		}
+	}
+	for i := 1; i < WormStartingBodyParts; i++ {
+		bodyPart := &self.bodyParts[i]
+		if !bodyPart.HasSprouted {
+			continue
+		}
+		if bodyPart.Y != prevPosY {
+			bodyPart.Y = prevPosY
+			break
+		}
+		prevPosY = bodyPart.Y
+	}*/
 	//if self.inputDisabledTimer.Tick() {
 	//	self.DisableInput = false
 	//}
@@ -139,5 +216,9 @@ func (self *Worm) Update() {
 		}
 		self.Score += 1
 		gml.InstanceDestroy(inst)
+	}
+
+	if self.LagTimer.Repeat(2) {
+		self.YLag = self.Y
 	}
 }

@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	MenuGameOverAccelerationSpeed = 0.20
+	MenuGameOverAccelerationSpeed = 3
 )
 
 type MenuGameover struct {
@@ -17,7 +17,6 @@ type MenuGameover struct {
 
 func (self *MenuGameover) Create() {
 	self.SetDepth(DepthMenu)
-	self.Speed.Y = 3.0
 
 	Global.MusicPlaying.Stop()
 	Global.MusicPlaying = SndGameover
@@ -29,7 +28,7 @@ func (self *MenuGameover) Create() {
 		screenSize := gml.CameraGetViewSize(0)
 		self.Size = self.SpriteIndex().Size()
 		self.X = (screenSize.X / 2) - (self.Size.X / 2)
-		self.Y = (screenSize.Y / 2) - (self.Size.Y / 2)
+		self.Y = -self.Size.Y //(screenSize.Y / 2) - (self.Size.Y / 2)
 	}
 
 	// Retry Button
@@ -39,6 +38,20 @@ func (self *MenuGameover) Create() {
 }
 
 func (self *MenuGameover) Update() {
+	// Animate menu and snap down to the center
+	{
+		screenSize := gml.CameraGetViewSize(0)
+		yCenter := (screenSize.Y / 2) - (self.Size.Y / 2)
+		if self.Y != yCenter {
+			self.Speed.Y += MenuGameOverAccelerationSpeed
+			self.Y += self.Speed.Y
+			if self.Y > yCenter {
+				self.Y = yCenter
+				self.Speed.Y = 0
+			}
+		}
+	}
+
 	retryButton := self.RetryButton
 	retryButton.X += self.X
 	retryButton.Y += self.Y

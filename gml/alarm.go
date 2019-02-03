@@ -35,7 +35,9 @@ func (alarm *Alarm) Repeat(ticks float64) bool {
 	if !alarm.isTimerSet {
 		alarm.timeLeft = ticks
 		alarm.isTimerSet = true
-		return false
+		//alarm.timeLeft -= 1.0 * dt.DeltaTime()
+		//alarm.isTimerSet = true
+		//return false
 	}
 	amount := 1.0 * dt.DeltaTime()
 	alarm.timeLeft -= amount

@@ -33,7 +33,7 @@ func (*GameController) GameStart() {
 
 	// Setup "kinda" delta time
 	gml.SetDesignedTPS(DesignedMaxTPS)
-	//gml.SetMaxTPS(80)
+	//gml.SetMaxTPS(120)
 
 	// Setup global variables
 	// ...
