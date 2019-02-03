@@ -11,6 +11,7 @@ const (
 	WindowWidth  = 960
 	WindowHeight = 640
 	WindowScale  = 1
+	CreditText   = "Created by Silbinary Wolf | Art by milkroscope | Music by Magicdweedoo"
 )
 
 const (

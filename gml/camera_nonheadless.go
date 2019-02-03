@@ -2,138 +2,47 @@
 
 package gml
 
-import (
-	"math"
-	"strconv"
+import "github.com/hajimehoshi/ebiten"
 
-	"github.com/hajimehoshi/ebiten"
-	"github.com/silbinarywolf/gml-go/gml/internal/geom"
-)
-
-var (
-	gCameraManager cameraManager
-)
-
-type cameraManager struct {
-	cameras             [8]camera
-	current             *camera
-	camerasEnabledCount int
+type cameraSurface struct {
+	surface *ebiten.Image
 }
 
-type camera struct {
-	enabled bool
-	follow  InstanceIndex
-	geom.Rect
-	scale  geom.Vec
-	screen *ebiten.Image
-}
-
-func (manager *cameraManager) reset() {
-	for i := 0; i < len(manager.cameras); i++ {
-		view := &manager.cameras[i]
-		view.scale.X = 1
-		view.scale.Y = 1
-	}
-
-	// Setup 1st camera
-	CameraCreate(0, 0, 0, WindowWidth(), WindowHeight())
-}
-
-func CameraCreate(index int, windowX, windowY, windowWidth, windowHeight float64) {
-	view := &gCameraManager.cameras[index]
-	if view.enabled {
-		panic("Camera " + strconv.Itoa(index) + " is already enabled.")
-	}
-	if windowWidth == 0 ||
-		windowHeight == 0 {
-		panic("Cannot have camera window width or height of 0")
-	}
-	view.X = windowX
-	view.Y = windowY
-	view.Size.X = windowWidth
-	view.Size.Y = windowHeight
-	view.enabled = true
-	gCameraManager.camerasEnabledCount++
-}
-
-func CameraDestroy(index int) {
-	view := &gCameraManager.cameras[index]
-	if !view.enabled {
-		panic("Camera " + strconv.Itoa(index) + " is not enabled.")
-	}
-	view.enabled = false
-	gCameraManager.camerasEnabledCount--
-}
-
-func CameraSetSize(index int, windowWidth, windowHeight float64) {
-	view := &gCameraManager.cameras[index]
-	if !view.enabled {
-		panic("Camera " + strconv.Itoa(index) + " is not enabled.")
-	}
-	view.Size.X = windowWidth
-	view.Size.Y = windowHeight
-}
-
-// cameraGetActive gets the current camera we're drawing objects onto
-func cameraGetActive() *camera {
-	return gCameraManager.current
-}
-
-// cameraSetActive gets the current camera we want to draw objects onto
-func cameraSetActive(index int) {
-	gCameraManager.current = &gCameraManager.cameras[index]
-}
-
-func cameraClearActive() {
-	gCameraManager.current = nil
-}
-
-func CameraGetViewPos(index int) geom.Vec {
-	view := &gCameraManager.cameras[index]
-	return view.Vec
-}
-
-func CameraGetViewSize(index int) geom.Vec {
-	view := &gCameraManager.cameras[index]
-	return view.Size
-}
-
-func CameraSetViewPos(index int, x, y float64) {
-	view := &gCameraManager.cameras[index]
-	view.Vec = geom.Vec{
-		X: x,
-		Y: y,
-	}
-
-	view.cameraFitToRoomDimensions()
-}
-
-func CameraSetViewSize(index int, width, height float64) {
-	view := &gCameraManager.cameras[index]
-	view.Size = geom.Vec{
-		X: width,
-		Y: height,
-	}
-}
-
-func CameraSetViewTarget(index int, inst InstanceIndex) {
-	view := &gCameraManager.cameras[index]
-	view.follow = inst
-}
-
-// cameraHasMultipleEnabled is generally used to disable
-// rendering to an offscreen surface if using 1 camera.
-func cameraHasMultipleEnabled() bool {
-	return gCameraManager.camerasEnabledCount > 1
-}
-
-func cameraClear(index int) {
+func cameraClearSurface(index int) {
 	// NOTE(Jake): 2019-01-26
 	// We don't render an offscreen image to the screen if
 	// only 1 camera is enabled.
 	if cameraHasMultipleEnabled() {
 		view := &gCameraManager.cameras[index]
-		view.screen.Clear()
+		view.surface.Clear()
+	}
+}
+
+func cameraPreDraw(index int) {
+	// NOTE(Jake): 2019-01-26
+	// We don't render an offscreen image to the screen if
+	// only 1 camera is enabled.
+	if cameraHasMultipleEnabled() {
+		view := &gCameraManager.cameras[index]
+		mustCreateNewRenderTarget := false
+		if view.surface == nil {
+			// Create new camera
+			mustCreateNewRenderTarget = true
+		} else {
+			// Resize camera
+			viewSurfaceSize := view.surface.Bounds().Max
+			if int(view.Size.X) != viewSurfaceSize.X ||
+				int(view.Size.Y) != viewSurfaceSize.Y {
+				mustCreateNewRenderTarget = true
+			}
+		}
+		if mustCreateNewRenderTarget {
+			image, err := ebiten.NewImage(int(view.Size.X), int(view.Size.Y), ebiten.FilterDefault)
+			if err != nil {
+				panic(err)
+			}
+			view.surface = image
+		}
 	}
 }
 
@@ -147,86 +56,8 @@ func cameraDraw(index int) {
 		// NOTE(Jake): 2019-01-26
 		// op is a global variable in "draw"
 		op.GeoM.Reset()
-		if view.scale.X != 1 || view.scale.Y != 1 {
-			op.GeoM.Scale(view.scale.X, view.scale.Y)
-		}
+		op.GeoM.Scale(view.scale.X, view.scale.Y)
 		op.GeoM.Translate(view.X, view.Y)
-		gScreen.DrawImage(view.screen, op)
-	}
-}
-
-func cameraInstanceDestroy(instanceIndex InstanceIndex) {
-	manager := gCameraManager
-	for i := 0; i < len(manager.cameras); i++ {
-		view := &manager.cameras[i]
-		if view.follow == instanceIndex {
-			view.follow = Noone
-		}
-	}
-}
-
-func (view *camera) update() {
-	// NOTE(Jake): 2019-01-26
-	// We don't render an offscreen image to the screen if
-	// only 1 camera is enabled.
-	if cameraHasMultipleEnabled() {
-		mustCreateNewRenderTarget := false
-		if view.screen == nil {
-			// Create new camera
-			mustCreateNewRenderTarget = true
-		} else {
-			// Resize camera
-			if int(view.Size.X) != view.screen.Bounds().Max.X ||
-				int(view.Size.Y) != view.screen.Bounds().Max.Y {
-				mustCreateNewRenderTarget = true
-			}
-		}
-		if mustCreateNewRenderTarget {
-			image, err := ebiten.NewImage(int(view.Size.X), int(view.Size.Y), ebiten.FilterDefault)
-			if err != nil {
-				panic(err)
-			}
-			view.screen = image
-		}
-	}
-
-	//
-	if inst := view.follow.Get(); inst != nil {
-		inst := inst.BaseObject()
-		view.X = inst.X - (view.Size.X / 2)
-		view.Y = inst.Y - (view.Size.Y / 2)
-	}
-	view.cameraFitToRoomDimensions()
-}
-
-func (view *camera) cameraFitToRoomDimensions() {
-	// If we're following an object, snap the camera to fit to the room
-	if inst := view.follow.Get(); inst != nil {
-		roomInst := roomGetInstance(inst.BaseObject().RoomInstanceIndex())
-		if roomInst != nil {
-			var left, right, top, bottom float64
-			left = roomInst.Left()
-			right = roomInst.Right()
-			top = roomInst.Top()
-			bottom = roomInst.Bottom()
-
-			if view.X < left {
-				view.X = left
-			}
-			if view.X+view.Size.X > right {
-				view.X = right - view.Size.X
-			}
-			if view.Y < top {
-				view.Y = top
-			}
-			if view.Y+view.Size.Y > bottom {
-				view.Y = bottom - view.Size.Y
-			}
-			// NOTE(Jake): 2018-12-23
-			// IIRC, Need to round these values otherwise draw calls show
-			// gaps/artifacts.
-			view.X = math.Floor(view.X)
-			view.Y = math.Floor(view.Y)
-		}
+		gScreen.DrawImage(view.surface, op)
 	}
 }

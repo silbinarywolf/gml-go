@@ -41,4 +41,5 @@ This project is mostly for fun and I have no intentions to get anything done unl
 ## Credits
 
 * [Hajime Hoshi](https://github.com/hajimehoshi/ebiten) for their fantastically simple 2D game library, [Ebiten](https://github.com/hajimehoshi/ebiten).
-* [Yann Le Coroller](http://www.yannlecoroller.com) for their free to use Helvetica style font. 
+* [Yann Le Coroller](http://www.yannlecoroller.com) for their free to use Helvetica style font.
+* [milkroscope](https://www.artstation.com/milkroscope) for their artwork on Worm In The Pipes (example/worm)

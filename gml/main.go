@@ -130,7 +130,17 @@ func update() error {
 	keyboardUpdate()
 	keyboardStringUpdate()
 	mouseUpdate()
-
+	// NOTE(Jake): 2019-02-03
+	// We may want to move `cameraUpdate` to execute just before `draw` calls
+	// so it snaps to where the player is before drawing, otherwise it will lag behind.
+	//
+	// However, if someone wants to control where the camera is positioned manually WHILE still following
+	// a player, doing this change would break their code. The reason a programmer might do this is
+	// because a camera will draw everything in the same room as the instance it's following. Without
+	// setting the camera to follow an instance, it would just draw a black screen.
+	//
+	// Maybe I need a function callback so you can update the camera manually like that?
+	cameraUpdate()
 	debugUpdate()
 
 	switch debugMenuID {
@@ -140,14 +150,16 @@ func update() error {
 		gState.update()
 		gController.GamePostUpdate()
 
+		// NOTE(Jake): 2019-02-03
+		// As per comment above, maybe I want to update/simulate camera
+		// code here?
+
 		// Draw
-		gController.GamePreDraw()
-		gState.draw()
-		gController.GamePostDraw()
+		draw()
 	case debugMenuAnimationEditor:
 		//debugMenuRoomEditor,
 		cameraSetActive(0)
-		cameraClear(0)
+		cameraClearSurface(0)
 
 		switch debugMenuID {
 		//case debugMenuRoomEditor:

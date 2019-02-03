@@ -89,9 +89,6 @@ func (state *state) deleteRoomInstance(roomInst *roomInstance) {
 }
 
 func (state *state) update() {
-	cameraSetActive(0)
-	defer cameraClearActive()
-
 	// Simulate each active instance
 	for i := 0; i < len(state.instanceManager.instances); i++ {
 		inst := state.instanceManager.instances[i]

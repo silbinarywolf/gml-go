@@ -8,7 +8,6 @@ import (
 
 const (
 	MenuFadeOutSpeed = 0.05
-	CreditText       = "Created by Silbinary Wolf | Art by Dansknapp | Music by Magicdweedoo"
 )
 
 type Menu struct {

@@ -169,7 +169,7 @@ func drawGetTarget() *ebiten.Image {
 	// "gCameraManager.camerasEnabledCount > 1" is here so that we render directly to
 	// gScreen if we are only using 1 camera.
 	if camera := cameraGetActive(); camera != nil && gCameraManager.camerasEnabledCount > 1 {
-		return camera.screen
+		return camera.surface
 	}
 	return gScreen
 }

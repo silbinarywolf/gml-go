@@ -2,26 +2,16 @@
 
 package gml
 
-import (
-	"github.com/hajimehoshi/ebiten"
-)
-
-// draw the room that the camera is in
+// draw the room that the each camera is in
 func (state *state) draw() {
-	if ebiten.IsDrawingSkipped() {
-		//log.Printf("Warning: Rendering is slow, skipping render this frame\n")
-		return
-	}
-
 	for i := 0; i < len(gCameraManager.cameras); i++ {
 		view := &gCameraManager.cameras[i]
 		if !view.enabled {
 			continue
 		}
-		view.update()
 		cameraSetActive(i)
-
-		cameraClear(i)
+		cameraPreDraw(i)
+		cameraClearSurface(i)
 
 		if inst := view.follow.getBaseObject(); inst != nil {
 			// Render instances in same room as instance following
