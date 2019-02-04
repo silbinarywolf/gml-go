@@ -1,6 +1,8 @@
 package gml
 
-import "github.com/silbinarywolf/gml-go/gml/internal/dt"
+import (
+	"github.com/silbinarywolf/gml-go/gml/internal/dt"
+)
 
 type Alarm struct {
 	isTimerSet bool
@@ -37,7 +39,7 @@ func (alarm *Alarm) Repeat(ticks float64) bool {
 		alarm.isTimerSet = true
 		//alarm.timeLeft -= 1.0 * dt.DeltaTime()
 		//alarm.isTimerSet = true
-		//return false
+		return false
 	}
 	amount := 1.0 * dt.DeltaTime()
 	alarm.timeLeft -= amount

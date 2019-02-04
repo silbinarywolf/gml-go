@@ -5,6 +5,7 @@ import "github.com/silbinarywolf/gml-go/gml"
 const (
 	SproutLerp      = 0.1
 	SproutLerpSpeed = 0.1
+	SeperationWidth = 40 // Taken from game logic: (sprite_get_width(sprite_index) >> 1) + (sprite_get_width(sprite_index) >> 2);
 )
 
 type WormBody struct {
@@ -14,6 +15,5 @@ type WormBody struct {
 }
 
 func (self *WormBody) SeperationWidth() float64 {
-	size := SprWormHead.Size()
-	return size.X/2 + size.X/6
+	return SeperationWidth
 }

@@ -14,6 +14,7 @@ const (
 	WormJumpGravity       = 0.66
 	WormFallGravity       = 0.56
 	WormDieGravity        = 0.58
+	WormSinCounterStart   = 9999999 // used in original game. Could just count up instead but kept it
 )
 
 type Worm struct {
@@ -42,12 +43,14 @@ func (self *Worm) Create() {
 	self.Score = 0
 	self.Vec = self.Start
 	self.YLag = self.Y
+	self.SinCounter = WormSinCounterStart
 
 	startPos := self.Vec
 	for i := 0; i < WormStartingBodyParts; i++ {
 		bodyPart := &self.bodyParts[i]
 		bodyPart.X = startPos.X - bodyPart.SeperationWidth()
 		bodyPart.Y = startPos.Y
+		bodyPart.YLag = bodyPart.Y
 		bodyPart.HasSprouted = true
 
 		startPos = bodyPart.Vec
@@ -85,11 +88,13 @@ func (self *Worm) Draw() {
 	// Draw body parts
 	// in reverse so they layer correctly
 	for i := len(self.bodyParts) - 1; i >= 0; i-- {
-		bodyPart := self.bodyParts[i]
+		bodyPart := &self.bodyParts[i]
 		if !bodyPart.HasSprouted {
 			continue
 		}
 		gml.DrawSprite(SprWormBody, 0, bodyPart.X, bodyPart.Y)
+		// todo: Wing
+		//x,y := bodyPart.X - 12, bodyPart.Y + 24
 	}
 
 	// Draw worm
@@ -97,63 +102,47 @@ func (self *Worm) Draw() {
 }
 
 func (self *Worm) Update() {
+	// Pre Begin Step
 	self.WallSpawner.Update(self.RoomInstanceIndex())
 	self.Physics.Update(&self.Object)
 
+	// Worm Body Parts
 	{
-		// NOTE(Jake): 2019-02-03 - #82
-		// We must update ylag timers after the vspeed/physics and
-		// we must loop it like this so it feels like the Game Maker
-		// version
-		if self.LagTimer.Repeat(2) {
-			self.YLag = self.Y
-		}
-		for i := 0; i < len(self.bodyParts); i++ {
-			// Alarm 11
-			bodyPart := &self.bodyParts[i]
-			//if bodyPart.LagTimer.Repeat(2) {
-			bodyPart.YLag = bodyPart.Y
-			//}
-		}
-	}
-	for i := 0; i < len(self.bodyParts); i++ {
 		// Begin Step
-		bodyPart := &self.bodyParts[i]
-		var parentX, parentYLag float64
-		if i == 0 {
-			parentX = self.X
-			parentYLag = self.YLag // self.Vec
-		} else {
-			prevBodyPart := &self.bodyParts[i-1]
-			parentX = prevBodyPart.X
-			parentYLag = prevBodyPart.YLag
+		{
+			// NOTE(Jake): 2019-02-04 - #82
+			// To make the worm body parts feel like the original
+			// the YLag body part update needs to happen before Physics
+			// update and the "Alarms" need to be after the loop.
+			for i := 0; i < len(self.bodyParts); i++ {
+				// Begin Step
+				bodyPart := &self.bodyParts[i]
+				var parentX, parentYLag float64
+				if i == 0 {
+					parentX = self.X
+					parentYLag = self.YLag // self.Vec
+				} else {
+					parentBodyPart := &self.bodyParts[i-1]
+					parentX = parentBodyPart.X
+					parentYLag = parentBodyPart.YLag
+				}
+				bodyPart.X = parentX - bodyPart.SeperationWidth()
+				bodyPart.Y = parentYLag
+			}
 		}
-		bodyPart.X = parentX - bodyPart.SeperationWidth()
-		bodyPart.Y = parentYLag
-	}
 
-	/*prevPosY := self.Y
-	if self.DragTimer.Repeat(1) {
-		bodyPart := &self.bodyParts[0]
-		if bodyPart.HasSprouted {
-			bodyPart.Y = prevPosY
-			prevPosY = bodyPart.Y
+		// Alarm 11
+		{
+			if self.LagTimer.Repeat(2) {
+				self.YLag = self.Y
+				for i := 0; i < len(self.bodyParts); i++ {
+					// Alarm 11
+					bodyPart := &self.bodyParts[i]
+					bodyPart.YLag = bodyPart.Y
+				}
+			}
 		}
 	}
-	for i := 1; i < WormStartingBodyParts; i++ {
-		bodyPart := &self.bodyParts[i]
-		if !bodyPart.HasSprouted {
-			continue
-		}
-		if bodyPart.Y != prevPosY {
-			bodyPart.Y = prevPosY
-			break
-		}
-		prevPosY = bodyPart.Y
-	}*/
-	//if self.inputDisabledTimer.Tick() {
-	//	self.DisableInput = false
-	//}
 
 	if self.Dead {
 		return
@@ -172,7 +161,7 @@ func (self *Worm) Update() {
 			self.Top() > 0 {
 			self.Y = self.Start.Y
 			self.Speed.Y = WormLeapPower
-			self.SinCounter = 0
+			self.SinCounter = WormSinCounterStart
 			self.InAir = true
 			SndPlay.Play()
 		}
@@ -198,7 +187,9 @@ func (self *Worm) Update() {
 		self.Gravity = 0
 		self.Speed.Y = 0
 
-		self.SinCounter += 1 * gml.DeltaTime()
+		self.SinCounter -= 1 * gml.DeltaTime()
+
+		// Taken from: y = ystart + round(sin(alarm[1]*0.15)*21);
 		self.Y = self.Start.Y + math.Round(math.Sin(self.SinCounter*0.15)*21)
 	} else {
 		if self.Speed.Y < 0 {
@@ -216,9 +207,5 @@ func (self *Worm) Update() {
 		}
 		self.Score += 1
 		gml.InstanceDestroy(inst)
-	}
-
-	if self.LagTimer.Repeat(2) {
-		self.YLag = self.Y
 	}
 }

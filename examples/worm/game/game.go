@@ -63,7 +63,13 @@ func (*GameController) GameReset() {
 		panic("Cannot find Player object to call GameReset")
 	}
 	inst.WallSpawner.Reset()
-	Global.MusicPlaying.Stop()
+
+	// Reset game music if game over
+	if Global.MusicPlaying == SndGameover {
+		Global.MusicPlaying.Stop()
+		Global.MusicPlaying = SndSunnyFields
+		Global.MusicPlaying.Play()
+	}
 
 	// Make walls from previous playthrough become disabled
 	screenSize := gml.CameraGetViewSize(0)
