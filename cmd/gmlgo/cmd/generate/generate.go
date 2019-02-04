@@ -288,7 +288,10 @@ func (g *Generator) generate() {
 					// Skip if can't determine type
 					return false
 				}
-				structTypeInfo := typeInfo.Underlying().(*types.Struct)
+				structTypeInfo, ok := typeInfo.Underlying().(*types.Struct)
+				if !ok {
+					return false
+				}
 				if hasEmbeddedObjectRecursive(structTypeInfo) {
 					structsUsingGMLObject = append(structsUsingGMLObject, Struct{
 						Name: structName,

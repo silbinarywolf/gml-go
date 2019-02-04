@@ -12,6 +12,7 @@ var Global = new(GameController)
 
 type GameController struct {
 	gml.Controller
+	Notification  Notification
 	Player        gml.InstanceIndex
 	MusicPlaying  audio.SoundIndex
 	Score         int
@@ -55,6 +56,12 @@ func (*GameController) GameStart() {
 	// Play song
 	Global.MusicPlaying = SndSunnyFields
 	Global.MusicPlaying.Play()
+
+	Global.Notification.SetNotification("Test")
+}
+
+func (*GameController) GamePreUpdate() {
+	Global.Notification.Update()
 }
 
 func (*GameController) GameReset() {
@@ -126,4 +133,7 @@ func (*GameController) GamePostDraw() {
 			x += fontWidth
 		}
 	}
+
+	// Draw notification
+	Global.Notification.Draw()
 }

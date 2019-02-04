@@ -8,12 +8,13 @@ import (
 )
 
 const (
-	WormStartingBodyParts = 2
+	WormStartingBodyParts = 1
 	WormMaxBodyParts      = 10
 	WormLeapPower         = -21
 	WormJumpGravity       = 0.66
 	WormFallGravity       = 0.56
 	WormDieGravity        = 0.58
+	WormSproutSpeed       = 0.05
 	WormSinCounterStart   = 9999999 // used in original game. Could just count up instead but kept it
 )
 
@@ -33,6 +34,7 @@ type Worm struct {
 	LastBodyPart gml.InstanceIndex
 	Dead         bool
 	InAir        bool
+	WingCount    float64
 }
 
 func (self *Worm) Create() {
@@ -84,6 +86,57 @@ func (self *Worm) TriggerDeath() {
 	}
 }
 
+func (self *Worm) ScoreIncrease() {
+	self.Score++
+	switch self.Score {
+	case 2, 5, 9, 15:
+		// Add body
+		for i := 0; i < len(self.bodyParts); i++ {
+			bodyPart := &self.bodyParts[i]
+			if !bodyPart.HasSprouted {
+				parentBodyPart := &self.bodyParts[i-1]
+				bodyPart.X = parentBodyPart.X
+				bodyPart.Y = parentBodyPart.Y
+				bodyPart.HasSprouted = true
+				break
+			}
+		}
+	case 22, 30, 39, 50, 65:
+		// Add Wing
+		self.WingCount++
+
+		// Update walls
+		switch self.WingCount {
+		case 1:
+			/*
+				with(objController)
+				{
+					// Remove any easy walls
+					ds_list_copy(wall, wall_flat_hard)
+					ds_list_append(wall, wall_fly_1)
+				}
+				// Get Wings
+				notification_set("You got a wing!##Each wing will add an extra jump!", 0.3)
+				wall_offscreen_kill()
+				with(objController)
+				{
+					alarm[0] = room_speed * 4
+				}
+			*/
+		case 2:
+			//ds_list_append(wall, wall_fly_2)
+		case 3:
+			//ds_list_append(wall, wall_fly_3)
+		case 4:
+			//ds_list_append(wall, wall_fly_4)
+		case 5:
+			//ds_list_append(wall, wall_fly_5)
+		default:
+			panic("invalid wing number")
+		}
+	}
+}
+
 func (self *Worm) Draw() {
 	// Draw body parts
 	// in reverse so they layer correctly
@@ -126,8 +179,17 @@ func (self *Worm) Update() {
 					parentX = parentBodyPart.X
 					parentYLag = parentBodyPart.YLag
 				}
-				bodyPart.X = parentX - bodyPart.SeperationWidth()
+
+				if bodyPart.HasSprouted {
+					bodyPart.SproutLerp += WormSproutSpeed
+					if bodyPart.SproutLerp > 1 {
+						bodyPart.SproutLerp = 1
+					}
+				}
+
+				bodyPart.X = parentX - (bodyPart.SeperationWidth() * bodyPart.SproutLerp)
 				bodyPart.Y = parentYLag
+
 			}
 		}
 
@@ -205,7 +267,7 @@ func (self *Worm) Update() {
 		if !ok {
 			continue
 		}
-		self.Score += 1
+		self.ScoreIncrease()
 		gml.InstanceDestroy(inst)
 	}
 }

@@ -12,6 +12,7 @@ type WormBody struct {
 	gml.Vec
 	WormLag
 	HasSprouted bool
+	SproutLerp  float64
 }
 
 func (self *WormBody) SeperationWidth() float64 {
