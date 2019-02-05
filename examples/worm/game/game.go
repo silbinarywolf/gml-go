@@ -57,7 +57,7 @@ func (*GameController) GameStart() {
 	Global.MusicPlaying = SndSunnyFields
 	Global.MusicPlaying.Play()
 
-	Global.Notification.SetNotification("Test")
+	Global.Notification.SetNotification("You got a wing\n\nEach wing will add an extra jump")
 }
 
 func (*GameController) GamePreUpdate() {
@@ -103,7 +103,7 @@ func (*GameController) GameReset() {
 
 func (*GameController) GamePostDraw() {
 	// Draw frame usage
-	gml.DrawTextF(32, 32, "%s", gml.FrameUsage())
+	gml.DrawTextF(8, 8, "%s", gml.FrameUsage())
 
 	// Draw score
 	if playerInst, ok := Global.Player.Get().(*Worm); ok {

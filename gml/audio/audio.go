@@ -16,6 +16,9 @@ const (
 
 // Play will play a sound
 func (index SoundIndex) Play() {
+	if disableAudio {
+		return
+	}
 	sound := &soundManager.assetList[index]
 	if sound.audioPlayer == nil {
 		panic("Sound isn't loaded")
@@ -26,6 +29,9 @@ func (index SoundIndex) Play() {
 
 // Stop will stop playing a sound
 func (index SoundIndex) Stop() {
+	if disableAudio {
+		return
+	}
 	sound := &soundManager.assetList[index]
 	if sound.audioPlayer == nil {
 		panic("Sound isn't loaded")

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"image/color"
 	"math"
+	"strings"
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/text"
@@ -140,20 +141,49 @@ func DrawText(x, y float64, message string) {
 }
 
 func DrawTextColorAlpha(x, y float64, message string, col color.Color, alpha float64) {
-	if !hasFontSet() {
-		panic("Must call DrawSetFont() before calling DrawText.")
-	}
+	//if !hasFontSet() {
+	//	panic("Must call DrawSetFont() before calling DrawText.")
+	//}
 	r, g, b, a := col.RGBA()
 	c := color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
 	c.A = uint8(float64(c.A) * alpha)
-	text.Draw(drawGetTarget(), message, fontFont(gFontManager.currentFont), int(x), int(y), c)
+	DrawTextColor(x, y, message, c)
+	//text.Draw(drawGetTarget(), message, fontFont(gFontManager.currentFont), int(x), int(y), c)
 }
 
 func DrawTextColor(x, y float64, message string, col color.Color) {
 	if !hasFontSet() {
 		panic("Must call DrawSetFont() before calling DrawText.")
 	}
-	text.Draw(drawGetTarget(), message, fontFont(gFontManager.currentFont), int(x), int(y), col)
+	fontFace := fontFont(gFontManager.currentFont)
+	if fontFace == nil {
+		return
+	}
+
+	lines := strings.Split(message, "\n")
+
+	// Calculate largest string height for initial space
+	// This seems to be identical to how Game Maker gets the initial
+	// space after a font.
+	// (overlapped screenshot of Worm in the Pipes Game Maker and
+	// this version, it's identical)
+	{
+		var stringHeight float64
+		for _, line := range lines {
+			height := StringHeight(line)
+			if height > stringHeight {
+				stringHeight = height
+			}
+		}
+		y += stringHeight
+	}
+
+	// Draw lines
+	leadingHeight := float64(fontFace.Metrics().Height.Ceil())
+	for _, line := range lines {
+		text.Draw(drawGetTarget(), line, fontFace, int(x), int(y), col)
+		y += leadingHeight
+	}
 }
 
 /*func drawText(font FontIndex, message string) {
