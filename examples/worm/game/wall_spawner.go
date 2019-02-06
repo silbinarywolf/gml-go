@@ -8,6 +8,7 @@ import (
 )
 
 type WallSpawner struct {
+	WallList            []wall.WallInfo
 	SpawnWallTimer      gml.Alarm
 	PreviousWallSpawned int
 }
@@ -15,28 +16,45 @@ type WallSpawner struct {
 func (self *WallSpawner) Reset() {
 	self.PreviousWallSpawned = -1
 	self.SpawnWallTimer.Set(DesignedMaxTPS * 1.25)
+
+	// Reset
+	if self.WallList == nil {
+		self.WallList = make([]wall.WallInfo, 0, 50)
+	} else {
+		self.WallList = self.WallList[:0]
+	}
+	self.WallList = append(self.WallList, wall.WallSetFlat...)
+	//copy(self.WallList, wallSets)
 }
 
 func (self *WallSpawner) Update(roomInstanceIndex gml.RoomInstanceIndex) {
 	if self.SpawnWallTimer.Tick() {
-		// Get wall info
-		var wallInfo wall.WallInfo
-		{
-			const WallX = 976
-			wallSets := wall.WallSets()
-			wallSet := wallSets[rand.Intn(len(wallSets))]
+		//if additional_spacing != WALL_TIME_EMPTY {
+		//	timer += additional_spacing
+		//}
 
-			// Select Wall randomly, make sure it isn't the same as before
-			wallInfoIndex := rand.Intn(len(wallSet))
-			if self.PreviousWallSpawned == wallInfoIndex {
-				if wallInfoIndex > 0 {
-					wallInfoIndex -= 1
-				} else {
-					wallInfoIndex += 1
-				}
+		// Spawn wall
+		const WallX = 976
+
+		// Select Wall randomly, make sure it isn't the same as before
+		wallInfoIndex := rand.Intn(len(self.WallList))
+		if self.PreviousWallSpawned == wallInfoIndex {
+			wallInfoIndex -= rand.Intn(1) - 1
+			if wallInfoIndex < 0 {
+				wallInfoIndex = len(self.WallList) - 1
 			}
-			self.PreviousWallSpawned = wallInfoIndex
-			wallInfo = wallSet[wallInfoIndex]
+			if wallInfoIndex >= len(self.WallList) {
+				wallInfoIndex = 0
+			}
+		}
+		self.PreviousWallSpawned = wallInfoIndex
+		//wallInfoIndex = 0
+
+		wallInfo := &self.WallList[wallInfoIndex]
+		gml.InstanceCreate(WallX, 0, roomInstanceIndex, ObjCheckpoint)
+		for _, wall := range wallInfo.WallList {
+			inst := gml.InstanceCreate(WallX+wall.X, wall.Y, roomInstanceIndex, ObjWall).(*Wall)
+			inst.DontKillPlayerIfInDirt = wall.IsInDirt
 		}
 
 		// Set timer
@@ -48,35 +66,6 @@ func (self *WallSpawner) Update(roomInstanceIndex gml.RoomInstanceIndex) {
 				ticksTillNextWall -= rand.Intn(-wallInfo.TimeTillNextRandom)
 			} else if wallInfo.TimeTillNextRandom > 0 {
 				ticksTillNextWall += rand.Intn(wallInfo.TimeTillNextRandom)
-			}
-		}
-
-		//if additional_spacing != WALL_TIME_EMPTY {
-		//	timer += additional_spacing
-		//}
-
-		// Spawn wall
-		{
-			const WallX = 976
-			wallSets := wall.WallSets()
-			wallSet := wallSets[rand.Intn(len(wallSets))]
-
-			// Select Wall randomly, make sure it isn't the same as before
-			wallInfoIndex := rand.Intn(len(wallSet))
-			if self.PreviousWallSpawned == wallInfoIndex {
-				if wallInfoIndex > 0 {
-					wallInfoIndex -= 1
-				} else {
-					wallInfoIndex += 1
-				}
-			}
-			self.PreviousWallSpawned = wallInfoIndex
-
-			wallInfo := wallSet[wallInfoIndex]
-			gml.InstanceCreate(WallX, 0, roomInstanceIndex, ObjCheckpoint)
-			for _, wall := range wallInfo.WallList {
-				inst := gml.InstanceCreate(WallX, wall.Y, roomInstanceIndex, ObjWall).(*Wall)
-				inst.DontKillPlayerIfInDirt = wall.IsInDirt
 			}
 		}
 

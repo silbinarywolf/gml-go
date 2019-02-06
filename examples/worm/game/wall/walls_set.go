@@ -1,16 +1,23 @@
 package wall
 
-func WallSets() [][]WallInfo {
-	return wallSets
-}
-
-var wallSets = [][]WallInfo{
+/*var wallSets = [][]WallInfo{
 	wallSetFlat,
-}
+}*/
 
-var wallSetFlat = []WallInfo{
+var WallSetFlat = []WallInfo{
 	wallLoose,
 	wallSemitight,
 	wallSemiloose,
 	wallAbovesurface,
+}
+
+var WallSetFlatHard = []WallInfo{
+	wallTight,
+	wallAbovesurface,
+}
+
+var WallSetFly1 = []WallInfo{
+	wallLooseFly1,
+	wallSemiloose1,
+	wallMediumFly1,
 }

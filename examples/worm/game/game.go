@@ -57,7 +57,7 @@ func (*GameController) GameStart() {
 	Global.MusicPlaying = SndSunnyFields
 	Global.MusicPlaying.Play()
 
-	Global.Notification.SetNotification("You got a wing\n\nEach wing will add an extra jump")
+	//Global.Notification.SetNotification("You got a wing\n\nEach wing will add an extra jump")
 }
 
 func (*GameController) GamePreUpdate() {
@@ -70,6 +70,8 @@ func (*GameController) GameReset() {
 		panic("Cannot find Player object to call GameReset")
 	}
 	inst.WallSpawner.Reset()
+	inst.Score = 0
+	inst.WingCount = 0
 
 	// Reset game music if game over
 	if Global.MusicPlaying == SndGameover {
@@ -98,6 +100,11 @@ func (*GameController) GameReset() {
 		inst.Speed.Y = 0
 		inst.SetSprite(SprWormHead)
 		inst.Dead = false
+	}
+
+	// DEBUG: Test
+	for i := 0; i < 23; i++ {
+		inst.ScoreIncrease()
 	}
 }
 

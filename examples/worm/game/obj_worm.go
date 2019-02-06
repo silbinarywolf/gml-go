@@ -4,6 +4,7 @@ import (
 	"math"
 
 	"github.com/silbinarywolf/gml-go/examples/worm/game/input"
+	"github.com/silbinarywolf/gml-go/examples/worm/game/wall"
 	"github.com/silbinarywolf/gml-go/gml"
 )
 
@@ -34,6 +35,7 @@ type Worm struct {
 	LastBodyPart gml.InstanceIndex
 	Dead         bool
 	InAir        bool
+	FlapCounter  float64
 	WingCount    float64
 }
 
@@ -45,6 +47,7 @@ func (self *Worm) Create() {
 	self.Score = 0
 	self.Vec = self.Start
 	self.YLag = self.Y
+	self.FlapCounter = 0
 	self.SinCounter = WormSinCounterStart
 
 	startPos := self.Vec
@@ -108,6 +111,12 @@ func (self *Worm) ScoreIncrease() {
 		// Update walls
 		switch self.WingCount {
 		case 1:
+			Global.Notification.SetNotification("You got a wing\n\nEach wing will add an extra jump")
+
+			// Change wall list to be harder and have pipes that require 1 wing
+			self.WallList = self.WallList[:0]
+			self.WallList = append(self.WallList, wall.WallSetFlatHard...)
+			self.WallList = append(self.WallList, wall.WallSetFly1...)
 			/*
 				with(objController)
 				{
@@ -146,8 +155,14 @@ func (self *Worm) Draw() {
 			continue
 		}
 		gml.DrawSprite(SprWormBody, 0, bodyPart.X, bodyPart.Y)
-		// todo: Wing
-		//x,y := bodyPart.X - 12, bodyPart.Y + 24
+		if self.WingCount > float64(i) {
+			imageIndex := 0.0
+			if self.Speed.Y < 0 &&
+				self.FlapCounter == float64(i+1) {
+				imageIndex = 1
+			}
+			gml.DrawSprite(SprWing, imageIndex, bodyPart.X-12, bodyPart.Y+24)
+		}
 	}
 
 	// Draw worm
@@ -219,12 +234,17 @@ func (self *Worm) Update() {
 	// Jump
 	{
 		if input.JumpPressed() &&
-			!self.InAir &&
+			(!self.InAir || self.FlapCounter < self.WingCount) &&
 			self.Top() > 0 {
-			self.Y = self.Start.Y
-			self.Speed.Y = WormLeapPower
-			self.SinCounter = WormSinCounterStart
-			self.InAir = true
+			if !self.InAir {
+				self.Speed.Y = WormLeapPower
+				self.Y = self.Start.Y
+				self.SinCounter = WormSinCounterStart
+				self.InAir = true
+			} else {
+				self.Speed.Y = WormLeapPower / 2
+				self.FlapCounter++
+			}
 			SndPlay.Play()
 		}
 	}
@@ -237,6 +257,7 @@ func (self *Worm) Update() {
 	} else if self.Speed.Y > 0 &&
 		self.Y > self.Start.Y {
 		self.InAir = false
+		self.FlapCounter = 0
 	}
 
 	//
@@ -262,6 +283,13 @@ func (self *Worm) Update() {
 	}
 
 	HandleCollisionForWormOrWormPart(&self.Object, self)
+	/*for i, _ := range self.bodyParts {
+		bodyPart := &self.bodyParts[i]
+		if bodyPart.HasSprouted {
+			HandleCollisionForWormOrWormPart(&bodyPart, self)
+		}
+	}*/
+
 	for _, id := range gml.CollisionRectList(self, self.X, self.Y) {
 		inst, ok := id.Get().(*Checkpoint)
 		if !ok {
