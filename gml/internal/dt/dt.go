@@ -9,7 +9,7 @@ const (
 )
 
 var (
-	fixedDeltaTime float64 = 0
+	fixedDeltaTime float64 = 1 // Default to 1 so tests that use it still work
 	designedTPS    int     = DefaultMaxTPS
 	maxTPS         int     = DefaultMaxTPS
 )

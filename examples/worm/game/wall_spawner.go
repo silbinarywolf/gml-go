@@ -24,7 +24,6 @@ func (self *WallSpawner) Reset() {
 		self.WallList = self.WallList[:0]
 	}
 	self.WallList = append(self.WallList, wall.WallSetFlat...)
-	//copy(self.WallList, wallSets)
 }
 
 func (self *WallSpawner) Update(roomInstanceIndex gml.RoomInstanceIndex) {

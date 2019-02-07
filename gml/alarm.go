@@ -11,6 +11,10 @@ type Alarm struct {
 
 // Set an alarm. This requires you process it every Update with Tick
 func (alarm *Alarm) Set(ticks float64) {
+	if ticks <= 0 {
+		alarm.isTimerSet = false
+		return
+	}
 	alarm.timeLeft = ticks
 	alarm.isTimerSet = true
 }

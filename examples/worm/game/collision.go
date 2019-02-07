@@ -4,8 +4,8 @@ import (
 	"github.com/silbinarywolf/gml-go/gml"
 )
 
-func HandleCollisionForWormOrWormPart(self *gml.Object, master *Worm) {
-	for _, id := range gml.CollisionRectList(self, self.X, self.Y) {
+func HandleCollisionForWormOrWormPart(master *Worm, x, y float64) {
+	for _, id := range gml.CollisionRectList(master, x, y) {
 		inst, ok := id.Get().(*Wall)
 		if !ok {
 			continue

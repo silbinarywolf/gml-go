@@ -29,28 +29,40 @@ type Worm struct {
 	dirtCreateTimer    gml.Alarm
 	inputDisabledTimer gml.Alarm
 
-	Start        gml.Vec
-	Score        float64
-	SinCounter   float64
-	LastBodyPart gml.InstanceIndex
-	Dead         bool
-	InAir        bool
-	FlapCounter  float64
-	WingCount    float64
+	Start       gml.Vec
+	Score       float64
+	SinCounter  float64
+	Dead        bool
+	InAir       bool
+	FlapCounter float64
+	WingCount   float64
 }
 
 func (self *Worm) Create() {
 	self.SetSprite(SprWormHead)
 	self.SetDepth(DepthWorm)
+
 	self.Start.X = 304
 	self.Start.Y = 528
-	self.Score = 0
-	self.Vec = self.Start
 	self.YLag = self.Y
-	self.FlapCounter = 0
+	self.Vec = self.Start
 	self.SinCounter = WormSinCounterStart
 
+	self.Reset()
+	self.WallSpawner.SpawnWallTimer.Set(0)
+}
+
+func (self *Worm) Reset() {
+	self.WallSpawner.Reset()
+
+	self.Score = 0
+	self.FlapCounter = 0
+	self.WingCount = 0
+
 	startPos := self.Vec
+	for i, _ := range self.bodyParts {
+		self.bodyParts[i] = WormBody{}
+	}
 	for i := 0; i < WormStartingBodyParts; i++ {
 		bodyPart := &self.bodyParts[i]
 		bodyPart.X = startPos.X - bodyPart.SeperationWidth()
@@ -61,17 +73,10 @@ func (self *Worm) Create() {
 		startPos = bodyPart.Vec
 	}
 
-	// Create body
-	/*parentIndex := self.InstanceIndex()
-	for i := 0; i < WormStartingBodyParts; i++ {
-		inst := gml.InstanceCreate(self.X, self.Y, self.RoomInstanceIndex(), ObjWormBody).(*WormBody)
-		inst.Parent = parentIndex
-		inst.Master = self.InstanceIndex()
-		inst.Index = inst.Index + 1
-		parentIndex = inst.InstanceIndex()
-	}
-	self.LastBodyPart = parentIndex*/
-
+	// DEBUG: Test
+	//for i := 0; i < 23; i++ {
+	//	self.ScoreIncrease()
+	//}
 }
 
 func (self *Worm) TriggerDeath() {
@@ -111,35 +116,23 @@ func (self *Worm) ScoreIncrease() {
 		// Update walls
 		switch self.WingCount {
 		case 1:
-			Global.Notification.SetNotification("You got a wing\n\nEach wing will add an extra jump")
-
 			// Change wall list to be harder and have pipes that require 1 wing
 			self.WallList = self.WallList[:0]
 			self.WallList = append(self.WallList, wall.WallSetFlatHard...)
 			self.WallList = append(self.WallList, wall.WallSetFly1...)
-			/*
-				with(objController)
-				{
-					// Remove any easy walls
-					ds_list_copy(wall, wall_flat_hard)
-					ds_list_append(wall, wall_fly_1)
-				}
-				// Get Wings
-				notification_set("You got a wing!##Each wing will add an extra jump!", 0.3)
-				wall_offscreen_kill()
-				with(objController)
-				{
-					alarm[0] = room_speed * 4
-				}
-			*/
+
+			// Get wings
+			Global.Notification.SetNotification("You got a wing\n\nEach wing will add an extra jump")
+			self.WallSpawner.Reset()
+			self.SpawnWallTimer.Set(DesignedMaxTPS * 4)
 		case 2:
-			//ds_list_append(wall, wall_fly_2)
+			self.WallList = append(self.WallList, wall.WallSetFly2...)
 		case 3:
-			//ds_list_append(wall, wall_fly_3)
+			self.WallList = append(self.WallList, wall.WallSetFly3...)
 		case 4:
-			//ds_list_append(wall, wall_fly_4)
+			self.WallList = append(self.WallList, wall.WallSetFly4...)
 		case 5:
-			//ds_list_append(wall, wall_fly_5)
+			self.WallList = append(self.WallList, wall.WallSetFly5...)
 		default:
 			panic("invalid wing number")
 		}
@@ -282,14 +275,16 @@ func (self *Worm) Update() {
 		}
 	}
 
-	HandleCollisionForWormOrWormPart(&self.Object, self)
-	/*for i, _ := range self.bodyParts {
+	// Handle collision for worm + body parts
+	HandleCollisionForWormOrWormPart(self, self.X, self.Y)
+	for i, _ := range self.bodyParts {
 		bodyPart := &self.bodyParts[i]
 		if bodyPart.HasSprouted {
-			HandleCollisionForWormOrWormPart(&bodyPart, self)
+			HandleCollisionForWormOrWormPart(self, bodyPart.X, bodyPart.Y)
 		}
-	}*/
+	}
 
+	// Get score
 	for _, id := range gml.CollisionRectList(self, self.X, self.Y) {
 		inst, ok := id.Get().(*Checkpoint)
 		if !ok {

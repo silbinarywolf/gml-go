@@ -86,10 +86,28 @@ var wallLooseFly1 = WallInfo{
 
 var wallMediumFly1 = WallInfo{
 	WallList: []Wall{
-		{Y: -300},
+		{X: 0, Y: -300},
 		{X: 48, Y: -285},
 		{X: 96, Y: -350},
-		// Repeat(3)
+		// repeat(3)
+		{X: 0, Y: 320},
+		{X: 48, Y: 320},
+		{X: 96, Y: 320},
+	},
+	TimeTillNext:       10,
+	TimeTillNextRandom: 10,
+}
+
+// Fly 2
+
+var wallTightFly1 = WallInfo{
+	WallList: []Wall{
+		{X: 0, Y: -300},
+		{X: 48, Y: -275},
+		{X: 96, Y: -350},
+		{X: 144, Y: -350},
+		// Repeat(4)
+		{X: 0, Y: 320},
 		{X: 48, Y: 320},
 		{X: 96, Y: 320},
 		{X: 144, Y: 320},
@@ -98,4 +116,57 @@ var wallMediumFly1 = WallInfo{
 	TimeTillNextRandom: 10,
 }
 
-// Fly 2
+// Fly 3
+
+var wallLooseFly3 = WallInfo{
+	WallList: []Wall{
+		{X: 0, Y: -400},
+		{X: 0, Y: 242},
+	},
+	TimeTillNext:       10,
+	TimeTillNextRandom: 10,
+}
+
+var wallLooseRow3 = WallInfo{
+	WallList: []Wall{
+		// repeat(12)
+		{X: 0, Y: -300}, {X: 0, Y: 380},
+		{X: 48, Y: -300}, {X: 48, Y: 380},
+		{X: 48 * 2, Y: -300}, {X: 48 * 2, Y: 380},
+		{X: 48 * 3, Y: -300}, {X: 48 * 3, Y: 380},
+		{X: 48 * 4, Y: -300}, {X: 48 * 4, Y: 380},
+		{X: 48 * 5, Y: -300}, {X: 48 * 5, Y: 380},
+		{X: 48 * 6, Y: -300}, {X: 48 * 6, Y: 380},
+		{X: 48 * 7, Y: -300}, {X: 48 * 7, Y: 380},
+		{X: 48 * 8, Y: -300}, {X: 48 * 8, Y: 380},
+		{X: 48 * 9, Y: -300}, {X: 48 * 9, Y: 380},
+		{X: 48 * 10, Y: -300}, {X: 48 * 10, Y: 380},
+		{X: 48 * 11, Y: -300}, {X: 48 * 11, Y: 380},
+	},
+	TimeTillNext:       90,
+	TimeTillNextRandom: 10,
+}
+
+var wallTightFall2 = WallInfo{
+	WallList: []Wall{
+		// repeat(4)
+		{X: 0, Y: 210},
+		{X: 48, Y: 210 + 48},
+		{X: 48 * 2, Y: 210 + (48 * 2)},
+		{X: 48 * 3, Y: 210 + (48 * 3)},
+	},
+	TimeTillNext:       10,
+	TimeTillNextRandom: 10,
+}
+
+// Fly 4
+
+var wallLoose4 = WallInfo{
+	WallList: []Wall{
+		// repeat(2)
+		{X: 0, Y: 200},
+		{X: 48, Y: 200},
+	},
+	TimeTillNext:       30,
+	TimeTillNextRandom: 10,
+}

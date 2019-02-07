@@ -21,3 +21,21 @@ var WallSetFly1 = []WallInfo{
 	wallSemiloose1,
 	wallMediumFly1,
 }
+
+var WallSetFly2 = []WallInfo{
+	wallTightFly1,
+}
+
+var WallSetFly3 = []WallInfo{
+	wallLooseFly3,
+	wallLooseRow3,
+	wallTightFall2,
+}
+
+var WallSetFly4 = []WallInfo{
+	wallLoose4,
+}
+
+var WallSetFly5 = []WallInfo{
+	// no data for this in original Game Maker game
+}

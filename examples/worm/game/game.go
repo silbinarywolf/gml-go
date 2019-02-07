@@ -69,9 +69,7 @@ func (*GameController) GameReset() {
 	if !ok {
 		panic("Cannot find Player object to call GameReset")
 	}
-	inst.WallSpawner.Reset()
-	inst.Score = 0
-	inst.WingCount = 0
+	inst.Reset()
 
 	// Reset game music if game over
 	if Global.MusicPlaying == SndGameover {
@@ -100,11 +98,6 @@ func (*GameController) GameReset() {
 		inst.Speed.Y = 0
 		inst.SetSprite(SprWormHead)
 		inst.Dead = false
-	}
-
-	// DEBUG: Test
-	for i := 0; i < 23; i++ {
-		inst.ScoreIncrease()
 	}
 }
 
