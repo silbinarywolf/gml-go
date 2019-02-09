@@ -41,16 +41,31 @@ var frameHasAlarm = map[int]bool{
 }
 
 func TestAlarmSet(t *testing.T) {
-	timer := new(Alarm)
+	timer := Alarm{}
 	timer.Set(4)
-	//var debugFrameTimerLog []int
 	for frame := 0; frame < 10; frame++ {
+		isSet, _ := frameHasAlarm[frame]
 		if timer.Tick() {
-			if isSet, _ := frameHasAlarm[frame]; !isSet {
+			if !isSet {
 				t.Errorf("Alarm is not meant to fire on frame %d", frame)
 			}
-			//debugFrameTimerLog = append(debugFrameTimerLog, frame)
 			timer.Set(4)
+		} else if isSet {
+			t.Errorf("Alarm did not fire when expected on frame %d", frame)
+		}
+	}
+}
+
+func TestAlarmRepeat(t *testing.T) {
+	timer := Alarm{}
+	for frame := 0; frame < 10; frame++ {
+		isSet, _ := frameHasAlarm[frame]
+		if timer.Repeat(4) {
+			if !isSet {
+				t.Errorf("Alarm is not meant to fire on frame %d", frame)
+			}
+		} else if isSet {
+			t.Errorf("Alarm did not fire when expected on frame %d", frame)
 		}
 	}
 }
