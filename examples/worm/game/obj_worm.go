@@ -11,6 +11,8 @@ import (
 const (
 	WormStartingBodyParts = 1
 	WormMaxBodyParts      = 10
+	WormStartX            = 304
+	WormStartY            = 528
 	WormLeapPower         = -21
 	WormJumpGravity       = 0.66
 	WormFallGravity       = 0.56
@@ -26,12 +28,12 @@ type Worm struct {
 	WallSpawner
 	bodyParts [WormMaxBodyParts]WormBody
 
+	sinTimer           gml.Alarm
 	dirtCreateTimer    gml.Alarm
 	inputDisabledTimer gml.Alarm
 
 	Start       gml.Vec
 	Score       float64
-	SinCounter  float64
 	Dead        bool
 	InAir       bool
 	FlapCounter float64
@@ -42,11 +44,10 @@ func (self *Worm) Create() {
 	self.SetSprite(SprWormHead)
 	self.SetDepth(DepthWorm)
 
-	self.Start.X = 304
-	self.Start.Y = 528
+	self.Start.X = WormStartX
+	self.Start.Y = WormStartY
 	self.YLag = self.Y
 	self.Vec = self.Start
-	self.SinCounter = WormSinCounterStart
 
 	self.Reset()
 	self.WallSpawner.SpawnWallTimer.Set(0)
@@ -214,6 +215,8 @@ func (self *Worm) Update() {
 		}
 	}
 
+	self.sinTimer.Repeat(WormSinCounterStart)
+
 	if self.Dead {
 		return
 	}
@@ -232,7 +235,7 @@ func (self *Worm) Update() {
 			if !self.InAir {
 				self.Speed.Y = WormLeapPower
 				self.Y = self.Start.Y
-				self.SinCounter = WormSinCounterStart
+				self.sinTimer.Set(WormSinCounterStart)
 				self.InAir = true
 			} else {
 				self.Speed.Y = WormLeapPower / 2
@@ -263,10 +266,8 @@ func (self *Worm) Update() {
 		self.Gravity = 0
 		self.Speed.Y = 0
 
-		self.SinCounter -= 1 * gml.DeltaTime()
-
 		// Taken from: y = ystart + round(sin(alarm[1]*0.15)*21);
-		self.Y = self.Start.Y + math.Round(math.Sin(self.SinCounter*0.15)*21)
+		self.Y = self.Start.Y + math.Round(math.Sin(self.sinTimer.Get()*0.15)*21)
 	} else {
 		if self.Speed.Y < 0 {
 			self.Gravity = WormJumpGravity

@@ -86,6 +86,13 @@ func SetDesignedTPS(tps int) {
 	dt.SetDesignedTPS(tps)
 }
 
+// DesignedTPS() returns the ticks-per-second that the game was designed to run at.
+//
+// Default is 60
+func DesignedTPS() int {
+	return dt.DesignedTPS()
+}
+
 // DeltaTime gets the fixed delta time based on the designed TPS divided by max TPS.
 func DeltaTime() float64 {
 	return dt.DeltaTime()
@@ -93,14 +100,14 @@ func DeltaTime() float64 {
 
 // TestBootstrap the game to give control over continuing / stopping execution per-frame
 // this method is for additional control when testing
-func TestBootstrap(controller gameController, gameSettings GameSettings, updateCallback func() bool) {
+func TestBootstrap(controller gameController, gameSettings GameSettings, afterUpdateCallback func() bool) {
 	// Set asset directory relative to the test code file path
 	// for `go test` support
 	_, filename, _, _ := runtime.Caller(1)
 	dir := filepath.Clean(filepath.Dir(filename) + "/../" + file.AssetDirectoryBase)
 	file.SetAssetDir(dir)
 
-	gameSettings.updateCallback = updateCallback
+	gameSettings.updateCallback = afterUpdateCallback
 	setup(controller, &gameSettings)
 
 	// NOTE(Jake): 2018-12-30

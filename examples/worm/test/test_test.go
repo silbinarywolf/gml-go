@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestGame(t *testing.T) {
+func TestWormGame(t *testing.T) {
 	frames := 0
 	gml.TestBootstrap(game.Global, gml.GameSettings{
 		WindowWidth:  game.WindowWidth,
@@ -19,16 +19,24 @@ func TestGame(t *testing.T) {
 		defer func() {
 			frames++
 		}()
-		// Run for approx ~3 seconds (assuming 60 FPS)
-		if frames >= 60*60 {
-			// todo(Jake): 2018-12-29 -
-			// Replace this hardcoded #1 with the ability to query by
-			// object type (just use the first player found / expect 1 player alive)
-			//if _, ok := gml.InstanceIndex(1).Get().(*game.Worm); !ok {
-			//	t.Errorf("Expected Player ship to still be alive after %d frames.", frames)
-			//}
+
+		if frames >= len(gameSessionTestData) {
+			// Finish simulating when out of data
 			return false
 		}
+
+		frameInfo := gameSessionTestData[frames]
+		wormInfo := frameInfo[0]
+
+		if inst := game.Global.Player.Get().(*game.Worm); inst != nil {
+			if wormInfo.X != inst.X ||
+				wormInfo.Y != inst.Y {
+				t.Errorf("Frame %v: Worm not matching test data, expected {X: %v, Y: %v} but got {X: %v, Y: %v}", frames, wormInfo.X, wormInfo.Y, inst.X, inst.Y)
+			}
+		} else {
+			t.Errorf("Frame %v: Worm missing.", frames)
+		}
+
 		return true
 	})
 }

@@ -162,6 +162,7 @@ func (manager *roomInstanceManager) InstanceCreate(position geom.Vec, objectInde
 	return inst
 }
 
+// WithAll returns a list of instances in the same room as the provided object
 func WithAll(instType collisionObject) []InstanceIndex {
 	inst := instType.BaseObject()
 	room := roomGetInstance(inst.BaseObject().RoomInstanceIndex())
@@ -183,6 +184,29 @@ func WithAll(instType collisionObject) []InstanceIndex {
 	}
 	return list
 }
+
+/*func WithObject(instType collisionObject, objectIndex ObjectIndex) []InstanceIndex {
+	inst := instType.BaseObject()
+	room := roomGetInstance(inst.BaseObject().RoomInstanceIndex())
+	if room == nil {
+		panic("RoomInstance this object belongs to has been destroyed")
+	}
+	var list []InstanceIndex
+	for i := 0; i < len(room.instanceLayers); i++ {
+		for _, otherIndex := range room.instanceLayers[i].instances {
+			other := otherIndex.getBaseObject()
+			if other == nil ||
+				other.ObjectIndex() == objectIndex {
+				continue
+			}
+			list = append(list, otherIndex)
+		}
+	}
+	if len(list) == 0 {
+		return nil
+	}
+	return list
+}*/
 
 /*
 func instanceRemove(inst ObjectType) {

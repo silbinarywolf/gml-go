@@ -22,6 +22,13 @@ func SetDesignedTPS(tps int) {
 	fixedDeltaTime = float64(designedTPS) / float64(maxTPS)
 }
 
+// DesignedTPS() returns the ticks-per-second that the game was designed to run at.
+//
+// Default is 60
+func DesignedTPS() int {
+	return designedTPS
+}
+
 // SetMaxTPS is the ticks-per-second the game is trying to run at. ie. 240tps, 480tps
 func SetMaxTPS(tps int) {
 	maxTPS = tps
@@ -32,3 +39,8 @@ func SetMaxTPS(tps int) {
 func DeltaTime() float64 {
 	return fixedDeltaTime
 }
+
+// TestSetDeltaTime allows test code to override the delta time value manually
+//func TestSetDeltaTime(dt float64) {
+//	fixedDeltaTime = dt
+//}
