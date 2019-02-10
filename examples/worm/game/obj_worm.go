@@ -166,7 +166,6 @@ func (self *Worm) Draw() {
 func (self *Worm) Update() {
 	// Pre Begin Step
 	self.WallSpawner.Update(self.RoomInstanceIndex())
-	self.Physics.Update(&self.Object)
 
 	// Worm Body Parts
 	{
@@ -218,6 +217,7 @@ func (self *Worm) Update() {
 	self.sinTimer.Repeat(WormSinCounterStart)
 
 	if self.Dead {
+		self.Physics.Update(&self.Object)
 		return
 	}
 
@@ -294,4 +294,6 @@ func (self *Worm) Update() {
 		self.ScoreIncrease()
 		gml.InstanceDestroy(inst)
 	}
+
+	self.Physics.Update(&self.Object)
 }

@@ -114,6 +114,11 @@ func loadSound(index SoundIndex) {
 
 // InitAndLoadAllSounds is used by gmlgo when initializing the engine
 func InitAndLoadAllSounds() error {
+	if audioContext != nil {
+		// Don't reinitialize. This can be called twice if multiple tests
+		// call TestBootstrap()
+		return nil
+	}
 	var err error
 	audioContext, err = audio.NewContext(sampleRate)
 	if err != nil {

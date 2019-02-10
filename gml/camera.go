@@ -28,6 +28,7 @@ type camera struct {
 func (manager *cameraManager) reset() {
 	for i := 0; i < len(manager.cameras); i++ {
 		view := &manager.cameras[i]
+		*view = camera{}
 		view.scale.X = 1
 		view.scale.Y = 1
 	}
