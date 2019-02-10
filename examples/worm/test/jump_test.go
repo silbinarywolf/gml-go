@@ -50,6 +50,20 @@ func TestWormJump(t *testing.T) {
 			bodyParts := frameInfo[1:]
 
 			if inst := game.Global.Player.Get().(*game.Worm); inst != nil {
+				hasNonmatchingBodyPart := false
+				for i, _ := range inst.BodyParts {
+					bodyPart := &inst.BodyParts[i]
+					if i >= len(bodyParts) {
+						break
+					}
+					bodyInfo := bodyParts[i]
+					bodyPartY := bodyInfo.Y // math.Floor(bodyInfo.Y*100) / 100
+					if bodyInfo.X != bodyPart.X ||
+						bodyInfo.Y != bodyPartY {
+						hasNonmatchingBodyPart = true
+					}
+				}
+
 				// NOTE(Jake): 2019-02-10
 				// Game Maker Studio 2 code seems to be more imprecise with
 				// floating point values than Go. Since the logic is sound
@@ -59,7 +73,8 @@ func TestWormJump(t *testing.T) {
 				wormInfoY := math.Round(wormInfo.Y*100) / 100
 				wormY := math.Round(inst.Y*100) / 100
 
-				if wormInfo.X != inst.X ||
+				if hasNonmatchingBodyPart ||
+					wormInfo.X != inst.X ||
 					wormInfoY != wormY {
 					t.Errorf("Frame %v: Not matching test data\n", frame)
 					if wormInfo.X != inst.X {
@@ -68,26 +83,24 @@ func TestWormJump(t *testing.T) {
 					if wormInfoY != wormY {
 						t.Errorf("- Y expected %v but got %v\n", wormInfoY, wormY)
 					}
-				}
-
-				for i, _ := range inst.BodyParts {
-					bodyPart := &inst.BodyParts[i]
-					if i >= len(bodyParts) {
-						if bodyPart.HasSprouted {
-							t.Errorf("- Worm Body Part %d - should not exist.", i)
+					for i, _ := range inst.BodyParts {
+						bodyPart := &inst.BodyParts[i]
+						if i >= len(bodyParts) {
+							if bodyPart.HasSprouted {
+								t.Errorf("- Worm Body Part %d - should not exist.", i)
+							}
+							break
 						}
-						break
-					}
-					bodyInfo := bodyParts[i]
-					bodyPartY := bodyInfo.Y // math.Floor(bodyInfo.Y*100) / 100
-					if bodyInfo.X != bodyPart.X ||
-						bodyInfo.Y != bodyPartY {
-						t.Errorf("Frame %v: Not matching test data\n", frame)
-						if bodyInfo.X != bodyPart.X {
-							t.Errorf("- Worm Body Part %d - X expected %v but got %v\n", i, bodyInfo.X, bodyPart.X)
-						}
-						if bodyInfo.Y != bodyPartY {
-							t.Errorf("- Worm Body Part %d - Y expected %v but got %v\n", i, bodyInfo.Y, bodyPartY)
+						bodyInfo := bodyParts[i]
+						bodyPartY := bodyInfo.Y // math.Floor(bodyInfo.Y*100) / 100
+						if bodyInfo.X != bodyPart.X ||
+							bodyInfo.Y != bodyPartY {
+							if bodyInfo.X != bodyPart.X {
+								t.Errorf("- Worm Body Part %d - X expected %v but got %v\n", i, bodyInfo.X, bodyPart.X)
+							}
+							if bodyInfo.Y != bodyPartY {
+								t.Errorf("- Worm Body Part %d - Y expected %v but got %v\n", i, bodyInfo.Y, bodyPartY)
+							}
 						}
 					}
 				}

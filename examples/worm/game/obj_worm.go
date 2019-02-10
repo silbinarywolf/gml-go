@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	WormStartingBodyParts = 1
+	WormStartingBodyParts = 10
 	WormMaxBodyParts      = 10
 	WormStartX            = 304
 	WormStartY            = 528
@@ -60,19 +60,19 @@ func (self *Worm) Reset() {
 	self.FlapCounter = 0
 	self.WingCount = 0
 
-	startPos := self.Vec
+	prevPos := self.Vec
 	for i, _ := range self.BodyParts {
 		self.BodyParts[i] = WormBody{}
 	}
 	for i := 0; i < WormStartingBodyParts; i++ {
 		bodyPart := &self.BodyParts[i]
-		bodyPart.X = startPos.X - bodyPart.SeperationWidth()
-		bodyPart.Y = startPos.Y
+		bodyPart.X = prevPos.X - bodyPart.SeperationWidth()
+		bodyPart.Y = prevPos.Y
 		bodyPart.YLag = bodyPart.Y
 		bodyPart.SproutLerp = 1
 		bodyPart.HasSprouted = true
 
-		startPos = bodyPart.Vec
+		prevPos = bodyPart.Vec
 	}
 
 	// DEBUG: Test
