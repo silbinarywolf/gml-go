@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	WormStartingBodyParts = 10
+	WormStartingBodyParts = 1
 	WormMaxBodyParts      = 10
 	WormStartX            = 304
 	WormStartY            = 528
@@ -59,12 +59,22 @@ func (self *Worm) Reset() {
 	self.Score = 0
 	self.FlapCounter = 0
 	self.WingCount = 0
+	self.SetStartingBodyParts(WormStartingBodyParts)
 
+	// DEBUG: Test
+	//for i := 0; i < 23; i++ {
+	//	self.ScoreIncrease()
+	//}
+}
+
+// SetStartingBodyParts allows the Create() event and tests
+// setup how many body parts trail the worm
+func (self *Worm) SetStartingBodyParts(bodyParts int) {
 	prevPos := self.Vec
 	for i, _ := range self.BodyParts {
 		self.BodyParts[i] = WormBody{}
 	}
-	for i := 0; i < WormStartingBodyParts; i++ {
+	for i := 0; i < bodyParts; i++ {
 		bodyPart := &self.BodyParts[i]
 		bodyPart.X = prevPos.X - bodyPart.SeperationWidth()
 		bodyPart.Y = prevPos.Y
@@ -74,11 +84,6 @@ func (self *Worm) Reset() {
 
 		prevPos = bodyPart.Vec
 	}
-
-	// DEBUG: Test
-	//for i := 0; i < 23; i++ {
-	//	self.ScoreIncrease()
-	//}
 }
 
 func (self *Worm) TriggerDeath() {
@@ -168,6 +173,10 @@ func (self *Worm) Update() {
 	// Pre Begin Step
 	self.WallSpawner.Update(self.RoomInstanceIndex())
 
+	defer func() {
+		self.Physics.Update(&self.Object)
+	}()
+
 	// Worm Body Parts
 	{
 		// Begin Step
@@ -218,7 +227,6 @@ func (self *Worm) Update() {
 	self.sinTimer.Repeat(WormSinCounterStart)
 
 	if self.Dead {
-		self.Physics.Update(&self.Object)
 		return
 	}
 
@@ -236,7 +244,7 @@ func (self *Worm) Update() {
 			if !self.InAir {
 				self.Speed.Y = WormLeapPower
 				self.Y = self.Start.Y
-				self.sinTimer.Set(WormSinCounterStart)
+				//self.sinTimer.Set(WormSinCounterStart - 1)
 				self.InAir = true
 			} else {
 				self.Speed.Y = WormLeapPower / 2
@@ -253,6 +261,7 @@ func (self *Worm) Update() {
 		self.InAir = true
 	} else if self.Speed.Y > 0 &&
 		self.Y > self.Start.Y {
+		self.sinTimer.Set(WormSinCounterStart)
 		self.InAir = false
 		self.FlapCounter = 0
 	}
@@ -295,6 +304,4 @@ func (self *Worm) Update() {
 		self.ScoreIncrease()
 		gml.InstanceDestroy(inst)
 	}
-
-	self.Physics.Update(&self.Object)
 }

@@ -16,7 +16,11 @@ import (
 // and compares the X/Y positions to what they are in the Game Maker Studio version
 // of the game.
 func TestWormJump(t *testing.T) {
+	const (
+		WormStartingBodyParts = 10
+	)
 	frame := 0
+	initTest := false
 	testData := wormJumpData
 	gml.TestBootstrap(game.Global, gml.GameSettings{
 		WindowWidth:  game.WindowWidth,
@@ -24,6 +28,14 @@ func TestWormJump(t *testing.T) {
 		WindowTitle:  game.WindowTitle,
 	}, gml.TestSettings{
 		PreUpdate: func() {
+			if !initTest {
+				if inst, ok := game.Global.Player.Get().(*game.Worm); ok {
+					inst.SetStartingBodyParts(WormStartingBodyParts)
+				}
+				initTest = true
+			}
+
+			//
 			input.TestResetJumpPressed()
 			if frame >= len(testData) {
 				// No data to manipulate
