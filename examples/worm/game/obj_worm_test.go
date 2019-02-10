@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/silbinarywolf/gml-go/gml"
-	"github.com/silbinarywolf/gml-go/gml/mathgml"
 )
 
 // TestSinCounter compares outputs of a pattern used by Worm against a dataset retrieved from
@@ -18,7 +17,7 @@ func TestSinCounter(t *testing.T) {
 
 		alarm := sinTimer.Get()
 		//sine := float64(math32.Sin(float32((alarm * 0.15))))
-		sine := mathgml.Sin(alarm * 0.15)
+		sine := math.Sin(alarm * 0.15)
 		sinCounter := math.Round(sine * 21)
 		if data.Alarm != alarm ||
 			data.Sine != sine ||
