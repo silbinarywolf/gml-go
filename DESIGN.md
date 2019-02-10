@@ -34,5 +34,3 @@ The fuzzy rule of thumb is, if you peek under the hood and see what the code is 
   - Typos cannot cause crashes, the game will perform incredibly fast as it’s natively compiled and in theory, I should be able to build tools similar to Go’s fix tool to update my old games from old versions of the framework to new versions.
 - Allows for easy serialization of object instances, possibly through code generation. 
   - By having native mechanisms for serialization, programmers can easily implement time-rewind mechanisms, lag-compensation for networked games, write out the state of the game world to a file and more.
-
-## What are the differences with Game Maker?

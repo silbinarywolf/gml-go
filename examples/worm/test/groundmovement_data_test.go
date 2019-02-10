@@ -4,7 +4,7 @@ package test
 
 import "github.com/silbinarywolf/gml-go/gml"
 
-var gameSessionTestData = [][]gml.Vec{
+var wormGroundMovementData = [][]gml.Vec{
 	// Frame 1
 	{
 		// Worm

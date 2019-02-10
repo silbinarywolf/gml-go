@@ -10,25 +10,24 @@ import (
 )
 
 func TestGame(t *testing.T) {
-	frames := 0
+	frame := 0
 	gml.TestBootstrap(game.Global, gml.GameSettings{
 		WindowWidth:  game.WindowWidth,
 		WindowHeight: game.WindowHeight,
 		WindowTitle:  game.WindowTitle,
-	}, func() bool {
-		defer func() {
-			frames++
-		}()
-		// Run for approx ~3 seconds (assuming 60 FPS)
-		if frames >= 60*60 {
-			// todo(Jake): 2018-12-29 -
-			// Replace this hardcoded #1 with the ability to query by
-			// object type (just use the first player found / expect 1 player alive)
-			if _, ok := gml.InstanceIndex(1).Get().(*game.Player); !ok {
-				t.Errorf("Expected Player ship to still be alive after %d frames.", frames)
+	}, gml.TestSettings{
+		PostUpdate: func() bool {
+			defer func() {
+				frame++
+			}()
+			// Run for approx ~3 seconds (assuming 60 FPS)
+			if frame >= gml.DesignedTPS()*3 {
+				if _, ok := game.Global.Player.Get().(*game.Player); !ok {
+					t.Errorf("Frame %v: Expected Player ship to still be alive.", frame)
+				}
+				return false
 			}
-			return false
-		}
-		return true
+			return true
+		},
 	})
 }

@@ -18,9 +18,11 @@ type GameSettings struct {
 	WindowWidth  float64
 	WindowHeight float64
 	WindowScale  float64
+}
 
-	// Used for tests only
-	updateCallback func() bool
+type TestSettings struct {
+	PreUpdate  func()
+	PostUpdate func() bool
 }
 
 const (
@@ -100,14 +102,13 @@ func DeltaTime() float64 {
 
 // TestBootstrap the game to give control over continuing / stopping execution per-frame
 // this method is for additional control when testing
-func TestBootstrap(controller gameController, gameSettings GameSettings, afterUpdateCallback func() bool) {
+func TestBootstrap(controller gameController, gameSettings GameSettings, testSettings TestSettings) {
 	// Set asset directory relative to the test code file path
 	// for `go test` support
 	_, filename, _, _ := runtime.Caller(1)
 	dir := filepath.Clean(filepath.Dir(filename) + "/../" + file.AssetDirectoryBase)
 	file.SetAssetDir(dir)
 
-	gameSettings.updateCallback = afterUpdateCallback
 	setup(controller, &gameSettings)
 
 	// NOTE(Jake): 2018-12-30
@@ -115,12 +116,15 @@ func TestBootstrap(controller gameController, gameSettings GameSettings, afterUp
 	// the simulation is fixed 60 FPS and we don't have a concept of delta-time
 	// or anything like that (yet?)
 	for {
-		if err := update(); err != nil {
-			return
+		if testSettings.PreUpdate != nil {
+			testSettings.PreUpdate()
 		}
-		if gGameSettings.updateCallback != nil &&
-			!gGameSettings.updateCallback() {
-			return
+		if err := update(); err != nil {
+			break
+		}
+		if testSettings.PostUpdate != nil &&
+			!testSettings.PostUpdate() {
+			break
 		}
 	}
 }
