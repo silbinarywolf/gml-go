@@ -64,6 +64,28 @@ func TestWormJump(t *testing.T) {
 						t.Errorf("- Y expected %v but got %v\n", wormInfo.Y, wormY)
 					}
 				}
+
+				for i, _ := range inst.BodyParts {
+					bodyPart := &inst.BodyParts[i]
+					if i+1 >= len(frameInfo) {
+						if bodyPart.HasSprouted {
+							t.Errorf("- Worm Body Part %d - should not exist.", i)
+						}
+						break
+					}
+					bodyInfo := frameInfo[1+i]
+					bodyPartY := math.Floor(bodyInfo.Y*100) / 100
+					if bodyInfo.X != bodyPart.X ||
+						bodyInfo.Y != bodyPartY {
+						t.Errorf("Frame %v: Not matching test data\n", frame)
+						if bodyInfo.X != bodyPart.X {
+							t.Errorf("- Worm Body Part %d - X expected %v but got %v\n", i, bodyInfo.X, bodyPart.X)
+						}
+						if bodyInfo.Y != bodyPartY {
+							t.Errorf("- Worm Body Part %d - Y expected %v but got %v\n", i, bodyInfo.Y, bodyPartY)
+						}
+					}
+				}
 			} else {
 				t.Errorf("Frame %v: Worm instance does not exist, expected it to exist.", frame)
 			}

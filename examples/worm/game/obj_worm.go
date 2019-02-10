@@ -26,7 +26,7 @@ type Worm struct {
 	Physics
 	WormLag
 	WallSpawner
-	bodyParts [WormMaxBodyParts]WormBody
+	BodyParts [WormMaxBodyParts]WormBody
 
 	sinTimer           gml.Alarm
 	dirtCreateTimer    gml.Alarm
@@ -61,14 +61,15 @@ func (self *Worm) Reset() {
 	self.WingCount = 0
 
 	startPos := self.Vec
-	for i, _ := range self.bodyParts {
-		self.bodyParts[i] = WormBody{}
+	for i, _ := range self.BodyParts {
+		self.BodyParts[i] = WormBody{}
 	}
 	for i := 0; i < WormStartingBodyParts; i++ {
-		bodyPart := &self.bodyParts[i]
+		bodyPart := &self.BodyParts[i]
 		bodyPart.X = startPos.X - bodyPart.SeperationWidth()
 		bodyPart.Y = startPos.Y
 		bodyPart.YLag = bodyPart.Y
+		bodyPart.SproutLerp = 1
 		bodyPart.HasSprouted = true
 
 		startPos = bodyPart.Vec
@@ -100,10 +101,10 @@ func (self *Worm) ScoreIncrease() {
 	switch self.Score {
 	case 2, 5, 9, 15:
 		// Add body
-		for i := 0; i < len(self.bodyParts); i++ {
-			bodyPart := &self.bodyParts[i]
+		for i := 0; i < len(self.BodyParts); i++ {
+			bodyPart := &self.BodyParts[i]
 			if !bodyPart.HasSprouted {
-				parentBodyPart := &self.bodyParts[i-1]
+				parentBodyPart := &self.BodyParts[i-1]
 				bodyPart.X = parentBodyPart.X
 				bodyPart.Y = parentBodyPart.Y
 				bodyPart.HasSprouted = true
@@ -143,8 +144,8 @@ func (self *Worm) ScoreIncrease() {
 func (self *Worm) Draw() {
 	// Draw body parts
 	// in reverse so they layer correctly
-	for i := len(self.bodyParts) - 1; i >= 0; i-- {
-		bodyPart := &self.bodyParts[i]
+	for i := len(self.BodyParts) - 1; i >= 0; i-- {
+		bodyPart := &self.BodyParts[i]
 		if !bodyPart.HasSprouted {
 			continue
 		}
@@ -175,15 +176,15 @@ func (self *Worm) Update() {
 			// To make the worm body parts feel like the original
 			// the YLag body part update needs to happen before Physics
 			// update and the "Alarms" need to be after the loop.
-			for i := 0; i < len(self.bodyParts); i++ {
+			for i := 0; i < len(self.BodyParts); i++ {
 				// Begin Step
-				bodyPart := &self.bodyParts[i]
+				bodyPart := &self.BodyParts[i]
 				var parentX, parentYLag float64
 				if i == 0 {
 					parentX = self.X
 					parentYLag = self.YLag // self.Vec
 				} else {
-					parentBodyPart := &self.bodyParts[i-1]
+					parentBodyPart := &self.BodyParts[i-1]
 					parentX = parentBodyPart.X
 					parentYLag = parentBodyPart.YLag
 				}
@@ -205,9 +206,9 @@ func (self *Worm) Update() {
 		{
 			if self.LagTimer.Repeat(2) {
 				self.YLag = self.Y
-				for i := 0; i < len(self.bodyParts); i++ {
+				for i := 0; i < len(self.BodyParts); i++ {
 					// Alarm 11
-					bodyPart := &self.bodyParts[i]
+					bodyPart := &self.BodyParts[i]
 					bodyPart.YLag = bodyPart.Y
 				}
 			}
@@ -278,8 +279,8 @@ func (self *Worm) Update() {
 
 	// Handle collision for worm + body parts
 	HandleCollisionForWormOrWormPart(self, self.X, self.Y)
-	for i, _ := range self.bodyParts {
-		bodyPart := &self.bodyParts[i]
+	for i, _ := range self.BodyParts {
+		bodyPart := &self.BodyParts[i]
 		if bodyPart.HasSprouted {
 			HandleCollisionForWormOrWormPart(self, bodyPart.X, bodyPart.Y)
 		}
