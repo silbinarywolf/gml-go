@@ -10,6 +10,9 @@ type Physics struct {
 }
 
 func (phys *Physics) Update(self *gml.Object) {
-	phys.Speed.Y += phys.Gravity * gml.DeltaTime()
-	self.Y += phys.Speed.Y * gml.DeltaTime()
+	// Formula taken from:
+	// https://web.archive.org/web/20120614044757/http://www.niksula.hut.fi/~hkankaan/Homepages/gravity.html
+	accel := phys.Gravity * gml.DeltaTime()
+	phys.Speed.Y += accel
+	self.Y += (phys.Speed.Y + accel/2) * gml.DeltaTime()
 }

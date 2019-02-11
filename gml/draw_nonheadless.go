@@ -42,6 +42,8 @@ func DrawSprite(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64) 
 		Y: y,
 	}
 	position = maybeApplyOffsetByCamera(position)
+	position.X = math.Floor(position.X)
+	position.Y = math.Floor(position.Y)
 
 	// NOTE(Jake): 2019-01-26 - #91
 	// DrawSprite is like DrawSpriteExt except we apply no scaling or colorM

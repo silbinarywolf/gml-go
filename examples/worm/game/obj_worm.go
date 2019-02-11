@@ -30,6 +30,7 @@ type Worm struct {
 
 	sinTimer           gml.Alarm
 	dirtCreateTimer    gml.Alarm
+	bodyTimer          gml.Alarm
 	inputDisabledTimer gml.Alarm
 
 	Start       gml.Vec
@@ -99,6 +100,37 @@ func (self *Worm) TriggerDeath() {
 		self.Speed.Y = WormLeapPower
 		self.Gravity = WormDieGravity
 	}
+}
+
+func (self *Worm) CalcMedals() (wormMedal int, flightMedal int) {
+	wormMedal = 0
+	flightMedal = 0
+
+	// Calculate body parts
+	bodyPartCount := 0
+	for _, bodyPart := range self.BodyParts {
+		if !bodyPart.HasSprouted {
+			break
+		}
+		bodyPartCount++
+	}
+
+	// Worm Body Medal
+	if bodyPartCount >= 3 {
+		wormMedal = 1 // Bronze
+		if bodyPartCount >= 5 {
+			wormMedal = 2 // Silver
+		}
+	}
+
+	// Worm Flight Medal
+	if self.WingCount >= 2 {
+		flightMedal = 1 // Bronze
+		if self.WingCount >= 4 {
+			flightMedal = 2 // Silver
+		}
+	}
+	return
 }
 
 func (self *Worm) ScoreIncrease() {
@@ -185,29 +217,30 @@ func (self *Worm) Update() {
 			// To make the worm body parts feel like the original
 			// the YLag body part update needs to happen before Physics
 			// update and the "Alarms" need to be after the loop.
-			for i := 0; i < len(self.BodyParts); i++ {
-				// Begin Step
-				bodyPart := &self.BodyParts[i]
-				var parentX, parentYLag float64
-				if i == 0 {
-					parentX = self.X
-					parentYLag = self.YLag // self.Vec
-				} else {
-					parentBodyPart := &self.BodyParts[i-1]
-					parentX = parentBodyPart.X
-					parentYLag = parentBodyPart.YLag
-				}
-
-				if bodyPart.HasSprouted {
-					bodyPart.SproutLerp += WormSproutSpeed
-					if bodyPart.SproutLerp > 1 {
-						bodyPart.SproutLerp = 1
+			if self.bodyTimer.Repeat(1) {
+				for i := 0; i < len(self.BodyParts); i++ {
+					// Begin Step
+					bodyPart := &self.BodyParts[i]
+					var parentX, parentYLag float64
+					if i == 0 {
+						parentX = self.X
+						parentYLag = self.YLag // self.Vec
+					} else {
+						parentBodyPart := &self.BodyParts[i-1]
+						parentX = parentBodyPart.X
+						parentYLag = parentBodyPart.YLag
 					}
+
+					if bodyPart.HasSprouted {
+						bodyPart.SproutLerp += WormSproutSpeed
+						if bodyPart.SproutLerp > 1 {
+							bodyPart.SproutLerp = 1
+						}
+					}
+
+					bodyPart.X = parentX - (bodyPart.SeperationWidth() * bodyPart.SproutLerp)
+					bodyPart.Y = parentYLag
 				}
-
-				bodyPart.X = parentX - (bodyPart.SeperationWidth() * bodyPart.SproutLerp)
-				bodyPart.Y = parentYLag
-
 			}
 		}
 
