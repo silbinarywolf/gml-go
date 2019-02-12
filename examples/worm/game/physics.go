@@ -1,6 +1,8 @@
 package game
 
 import (
+	"math"
+
 	"github.com/silbinarywolf/gml-go/gml"
 )
 
@@ -12,7 +14,14 @@ type Physics struct {
 func (phys *Physics) Update(self *gml.Object) {
 	// Formula taken from:
 	// https://web.archive.org/web/20120614044757/http://www.niksula.hut.fi/~hkankaan/Homepages/gravity.html
-	accel := phys.Gravity * gml.DeltaTime()
+	dt := gml.DeltaTime()
+	accel := phys.Gravity * dt
 	phys.Speed.Y += accel
-	self.Y += (phys.Speed.Y + accel/2) * gml.DeltaTime()
+	if dt == 1 {
+		self.Y += phys.Speed.Y
+	} else {
+		// Experimental higher fps
+		//self.Y += (phys.Speed.Y + accel/2) * dt
+		self.Y += dt*phys.Speed.Y + math.Pow(dt, 2)*accel
+	}
 }

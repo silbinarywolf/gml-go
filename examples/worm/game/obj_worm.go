@@ -73,17 +73,18 @@ func (self *Worm) Reset() {
 func (self *Worm) SetStartingBodyParts(bodyParts int) {
 	prevPos := self.Vec
 	for i, _ := range self.BodyParts {
-		self.BodyParts[i] = WormBody{}
+		bodyPart := &self.BodyParts[i]
+		*bodyPart = WormBody{}
+		bodyPart.X = prevPos.X
+		bodyPart.Y = prevPos.Y
+		bodyPart.YLag = bodyPart.Y
+
+		prevPos = bodyPart.Vec
 	}
 	for i := 0; i < bodyParts; i++ {
 		bodyPart := &self.BodyParts[i]
-		bodyPart.X = prevPos.X - bodyPart.SeperationWidth()
-		bodyPart.Y = prevPos.Y
-		bodyPart.YLag = bodyPart.Y
 		bodyPart.SproutLerp = 1
 		bodyPart.HasSprouted = true
-
-		prevPos = bodyPart.Vec
 	}
 }
 

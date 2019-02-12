@@ -20,6 +20,7 @@ func TestWormJump(t *testing.T) {
 		WormStartingBodyParts = 10
 	)
 	frame := 0
+	//checkEveryNFrame := 0
 	initTest := false
 	testData := wormJumpData
 	gml.TestBootstrap(game.Global, gml.GameSettings{
@@ -29,9 +30,13 @@ func TestWormJump(t *testing.T) {
 	}, gml.TestSettings{
 		PreUpdate: func() {
 			if !initTest {
+				// todo: Fix game logic to run consistently at different tick rates
+				gml.SetMaxTPS(120)
+
 				if inst, ok := game.Global.Player.Get().(*game.Worm); ok {
 					inst.SetStartingBodyParts(WormStartingBodyParts)
 				}
+				//checkEveryNFrame = int(1.0/gml.DeltaTime()) - 1.0
 				initTest = true
 			}
 
@@ -57,9 +62,17 @@ func TestWormJump(t *testing.T) {
 				return false
 			}
 
+			//switch gml.MaxTPS()
+
 			frameInfo := testData[frame]
 			wormInfo := frameInfo[0]
 			bodyParts := frameInfo[1:]
+
+			//if frame != checkEveryNFrame {
+			//	return true
+			//}
+			//nextFrame := float64(1.0) / gml.DeltaTime()
+			//checkEveryNFrame *= int(nextFrame) + 1
 
 			if inst := game.Global.Player.Get().(*game.Worm); inst != nil {
 				hasNonmatchingBodyPart := false
@@ -90,10 +103,10 @@ func TestWormJump(t *testing.T) {
 					wormInfoY != wormY {
 					t.Errorf("Frame %v: Not matching test data\n", frame)
 					if wormInfo.X != inst.X {
-						t.Errorf("- X expected %v but got %v\n", wormInfo.X, inst.X)
+						t.Errorf("- Worm Head X expected %v but got %v\n", wormInfo.X, inst.X)
 					}
 					if wormInfoY != wormY {
-						t.Errorf("- Y expected %v but got %v\n", wormInfoY, wormY)
+						t.Errorf("- Worm Head Y expected %v but got %v\n", wormInfoY, wormY)
 					}
 					for i, _ := range inst.BodyParts {
 						bodyPart := &inst.BodyParts[i]
@@ -104,14 +117,15 @@ func TestWormJump(t *testing.T) {
 							break
 						}
 						bodyInfo := bodyParts[i]
-						bodyPartY := bodyInfo.Y // math.Floor(bodyInfo.Y*100) / 100
+						bodyInfoY := math.Round(bodyInfo.Y*100) / 100 // math.Floor(bodyInfo.Y*100) / 100
+						bodyPartY := math.Round(bodyPart.Y*100) / 100
 						if bodyInfo.X != bodyPart.X ||
-							bodyInfo.Y != bodyPartY {
+							bodyInfoY != bodyPartY {
 							if bodyInfo.X != bodyPart.X {
 								t.Errorf("- Worm Body Part %d - X expected %v but got %v\n", i, bodyInfo.X, bodyPart.X)
 							}
-							if bodyInfo.Y != bodyPartY {
-								t.Errorf("- Worm Body Part %d - Y expected %v but got %v\n", i, bodyInfo.Y, bodyPartY)
+							if bodyInfoY != bodyPartY {
+								t.Errorf("- Worm Body Part %d - Y expected %v but got %v\n", i, bodyInfoY, bodyPartY)
 							}
 						}
 					}
