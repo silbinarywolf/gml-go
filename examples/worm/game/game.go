@@ -12,12 +12,32 @@ var Global = new(GameController)
 
 type GameController struct {
 	gml.Controller
+	PreviousRound GameScore
+	CurrentRound  GameScore
+	// todo(Jake): 2019-03-13
+	// Maybe reimplement saving for the high score system
+	//Persistent    GameScore
+
 	Notification  Notification
 	Player        gml.InstanceIndex
 	MusicPlaying  audio.SoundIndex
 	Score         int
 	SoundDisabled bool
 	MusicDisabled bool
+}
+
+type Medal int
+
+const (
+	MedalNone   Medal = 0
+	MedalBronze Medal = 1
+	MedalSilver Medal = 2
+	MedalGold   Medal = 3
+)
+
+type GameScore struct {
+	MedalWorm Medal
+	MedalWing Medal
 }
 
 func (*GameController) HasWormStopped() bool {
@@ -34,7 +54,11 @@ func (*GameController) GameStart() {
 
 	// Setup "kinda" delta time
 	gml.SetDesignedTPS(DesignedMaxTPS)
-	//gml.SetMaxTPS(120)
+	//gml.SetMaxTPS(480)
+
+	// Play song
+	Global.MusicPlaying = SndSunnyFields
+	Global.MusicPlaying.Play()
 
 	// Setup global variables
 	// ...
@@ -46,16 +70,12 @@ func (*GameController) GameStart() {
 	gml.InstanceCreate(0, 0, roomInstanceIndex, ObjBackground)
 
 	// Create menu
-	gml.InstanceCreate(0, 0, roomInstanceIndex, ObjMenu)
-	//gml.InstanceCreate(0, 0, roomInstanceIndex, ObjMenuGameover)
+	//gml.InstanceCreate(0, 0, roomInstanceIndex, ObjMenu)
+	gml.InstanceCreate(0, 0, roomInstanceIndex, ObjMenuGameover)
 
 	// Create player in the center of the room
 	playerInst := gml.InstanceCreate(0, 0, roomInstanceIndex, ObjWorm).(*Worm)
 	Global.Player = playerInst.InstanceIndex()
-
-	// Play song
-	Global.MusicPlaying = SndSunnyFields
-	Global.MusicPlaying.Play()
 
 	//Global.Notification.SetNotification("You got a wing\n\nEach wing will add an extra jump")
 }

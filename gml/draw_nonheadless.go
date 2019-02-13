@@ -243,6 +243,7 @@ func drawRect(dst *ebiten.Image, x, y, width, height float64, clr color.Color) {
 	op.GeoM.Reset()
 	op.GeoM.Scale(width/float64(ew), height/float64(eh))
 	op.GeoM.Translate(x, y)
+	op.ColorM.Reset()
 	op.ColorM.Scale(colorScale(clr))
 	// Filter must be 'nearest' filter (default).
 	// Linear filtering would make edges blurred.

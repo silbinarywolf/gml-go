@@ -11,16 +11,24 @@ const (
 type MenuGameover struct {
 	gml.Object
 	Physics
-	RetryButton      gml.Rect
-	IsHoveringOnMenu bool
+	RetryButton             gml.Rect
+	IsHoveringOnMenu        bool
+	DisplayScore            GameScore
+	MedalDisplayUpdateTimer gml.Alarm
 }
 
 func (self *MenuGameover) Create() {
 	self.SetDepth(DepthMenu)
 
-	Global.MusicPlaying.Stop()
+	if Global.MusicPlaying != 0 {
+		Global.MusicPlaying.Stop()
+	}
 	Global.MusicPlaying = SndGameover
 	Global.MusicPlaying.Play()
+
+	//
+	self.MedalDisplayUpdateTimer.Set(60.0 * 1.0)
+	self.DisplayScore = Global.PreviousRound
 
 	// Gameover
 	{
@@ -52,6 +60,15 @@ func (self *MenuGameover) Update() {
 		}
 	}
 
+	// Update medals
+	if self.MedalDisplayUpdateTimer.Tick() {
+		if self.DisplayScore != Global.CurrentRound {
+			SndMedalObtained.Play()
+			self.DisplayScore = Global.CurrentRound
+		}
+	}
+
+	//
 	retryButton := self.RetryButton
 	retryButton.X += self.X
 	retryButton.Y += self.Y
@@ -79,13 +96,8 @@ func (self *MenuGameover) Draw() {
 		}
 		gml.DrawSprite(SprRetryButton, imageIndex, self.X+self.RetryButton.X, self.Y+self.RetryButton.Y)
 	}
-	//screenSize := gml.CameraGetViewSize(0)
-	//x := 16.0
-	//y := 16.0
 
-	//draw_background(bgGameOver, x, y);
-	//draw_sprite(sprRetry, retry_img_index, x + retry_x, y + retry_y);
-
-	//draw_sprite(sprMedalWorm, global.best_medals[MEDAL_WORM], x + 41, y + 73);
-	//draw_sprite(sprMedalWing, global.best_medals[MEDAL_FLIGHT], x + 290, y + 84);
+	// Draw worm medal and flight medal
+	gml.DrawSprite(SprMedalWorm, float64(self.DisplayScore.MedalWorm), self.X+41, self.Y+73)
+	gml.DrawSprite(SprMedalWing, float64(self.DisplayScore.MedalWing), self.X+290, self.Y+84)
 }

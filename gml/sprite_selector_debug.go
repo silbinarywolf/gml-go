@@ -94,6 +94,9 @@ func (viewer *debugSpriteViewer) update() (sprite.SpriteIndex, bool) {
 		}
 		previewSize := geom.Vec{32, 32}
 		for _, spr := range spriteMenuFiltered {
+			if spr == 0 {
+				continue
+			}
 			var pos geom.Vec
 			pos.X = ui.X - 40
 			pos.Y = ui.Y - (previewSize.Y / 2)

@@ -11,13 +11,17 @@ import (
 type SoundIndex int32
 
 const (
-	SoundDirectoryBase = "sound"
+	sndUndefined       SoundIndex = 0
+	SoundDirectoryBase            = "sound"
 )
 
 // Play will play a sound
 func (index SoundIndex) Play() {
 	if disableAudio {
 		return
+	}
+	if index == sndUndefined {
+		panic("Cannot play sound if not set")
 	}
 	sound := &soundManager.assetList[index]
 	if sound.audioPlayer == nil {
@@ -31,6 +35,9 @@ func (index SoundIndex) Play() {
 func (index SoundIndex) Stop() {
 	if disableAudio {
 		return
+	}
+	if index == sndUndefined {
+		panic("Cannot stop sound if not set")
 	}
 	sound := &soundManager.assetList[index]
 	if sound.audioPlayer == nil {

@@ -31,7 +31,7 @@ func TestWormJump(t *testing.T) {
 		PreUpdate: func() {
 			if !initTest {
 				// todo: Fix game logic to run consistently at different tick rates
-				gml.SetMaxTPS(120)
+				gml.SetMaxTPS(60)
 
 				if inst, ok := game.Global.Player.Get().(*game.Worm); ok {
 					inst.SetStartingBodyParts(WormStartingBodyParts)
@@ -117,7 +117,7 @@ func TestWormJump(t *testing.T) {
 							break
 						}
 						bodyInfo := bodyParts[i]
-						bodyInfoY := math.Round(bodyInfo.Y*100) / 100 // math.Floor(bodyInfo.Y*100) / 100
+						bodyInfoY := math.Round(bodyInfo.Y*100) / 100
 						bodyPartY := math.Round(bodyPart.Y*100) / 100
 						if bodyInfo.X != bodyPart.X ||
 							bodyInfoY != bodyPartY {

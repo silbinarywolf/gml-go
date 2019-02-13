@@ -95,6 +95,7 @@ func (self *Worm) TriggerDeath() {
 		self.Dead = true
 
 		// Show game over menu
+		self.CalcMedals()
 		gml.InstanceCreate(0, 0, self.RoomInstanceIndex(), ObjMenuGameover)
 
 		// Leap into air at death
@@ -103,9 +104,9 @@ func (self *Worm) TriggerDeath() {
 	}
 }
 
-func (self *Worm) CalcMedals() (wormMedal int, flightMedal int) {
-	wormMedal = 0
-	flightMedal = 0
+func (self *Worm) CalcMedals() {
+	wormMedal := MedalNone
+	flightMedal := MedalNone
 
 	// Calculate body parts
 	bodyPartCount := 0
@@ -118,20 +119,28 @@ func (self *Worm) CalcMedals() (wormMedal int, flightMedal int) {
 
 	// Worm Body Medal
 	if bodyPartCount >= 3 {
-		wormMedal = 1 // Bronze
+		wormMedal = MedalBronze
 		if bodyPartCount >= 5 {
-			wormMedal = 2 // Silver
+			wormMedal = MedalSilver
 		}
 	}
 
 	// Worm Flight Medal
 	if self.WingCount >= 2 {
-		flightMedal = 1 // Bronze
+		flightMedal = MedalBronze
 		if self.WingCount >= 4 {
-			flightMedal = 2 // Silver
+			flightMedal = MedalSilver
 		}
 	}
-	return
+
+	//
+	Global.PreviousRound = Global.CurrentRound
+	if wormMedal > Global.CurrentRound.MedalWorm {
+		Global.CurrentRound.MedalWorm = wormMedal
+	}
+	if flightMedal > Global.CurrentRound.MedalWing {
+		Global.CurrentRound.MedalWing = flightMedal
+	}
 }
 
 func (self *Worm) ScoreIncrease() {
