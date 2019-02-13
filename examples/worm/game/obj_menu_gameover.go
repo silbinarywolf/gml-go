@@ -82,6 +82,7 @@ func (self *MenuGameover) Update() {
 
 func (self *MenuGameover) Destroy() {
 	Global.GameReset()
+	Global.MusicRandomizeTrack()
 }
 
 func (self *MenuGameover) Draw() {

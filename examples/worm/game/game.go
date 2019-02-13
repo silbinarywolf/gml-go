@@ -3,6 +3,7 @@ package game
 import (
 	"image/color"
 	"math"
+	"math/rand"
 
 	"github.com/silbinarywolf/gml-go/gml"
 	"github.com/silbinarywolf/gml-go/gml/audio"
@@ -70,14 +71,41 @@ func (*GameController) GameStart() {
 	gml.InstanceCreate(0, 0, roomInstanceIndex, ObjBackground)
 
 	// Create menu
-	//gml.InstanceCreate(0, 0, roomInstanceIndex, ObjMenu)
-	gml.InstanceCreate(0, 0, roomInstanceIndex, ObjMenuGameover)
+	gml.InstanceCreate(0, 0, roomInstanceIndex, ObjMenu)
+	//gml.InstanceCreate(0, 0, roomInstanceIndex, ObjMenuGameover)
 
 	// Create player in the center of the room
 	playerInst := gml.InstanceCreate(0, 0, roomInstanceIndex, ObjWorm).(*Worm)
 	Global.Player = playerInst.InstanceIndex()
 
 	//Global.Notification.SetNotification("You got a wing\n\nEach wing will add an extra jump")
+}
+
+func (*GameController) MusicRandomizeTrack() {
+	if Global.MusicPlaying != 0 {
+		Global.MusicPlaying.Stop()
+	}
+
+	if Global.MusicPlaying != 0 &&
+		Global.MusicPlaying != SndClassicTrack {
+		if rand.Int63n(1000) == 1 {
+			Global.MusicPlaying = SndClassicTrack
+			Global.MusicPlaying.Play()
+			return
+		}
+	}
+
+	// NOTE: Jake: 2019-02-13
+	// This doesn't technically cycle through the tracks between games
+	// as I expected but this is how the original code worked, so I'm
+	// leaving it as is.
+	switch Global.MusicPlaying {
+	case SndSunnyFields:
+		Global.MusicPlaying = SndRacer
+	default:
+		Global.MusicPlaying = SndSunnyFields
+	}
+	Global.MusicPlaying.Play()
 }
 
 func (*GameController) GamePreUpdate() {
