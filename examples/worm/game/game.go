@@ -109,6 +109,9 @@ func (*GameController) MusicRandomizeTrack() {
 }
 
 func (*GameController) GamePreUpdate() {
+	if Global.MusicPlaying != 0 && !Global.MusicPlaying.IsPlaying() {
+		Global.MusicRandomizeTrack()
+	}
 	Global.Notification.Update()
 }
 

@@ -46,6 +46,18 @@ func (index SoundIndex) Stop() {
 	sound.audioPlayer.Pause()
 }
 
+// IsPlaying will check if a sound is playing
+func (index SoundIndex) IsPlaying() bool {
+	if disableAudio {
+		return true
+	}
+	if index == sndUndefined {
+		panic("Cannot check if unset sound is playing")
+	}
+	sound := &soundManager.assetList[index]
+	return sound.audioPlayer.IsPlaying()
+}
+
 const (
 	sampleRate = 48000
 )
