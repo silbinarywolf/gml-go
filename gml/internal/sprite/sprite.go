@@ -45,6 +45,24 @@ func (spriteIndex SpriteIndex) Size() geom.Vec {
 	return sprite.size
 }
 
+func SpriteCollisionMask(spriteIndex SpriteIndex) geom.Rect {
+	sprite := &gSpriteManager.assetList[spriteIndex]
+	if !sprite.isLoaded {
+		panic("sprite is not loaded, cannot retrieve size")
+	}
+	collisionMask := sprite.frames[0].collisionMasks[0]
+	switch collisionMask.Kind {
+	case CollisionMaskInherit:
+		return geom.Rect{
+			Vec:  geom.Vec{0, 0},
+			Size: sprite.size,
+		}
+	case CollisionMaskManual:
+		return collisionMask.Rect
+	}
+	panic("error: unhandled collision mask kind")
+}
+
 func (spriteIndex SpriteIndex) ImageSpeed() float64 {
 	sprite := &gSpriteManager.assetList[spriteIndex]
 	if !sprite.isLoaded {

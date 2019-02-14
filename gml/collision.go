@@ -18,10 +18,7 @@ func CollisionRectList(instType collisionObject, x, y float64) []InstanceIndex {
 	}
 
 	// Create collision rect at position provided in function
-	r1 := inst.Rect
-	r1.X = x
-	r1.Y = y
-	r1.Size = inst.Size
+	r1 := inst.bboxAt(x, y)
 
 	// todo(Jake): 2018-12-01 - #18
 	// Consider pooling reusable InstanceIndex slices to
@@ -34,7 +31,7 @@ func CollisionRectList(instType collisionObject, x, y float64) []InstanceIndex {
 			if other == nil {
 				continue
 			}
-			if r1.CollisionRectangle(other.Rect) &&
+			if r1.CollisionRectangle(other.Bbox()) &&
 				!other.isDestroyed &&
 				inst != other {
 				list = append(list, otherIndex)
@@ -55,10 +52,7 @@ func PlaceFree(instType collisionObject, x, y float64) bool {
 	}
 
 	// Create collision rect at position provided in function
-	r1 := inst.Rect
-	r1.X = x
-	r1.Y = y
-	r1.Size = inst.Size
+	r1 := inst.bboxAt(x, y)
 
 	//var debugString string
 	hasCollision := false
@@ -69,7 +63,7 @@ func PlaceFree(instType collisionObject, x, y float64) bool {
 				continue
 			}
 			if other.Solid() &&
-				r1.CollisionRectangle(other.Rect) &&
+				r1.CollisionRectangle(other.Bbox()) &&
 				inst != other {
 				hasCollision = true
 			}
@@ -81,6 +75,8 @@ func PlaceFree(instType collisionObject, x, y float64) bool {
 			continue
 		}
 		for _, other := range layer.sprites {
+			// todo: Fix Rect() to return position plus bounding box
+			// of sprite (or delete sprite layer as planned)
 			if r1.CollisionRectangle(other.Rect()) {
 				hasCollision = true
 			}

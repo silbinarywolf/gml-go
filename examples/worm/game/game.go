@@ -13,18 +13,14 @@ var Global = new(GameController)
 
 type GameController struct {
 	gml.Controller
+	PersistentGameData
 	PreviousRound GameScore
 	CurrentRound  GameScore
-	// todo(Jake): 2019-03-13
-	// Maybe reimplement saving for the high score system
-	//Persistent    GameScore
 
-	Notification  Notification
-	Player        gml.InstanceIndex
-	MusicPlaying  audio.SoundIndex
-	Score         int
-	SoundDisabled bool
-	MusicDisabled bool
+	Notification Notification
+	Player       gml.InstanceIndex
+	MusicPlaying audio.SoundIndex
+	Score        int
 }
 
 type Medal int
@@ -39,6 +35,13 @@ const (
 type GameScore struct {
 	MedalWorm Medal
 	MedalWing Medal
+}
+
+type PersistentGameData struct {
+	// todo(Jake): 2019-03-13
+	// Maybe reimplement saving for the options / high score system
+	SoundDisabled bool
+	MusicDisabled bool
 }
 
 func (*GameController) HasWormStopped() bool {
@@ -58,8 +61,10 @@ func (*GameController) GameStart() {
 	//gml.SetMaxTPS(480)
 
 	// Play song
-	Global.MusicPlaying = SndSunnyFields
-	Global.MusicPlaying.Play()
+	if !Global.MusicDisabled {
+		Global.MusicPlaying = SndSunnyFields
+		Global.MusicPlaying.Play()
+	}
 
 	// Setup global variables
 	// ...
@@ -84,6 +89,9 @@ func (*GameController) GameStart() {
 func (*GameController) MusicRandomizeTrack() {
 	if Global.MusicPlaying != 0 {
 		Global.MusicPlaying.Stop()
+	}
+	if Global.MusicDisabled {
+		return
 	}
 
 	if Global.MusicPlaying != 0 &&

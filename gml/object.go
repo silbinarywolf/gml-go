@@ -25,8 +25,9 @@ type ObjectType interface {
 }
 
 type Object struct {
-	sprite.SpriteState // Sprite (contains SetSprite)
 	geom.Rect
+	sprite.SpriteState // Sprite (contains SetSprite)
+	bboxOffset         geom.Vec
 	instanceObject
 	objectIndex       ObjectIndex
 	depth             int
@@ -42,6 +43,26 @@ func (inst *Object) Destroy() {}
 
 func (inst *Object) Draw() {
 	DrawSprite(inst.SpriteIndex(), inst.ImageIndex(), inst.X, inst.Y)
+}
+
+func (inst *Object) Bbox() geom.Rect {
+	return geom.Rect{
+		Vec: geom.Vec{
+			X: inst.X + inst.bboxOffset.X,
+			Y: inst.Y + inst.bboxOffset.Y,
+		},
+		Size: inst.Size,
+	}
+}
+
+func (inst *Object) bboxAt(x, y float64) geom.Rect {
+	return geom.Rect{
+		Vec: geom.Vec{
+			X: x + inst.bboxOffset.X,
+			Y: y + inst.bboxOffset.Y,
+		},
+		Size: inst.Size,
+	}
 }
 
 func (inst *Object) create() {
@@ -79,11 +100,12 @@ func (inst *Object) SetSprite(spriteIndex sprite.SpriteIndex) {
 
 	// Infer width and height if they aren't manually set
 	// (This might be a bad idea, too magic! But feels like Game Maker, so...)
-	if inst.Size.X == oldSize.X &&
-		inst.Size.Y == oldSize.Y {
-		size := spriteIndex.Size()
-		inst.Size.X = size.X
-		inst.Size.Y = size.Y
+	size := inst.Size
+	if size.X == oldSize.X &&
+		size.Y == oldSize.Y {
+		rect := sprite.SpriteCollisionMask(spriteIndex)
+		inst.bboxOffset = rect.Vec
+		inst.Size = rect.Size
 	}
 }
 

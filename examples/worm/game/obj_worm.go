@@ -90,7 +90,9 @@ func (self *Worm) SetStartingBodyParts(bodyParts int) {
 
 func (self *Worm) TriggerDeath() {
 	if !self.Dead {
-		SndWormDie.Play()
+		if Global.SoundDisabled {
+			SndWormDie.Play()
+		}
 		self.SetSprite(SprWormHeadDead)
 		self.Dead = true
 
@@ -293,7 +295,9 @@ func (self *Worm) Update() {
 				self.Speed.Y = WormLeapPower / 2
 				self.FlapCounter++
 			}
-			SndPlay.Play()
+			if Global.SoundDisabled {
+				SndPlay.Play()
+			}
 		}
 	}
 
