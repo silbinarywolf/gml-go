@@ -125,16 +125,19 @@ func animationEditorUpdate() {
 
 	//
 	{
-		pos := geom.Vec{16, 16}
-		DrawTextColor(pos, "Animation Editor", color.White)
+		pos := geom.Vec{
+			X: 16,
+			Y: 16,
+		}
+		DrawTextColor(pos.X, pos.Y, "Animation Editor", color.White)
 		pos.Y += 24
-		DrawTextColor(pos, "Space = Play/Pause Animation", color.White)
+		DrawTextColor(pos.X, pos.Y, "Space = Play/Pause Animation", color.White)
 		pos.Y += 24
-		DrawTextColor(pos, "CTRL + P = Open Sprite List", color.White)
+		DrawTextColor(pos.X, pos.Y, "CTRL + P = Open Sprite List", color.White)
 
 		if spriteIndex := editor.spriteViewing.SpriteIndex(); spriteIndex != sprite.SprUndefined {
 			pos.Y += 24
-			DrawTextColor(pos, "CTRL + S = Save", color.White)
+			DrawTextColor(pos.X, pos.Y, "CTRL + S = Save", color.White)
 
 			if KeyboardCheck(VkControl) && KeyboardCheckPressed(VkS) {
 				err := sprite.DebugWriteSpriteConfig(spriteIndex)
@@ -156,7 +159,7 @@ func animationEditorUpdate() {
 	}
 
 	// Change frame viewing
-	if spr := editor.spriteViewing.SpriteIndex(); spr.IsValid() {
+	if spr := editor.spriteViewing.SpriteIndex(); spr != 0 {
 		imageIndex := math.Floor(editor.spriteViewing.ImageIndex())
 		if KeyboardCheckPressed(VkLeft) {
 			imageIndex -= 1
@@ -177,7 +180,7 @@ func animationEditorUpdate() {
 	//
 	var collisionMask *sprite.CollisionMask
 	var inheritCollisionMask *sprite.CollisionMask
-	if spriteIndex := editor.spriteViewing.SpriteIndex(); spriteIndex.IsValid() {
+	if spriteIndex := editor.spriteViewing.SpriteIndex(); spriteIndex != 0 {
 		imageIndex := int(math.Floor(editor.spriteViewing.ImageIndex()))
 		collisionMask = sprite.GetCollisionMask(spriteIndex, imageIndex, 0)
 		switch collisionMask.Kind {
@@ -205,28 +208,31 @@ func animationEditorUpdate() {
 		}
 	}
 
-	if spriteIndex := editor.spriteViewing.SpriteIndex(); spriteIndex.IsValid() {
+	if spriteIndex := editor.spriteViewing.SpriteIndex(); spriteIndex != 0 {
 		size := spriteIndex.Size()
-		pos := geom.Vec{float64(WindowWidth()/2) - (float64(size.X) / 2), float64(WindowHeight()/2) - (float64(size.Y) / 2)}
+		pos := geom.Vec{
+			X: float64(WindowWidth()/2) - (float64(size.X) / 2),
+			Y: float64(WindowHeight()/2) - (float64(size.Y) / 2),
+		}
 
 		{
 			// Draw backdrop
 			pos := pos
-			DrawRectangle(pos, size, color.RGBA{195, 195, 195, 255})
+			DrawRectangle(pos.X, pos.Y, size.X, size.Y, color.RGBA{195, 195, 195, 255})
 		}
 
 		// Sprite
 		if editor.isInPlayback {
 			editor.spriteViewing.ImageUpdate()
 		}
-		DrawSprite(spriteIndex, editor.spriteViewing.ImageIndex(), pos)
+		DrawSprite(spriteIndex, editor.spriteViewing.ImageIndex(), pos.X, pos.Y)
 
 		if collisionMask != nil {
 			// Draw collision box
 			var rect geom.Rect = collisionMask.Rect
 			rect.X += pos.X
 			rect.Y += pos.Y
-			DrawRectangle(rect.Vec, rect.Size, color.RGBA{255, 0, 0, 128})
+			DrawRectangle(rect.X, rect.Y, rect.Size.X, rect.Size.Y, color.RGBA{255, 0, 0, 128})
 		}
 
 		if collisionMask != nil &&
@@ -268,7 +274,7 @@ func animationEditorUpdate() {
 					}
 					col = color.RGBA{200, 200, 200, 255}
 				}
-				DrawRectangle(rect.Pos(), rect.Size, col)
+				DrawRectangle(rect.X, rect.Y, rect.Size.X, rect.Size.Y, col)
 			}
 			{
 				// Top-Right
@@ -290,7 +296,7 @@ func animationEditorUpdate() {
 					}
 					col = color.RGBA{200, 200, 200, 255}
 				}
-				DrawRectangle(rect.Pos(), rect.Size, col)
+				DrawRectangle(rect.X, rect.Y, rect.Size.X, rect.Size.Y, col)
 			}
 			{
 				// Bottom-Left
@@ -313,7 +319,7 @@ func animationEditorUpdate() {
 					}
 					col = color.RGBA{200, 200, 200, 255}
 				}
-				DrawRectangle(rect.Pos(), rect.Size, col)
+				DrawRectangle(rect.X, rect.Y, rect.Size.X, rect.Size.Y, col)
 			}
 			{
 				// Bottom-Right
@@ -334,7 +340,7 @@ func animationEditorUpdate() {
 					}
 					col = color.RGBA{200, 200, 200, 255}
 				}
-				DrawRectangle(rect.Pos(), rect.Size, col)
+				DrawRectangle(rect.X, rect.Y, rect.Size.X, rect.Size.Y, col)
 			}
 			{
 				// Update State
@@ -358,12 +364,12 @@ func animationEditorUpdate() {
 		}
 	}
 
-	if spriteIndex := editor.spriteViewing.SpriteIndex(); spriteIndex.IsValid() {
+	if spriteIndex := editor.spriteViewing.SpriteIndex(); spriteIndex != 0 {
 		basePos := geom.Vec{(float64(WindowWidth()) / 2) - 140, float64(WindowHeight())}
 		basePos.Y -= 210
 
 		imageIndex := int(math.Floor(editor.spriteViewing.ImageIndex()))
-		DrawTextF(basePos, "Frame: %d", imageIndex)
+		DrawTextF(basePos.X, basePos.Y, "Frame: %d", imageIndex)
 		basePos.Y += 24
 		if drawButton(basePos, "Kind: Inherit") {
 			collisionMask = sprite.GetCollisionMask(spriteIndex, imageIndex, 0)
@@ -387,58 +393,60 @@ func animationEditorUpdate() {
 			drawMask = collisionMask
 		}
 
-		{
-			text := strconv.FormatFloat(drawMask.Rect.Left(), 'f', -1, 64)
-			if KeyboardCheck(VkControl) && KeyboardCheckPressed(Vk1) {
-				editor.animationEditorToggleMenu(animMenuSpriteBboxLeft)
-				if editor.menuOpened == animMenuSpriteBboxLeft {
-					SetKeyboardString(text)
+		if drawMask != nil {
+			{
+				text := strconv.FormatFloat(drawMask.Rect.Left(), 'f', -1, 64)
+				if KeyboardCheck(VkControl) && KeyboardCheckPressed(Vk1) {
+					editor.animationEditorToggleMenu(animMenuSpriteBboxLeft)
+					if editor.menuOpened == animMenuSpriteBboxLeft {
+						SetKeyboardString(text)
+					}
+				}
+				if drawInputText(&pos, "Left (CTRL + 1)", text, editor.menuOpened == animMenuSpriteBboxLeft) {
+					editor.animationEditorToggleMenu(animMenuSpriteBboxLeft)
 				}
 			}
-			if drawInputText(&pos, "Left (CTRL + 1)", text, editor.menuOpened == animMenuSpriteBboxLeft) {
-				editor.animationEditorToggleMenu(animMenuSpriteBboxLeft)
-			}
-		}
-		{
-			pos.Y += 24
+			{
+				pos.Y += 24
 
-			text := strconv.FormatFloat(drawMask.Rect.Bottom(), 'f', -1, 64)
-			if KeyboardCheck(VkControl) && KeyboardCheckPressed(Vk3) {
-				editor.animationEditorToggleMenu(animMenuSpriteBboxBottom)
-				if editor.menuOpened == animMenuSpriteBboxBottom {
-					SetKeyboardString(text)
+				text := strconv.FormatFloat(drawMask.Rect.Bottom(), 'f', -1, 64)
+				if KeyboardCheck(VkControl) && KeyboardCheckPressed(Vk3) {
+					editor.animationEditorToggleMenu(animMenuSpriteBboxBottom)
+					if editor.menuOpened == animMenuSpriteBboxBottom {
+						SetKeyboardString(text)
+					}
+				}
+				if drawInputText(&pos, "Bottom (CTRL + 3)", text, editor.menuOpened == animMenuSpriteBboxBottom) {
+					editor.animationEditorToggleMenu(animMenuSpriteBboxBottom)
 				}
 			}
-			if drawInputText(&pos, "Bottom (CTRL + 3)", text, editor.menuOpened == animMenuSpriteBboxBottom) {
-				editor.animationEditorToggleMenu(animMenuSpriteBboxBottom)
-			}
-		}
-		pos = basePos
-		pos.X += 160
-		{
-			text := strconv.FormatFloat(drawMask.Rect.Top(), 'f', -1, 64)
-			if KeyboardCheck(VkControl) && KeyboardCheckPressed(Vk2) {
-				editor.animationEditorToggleMenu(animMenuSpriteBboxTop)
-				if editor.menuOpened == animMenuSpriteBboxTop {
-					SetKeyboardString(text)
+			pos = basePos
+			pos.X += 160
+			{
+				text := strconv.FormatFloat(drawMask.Rect.Top(), 'f', -1, 64)
+				if KeyboardCheck(VkControl) && KeyboardCheckPressed(Vk2) {
+					editor.animationEditorToggleMenu(animMenuSpriteBboxTop)
+					if editor.menuOpened == animMenuSpriteBboxTop {
+						SetKeyboardString(text)
+					}
+				}
+				if drawInputText(&pos, "Top (CTRL + 2)", text, editor.menuOpened == animMenuSpriteBboxTop) {
+					editor.animationEditorToggleMenu(animMenuSpriteBboxTop)
 				}
 			}
-			if drawInputText(&pos, "Top (CTRL + 2)", text, editor.menuOpened == animMenuSpriteBboxTop) {
-				editor.animationEditorToggleMenu(animMenuSpriteBboxTop)
-			}
-		}
-		{
-			pos.Y += 24
+			{
+				pos.Y += 24
 
-			text := strconv.FormatFloat(drawMask.Rect.Right(), 'f', -1, 64)
-			if KeyboardCheck(VkControl) && KeyboardCheckPressed(Vk4) {
-				editor.animationEditorToggleMenu(animMenuSpriteBboxRight)
-				if editor.menuOpened == animMenuSpriteBboxRight {
-					SetKeyboardString(text)
+				text := strconv.FormatFloat(drawMask.Rect.Right(), 'f', -1, 64)
+				if KeyboardCheck(VkControl) && KeyboardCheckPressed(Vk4) {
+					editor.animationEditorToggleMenu(animMenuSpriteBboxRight)
+					if editor.menuOpened == animMenuSpriteBboxRight {
+						SetKeyboardString(text)
+					}
 				}
-			}
-			if drawInputText(&pos, "Right (CTRL + 4)", text, editor.menuOpened == animMenuSpriteBboxRight) {
-				editor.animationEditorToggleMenu(animMenuSpriteBboxRight)
+				if drawInputText(&pos, "Right (CTRL + 4)", text, editor.menuOpened == animMenuSpriteBboxRight) {
+					editor.animationEditorToggleMenu(animMenuSpriteBboxRight)
+				}
 			}
 		}
 	}

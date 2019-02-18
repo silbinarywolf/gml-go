@@ -5,7 +5,6 @@ package gml
 import (
 	"image/color"
 
-	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
 )
 
@@ -16,26 +15,35 @@ func DrawGetGUI() bool {
 func DrawSetGUI(guiMode bool) {
 }
 
-func DrawSprite(spr sprite.SpriteIndex, subimage float64, position Vec) {
+func DrawSprite(spr sprite.SpriteIndex, subimage float64, x, y float64) {
 }
 
-func DrawSpriteScaled(spr sprite.SpriteIndex, subimage float64, position Vec, scale Vec) {
+func DrawSpriteAlpha(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64, alpha float64) {
 }
 
-func DrawSpriteExt(spr sprite.SpriteIndex, subimage float64, position Vec, scale Vec, alpha float64) {
+func DrawSpriteScaled(spr sprite.SpriteIndex, subimage float64, x, y float64, scale Vec) {
 }
 
-func DrawRectangle(pos Vec, size Vec, col color.Color) {
+func DrawSpriteColor(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64, col color.Color) {
 }
 
-func DrawRectangleBorder(position Vec, size Vec, color color.Color, borderSize float64, borderColor color.Color) {
+func DrawSpriteExt(spr sprite.SpriteIndex, subimage float64, x, y float64, scale Vec, alpha float64) {
 }
 
-func DrawText(position Vec, message string) {
+func DrawRectangle(x, y, w, h float64, col color.Color) {
 }
 
-func DrawTextColor(position geom.Vec, message string, col color.Color) {
+func DrawRectangleBorder(x, y, w, h float64, color color.Color, borderSize float64, borderColor color.Color) {
 }
 
-func DrawTextF(position Vec, message string, args ...interface{}) {
+func DrawText(x, y float64, message string) {
+}
+
+func DrawTextColorAlpha(x, y float64, message string, col color.Color, alpha float64) {
+}
+
+func DrawTextColor(x, y float64, message string, col color.Color) {
+}
+
+func DrawTextF(x, y float64, message string, args ...interface{}) {
 }

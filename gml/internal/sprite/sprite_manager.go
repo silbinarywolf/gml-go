@@ -6,6 +6,8 @@ import (
 	"errors"
 	"io/ioutil"
 
+	_ "image/png"
+
 	"github.com/silbinarywolf/gml-go/gml/internal/file"
 )
 
@@ -49,13 +51,13 @@ func SpriteNames() []string {
 	return gSpriteManager.assetIndexToName
 }
 
-func sprite(index SpriteIndex) *Sprite {
+/*func sprite(index SpriteIndex) *Sprite {
 	sprite := &gSpriteManager.assetList[index]
-	if sprite.isLoaded() {
+	if sprite.isLoaded {
 		return sprite
 	}
 	return nil
-}
+}*/
 
 // SpriteLoadByName is used internally by the room editor, animation editor,
 // live-sprite reloading watcher and more
@@ -80,7 +82,7 @@ func SpriteLoadByName(name string) SpriteIndex {
 func SpriteLoad(index SpriteIndex) {
 	manager := gSpriteManager
 	sprite := &manager.assetList[index]
-	if sprite.isLoaded() {
+	if sprite.isLoaded {
 		return
 	}
 	name := manager.assetIndexToName[index]

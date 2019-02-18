@@ -1,0 +1,18 @@
+{
+	"ImageSpeed": 0,
+	"CollisionMasks": {
+		"0": {
+			"0": {
+				"Kind": 1,
+				"Rect": {
+					"X": 9,
+					"Y": 12,
+					"Size": {
+						"X": 45,
+						"Y": 42
+					}
+				}
+			}
+		}
+	}
+}

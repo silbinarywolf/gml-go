@@ -16,12 +16,12 @@ func (self *Bullet) Create() {
 func (self *Bullet) Update() {
 	self.Y -= 8
 
-	for _, otherId := range gml.CollisionRectList(self, self.Pos()) {
-		other, ok := gml.InstanceGet(otherId).(*EnemyShip)
+	for _, otherId := range gml.CollisionRectList(self, self.X, self.Y) {
+		other, ok := otherId.Get().(*EnemyShip)
 		if !ok {
 			continue
 		}
-		owner := gml.InstanceGet(self.Owner).(*Player)
+		owner := self.Owner.Get().(*Player)
 		owner.Score += 1
 		gml.InstanceDestroy(other)
 	}

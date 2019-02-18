@@ -1,7 +1,6 @@
 package gml
 
 import (
-	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
 )
 
@@ -23,13 +22,13 @@ func (layer *roomInstanceLayerBackground) draw() {
 	width := float64(sprite.Size().X)
 	x := layer.x
 	y := layer.y
-	DrawSprite(sprite, 0, geom.Vec{x, y})
+	DrawSprite(sprite, 0, x, y)
 	{
 		// Tile left
 		x := x
 		for x > float64(layer.roomLeft) {
 			x -= width
-			DrawSprite(sprite, 0, geom.Vec{x, y})
+			DrawSprite(sprite, 0, x, y)
 		}
 	}
 	{
@@ -37,7 +36,7 @@ func (layer *roomInstanceLayerBackground) draw() {
 		x := x
 		for x < float64(layer.roomRight) {
 			x += width
-			DrawSprite(sprite, 0, geom.Vec{x, y})
+			DrawSprite(sprite, 0, x, y)
 		}
 	}
 }

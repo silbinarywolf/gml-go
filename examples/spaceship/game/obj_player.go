@@ -17,7 +17,7 @@ func (self *Player) Create() {
 }
 
 func (self *Player) Update() {
-	if self.enemyCreateAlarm.Update(60) {
+	if self.enemyCreateAlarm.Repeat(60) {
 		// Spawn enemies at the top of the frame, every 60 frames
 		roomSize := gml.RoomInstanceSize(self.RoomInstanceIndex())
 		gml.InstanceCreate(float64(rand.Intn(int(roomSize.X))), 0, self.RoomInstanceIndex(), ObjEnemyShip)
@@ -42,7 +42,6 @@ func (self *Player) Update() {
 }
 
 func (self *Player) Draw() {
-	gml.DrawSelf(&self.SpriteState, self.Pos())
-	gml.DrawTextF(gml.Vec{0, 32}, "Score: %v", self.Score)
-	gml.DrawTextF(gml.Vec{0, 64}, "Ships Sighted: %v", global.ShipsSighted)
+	self.Object.Draw()
+	gml.DrawTextF(16, 16, "Score: %v\n\nShips Sighted: %v", self.Score, Global.ShipsSighted)
 }

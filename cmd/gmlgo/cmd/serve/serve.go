@@ -13,6 +13,11 @@ import (
 	"time"
 )
 
+const (
+	Use              = "serve [dir]"
+	ShortDescription = "Serve a build of your game for playing in a web browser, defaults to port 8080"
+)
+
 const indexHTML = `<!DOCTYPE html>
 <head>
 	<meta name="viewport" content="width=device-width, initial-scale=1">

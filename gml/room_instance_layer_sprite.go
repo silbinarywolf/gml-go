@@ -34,9 +34,9 @@ func (layer *roomInstanceLayerSprite) draw() {
 	for _, record := range layer.sprites {
 		/*position := maybeApplyOffsetByCamera(record.Vec)
 		frame := sprite.GetRawFrame(record.Sprite, 0) // int(math.Floor(subimage))
-		op := ebiten.DrawImageOptions{}
+		op.Geom.Reset()
 		op.GeoM.Translate(position.X, position.Y)
 		screen.DrawImage(frame, &op)*/
-		DrawSprite(record.sprite, 0, geom.Vec{record.X, record.Y})
+		DrawSprite(record.sprite, 0, record.X, record.Y)
 	}
 }

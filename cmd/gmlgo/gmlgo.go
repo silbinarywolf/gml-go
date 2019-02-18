@@ -11,8 +11,8 @@ import (
 )
 
 var (
-	Directory string
-	Tags      string
+	Tags    string
+	Verbose bool
 )
 
 var rootCmd = &cobra.Command{
@@ -23,8 +23,8 @@ var rootCmd = &cobra.Command{
 }
 
 var generateCmd = &cobra.Command{
-	Use:   "generate [dir]",
-	Short: "Generate code so that assets and objects can be referenced by constant IDs",
+	Use:   generate.Use,
+	Short: generate.ShortDescription,
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		dir := ""
@@ -33,13 +33,14 @@ var generateCmd = &cobra.Command{
 		}
 		generate.Run(generate.Arguments{
 			Directory: dir,
+			Verbose:   Verbose,
 		})
 	},
 }
 
 var serveCmd = &cobra.Command{
-	Use:   "serve [dir]",
-	Short: "Serve a build of your game for playing in a web browser, defaults to port 8080",
+	Use:   serve.Use,
+	Short: serve.ShortDescription,
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		dir := ""
@@ -53,12 +54,32 @@ var serveCmd = &cobra.Command{
 	},
 }
 
+// NOTE(Jake): 2019-01-23 - Github #89
+// The effort/cost of writing the fixing tool right now is not worth it.
+// It would be less time consuming to manually fix everything.
+//var fixCmd = &cobra.Command{
+//	Use:   fix.Use,
+//	Short: fix.ShortDescription,
+//	Long:  ``,
+//	Run: func(cmd *cobra.Command, args []string) {
+//		dir := ""
+//		if len(args) > 0 {
+//			dir = args[0]
+//		}
+//		fix.Run(fix.Arguments{
+//			Directory: dir,
+//		})
+//	},
+//}
+
 func main() {
 	log.SetFlags(0)
 	log.SetPrefix("gmlgo: ")
 
 	rootCmd.AddCommand(generateCmd)
 	rootCmd.AddCommand(serveCmd)
+	//rootCmd.AddCommand(fixCmd)
+	generateCmd.Flags().BoolVar(&Verbose, "v", false, "verbose")
 	serveCmd.Flags().StringVar(&Tags, "tags", "", "a list of build tags to consider satisfied during the build")
 	//rootCmd.PersistentFlags().StringVarP(&Directory, "dir", "d", ".", "directory")
 

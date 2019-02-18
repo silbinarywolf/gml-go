@@ -25,10 +25,12 @@ type ObjectType interface {
 }
 
 type Object struct {
-	sprite.SpriteState // Sprite (contains SetSprite)
 	geom.Rect
+	sprite.SpriteState // Sprite (contains SetSprite)
+	bboxOffset         geom.Vec
 	instanceObject
 	objectIndex       ObjectIndex
+	depth             int
 	solid             bool
 	imageAngleRadians float64 // Image Angle
 }
@@ -40,7 +42,27 @@ func (inst *Object) Update() {}
 func (inst *Object) Destroy() {}
 
 func (inst *Object) Draw() {
-	DrawSelf(&inst.SpriteState, inst.Pos())
+	DrawSprite(inst.SpriteIndex(), inst.ImageIndex(), inst.X, inst.Y)
+}
+
+func (inst *Object) Bbox() geom.Rect {
+	return geom.Rect{
+		Vec: geom.Vec{
+			X: inst.X + inst.bboxOffset.X,
+			Y: inst.Y + inst.bboxOffset.Y,
+		},
+		Size: inst.Size,
+	}
+}
+
+func (inst *Object) bboxAt(x, y float64) geom.Rect {
+	return geom.Rect{
+		Vec: geom.Vec{
+			X: x + inst.bboxOffset.X,
+			Y: y + inst.bboxOffset.Y,
+		},
+		Size: inst.Size,
+	}
 }
 
 func (inst *Object) create() {
@@ -59,19 +81,31 @@ func (inst *Object) ObjectIndex() ObjectIndex   { return inst.objectIndex }
 func (inst *Object) ImageAngleRadians() float64 { return inst.imageAngleRadians }
 func (inst *Object) ImageAngle() float64        { return inst.imageAngleRadians * (180 / math.Pi) }
 
-//func (inst *Object) ImageScale() geom.Vec          { return inst.imageScale }
+// Depth will get the draw order of the object
+func (inst *Object) Depth() int { return inst.depth }
 
+// SetDepth will change the draw order of the object
+func (inst *Object) SetDepth(depth int) {
+	inst.depth = depth
+}
+
+// SetSprite will change the image used to draw the object
 func (inst *Object) SetSprite(spriteIndex sprite.SpriteIndex) {
+	var oldSize geom.Vec
+	if oldSpriteIndex := inst.SpriteIndex(); oldSpriteIndex != sprite.SprUndefined {
+		oldSize = oldSpriteIndex.Size()
+	}
+
 	inst.SpriteState.SetSprite(spriteIndex)
 
 	// Infer width and height if they aren't manually set
 	// (This might be a bad idea, too magic! But feels like Game Maker, so...)
-	size := spriteIndex.Size()
-	if inst.Size.X == 0 {
-		inst.Size.X = size.X
-	}
-	if inst.Size.Y == 0 {
-		inst.Size.Y = size.Y
+	size := inst.Size
+	if size.X == oldSize.X &&
+		size.Y == oldSize.Y {
+		rect := sprite.SpriteCollisionMask(spriteIndex)
+		inst.bboxOffset = rect.Vec
+		inst.Size = rect.Size
 	}
 }
 

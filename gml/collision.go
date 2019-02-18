@@ -1,9 +1,5 @@
 package gml
 
-import (
-	"github.com/silbinarywolf/gml-go/gml/internal/geom"
-)
-
 const (
 	DEBUG_COLLISION = false
 )
@@ -12,7 +8,9 @@ type collisionObject interface {
 	BaseObject() *Object
 }
 
-func CollisionRectList(instType collisionObject, position geom.Vec) []InstanceIndex {
+//var list []InstanceIndex
+
+func CollisionRectList(instType collisionObject, x, y float64) []InstanceIndex {
 	inst := instType.BaseObject()
 	room := roomGetInstance(inst.BaseObject().RoomInstanceIndex())
 	if room == nil {
@@ -20,21 +18,20 @@ func CollisionRectList(instType collisionObject, position geom.Vec) []InstanceIn
 	}
 
 	// Create collision rect at position provided in function
-	r1 := inst.Rect
-	r1.Vec = position
-	r1.Size = inst.Size
+	r1 := inst.bboxAt(x, y)
 
 	// todo(Jake): 2018-12-01 - #18
 	// Consider pooling reusable InstanceIndex slices to
 	// improve performance.
 	var list []InstanceIndex
+	//list = list[:0]
 	for i := 0; i < len(room.instanceLayers); i++ {
 		for _, otherIndex := range room.instanceLayers[i].instances {
-			other := instanceGetBaseObject(otherIndex)
+			other := otherIndex.getBaseObject()
 			if other == nil {
 				continue
 			}
-			if r1.CollisionRectangle(other.Rect) &&
+			if r1.CollisionRectangle(other.Bbox()) &&
 				!other.isDestroyed &&
 				inst != other {
 				list = append(list, otherIndex)
@@ -47,7 +44,7 @@ func CollisionRectList(instType collisionObject, position geom.Vec) []InstanceIn
 	return list
 }
 
-func PlaceFree(instType collisionObject, position geom.Vec) bool {
+func PlaceFree(instType collisionObject, x, y float64) bool {
 	inst := instType.BaseObject()
 	room := roomGetInstance(inst.BaseObject().RoomInstanceIndex())
 	if room == nil {
@@ -55,20 +52,18 @@ func PlaceFree(instType collisionObject, position geom.Vec) bool {
 	}
 
 	// Create collision rect at position provided in function
-	r1 := inst.Rect
-	r1.Vec = position
-	r1.Size = inst.Size
+	r1 := inst.bboxAt(x, y)
 
 	//var debugString string
 	hasCollision := false
 	for i := 0; i < len(room.instanceLayers); i++ {
 		for _, otherIndex := range room.instanceLayers[i].instances {
-			other := instanceGetBaseObject(otherIndex)
+			other := otherIndex.getBaseObject()
 			if other == nil {
 				continue
 			}
 			if other.Solid() &&
-				r1.CollisionRectangle(other.Rect) &&
+				r1.CollisionRectangle(other.Bbox()) &&
 				inst != other {
 				hasCollision = true
 			}
@@ -80,6 +75,8 @@ func PlaceFree(instType collisionObject, position geom.Vec) bool {
 			continue
 		}
 		for _, other := range layer.sprites {
+			// todo: Fix Rect() to return position plus bounding box
+			// of sprite (or delete sprite layer as planned)
 			if r1.CollisionRectangle(other.Rect()) {
 				hasCollision = true
 			}

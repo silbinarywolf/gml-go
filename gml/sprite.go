@@ -13,6 +13,7 @@ func InitSpriteGeneratedData(indexToName []string, nameToIndex map[string]Sprite
 	sprite.InitSpriteGeneratedData(indexToName, nameToIndex)
 }
 
+// SpriteLoad will ensure the sprite is loaded
 func SpriteLoad(index SpriteIndex) SpriteIndex {
 	sprite.SpriteLoad(index)
 	return index

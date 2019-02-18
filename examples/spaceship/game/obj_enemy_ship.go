@@ -14,20 +14,14 @@ func (self *EnemyShip) Create() {
 }
 
 func (self *EnemyShip) Destroy() {
-	global.ShipsSighted += 1
+	Global.ShipsSighted += 1
 }
 
 func (self *EnemyShip) Update() {
 	self.Y += 8
 
-	// Kill player
-	/*for _, otherId := range gml.CollisionRectList(self, self.Pos()) {
-		other, ok := gml.InstanceGet(otherId).(*Player)
-		if !ok {
-			continue
-		}
-		gml.InstanceDestroy(other)
-	}*/
+	// todo(Jake): 2019-01-23
+	// Add some code here to destroy the player ship?
 
 	// todo(Jake): 2018-12-06 - #38
 	// Add function to get RoomSize from RoomInstanceIndex

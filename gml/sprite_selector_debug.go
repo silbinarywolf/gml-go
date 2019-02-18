@@ -74,7 +74,7 @@ func (viewer *debugSpriteViewer) update() (sprite.SpriteIndex, bool) {
 	{
 		DrawSetGUI(true)
 		// Add black opacity over screen with menu open
-		DrawRectangle(geom.Vec{0, 0}, geom.Vec{2048, 2048}, color.RGBA{0, 0, 0, 190})
+		DrawRectangle(0, 0, 2048, 2048, color.RGBA{0, 0, 0, 190})
 
 		ui := geom.Vec{
 			X: float64(WindowWidth()) / 2,
@@ -83,26 +83,29 @@ func (viewer *debugSpriteViewer) update() (sprite.SpriteIndex, bool) {
 
 		{
 			searchText := "Search for image (type + press enter)"
-			DrawText(geom.Vec{ui.X - (StringWidth(searchText) / 4), ui.Y}, searchText)
+			DrawText(ui.X-(StringWidth(searchText)/4), ui.Y, searchText)
 			ui.Y += 24
 		}
 		{
 			typingText := KeyboardString()
-			DrawText(geom.Vec{ui.X, ui.Y}, typingText)
-			DrawText(geom.Vec{ui.X + StringWidth(typingText), ui.Y}, "|")
+			DrawText(ui.X, ui.Y, typingText)
+			DrawText(ui.X+StringWidth(typingText), ui.Y, "|")
 			ui.Y += 24
 		}
 		previewSize := geom.Vec{32, 32}
 		for _, spr := range spriteMenuFiltered {
+			if spr == 0 {
+				continue
+			}
 			var pos geom.Vec
 			pos.X = ui.X - 40
 			pos.Y = ui.Y - (previewSize.Y / 2)
 			calcPreviewSize := previewSize
 			calcPreviewSize.X /= float64(spr.Size().X)
 			calcPreviewSize.Y /= float64(spr.Size().Y)
-			DrawSpriteScaled(spr, 0, pos, calcPreviewSize)
+			DrawSpriteScaled(spr, 0, pos.X, pos.Y, calcPreviewSize)
 			name := spr.Name()
-			DrawText(geom.Vec{ui.X, ui.Y}, name)
+			DrawText(ui.X, ui.Y, name)
 			ui.Y += previewSize.Y + 16
 		}
 	}

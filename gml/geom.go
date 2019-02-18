@@ -5,3 +5,5 @@ import (
 )
 
 type Vec = geom.Vec
+
+type Rect = geom.Rect

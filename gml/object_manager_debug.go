@@ -23,7 +23,7 @@ func debugInitObjectMetaList(objTypes []ObjectType) {
 		inst.Create()
 		baseObj := inst.BaseObject()
 		meta := debugobj.ObjectMeta{
-			Rect:        baseObj.Rect,
+			Rect:        baseObj.Bbox(),
 			SpriteIndex: baseObj.SpriteIndex(),
 			ObjectName:  inst.ObjectName(),
 			ObjectIndex: int32(inst.ObjectIndex()),

@@ -19,11 +19,6 @@ func run(gameSettings GameSettings) {
 			if err := update(); err != nil {
 				return
 			}
-
-			if gGameSettings.updateCallback != nil &&
-				!gGameSettings.updateCallback() {
-				return
-			}
 			// todo(Jake): 2018-07-10
 			//
 			// Should improve this to be more robust!

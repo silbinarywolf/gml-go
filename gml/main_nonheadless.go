@@ -21,7 +21,14 @@ func updateEbiten(s *ebiten.Image) error {
 }
 
 func draw() {
+	if ebiten.IsDrawingSkipped() {
+		//log.Printf("Warning: Rendering is slow, skipping render this frame\n")
+		return
+	}
+	// Draw
+	gController.GamePreDraw()
 	gState.draw()
+	gController.GamePostDraw()
 }
 
 func run(gameSettings GameSettings) {

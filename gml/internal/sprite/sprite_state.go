@@ -1,6 +1,7 @@
 package sprite
 
 import (
+	"github.com/silbinarywolf/gml-go/gml/internal/dt"
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 )
 
@@ -11,7 +12,7 @@ type SpriteState struct {
 }
 
 func GetCollisionMask(spriteIndex SpriteIndex, imageIndex int, kind int) *CollisionMask {
-	spr := sprite(spriteIndex)
+	spr := spriteIndex.get()
 	if spr == nil {
 		return nil
 	}
@@ -25,20 +26,19 @@ func (state *SpriteState) ImageSpeed() float64 {
 	if state.spriteIndex == SprUndefined {
 		return 0
 	}
-	spr := sprite(state.spriteIndex)
-	return spr.imageSpeed
+	return state.spriteIndex.ImageSpeed()
 }
 func (state *SpriteState) ImageNumber() float64 {
 	if state.spriteIndex == SprUndefined {
 		return 0
 	}
-	spr := sprite(state.spriteIndex)
+	spr := state.spriteIndex.get()
 	return float64(len(spr.frames))
 }
 
 func (state *SpriteState) SetSprite(spriteIndex SpriteIndex) {
 	if state.spriteIndex != spriteIndex {
-		if !spriteIndex.IsLoaded() {
+		if !spriteIndex.isLoaded() {
 			SpriteLoad(spriteIndex)
 		}
 		state.spriteIndex = spriteIndex
@@ -48,18 +48,24 @@ func (state *SpriteState) SetSprite(spriteIndex SpriteIndex) {
 
 func (state *SpriteState) SetImageIndex(imageIndex float64) {
 	state.imageIndex = imageIndex
-	if state.imageIndex >= state.ImageNumber() {
-		state.imageIndex = 0
-	}
-	if state.imageIndex < 0 {
-		state.imageIndex = 0
+	imageNumber := state.ImageNumber()
+	if imageNumber > 0 {
+		for state.imageIndex >= imageNumber {
+			state.imageIndex -= imageNumber
+		}
+		if state.imageIndex < 0 {
+			state.imageIndex = 0
+		}
 	}
 }
 
 func (state *SpriteState) ImageUpdate() {
-	imageSpeed := state.ImageSpeed() // * dt
-	state.imageIndex += imageSpeed
-	if state.imageIndex >= state.ImageNumber() {
-		state.imageIndex = 0
+	imageNumber := state.ImageNumber()
+	if imageNumber > 0 {
+		imageSpeed := state.ImageSpeed() * dt.DeltaTime()
+		state.imageIndex += imageSpeed
+		for state.imageIndex >= state.ImageNumber() {
+			state.imageIndex -= state.ImageNumber()
+		}
 	}
 }

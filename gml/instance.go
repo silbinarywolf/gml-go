@@ -71,15 +71,15 @@ func (manager *roomInstanceManager) reset() {
 	*manager = roomInstanceManager{}
 }
 
-// instanceGetBaseObject get the base object for an instance
-func instanceGetBaseObject(index InstanceIndex) *Object {
-	if inst := InstanceGet(index); inst != nil {
+// getBaseObject get the base object for an instance
+func (index InstanceIndex) getBaseObject() *Object {
+	if inst := index.Get(); inst != nil {
 		return inst.BaseObject()
 	}
 	return nil
 }
 
-func InstanceGet(index InstanceIndex) ObjectType {
+func (index InstanceIndex) Get() ObjectType {
 	dataIndex, ok := gState.instanceManager.instanceIndexToIndex[index]
 	if !ok {
 		return nil
@@ -161,6 +161,52 @@ func (manager *roomInstanceManager) InstanceCreate(position geom.Vec, objectInde
 	inst.BaseObject().Vec = position
 	return inst
 }
+
+// WithAll returns a list of instances in the same room as the provided object
+func WithAll(instType collisionObject) []InstanceIndex {
+	inst := instType.BaseObject()
+	room := roomGetInstance(inst.BaseObject().RoomInstanceIndex())
+	if room == nil {
+		panic("RoomInstance this object belongs to has been destroyed")
+	}
+	var list []InstanceIndex
+	for i := 0; i < len(room.instanceLayers); i++ {
+		for _, otherIndex := range room.instanceLayers[i].instances {
+			other := otherIndex.getBaseObject()
+			if other == nil {
+				continue
+			}
+			list = append(list, otherIndex)
+		}
+	}
+	if len(list) == 0 {
+		return nil
+	}
+	return list
+}
+
+/*func WithObject(instType collisionObject, objectIndex ObjectIndex) []InstanceIndex {
+	inst := instType.BaseObject()
+	room := roomGetInstance(inst.BaseObject().RoomInstanceIndex())
+	if room == nil {
+		panic("RoomInstance this object belongs to has been destroyed")
+	}
+	var list []InstanceIndex
+	for i := 0; i < len(room.instanceLayers); i++ {
+		for _, otherIndex := range room.instanceLayers[i].instances {
+			other := otherIndex.getBaseObject()
+			if other == nil ||
+				other.ObjectIndex() == objectIndex {
+				continue
+			}
+			list = append(list, otherIndex)
+		}
+	}
+	if len(list) == 0 {
+		return nil
+	}
+	return list
+}*/
 
 /*
 func instanceRemove(inst ObjectType) {
