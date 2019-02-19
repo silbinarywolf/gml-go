@@ -6,6 +6,7 @@ import (
 	"github.com/silbinarywolf/gml-go/examples/worm/game/input"
 	"github.com/silbinarywolf/gml-go/examples/worm/game/wall"
 	"github.com/silbinarywolf/gml-go/gml"
+	"github.com/silbinarywolf/gml-go/gml/alarm"
 )
 
 const (
@@ -28,10 +29,10 @@ type Worm struct {
 	WallSpawner
 	BodyParts [WormMaxBodyParts]WormBody
 
-	sinTimer           gml.Alarm
-	dirtCreateTimer    gml.Alarm
-	bodyTimer          gml.Alarm
-	inputDisabledTimer gml.Alarm
+	sinTimer           alarm.Alarm
+	dirtCreateTimer    alarm.Alarm
+	bodyTimer          alarm.Alarm
+	inputDisabledTimer alarm.Alarm
 
 	Start       gml.Vec
 	Score       float64

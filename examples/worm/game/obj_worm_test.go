@@ -4,13 +4,13 @@ import (
 	"math"
 	"testing"
 
-	"github.com/silbinarywolf/gml-go/gml"
+	"github.com/silbinarywolf/gml-go/gml/alarm"
 )
 
 // TestSinCounter compares outputs of a pattern used by Worm against a dataset retrieved from
 // how Game Maker Studio 2 outputs the same values each frame.
 func TestSinCounter(t *testing.T) {
-	sinTimer := gml.Alarm{}
+	sinTimer := alarm.Alarm{}
 	for frame := 0; frame < len(sinCounterTestData); frame++ {
 		data := &sinCounterTestData[frame]
 		sinTimer.Repeat(WormSinCounterStart)

@@ -1,4 +1,4 @@
-package gml
+package alarm
 
 import (
 	"github.com/silbinarywolf/gml-go/gml/internal/dt"

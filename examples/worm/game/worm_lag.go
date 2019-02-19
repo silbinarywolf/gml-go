@@ -1,10 +1,8 @@
 package game
 
-import (
-	"github.com/silbinarywolf/gml-go/gml"
-)
+import "github.com/silbinarywolf/gml-go/gml/alarm"
 
 type WormLag struct {
-	LagTimer gml.Alarm
+	LagTimer alarm.Alarm
 	YLag     float64
 }

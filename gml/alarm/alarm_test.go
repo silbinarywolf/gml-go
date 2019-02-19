@@ -4,7 +4,7 @@
 // IDE Version: 2.2.1.375
 // Runtime Version: 2 2.2.1.297
 
-package gml
+package alarm
 
 import (
 	"testing"

@@ -2,6 +2,7 @@ package game
 
 import (
 	"github.com/silbinarywolf/gml-go/gml"
+	"github.com/silbinarywolf/gml-go/gml/alarm"
 )
 
 const (
@@ -14,7 +15,7 @@ type MenuGameover struct {
 	RetryButton             gml.Rect
 	IsHoveringOnMenu        bool
 	DisplayScore            GameScore
-	MedalDisplayUpdateTimer gml.Alarm
+	MedalDisplayUpdateTimer alarm.Alarm
 }
 
 func (self *MenuGameover) Create() {

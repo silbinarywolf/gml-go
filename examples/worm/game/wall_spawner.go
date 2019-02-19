@@ -5,11 +5,12 @@ import (
 
 	"github.com/silbinarywolf/gml-go/examples/worm/game/wall"
 	"github.com/silbinarywolf/gml-go/gml"
+	"github.com/silbinarywolf/gml-go/gml/alarm"
 )
 
 type WallSpawner struct {
 	WallList            []wall.WallInfo
-	SpawnWallTimer      gml.Alarm
+	SpawnWallTimer      alarm.Alarm
 	PreviousWallSpawned int
 }
 
