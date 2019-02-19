@@ -18,8 +18,8 @@ func (_ *GameController) GameStart() {
 
 	// Create new empty room
 	roomInstanceIndex := gml.RoomInstanceNew()
-	roomSize := gml.RoomInstanceSize(roomInstanceIndex)
+	roomSize := roomInstanceIndex.Size()
 
 	// Create player in the center of the room
-	Global.Player = gml.InstanceCreate(roomSize.X/2, roomSize.Y/2, roomInstanceIndex, ObjPlayer).BaseObject().InstanceIndex()
+	Global.Player = roomInstanceIndex.InstanceCreate(roomSize.X/2, roomSize.Y/2, ObjPlayer).BaseObject().InstanceIndex()
 }

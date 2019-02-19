@@ -91,51 +91,23 @@ func (index InstanceIndex) Get() ObjectType {
 	return inst
 }
 
-func InstanceChangeRoom(inst ObjectType, roomInstanceIndex RoomInstanceIndex) {
-	roomInst := &gState.roomInstances[roomInstanceIndex]
-	if !roomInst.used {
-		return
-	}
-	// NOTE(Jake): 2018-07-22
-	// For now instances default to the last instance layer
-	//layerIndex := len(roomInst.instanceLayers) - 1
-	//layer := &roomInst.instanceLayers[layerIndex]
-
-	//instanceRemove(inst)
-	panic("todo: Update this to remove instance index from one room instance list and add it to another")
-	// Move entity to new list
-	//index := len(manager.instances)
-	//moveInstance(inst, index, roomInstanceIndex, layerIndex)
-	//manager.instances = append(manager.instances, inst)
-}
-
-func InstanceCreate(x, y float64, roomInstanceIndex RoomInstanceIndex, objectIndex ObjectIndex) ObjectType {
+func instanceCreate(x, y float64, objectIndex ObjectIndex, callback func(inst *Object)) ObjectType {
 	inst := allocateNewInstance(objectIndex)
 	{
 		baseObj := inst.BaseObject()
 		baseObj.Vec = geom.Vec{x, y}
 		baseObj.objectIndex = objectIndex
-		baseObj.roomInstanceIndex = roomInstanceIndex
-		roomInst := &gState.roomInstances[roomInstanceIndex]
-		// NOTE(Jake): 2018-07-22
-		// For now instances default to the last instance layer
-		layerIndex := len(roomInst.instanceLayers) - 1
-		layer := &roomInst.instanceLayers[layerIndex]
-		layer.instances = append(layer.instances, baseObj.InstanceIndex())
+
+		callback(baseObj)
+		//baseObj.roomInstanceIndex = roomInstanceIndex
+		//roomInst := &gState.roomInstances[roomInstanceIndex]
+		//roomInst.instances = append(roomInst.instances, baseObj.InstanceIndex())
 
 		baseObj.create()
 		inst.Create()
 	}
 
 	return inst
-	/*roomInst := &gState.roomInstances[roomInstanceIndex]
-	// NOTE(Jake): 2018-07-22
-	// For now instances default to the last instance layer
-	layerIndex := len(roomInst.instanceLayers) - 1
-	layer := &roomInst.instanceLayers[layerIndex]
-	//manager.instances = append(manager.instances, inst)
-	//fmt.Printf("InstanceCreateRoom: Create on layer %d\n", layerIndex)
-	return layer.manager.InstanceCreate(position, objectIndex, roomInst.index, layer.index)*/
 }
 
 // InstanceExists will return true if an object has not been destroyed and belongs to a room
@@ -160,29 +132,6 @@ func (manager *roomInstanceManager) InstanceCreate(position geom.Vec, objectInde
 	inst.Create()
 	inst.BaseObject().Vec = position
 	return inst
-}
-
-// WithAll returns a list of instances in the same room as the provided object
-func WithAll(instType collisionObject) []InstanceIndex {
-	inst := instType.BaseObject()
-	room := roomGetInstance(inst.BaseObject().RoomInstanceIndex())
-	if room == nil {
-		panic("RoomInstance this object belongs to has been destroyed")
-	}
-	var list []InstanceIndex
-	for i := 0; i < len(room.instanceLayers); i++ {
-		for _, otherIndex := range room.instanceLayers[i].instances {
-			other := otherIndex.getBaseObject()
-			if other == nil {
-				continue
-			}
-			list = append(list, otherIndex)
-		}
-	}
-	if len(list) == 0 {
-		return nil
-	}
-	return list
 }
 
 /*func WithObject(instType collisionObject, objectIndex ObjectIndex) []InstanceIndex {

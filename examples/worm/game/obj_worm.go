@@ -98,7 +98,7 @@ func (self *Worm) TriggerDeath() {
 
 		// Show game over menu
 		self.CalcMedals()
-		gml.InstanceCreate(0, 0, self.RoomInstanceIndex(), ObjMenuGameover)
+		self.RoomInstanceIndex().InstanceCreate(0, 0, ObjMenuGameover)
 
 		// Leap into air at death
 		self.Speed.Y = WormLeapPower
@@ -277,7 +277,7 @@ func (self *Worm) Update() {
 
 	if self.dirtCreateTimer.Repeat(2) {
 		if !self.InAir {
-			gml.InstanceCreate(self.X, self.Y, self.RoomInstanceIndex(), ObjWormHole)
+			self.RoomInstanceIndex().InstanceCreate(self.X, self.Y, ObjWormHole)
 		}
 	}
 

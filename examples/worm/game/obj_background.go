@@ -55,7 +55,7 @@ func (self *Background) Update() {
 }
 
 func (self *Background) Draw() {
-	roomSize := gml.RoomInstanceSize(self.RoomInstanceIndex())
+	roomSize := self.RoomInstanceIndex().Size()
 
 	// Draw background
 	gml.DrawSprite(SprSky, 0, 0, 0)

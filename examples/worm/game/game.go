@@ -73,14 +73,14 @@ func (*GameController) GameStart() {
 	roomInstanceIndex := gml.RoomInstanceNew()
 
 	// Create background drawer
-	gml.InstanceCreate(0, 0, roomInstanceIndex, ObjBackground)
+	roomInstanceIndex.InstanceCreate(0, 0, ObjBackground)
 
 	// Create menu
-	gml.InstanceCreate(0, 0, roomInstanceIndex, ObjMenu)
+	roomInstanceIndex.InstanceCreate(0, 0, ObjMenu)
 	//gml.InstanceCreate(0, 0, roomInstanceIndex, ObjMenuGameover)
 
 	// Create player in the center of the room
-	playerInst := gml.InstanceCreate(0, 0, roomInstanceIndex, ObjWorm).(*Worm)
+	playerInst := roomInstanceIndex.InstanceCreate(0, 0, ObjWorm).(*Worm)
 	Global.Player = playerInst.InstanceIndex()
 
 	//Global.Notification.SetNotification("You got a wing\n\nEach wing will add an extra jump")
@@ -139,7 +139,7 @@ func (*GameController) GameReset() {
 
 	// Make walls from previous playthrough become disabled
 	screenSize := gml.CameraGetViewSize(0)
-	for _, id := range gml.WithAll(inst) {
+	for _, id := range inst.RoomInstanceIndex().WithAll() {
 		inst := id.Get()
 		switch inst := inst.(type) {
 		case *Wall:

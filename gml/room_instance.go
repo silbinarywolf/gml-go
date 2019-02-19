@@ -1,10 +1,17 @@
 package gml
 
 import (
+	"sort"
+
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 )
 
 type RoomInstanceIndex int32
+
+type roomInstanceStateManager struct {
+	roomInstances          []roomInstance
+	isCreatingRoomInstance bool
+}
 
 type roomInstance struct {
 	used  bool
@@ -12,58 +19,122 @@ type roomInstance struct {
 	//room  *room.Room // deprecate room data
 	geom.Rect
 
-	instanceLayers []roomInstanceLayerInstance
-	spriteLayers   []roomInstanceLayerSprite
-	drawLayers     []roomInstanceLayerDraw
+	instances []InstanceIndex
 }
 
-// todo(Jake): 2018-12-01: Remove this if it feels unnecessary or goes unused
-// RoomInstanceName get the name of the room used by the room instance
-/*func RoomInstanceName(roomInstanceIndex int) string {
-	roomInst := &gState.roomInstances[roomInstanceIndex]
-	if !roomInst.used {
-		return ""
-	}
-	return roomInst.room.Config.UUID
-}*/
+var roomInstanceState = roomInstanceStateManager{
+	roomInstances: make([]roomInstance, 1, 10),
+}
 
 // RoomInstanceNew create a new empty room instance programmatically
 func RoomInstanceNew() RoomInstanceIndex {
-	roomInst := gState.createNewRoomInstance()
+	roomInstanceState.roomInstances = append(roomInstanceState.roomInstances, roomInstance{
+		used: true,
+	})
+	roomInstanceState.isCreatingRoomInstance = true
+	defer func() {
+		roomInstanceState.isCreatingRoomInstance = false
+	}()
+	index := len(roomInstanceState.roomInstances) - 1
+	roomInst := &roomInstanceState.roomInstances[index]
+	roomInst.index = RoomInstanceIndex(index)
+
+	// If creating room programmatically, default the room size
+	// to the size of the screen
+	roomInst.Size = WindowSize()
+
 	return roomInst.index
 }
 
+func (roomInstanceIndex RoomInstanceIndex) RoomInstanceChangeRoom(inst ObjectType) {
+	roomInst := &roomInstanceState.roomInstances[roomInstanceIndex]
+	if !roomInst.used {
+		return
+	}
+	// NOTE(Jake): 2018-07-22
+	// For now instances default to the last instance layer
+	//layerIndex := len(roomInst.instanceLayers) - 1
+	//layer := &roomInst.instanceLayers[layerIndex]
+
+	//instanceRemove(inst)
+	panic("todo: Update this to remove instance index from one room instance list and add it to another")
+	// Move entity to new list
+	//index := len(manager.instances)
+	//moveInstance(inst, index, roomInstanceIndex, layerIndex)
+	//manager.instances = append(manager.instances, inst)
+}
+
+func (roomInstanceIndex RoomInstanceIndex) InstanceCreate(x, y float64, objectIndex ObjectIndex) ObjectType {
+	return instanceCreate(x, y, objectIndex, func(inst *Object) {
+		inst.roomInstanceIndex = roomInstanceIndex
+		roomInst := &roomInstanceState.roomInstances[roomInstanceIndex]
+		roomInst.instances = append(roomInst.instances, inst.InstanceIndex())
+	})
+	/*inst := allocateNewInstance(objectIndex)
+	{
+		baseObj := inst.BaseObject()
+		baseObj.Vec = geom.Vec{x, y}
+		baseObj.objectIndex = objectIndex
+
+		baseObj.roomInstanceIndex = roomInstanceIndex
+		roomInst := &roomInstanceStateManager.roomInstances[roomInstanceIndex]
+		roomInst.instances = append(roomInst.instances, baseObj.InstanceIndex())
+
+		baseObj.create()
+		inst.Create()
+	}
+
+	return inst*/
+}
+
 // RoomInstanceDestroy destroys a room instance
-func RoomInstanceDestroy(roomInstanceIndex RoomInstanceIndex) {
+func RoomDestroy(roomInstanceIndex RoomInstanceIndex) {
 	if roomInst := roomGetInstance(roomInstanceIndex); roomInst != nil {
-		gState.deleteRoomInstance(roomInst)
+		// NOTE(Jake): 2018-08-21
+		// Running Destroy() on each rather than InstanceDestroy()
+		// for speed purposes
+		for _, instanceIndex := range roomInst.instances {
+			if inst := instanceIndex.Get(); inst != nil {
+				inst.Destroy()
+				cameraInstanceDestroy(instanceIndex)
+			}
+		}
+		roomInst.instances = nil
+		roomInst.used = false
+		*roomInst = roomInstance{}
 	}
 }
 
-// RoomInstanceSize returns the size of the given room instance
-func RoomInstanceSize(roomInstanceIndex RoomInstanceIndex) geom.Vec {
+// Size returns the size of the given room instance
+func (roomInstanceIndex RoomInstanceIndex) Size() geom.Vec {
 	if roomInst := roomGetInstance(roomInstanceIndex); roomInst != nil {
 		return roomInst.Size
 	}
 	panic("Invalid roomInstanceIndex given")
 }
 
-type roomInstanceObject interface {
-	BaseObject() *Object
-}
-
-/*func RoomInstanceInstances(inst roomInstanceObject) []ObjectType {
-	roomInstanceIndex := RoomInstanceIndex(inst.BaseObject())
-	roomInst := RoomGetInstance(roomInstanceIndex)
+// WithAll returns a list of instances in the same room as the provided object
+func (roomIndex RoomInstanceIndex) WithAll() []InstanceIndex {
+	roomInst := roomGetInstance(roomIndex)
 	if roomInst == nil {
+		panic("RoomInstance this object belongs to has been destroyed")
+	}
+	var list []InstanceIndex
+	for _, otherIndex := range roomInst.instances {
+		other := otherIndex.getBaseObject()
+		if other == nil {
+			continue
+		}
+		list = append(list, otherIndex)
+	}
+	if len(list) == 0 {
 		return nil
 	}
-	instanceLayer := &roomInst.instanceLayers[len(roomInst.instanceLayers)-1]
-	return instanceLayer.manager.instances
-}*/
+	return list
+}
 
 func roomGetInstance(roomInstanceIndex RoomInstanceIndex) *roomInstance {
-	roomInst := &gState.roomInstances[roomInstanceIndex]
+	roomInst := &roomInstanceState.roomInstances[roomInstanceIndex]
 	if roomInst.used {
 		return roomInst
 	}
@@ -77,7 +148,25 @@ func (roomInst *roomInstance) update(animationUpdate bool) {
 }
 
 func (roomInst *roomInstance) draw() {
-	for _, layer := range roomInst.drawLayers {
-		layer.draw()
+	// Sort by order
+	sort.SliceStable(roomInst.instances, func(i, j int) bool {
+		a := roomInst.instances[i].getBaseObject()
+		if a == nil {
+			return false
+		}
+		b := roomInst.instances[j].getBaseObject()
+		if b == nil {
+			return false
+		}
+		return a.Depth() > b.Depth()
+	})
+	//log.Printf("Stable sort count: %d, cap: %d\n", len(layer.instances), cap(layer.instances))
+
+	for _, instanceIndex := range roomInst.instances {
+		inst := instanceIndex.Get()
+		if inst == nil {
+			panic("instance index not removed from draw list when destroyed")
+		}
+		inst.Draw()
 	}
 }
