@@ -105,6 +105,15 @@ func RoomDestroy(roomInstanceIndex RoomInstanceIndex) {
 	}
 }
 
+func (roomInstanceIndex RoomInstanceIndex) SetSize(width, height float64) {
+	if roomInst := roomGetInstance(roomInstanceIndex); roomInst != nil {
+		roomInst.Size.X = width
+		roomInst.Size.Y = height
+		return
+	}
+	panic("Invalid roomInstanceIndex given")
+}
+
 // Size returns the size of the given room instance
 func (roomInstanceIndex RoomInstanceIndex) Size() geom.Vec {
 	if roomInst := roomGetInstance(roomInstanceIndex); roomInst != nil {

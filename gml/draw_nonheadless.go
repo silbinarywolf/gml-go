@@ -58,14 +58,18 @@ func DrawSprite(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64) 
 }
 
 func DrawSpriteAlpha(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64, alpha float64) {
-	DrawSpriteExt(spriteIndex, subimage, x, y, geom.Vec{1, 1}, alpha)
+	DrawSpriteExt(spriteIndex, subimage, x, y, 0, geom.Vec{1, 1}, alpha)
 }
 
 func DrawSpriteScaled(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64, scale geom.Vec) {
-	DrawSpriteExt(spriteIndex, subimage, x, y, scale, 1.0)
+	DrawSpriteExt(spriteIndex, subimage, x, y, 0, scale, 1.0)
 }
 
-func DrawSpriteExt(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64, scale geom.Vec, alpha float64) {
+func DrawSpriteRotated(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64, rotation float64) {
+	DrawSpriteExt(spriteIndex, subimage, x, y, rotation, geom.Vec{1, 1}, 1.0)
+}
+
+func DrawSpriteExt(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64, rotation float64, scale geom.Vec, alpha float64) {
 	if spriteIndex == sprite.SprUndefined {
 		// If no sprite in use, draw nothing
 		return
@@ -80,6 +84,7 @@ func DrawSpriteExt(spriteIndex sprite.SpriteIndex, subimage float64, x, y float6
 	frame := sprite.GetRawFrame(spriteIndex, int(math.Floor(subimage)))
 	op.GeoM.Reset()
 	op.GeoM.Scale(scale.X, scale.Y)
+	op.GeoM.Rotate(rotation / 57.2958)
 	op.GeoM.Translate(position.X, position.Y)
 	op.ColorM.Reset()
 	op.ColorM.Scale(1.0, 1.0, 1.0, alpha)

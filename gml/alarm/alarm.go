@@ -33,6 +33,13 @@ func (alarm *Alarm) Set(ticks float64) {
 	alarm.isTimerSet = true
 }
 
+// IsRunning will return true if the timer is set and running.
+// When used with Set, it will remain true until Tick() returns true
+// When used with Repeat, it will always remain true after Repeat() is called for the first time.
+func (alarm *Alarm) IsRunning() bool {
+	return alarm.isTimerSet
+}
+
 // Tick will process the timed event and return true if the timer has expired
 func (alarm *Alarm) Tick() bool {
 	if !alarm.isTimerSet {
