@@ -47,10 +47,10 @@ type roomInstanceManager struct {
 }
 
 type instanceObject struct {
-	isDestroyed        bool
-	instanceIndex      InstanceIndex     // global uuid
-	roomInstanceIndex  RoomInstanceIndex // Room Instance Index belongs to
-	layerInstanceIndex int               // Layer belongs to
+	isDestroyed       bool
+	instanceIndex     InstanceIndex     // global uuid
+	roomInstanceIndex RoomInstanceIndex // Room Instance Index belongs to
+	//layerInstanceIndex int               // Layer belongs to
 }
 
 func (inst *Object) InstanceIndex() InstanceIndex {
@@ -119,20 +119,20 @@ func InstanceExists(inst ObjectType) bool {
 		roomInst != nil
 }
 
-func (manager *roomInstanceManager) InstanceCreate(position geom.Vec, objectIndex ObjectIndex, roomInstanceIndex RoomInstanceIndex, layerIndex int) ObjectType {
+/*func (manager *roomInstanceManager) InstanceCreate(position geom.Vec, objectIndex ObjectIndex, roomInstanceIndex RoomInstanceIndex) ObjectType {
 
 	// Create and add to entity list
 	index := len(manager.instances)
 
 	// Get instance
-	inst := newRawInstance(objectIndex, index, roomInstanceIndex, layerIndex)
+	inst := newRawInstance(objectIndex, index, roomInstanceIndex)
 	manager.instances = append(manager.instances, inst)
 
 	// Init and Set position
 	inst.Create()
 	inst.BaseObject().Vec = position
 	return inst
-}
+}*/
 
 /*func WithObject(instType collisionObject, objectIndex ObjectIndex) []InstanceIndex {
 	inst := instType.BaseObject()

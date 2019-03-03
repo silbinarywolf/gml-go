@@ -52,7 +52,7 @@ func InitObjectGeneratedData(indexToName []string, nameToIndex map[string]Object
 	baseObj.layerInstanceIndex = layerIndex
 }*/
 
-func newRawInstance(objectIndex ObjectIndex, index int, roomInstanceIndex RoomInstanceIndex, layerIndex int) ObjectType {
+func newRawInstance(objectIndex ObjectIndex, index int, roomInstanceIndex RoomInstanceIndex) ObjectType {
 	valToCopy := gObjectManager.idToEntityData[objectIndex]
 	if valToCopy == nil {
 		panic("Invalid objectIndex given")
@@ -62,28 +62,9 @@ func newRawInstance(objectIndex ObjectIndex, index int, roomInstanceIndex RoomIn
 	baseObj := inst.BaseObject()
 	//baseObj.index = index
 	baseObj.roomInstanceIndex = roomInstanceIndex
-	baseObj.layerInstanceIndex = layerIndex
 	baseObj.objectIndex = objectIndex
 	baseObj.create()
 	return inst
-	/*// Create
-	valToCopy := gObjectManager.idToEntityData[objectIndex]
-	inst := reflect.New(reflect.ValueOf(valToCopy).Elem().Type()).Interface().(ObjectType)
-
-	// Initialize object
-	baseObj := inst.BaseObject()
-	baseObj.index = index
-	baseObj.roomInstanceIndex = roomInstanceIndex
-	baseObj.layerInstanceIndex = layerIndex
-	// todo(Jake): 2018-07-08
-	//
-	// Figure out a cleaner way to handle this functionality across
-	// the room editor and gamecode.
-	//
-	// Perhaps force objects to have to be created via an instance manager.
-	//
-	baseObj.SpaceObject.Init(space, spaceIndex)
-	baseObj.create()*/
 }
 
 func ObjectGetIndex(name string) (ObjectIndex, bool) {

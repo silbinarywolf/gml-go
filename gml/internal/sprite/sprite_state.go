@@ -1,9 +1,18 @@
 package sprite
 
 import (
+	"bytes"
+	"encoding/gob"
+
 	"github.com/silbinarywolf/gml-go/gml/internal/dt"
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 )
+
+type spriteStateSerialize struct {
+	SpriteIndex SpriteIndex
+	ImageScale  geom.Vec
+	ImageIndex  float64
+}
 
 type SpriteState struct {
 	spriteIndex SpriteIndex
@@ -68,4 +77,31 @@ func (state *SpriteState) ImageUpdate() {
 			state.imageIndex -= state.ImageNumber()
 		}
 	}
+}
+
+func (state SpriteState) MarshalBinary() ([]byte, error) {
+	w := spriteStateSerialize{
+		SpriteIndex: state.spriteIndex,
+		ImageScale:  state.ImageScale,
+		ImageIndex:  state.imageIndex,
+	}
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+	if err := enc.Encode(w); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+func (state *SpriteState) UnmarshalBinary(data []byte) error {
+	w := spriteStateSerialize{}
+	reader := bytes.NewReader(data)
+	dec := gob.NewDecoder(reader)
+	if err := dec.Decode(&w); err != nil {
+		return err
+	}
+	state.SetSprite(w.SpriteIndex)
+	state.SetImageIndex(w.ImageIndex)
+	state.ImageScale = w.ImageScale
+	return nil
 }

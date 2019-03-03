@@ -1,6 +1,8 @@
 package gml
 
 import (
+	"bytes"
+	"encoding/gob"
 	"math"
 
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
@@ -22,6 +24,24 @@ type ObjectType interface {
 	Destroy()
 	Update()
 	Draw()
+}
+
+/*type objectInteral struct {
+	objectIndex       ObjectIndex
+	depth             int
+	solid             bool
+}*/
+
+type objectSerialize struct {
+	Rect              geom.Rect
+	SpriteState       sprite.SpriteState
+	BboxOffset        geom.Vec
+	InstanceIndex     InstanceIndex
+	RoomInstanceIndex RoomInstanceIndex
+	ObjectIndex       ObjectIndex
+	Depth             int
+	Solid             bool
+	ImageAngleRadians float64
 }
 
 type Object struct {
@@ -115,4 +135,43 @@ func (inst *Object) SetImageAngle(angleInDegrees float64) {
 
 func (inst *Object) SetImageAngleRadians(angleInRadians float64) {
 	inst.imageAngleRadians = angleInRadians
+}
+
+func (inst Object) MarshalBinary() ([]byte, error) {
+	w := objectSerialize{
+		Rect:              inst.Rect,
+		SpriteState:       inst.SpriteState,
+		BboxOffset:        inst.bboxOffset,
+		InstanceIndex:     inst.instanceIndex,
+		RoomInstanceIndex: inst.roomInstanceIndex,
+		ObjectIndex:       inst.objectIndex,
+		Depth:             inst.depth,
+		Solid:             inst.solid,
+		ImageAngleRadians: inst.imageAngleRadians,
+	}
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+	if err := enc.Encode(w); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+func (inst *Object) UnmarshalBinary(data []byte) error {
+	w := objectSerialize{}
+	reader := bytes.NewReader(data)
+	dec := gob.NewDecoder(reader)
+	if err := dec.Decode(&w); err != nil {
+		return err
+	}
+	inst.Rect = w.Rect
+	inst.SpriteState = w.SpriteState
+	inst.bboxOffset = w.BboxOffset
+	inst.instanceIndex = w.InstanceIndex
+	inst.roomInstanceIndex = w.RoomInstanceIndex
+	inst.objectIndex = w.ObjectIndex
+	inst.depth = w.Depth
+	inst.solid = w.Solid
+	inst.imageAngleRadians = w.ImageAngleRadians
+	return nil
 }
