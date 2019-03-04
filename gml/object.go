@@ -26,11 +26,14 @@ type ObjectType interface {
 	Draw()
 }
 
-/*type objectInteral struct {
+type objectInternal struct {
+	bboxOffset geom.Vec
+	instanceObject
 	objectIndex       ObjectIndex
 	depth             int
 	solid             bool
-}*/
+	imageAngleRadians float64 // Image Angle
+}
 
 type objectSerialize struct {
 	Rect              geom.Rect
@@ -47,12 +50,7 @@ type objectSerialize struct {
 type Object struct {
 	geom.Rect
 	sprite.SpriteState // Sprite (contains SetSprite)
-	bboxOffset         geom.Vec
-	instanceObject
-	objectIndex       ObjectIndex
-	depth             int
-	solid             bool
-	imageAngleRadians float64 // Image Angle
+	internal           objectInternal
 }
 
 func (inst *Object) Create() {}
@@ -68,8 +66,8 @@ func (inst *Object) Draw() {
 func (inst *Object) Bbox() geom.Rect {
 	return geom.Rect{
 		Vec: geom.Vec{
-			X: inst.X + inst.bboxOffset.X,
-			Y: inst.Y + inst.bboxOffset.Y,
+			X: inst.X + inst.internal.bboxOffset.X,
+			Y: inst.Y + inst.internal.bboxOffset.Y,
 		},
 		Size: inst.Size,
 	}
@@ -78,8 +76,8 @@ func (inst *Object) Bbox() geom.Rect {
 func (inst *Object) bboxAt(x, y float64) geom.Rect {
 	return geom.Rect{
 		Vec: geom.Vec{
-			X: x + inst.bboxOffset.X,
-			Y: y + inst.bboxOffset.Y,
+			X: x + inst.internal.bboxOffset.X,
+			Y: y + inst.internal.bboxOffset.Y,
 		},
 		Size: inst.Size,
 	}
@@ -91,22 +89,22 @@ func (inst *Object) create() {
 }
 
 func (inst *Object) SetSolid(isSolid bool) {
-	inst.solid = isSolid
+	inst.internal.solid = isSolid
 }
 
-func (inst *Object) Solid() bool                { return inst.solid }
+func (inst *Object) Solid() bool                { return inst.internal.solid }
 func (inst *Object) BaseObject() *Object        { return inst }
-func (inst *Object) ObjectName() string         { return gObjectManager.indexToName[inst.objectIndex] }
-func (inst *Object) ObjectIndex() ObjectIndex   { return inst.objectIndex }
-func (inst *Object) ImageAngleRadians() float64 { return inst.imageAngleRadians }
-func (inst *Object) ImageAngle() float64        { return inst.imageAngleRadians * (180 / math.Pi) }
+func (inst *Object) ObjectName() string         { return gObjectManager.indexToName[inst.internal.objectIndex] }
+func (inst *Object) ObjectIndex() ObjectIndex   { return inst.internal.objectIndex }
+func (inst *Object) ImageAngleRadians() float64 { return inst.internal.imageAngleRadians }
+func (inst *Object) ImageAngle() float64        { return inst.internal.imageAngleRadians * (180 / math.Pi) }
 
 // Depth will get the draw order of the object
-func (inst *Object) Depth() int { return inst.depth }
+func (inst *Object) Depth() int { return inst.internal.depth }
 
 // SetDepth will change the draw order of the object
 func (inst *Object) SetDepth(depth int) {
-	inst.depth = depth
+	inst.internal.depth = depth
 }
 
 // SetSprite will change the image used to draw the object
@@ -124,30 +122,30 @@ func (inst *Object) SetSprite(spriteIndex sprite.SpriteIndex) {
 	if size.X == oldSize.X &&
 		size.Y == oldSize.Y {
 		rect := sprite.SpriteCollisionMask(spriteIndex)
-		inst.bboxOffset = rect.Vec
+		inst.internal.bboxOffset = rect.Vec
 		inst.Size = rect.Size
 	}
 }
 
 func (inst *Object) SetImageAngle(angleInDegrees float64) {
-	inst.imageAngleRadians = angleInDegrees * (math.Pi / 180)
+	inst.internal.imageAngleRadians = angleInDegrees * (math.Pi / 180)
 }
 
 func (inst *Object) SetImageAngleRadians(angleInRadians float64) {
-	inst.imageAngleRadians = angleInRadians
+	inst.internal.imageAngleRadians = angleInRadians
 }
 
-func (inst Object) MarshalBinary() ([]byte, error) {
+func (inst Object) MarshalBinaryField() ([]byte, error) {
 	w := objectSerialize{
 		Rect:              inst.Rect,
 		SpriteState:       inst.SpriteState,
-		BboxOffset:        inst.bboxOffset,
-		InstanceIndex:     inst.instanceIndex,
-		RoomInstanceIndex: inst.roomInstanceIndex,
-		ObjectIndex:       inst.objectIndex,
-		Depth:             inst.depth,
-		Solid:             inst.solid,
-		ImageAngleRadians: inst.imageAngleRadians,
+		BboxOffset:        inst.internal.bboxOffset,
+		InstanceIndex:     inst.internal.instanceIndex,
+		RoomInstanceIndex: inst.internal.roomInstanceIndex,
+		ObjectIndex:       inst.internal.objectIndex,
+		Depth:             inst.internal.depth,
+		Solid:             inst.internal.solid,
+		ImageAngleRadians: inst.internal.imageAngleRadians,
 	}
 	var buf bytes.Buffer
 	enc := gob.NewEncoder(&buf)
@@ -157,7 +155,7 @@ func (inst Object) MarshalBinary() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (inst *Object) UnmarshalBinary(data []byte) error {
+func (inst *Object) UnmarshalBinaryField(data []byte) error {
 	w := objectSerialize{}
 	reader := bytes.NewReader(data)
 	dec := gob.NewDecoder(reader)
@@ -166,12 +164,12 @@ func (inst *Object) UnmarshalBinary(data []byte) error {
 	}
 	inst.Rect = w.Rect
 	inst.SpriteState = w.SpriteState
-	inst.bboxOffset = w.BboxOffset
-	inst.instanceIndex = w.InstanceIndex
-	inst.roomInstanceIndex = w.RoomInstanceIndex
-	inst.objectIndex = w.ObjectIndex
-	inst.depth = w.Depth
-	inst.solid = w.Solid
-	inst.imageAngleRadians = w.ImageAngleRadians
+	inst.internal.bboxOffset = w.BboxOffset
+	inst.internal.instanceIndex = w.InstanceIndex
+	inst.internal.roomInstanceIndex = w.RoomInstanceIndex
+	inst.internal.objectIndex = w.ObjectIndex
+	inst.internal.depth = w.Depth
+	inst.internal.solid = w.Solid
+	inst.internal.imageAngleRadians = w.ImageAngleRadians
 	return nil
 }

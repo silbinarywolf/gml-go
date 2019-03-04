@@ -35,8 +35,8 @@ func allocateNewInstance(objectIndex ObjectIndex) ObjectType {
 	inst := manager.instances[slot]
 	baseObj := inst.BaseObject()
 	gState.instanceManager.nextInstanceIndex++
-	baseObj.instanceIndex = gState.instanceManager.nextInstanceIndex
-	manager.instanceIndexToIndex[baseObj.instanceIndex] = slot
+	baseObj.internal.instanceIndex = gState.instanceManager.nextInstanceIndex
+	manager.instanceIndexToIndex[baseObj.internal.instanceIndex] = slot
 	return inst
 }
 
@@ -54,11 +54,11 @@ type instanceObject struct {
 }
 
 func (inst *Object) InstanceIndex() InstanceIndex {
-	return inst.instanceIndex
+	return inst.internal.instanceIndex
 }
 
 func (inst *Object) RoomInstanceIndex() RoomInstanceIndex {
-	return inst.roomInstanceIndex
+	return inst.internal.roomInstanceIndex
 }
 
 func newroomInstanceManager() *roomInstanceManager {
@@ -96,7 +96,7 @@ func instanceCreate(x, y float64, objectIndex ObjectIndex, callback func(inst *O
 	{
 		baseObj := inst.BaseObject()
 		baseObj.Vec = geom.Vec{x, y}
-		baseObj.objectIndex = objectIndex
+		baseObj.internal.objectIndex = objectIndex
 
 		callback(baseObj)
 		//baseObj.roomInstanceIndex = roomInstanceIndex
@@ -115,7 +115,7 @@ func InstanceExists(inst ObjectType) bool {
 	baseObj := inst.BaseObject()
 	roomInst := roomGetInstance(baseObj.RoomInstanceIndex())
 	return baseObj != nil &&
-		!baseObj.isDestroyed &&
+		!baseObj.internal.isDestroyed &&
 		roomInst != nil
 }
 
@@ -201,7 +201,7 @@ func instanceRemove(inst ObjectType) {
 
 func InstanceDestroy(inst ObjectType) {
 	baseObj := inst.BaseObject()
-	if baseObj.isDestroyed {
+	if baseObj.internal.isDestroyed {
 		// NOTE(Jake): 2018-10-07
 		// Maybe making this just silently returning will be better / less error
 		// prone? For now lets be strict.
@@ -212,7 +212,7 @@ func InstanceDestroy(inst ObjectType) {
 	inst.Destroy()
 
 	// Mark as destroyed
-	baseObj.isDestroyed = true
+	baseObj.internal.isDestroyed = true
 
 	// NOTE(Jake): 2018-10-07
 	// Remove at the end of the frame (gState.update)
