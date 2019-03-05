@@ -22,8 +22,8 @@ type camera struct {
 	enabled bool
 	follow  InstanceIndex
 	geom.Rect
-	scale geom.Vec
-	//updateFunc func()
+	scale      geom.Vec
+	updateFunc func()
 }
 
 func (manager *cameraManager) reset() {
@@ -85,11 +85,9 @@ func cameraUpdate() {
 		}
 		view.cameraFitToRoomDimensions()
 
-		// todo: Jake: 2019-02-24 - https://github.com/silbinarywolf/gml-go/issues/103
-		// Add this API when needed
-		//if view.updateFunc != nil {
-		//	view.updateFunc()
-		//}
+		if view.updateFunc != nil {
+			view.updateFunc()
+		}
 	}
 }
 
@@ -127,10 +125,10 @@ func CameraSetViewPos(index int, x, y float64) {
 	view.cameraFitToRoomDimensions()
 }
 
-//func CameraSetUpdateFunction(index int, updateFunc func()) {
-//	view := &gCameraManager.cameras[index]
-//	view.updateFunc = updateFunc
-//}
+func CameraSetUpdateFunction(index int, updateFunc func()) {
+	view := &gCameraManager.cameras[index]
+	view.updateFunc = updateFunc
+}
 
 func CameraSetViewSize(index int, width, height float64) {
 	view := &gCameraManager.cameras[index]

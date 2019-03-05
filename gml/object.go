@@ -135,7 +135,7 @@ func (inst *Object) SetImageAngleRadians(angleInRadians float64) {
 	inst.internal.imageAngleRadians = angleInRadians
 }
 
-func (inst Object) MarshalBinaryField() ([]byte, error) {
+func (inst Object) MarshalBinaryObject() ([]byte, error) {
 	w := objectSerialize{
 		Rect:              inst.Rect,
 		SpriteState:       inst.SpriteState,
@@ -155,7 +155,7 @@ func (inst Object) MarshalBinaryField() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (inst *Object) UnmarshalBinaryField(data []byte) error {
+func (inst *Object) UnmarshalBinaryObject(data []byte) error {
 	w := objectSerialize{}
 	reader := bytes.NewReader(data)
 	dec := gob.NewDecoder(reader)
