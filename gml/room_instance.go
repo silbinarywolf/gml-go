@@ -69,7 +69,7 @@ func (roomInstanceIndex RoomInstanceIndex) InstanceCreate(x, y float64, objectIn
 		inst.internal.roomInstanceIndex = roomInstanceIndex
 		roomInst := &roomInstanceState.roomInstances[roomInstanceIndex]
 		roomInst.instances = append(roomInst.instances, inst.InstanceIndex())
-	})
+	}, true)
 	/*inst := allocateNewInstance(objectIndex)
 	{
 		baseObj := inst.BaseObject()

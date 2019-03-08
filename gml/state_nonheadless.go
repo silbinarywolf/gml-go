@@ -17,7 +17,7 @@ func (state *state) draw() {
 			// Render instances in same room as instance following
 			roomInst := roomGetInstance(inst.RoomInstanceIndex())
 			if roomInst == nil {
-				panic("RoomInstance this object belongs to has been destroyed")
+				panic("draw: RoomInstance this object belongs to has been destroyed")
 			}
 			roomInst.draw()
 		} else {

@@ -1,6 +1,7 @@
 package gml
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
@@ -15,6 +16,20 @@ type instanceManager struct {
 	instances            []ObjectType
 	instanceIndexToIndex map[InstanceIndex]int
 	nextInstanceIndex    InstanceIndex
+}
+
+// InstanceRestore re-creates an object using a previously used instance index
+// and object index. This is used to bring old objects back with serialization.
+func InstanceRestore(oldInstanceIndex InstanceIndex, objectIndex ObjectIndex) ObjectType {
+	inst := oldInstanceIndex.Get()
+	if inst != nil {
+		panic("Cannot call InstanceRestore if instance still exists.")
+	}
+	return instanceCreate(0, 0, objectIndex, func(inst *Object) {
+		inst.internal.instanceIndex = oldInstanceIndex
+		//roomInst := &roomInstanceState.roomInstances[roomInstanceIndex]
+		//roomInst.instances = append(roomInst.instances, inst.InstanceIndex())
+	}, false)
 }
 
 func allocateNewInstance(objectIndex ObjectIndex) ObjectType {
@@ -33,10 +48,6 @@ func allocateNewInstance(objectIndex ObjectIndex) ObjectType {
 	}
 	slot := len(manager.instances) - 1
 	inst := manager.instances[slot]
-	baseObj := inst.BaseObject()
-	gState.instanceManager.nextInstanceIndex++
-	baseObj.internal.instanceIndex = gState.instanceManager.nextInstanceIndex
-	manager.instanceIndexToIndex[baseObj.internal.instanceIndex] = slot
 	return inst
 }
 
@@ -91,20 +102,34 @@ func (index InstanceIndex) Get() ObjectType {
 	return inst
 }
 
-func instanceCreate(x, y float64, objectIndex ObjectIndex, callback func(inst *Object)) ObjectType {
+func instanceCreate(x, y float64, objectIndex ObjectIndex, callback func(inst *Object), assignNewInstanceIndex bool) ObjectType {
 	inst := allocateNewInstance(objectIndex)
 	{
 		baseObj := inst.BaseObject()
-		baseObj.Vec = geom.Vec{x, y}
 		baseObj.internal.objectIndex = objectIndex
+		if assignNewInstanceIndex {
+			// Get next instance index
+			gState.instanceManager.nextInstanceIndex++
+			baseObj.internal.instanceIndex = gState.instanceManager.nextInstanceIndex
+		}
+		baseObj.Vec = geom.Vec{x, y}
 
 		callback(baseObj)
-		//baseObj.roomInstanceIndex = roomInstanceIndex
-		//roomInst := &gState.roomInstances[roomInstanceIndex]
-		//roomInst.instances = append(roomInst.instances, baseObj.InstanceIndex())
 
-		baseObj.create()
-		inst.Create()
+		if baseObj.internal.instanceIndex == 0 {
+			panic("Instance index cannot be 0")
+		}
+
+		// NOTE: Jake: 2019-03-08
+		// This is sensitive as it expects InstanceRestore to set a instanceIndex
+		slot := len(gState.instanceManager.instances) - 1
+		fmt.Printf("Instance Index: %d\n", baseObj.internal.instanceIndex)
+		gState.instanceManager.instanceIndexToIndex[baseObj.internal.instanceIndex] = slot
+
+		if assignNewInstanceIndex {
+			baseObj.create()
+			inst.Create()
+		}
 	}
 
 	return inst
@@ -118,86 +143,6 @@ func InstanceExists(inst ObjectType) bool {
 		!baseObj.internal.isDestroyed &&
 		roomInst != nil
 }
-
-/*func (manager *roomInstanceManager) InstanceCreate(position geom.Vec, objectIndex ObjectIndex, roomInstanceIndex RoomInstanceIndex) ObjectType {
-
-	// Create and add to entity list
-	index := len(manager.instances)
-
-	// Get instance
-	inst := newRawInstance(objectIndex, index, roomInstanceIndex)
-	manager.instances = append(manager.instances, inst)
-
-	// Init and Set position
-	inst.Create()
-	inst.BaseObject().Vec = position
-	return inst
-}*/
-
-/*func WithObject(instType collisionObject, objectIndex ObjectIndex) []InstanceIndex {
-	inst := instType.BaseObject()
-	room := roomGetInstance(inst.BaseObject().RoomInstanceIndex())
-	if room == nil {
-		panic("RoomInstance this object belongs to has been destroyed")
-	}
-	var list []InstanceIndex
-	for i := 0; i < len(room.instanceLayers); i++ {
-		for _, otherIndex := range room.instanceLayers[i].instances {
-			other := otherIndex.getBaseObject()
-			if other == nil ||
-				other.ObjectIndex() == objectIndex {
-				continue
-			}
-			list = append(list, otherIndex)
-		}
-	}
-	if len(list) == 0 {
-		return nil
-	}
-	return list
-}*/
-
-/*
-func instanceRemove(inst ObjectType) {
-	baseObj := inst.BaseObject()
-
-	// Get slots
-	roomInstanceIndex := baseObj.roomInstanceIndex
-	layerIndex := baseObj.layerInstanceIndex
-	index := baseObj.index
-
-	// Get manager
-	roomInst := &gState.roomInstances[roomInstanceIndex]
-	layerInst := &roomInst.instanceLayers[layerIndex]
-
-	if layerInst.instances[index] != inst {
-		panic("instanceRemove failed as instance provided has already been removed")
-	}
-	// Get index
-	index := -1
-	for i, otherInst := range manager.instances {
-		if inst == otherInst {
-			index = i
-		}
-	}
-	if index == -1 {
-		panic("instanceRemove failed as instance provided has already been removed")
-	}
-
-	// Unordered delete
-	// NOTE(Jake): 2018-09-15
-	// Im aware this sometimes causes the server to crash...
-	// but I also don't want to fix this yet as I might store each type of an
-	// entity in its own bucket array soon...
-	//
-	// At the very least I should maybe make this a "mark as deleted"
-	// system where it cleans up the entity list at the end of the frame.
-	//
-	lastEntry := manager.instances[len(manager.instances)-1]
-	manager.instances[index] = lastEntry
-	SetInstanceIndex(lastEntry.BaseObject(), index)
-	manager.instances = manager.instances[:len(manager.instances)-1]
-}*/
 
 func InstanceDestroy(inst ObjectType) {
 	baseObj := inst.BaseObject()
