@@ -31,7 +31,7 @@ func CollisionRectList(instType collisionObject, x, y float64) []InstanceIndex {
 			continue
 		}
 		if r1.CollisionRectangle(other.Bbox()) &&
-			!other.internal.isDestroyed &&
+			!other.internal.IsDestroyed &&
 			inst != other {
 			list = append(list, otherIndex)
 		}

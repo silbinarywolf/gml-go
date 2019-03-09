@@ -61,8 +61,8 @@ func newRawInstance(objectIndex ObjectIndex, index int, roomInstanceIndex RoomIn
 	//moveInstance(inst, index, roomInstanceIndex, layerIndex)
 	baseObj := inst.BaseObject()
 	//baseObj.index = index
-	baseObj.internal.roomInstanceIndex = roomInstanceIndex
-	baseObj.internal.objectIndex = objectIndex
+	baseObj.internal.RoomInstanceIndex = roomInstanceIndex
+	baseObj.internal.ObjectIndex = objectIndex
 	baseObj.create()
 	return inst
 }

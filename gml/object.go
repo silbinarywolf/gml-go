@@ -5,6 +5,7 @@ import (
 	"encoding/gob"
 	"math"
 
+	"github.com/silbinarywolf/gml-go/gml/internal/assert"
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
 )
@@ -17,7 +18,7 @@ import (
 type ObjectIndex int32
 
 type ObjectType interface {
-	BaseObject() *Object // remove this or unexport it once ObjectIndex is used in the engine
+	BaseObject() *Object
 	ObjectIndex() ObjectIndex
 	ObjectName() string
 	Create()
@@ -26,31 +27,31 @@ type ObjectType interface {
 	Draw()
 }
 
-type objectInternal struct {
-	bboxOffset geom.Vec
-	instanceObject
-	objectIndex       ObjectIndex
-	depth             int
-	solid             bool
-	imageAngleRadians float64 // Image Angle
+type objectExternal struct {
+	geom.Rect
+	sprite.SpriteState // Sprite (contains SetSprite)
 }
 
-type objectSerialize struct {
-	Rect              geom.Rect
-	SpriteState       sprite.SpriteState
+type objectInternal struct {
 	BboxOffset        geom.Vec
-	InstanceIndex     InstanceIndex
-	RoomInstanceIndex RoomInstanceIndex
+	IsDestroyed       bool
+	InstanceIndex     InstanceIndex     // global uuid
+	RoomInstanceIndex RoomInstanceIndex // Room Instance Index belongs to
 	ObjectIndex       ObjectIndex
 	Depth             int
 	Solid             bool
-	ImageAngleRadians float64
+	ImageAngleRadians float64 // Image Angle
 }
 
 type Object struct {
-	geom.Rect
-	sprite.SpriteState // Sprite (contains SetSprite)
-	internal           objectInternal
+	objectExternal
+	internal objectInternal
+}
+
+type objectSerialize struct {
+	Rect        geom.Rect
+	SpriteState sprite.SpriteState
+	Internal    objectInternal
 }
 
 func (inst *Object) Create() {}
@@ -66,8 +67,8 @@ func (inst *Object) Draw() {
 func (inst *Object) Bbox() geom.Rect {
 	return geom.Rect{
 		Vec: geom.Vec{
-			X: inst.X + inst.internal.bboxOffset.X,
-			Y: inst.Y + inst.internal.bboxOffset.Y,
+			X: inst.X + inst.internal.BboxOffset.X,
+			Y: inst.Y + inst.internal.BboxOffset.Y,
 		},
 		Size: inst.Size,
 	}
@@ -76,8 +77,8 @@ func (inst *Object) Bbox() geom.Rect {
 func (inst *Object) bboxAt(x, y float64) geom.Rect {
 	return geom.Rect{
 		Vec: geom.Vec{
-			X: x + inst.internal.bboxOffset.X,
-			Y: y + inst.internal.bboxOffset.Y,
+			X: x + inst.internal.BboxOffset.X,
+			Y: y + inst.internal.BboxOffset.Y,
 		},
 		Size: inst.Size,
 	}
@@ -89,22 +90,22 @@ func (inst *Object) create() {
 }
 
 func (inst *Object) SetSolid(isSolid bool) {
-	inst.internal.solid = isSolid
+	inst.internal.Solid = isSolid
 }
 
-func (inst *Object) Solid() bool                { return inst.internal.solid }
+func (inst *Object) Solid() bool                { return inst.internal.Solid }
 func (inst *Object) BaseObject() *Object        { return inst }
-func (inst *Object) ObjectName() string         { return gObjectManager.indexToName[inst.internal.objectIndex] }
-func (inst *Object) ObjectIndex() ObjectIndex   { return inst.internal.objectIndex }
-func (inst *Object) ImageAngleRadians() float64 { return inst.internal.imageAngleRadians }
-func (inst *Object) ImageAngle() float64        { return inst.internal.imageAngleRadians * (180 / math.Pi) }
+func (inst *Object) ObjectName() string         { return gObjectManager.indexToName[inst.internal.ObjectIndex] }
+func (inst *Object) ObjectIndex() ObjectIndex   { return inst.internal.ObjectIndex }
+func (inst *Object) ImageAngleRadians() float64 { return inst.internal.ImageAngleRadians }
+func (inst *Object) ImageAngle() float64        { return inst.internal.ImageAngleRadians * (180 / math.Pi) }
 
 // Depth will get the draw order of the object
-func (inst *Object) Depth() int { return inst.internal.depth }
+func (inst *Object) Depth() int { return inst.internal.Depth }
 
 // SetDepth will change the draw order of the object
 func (inst *Object) SetDepth(depth int) {
-	inst.internal.depth = depth
+	inst.internal.Depth = depth
 }
 
 // SetSprite will change the image used to draw the object
@@ -122,30 +123,27 @@ func (inst *Object) SetSprite(spriteIndex sprite.SpriteIndex) {
 	if size.X == oldSize.X &&
 		size.Y == oldSize.Y {
 		rect := sprite.SpriteCollisionMask(spriteIndex)
-		inst.internal.bboxOffset = rect.Vec
+		inst.internal.BboxOffset = rect.Vec
 		inst.Size = rect.Size
 	}
 }
 
 func (inst *Object) SetImageAngle(angleInDegrees float64) {
-	inst.internal.imageAngleRadians = angleInDegrees * (math.Pi / 180)
+	inst.internal.ImageAngleRadians = angleInDegrees * (math.Pi / 180)
 }
 
 func (inst *Object) SetImageAngleRadians(angleInRadians float64) {
-	inst.internal.imageAngleRadians = angleInRadians
+	inst.internal.ImageAngleRadians = angleInRadians
 }
 
 func (inst Object) MarshalBinaryObject() ([]byte, error) {
+	if inst.internal.RoomInstanceIndex == 0 {
+		panic("RoomInstanceIndex cannot be 0")
+	}
 	w := objectSerialize{
-		Rect:              inst.Rect,
-		SpriteState:       inst.SpriteState,
-		BboxOffset:        inst.internal.bboxOffset,
-		InstanceIndex:     inst.internal.instanceIndex,
-		RoomInstanceIndex: inst.internal.roomInstanceIndex,
-		ObjectIndex:       inst.internal.objectIndex,
-		Depth:             inst.internal.depth,
-		Solid:             inst.internal.solid,
-		ImageAngleRadians: inst.internal.imageAngleRadians,
+		Rect:        inst.Rect,
+		SpriteState: inst.SpriteState,
+		Internal:    inst.internal,
 	}
 	var buf bytes.Buffer
 	enc := gob.NewEncoder(&buf)
@@ -162,14 +160,26 @@ func (inst *Object) UnmarshalBinaryObject(data []byte) error {
 	if err := dec.Decode(&w); err != nil {
 		return err
 	}
+	prevRoomIndex := inst.internal.RoomInstanceIndex
+
 	inst.Rect = w.Rect
 	inst.SpriteState = w.SpriteState
-	inst.internal.bboxOffset = w.BboxOffset
-	inst.internal.instanceIndex = w.InstanceIndex
-	inst.internal.roomInstanceIndex = w.RoomInstanceIndex
-	inst.internal.objectIndex = w.ObjectIndex
-	inst.internal.depth = w.Depth
-	inst.internal.solid = w.Solid
-	inst.internal.imageAngleRadians = w.ImageAngleRadians
+	inst.internal = w.Internal
+
+	assert.DebugAssert(inst.X == 0, "X cannot be 0")
+	assert.DebugAssert(inst.Y == 0, "Y cannot be 0")
+	assert.DebugAssert(inst.internal.InstanceIndex == 0, "InstanceIndex cannot be 0")
+	assert.DebugAssert(inst.internal.RoomInstanceIndex == 0, "RoomInstanceIndex cannot be 0")
+
+	// NOTE: Jake: 2019-03-09
+	// This is incorrect behaviour and a hack.
+	// InstanceRestore should be updating the room that the player is in based on
+	// byte data. I need to do this in the near future.
+	// Add to room
+	if prevRoomIndex == 0 {
+		roomInst := &roomInstanceState.roomInstances[inst.internal.RoomInstanceIndex]
+		roomInst.instances = append(roomInst.instances, inst.internal.InstanceIndex)
+	}
+
 	return nil
 }

@@ -66,7 +66,7 @@ func (roomInstanceIndex RoomInstanceIndex) RoomInstanceChangeRoom(inst ObjectTyp
 
 func (roomInstanceIndex RoomInstanceIndex) InstanceCreate(x, y float64, objectIndex ObjectIndex) ObjectType {
 	return instanceCreate(x, y, objectIndex, func(inst *Object) {
-		inst.internal.roomInstanceIndex = roomInstanceIndex
+		inst.internal.RoomInstanceIndex = roomInstanceIndex
 		roomInst := &roomInstanceState.roomInstances[roomInstanceIndex]
 		roomInst.instances = append(roomInst.instances, inst.InstanceIndex())
 	}, true)

@@ -1,9 +1,9 @@
 package gml
 
 import (
-	"fmt"
 	"reflect"
 
+	"github.com/silbinarywolf/gml-go/gml/internal/assert"
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 )
 
@@ -21,18 +21,18 @@ type instanceManager struct {
 // InstanceRestore re-creates an object using a previously used instance index
 // and object index. This is used to bring old objects back with serialization.
 func InstanceRestore(oldInstanceIndex InstanceIndex, objectIndex ObjectIndex) ObjectType {
-	inst := oldInstanceIndex.Get()
-	if inst != nil {
+	if inst := oldInstanceIndex.Get(); inst != nil {
 		panic("Cannot call InstanceRestore if instance still exists.")
 	}
-	return instanceCreate(0, 0, objectIndex, func(inst *Object) {
-		inst.internal.instanceIndex = oldInstanceIndex
-		//roomInst := &roomInstanceState.roomInstances[roomInstanceIndex]
-		//roomInst.instances = append(roomInst.instances, inst.InstanceIndex())
-	}, false)
+	inst, slot := allocateNewInstance(objectIndex)
+	baseObj := inst.BaseObject()
+	baseObj.internal.InstanceIndex = oldInstanceIndex
+	gState.instanceManager.instanceIndexToIndex[baseObj.internal.InstanceIndex] = slot
+	//assert.DebugAssert(baseObj.internal.RoomInstanceIndex == 0, "Room Instance Index cannot be 0")
+	return inst
 }
 
-func allocateNewInstance(objectIndex ObjectIndex) ObjectType {
+func allocateNewInstance(objectIndex ObjectIndex) (ObjectType, int) {
 	manager := &gState.instanceManager
 
 	// Allocate new instance
@@ -48,7 +48,8 @@ func allocateNewInstance(objectIndex ObjectIndex) ObjectType {
 	}
 	slot := len(manager.instances) - 1
 	inst := manager.instances[slot]
-	return inst
+	inst.BaseObject().internal.ObjectIndex = objectIndex
+	return inst, slot
 }
 
 // todo: Jake: 2018-12-16
@@ -57,19 +58,12 @@ type roomInstanceManager struct {
 	instances []ObjectType
 }
 
-type instanceObject struct {
-	isDestroyed       bool
-	instanceIndex     InstanceIndex     // global uuid
-	roomInstanceIndex RoomInstanceIndex // Room Instance Index belongs to
-	//layerInstanceIndex int               // Layer belongs to
-}
-
 func (inst *Object) InstanceIndex() InstanceIndex {
-	return inst.internal.instanceIndex
+	return inst.internal.InstanceIndex
 }
 
 func (inst *Object) RoomInstanceIndex() RoomInstanceIndex {
-	return inst.internal.roomInstanceIndex
+	return inst.internal.RoomInstanceIndex
 }
 
 func newroomInstanceManager() *roomInstanceManager {
@@ -103,29 +97,21 @@ func (index InstanceIndex) Get() ObjectType {
 }
 
 func instanceCreate(x, y float64, objectIndex ObjectIndex, callback func(inst *Object), assignNewInstanceIndex bool) ObjectType {
-	inst := allocateNewInstance(objectIndex)
+	inst, slot := allocateNewInstance(objectIndex)
 	{
 		baseObj := inst.BaseObject()
-		baseObj.internal.objectIndex = objectIndex
 		if assignNewInstanceIndex {
 			// Get next instance index
 			gState.instanceManager.nextInstanceIndex++
-			baseObj.internal.instanceIndex = gState.instanceManager.nextInstanceIndex
+			baseObj.internal.InstanceIndex = gState.instanceManager.nextInstanceIndex
 		}
 		baseObj.Vec = geom.Vec{x, y}
 
 		callback(baseObj)
 
-		if baseObj.internal.instanceIndex == 0 {
-			panic("Instance index cannot be 0")
-		}
-
-		// NOTE: Jake: 2019-03-08
-		// This is sensitive as it expects InstanceRestore to set a instanceIndex
-		slot := len(gState.instanceManager.instances) - 1
-		fmt.Printf("Instance Index: %d\n", baseObj.internal.instanceIndex)
-		gState.instanceManager.instanceIndexToIndex[baseObj.internal.instanceIndex] = slot
-
+		assert.DebugAssert(baseObj.internal.RoomInstanceIndex == 0, "Instance index cannot be 0")
+		gState.instanceManager.instanceIndexToIndex[baseObj.internal.InstanceIndex] = slot
+		assert.DebugAssert(baseObj.internal.RoomInstanceIndex == 0, "Room Instance Index cannot be 0")
 		if assignNewInstanceIndex {
 			baseObj.create()
 			inst.Create()
@@ -138,15 +124,13 @@ func instanceCreate(x, y float64, objectIndex ObjectIndex, callback func(inst *O
 // InstanceExists will return true if an object has not been destroyed and belongs to a room
 func InstanceExists(inst ObjectType) bool {
 	baseObj := inst.BaseObject()
-	roomInst := roomGetInstance(baseObj.RoomInstanceIndex())
 	return baseObj != nil &&
-		!baseObj.internal.isDestroyed &&
-		roomInst != nil
+		!baseObj.internal.IsDestroyed
 }
 
 func InstanceDestroy(inst ObjectType) {
 	baseObj := inst.BaseObject()
-	if baseObj.internal.isDestroyed {
+	if baseObj.internal.IsDestroyed {
 		// NOTE(Jake): 2018-10-07
 		// Maybe making this just silently returning will be better / less error
 		// prone? For now lets be strict.
@@ -157,7 +141,7 @@ func InstanceDestroy(inst ObjectType) {
 	inst.Destroy()
 
 	// Mark as destroyed
-	baseObj.internal.isDestroyed = true
+	baseObj.internal.IsDestroyed = true
 
 	// NOTE(Jake): 2018-10-07
 	// Remove at the end of the frame (gState.update)
