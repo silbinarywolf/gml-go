@@ -45,7 +45,9 @@ func (state *state) update() {
 	for i := 0; i < len(state.instanceManager.instances); i++ {
 		inst := state.instanceManager.instances[i]
 		baseObj := inst.BaseObject()
-
+		if baseObj.internal.IsDestroyed {
+			continue
+		}
 		inst.Update()
 		baseObj.SpriteState.ImageUpdate()
 	}
@@ -72,7 +74,7 @@ func (state *state) update() {
 					if instanceIndex == otherInstanceIndex {
 						lastEntry := instances[len(instances)-1]
 						instances[dataIndex] = lastEntry
-						instances = instances[:len(manager.instances)-1]
+						instances = instances[:len(instances)-1]
 						break
 					}
 				}

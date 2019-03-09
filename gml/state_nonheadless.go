@@ -22,9 +22,9 @@ func (state *state) draw() {
 			roomInst.draw()
 		} else {
 			// If no follower is configured, just render the first active room found
-			roomInst := roomGetInstance(1)
+			roomInst := roomLastCreated()
 			if roomInst == nil {
-				panic("Unable to find room instance: 1")
+				panic("No room exists, you must create a room")
 			}
 			roomInst.draw()
 		}

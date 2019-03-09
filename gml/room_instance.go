@@ -10,6 +10,7 @@ type RoomInstanceIndex int32
 
 type roomInstanceStateManager struct {
 	roomInstances          []roomInstance
+	lastCreatedRoom        RoomInstanceIndex
 	isCreatingRoomInstance bool
 }
 
@@ -42,6 +43,8 @@ func RoomInstanceNew() RoomInstanceIndex {
 	// If creating room programmatically, default the room size
 	// to the size of the screen
 	roomInst.Size = WindowSize()
+
+	roomInstanceState.lastCreatedRoom = roomInst.index
 
 	return roomInst.index
 }
@@ -87,22 +90,27 @@ func (roomInstanceIndex RoomInstanceIndex) InstanceCreate(x, y float64, objectIn
 	return inst*/
 }
 
-// RoomInstanceDestroy destroys a room instance
-func RoomDestroy(roomInstanceIndex RoomInstanceIndex) {
+// Destroy destroys a room instance
+func (roomInstanceIndex RoomInstanceIndex) Destroy() {
 	if roomInst := roomGetInstance(roomInstanceIndex); roomInst != nil {
 		// NOTE(Jake): 2018-08-21
 		// Running Destroy() on each rather than InstanceDestroy()
 		// for speed purposes
 		for _, instanceIndex := range roomInst.instances {
 			if inst := instanceIndex.Get(); inst != nil {
-				inst.Destroy()
-				cameraInstanceDestroy(instanceIndex)
+				fastInstanceDestroy(inst)
 			}
+		}
+		if roomInstanceState.lastCreatedRoom == roomInst.index {
+			roomInstanceState.lastCreatedRoom = 0
 		}
 		roomInst.instances = nil
 		roomInst.used = false
+		gState.instancesMarkedForDelete = gState.instancesMarkedForDelete[:0]
 		*roomInst = roomInstance{}
+		return
 	}
+	panic("Invalid roomInstanceIndex given")
 }
 
 func (roomInstanceIndex RoomInstanceIndex) SetSize(width, height float64) {
@@ -148,6 +156,13 @@ func roomGetInstance(roomInstanceIndex RoomInstanceIndex) *roomInstance {
 		return roomInst
 	}
 	return nil
+}
+
+func roomLastCreated() *roomInstance {
+	if roomInstanceState.lastCreatedRoom == 0 {
+		return nil
+	}
+	return roomGetInstance(roomInstanceState.lastCreatedRoom)
 }
 
 func (roomInst *roomInstance) update(animationUpdate bool) {

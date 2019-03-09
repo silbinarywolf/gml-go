@@ -78,15 +78,24 @@ func CameraSetSize(index int, windowWidth, windowHeight float64) {
 func cameraUpdate() {
 	for i, _ := range gCameraManager.cameras {
 		view := &gCameraManager.cameras[i]
-		if inst := view.follow.Get(); inst != nil {
-			inst := inst.BaseObject()
-			view.X = inst.X - (view.Size.X / 2)
-			view.Y = inst.Y - (view.Size.Y / 2)
-		}
-		view.cameraFitToRoomDimensions()
 
 		if view.updateFunc != nil {
 			view.updateFunc()
+		} else {
+			// NOTE: Jake: 2019-03-09
+			// We want the ability for someone to be able to
+			// use their own update function and follow an instance
+			// at the same time. This allows us to determine what
+			// Room to render for that camera.
+
+			// Default behaviour is to follow an instance and
+			// center the camera
+			if inst := view.follow.Get(); inst != nil {
+				inst := inst.BaseObject()
+				view.X = inst.X - (view.Size.X / 2)
+				view.Y = inst.Y - (view.Size.Y / 2)
+			}
+			view.cameraFitToRoomDimensions()
 		}
 	}
 }
@@ -147,16 +156,6 @@ func CameraSetViewTarget(index int, inst InstanceIndex) {
 // rendering to an offscreen surface if using 1 camera.
 func cameraHasMultipleEnabled() bool {
 	return gCameraManager.camerasEnabledCount > 1
-}
-
-func cameraInstanceDestroy(instanceIndex InstanceIndex) {
-	manager := gCameraManager
-	for i := 0; i < len(manager.cameras); i++ {
-		view := &manager.cameras[i]
-		if view.follow == instanceIndex {
-			view.follow = Noone
-		}
-	}
 }
 
 func (view *camera) cameraFitToRoomDimensions() {

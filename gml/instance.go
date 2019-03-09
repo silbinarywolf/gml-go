@@ -128,6 +128,16 @@ func InstanceExists(inst ObjectType) bool {
 		!baseObj.internal.IsDestroyed
 }
 
+// fastInstanceDestroy exists to quickly destroy instances without removing
+// from an array. Used by rooms when they're destroying themselves
+func fastInstanceDestroy(inst ObjectType) {
+	// Run user-destroy code
+	inst.Destroy()
+
+	// Mark as destroyed
+	inst.BaseObject().internal.IsDestroyed = true
+}
+
 func InstanceDestroy(inst ObjectType) {
 	baseObj := inst.BaseObject()
 	if baseObj.internal.IsDestroyed {
@@ -137,11 +147,7 @@ func InstanceDestroy(inst ObjectType) {
 		panic("Cannot call InstanceDestroy on an object more than once.")
 	}
 
-	// Run user-destroy code
-	inst.Destroy()
-
-	// Mark as destroyed
-	baseObj.internal.IsDestroyed = true
+	fastInstanceDestroy(inst)
 
 	// NOTE(Jake): 2018-10-07
 	// Remove at the end of the frame (gState.update)
