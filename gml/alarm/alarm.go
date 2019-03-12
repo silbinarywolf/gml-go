@@ -1,6 +1,9 @@
 package alarm
 
 import (
+	"bytes"
+	"encoding/gob"
+
 	"github.com/silbinarywolf/gml-go/gml/internal/dt"
 )
 
@@ -11,44 +14,48 @@ import (
 const alarmNotSet = 0
 
 type Alarm struct {
-	isTimerSet bool
-	timeLeft   float64
+	internal alarmSerialize
+}
+
+type alarmSerialize struct {
+	IsTimerSet bool
+	TimeLeft   float64
 }
 
 func (alarm *Alarm) Get() float64 {
 	//if !alarm.isTimerSet {
 	//	return 0
 	//}
-	return alarm.timeLeft
+	return alarm.internal.TimeLeft
 }
 
 // Set an alarm. This requires you process it every Update with Tick
 func (alarm *Alarm) Set(ticks float64) {
 	if ticks <= 0 {
-		alarm.timeLeft = alarmNotSet
-		alarm.isTimerSet = false
+		alarm.internal.TimeLeft = alarmNotSet
+		alarm.internal.IsTimerSet = false
 		return
 	}
-	alarm.timeLeft = ticks
-	alarm.isTimerSet = true
+	alarm.internal.TimeLeft = ticks
+	alarm.internal.IsTimerSet = true
 }
 
 // IsRunning will return true if the timer is set and running.
 // When used with Set, it will remain true until Tick() returns true
 // When used with Repeat, it will always remain true after Repeat() is called for the first time.
 func (alarm *Alarm) IsRunning() bool {
-	return alarm.isTimerSet
+	return alarm.internal.IsTimerSet
 }
 
 // Tick will process the timed event and return true if the timer has expired
 func (alarm *Alarm) Tick() bool {
-	if !alarm.isTimerSet {
+	if !alarm.internal.IsTimerSet {
 		return false
 	}
-	alarm.timeLeft -= 1.0 * dt.DeltaTime()
-	if alarm.timeLeft <= 0 {
-		alarm.timeLeft = alarmNotSet
-		alarm.isTimerSet = false
+	alarm.internal.TimeLeft -= 1.0 * dt.DeltaTime()
+	if alarm.internal.TimeLeft <= 0 {
+		alarm.internal.TimeLeft = alarmNotSet
+		alarm.internal.IsTimerSet = false
 		return true
 	}
 	return false
@@ -56,16 +63,35 @@ func (alarm *Alarm) Tick() bool {
 
 // Repeat is like to be used for events that repeat every N frames and will return true once N frames are processed
 func (alarm *Alarm) Repeat(ticks float64) bool {
-	if !alarm.isTimerSet {
-		alarm.timeLeft = ticks
-		alarm.isTimerSet = true
+	if !alarm.internal.IsTimerSet {
+		alarm.internal.TimeLeft = ticks
+		alarm.internal.IsTimerSet = true
 	}
 	amount := 1.0 * dt.DeltaTime()
-	alarm.timeLeft -= amount
-	if alarm.timeLeft <= 0 {
-		alarm.timeLeft = alarmNotSet
-		alarm.isTimerSet = false
+	alarm.internal.TimeLeft -= amount
+	if alarm.internal.TimeLeft <= 0 {
+		alarm.internal.TimeLeft = alarmNotSet
+		alarm.internal.IsTimerSet = false
 		return true
 	}
 	return false
+}
+
+func (alarm Alarm) GobEncode() ([]byte, error) {
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+	if err := enc.Encode(alarm.internal); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+func (alarm *Alarm) GobDecode(data []byte) error {
+	reader := bytes.NewReader(data)
+	dec := gob.NewDecoder(reader)
+	alarm.internal = alarmSerialize{}
+	if err := dec.Decode(&alarm.internal); err != nil {
+		return err
+	}
+	return nil
 }
