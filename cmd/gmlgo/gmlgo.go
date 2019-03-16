@@ -7,8 +7,15 @@ import (
 
 	"github.com/silbinarywolf/gml-go/cmd/gmlgo/cmd/generate"
 	"github.com/silbinarywolf/gml-go/cmd/gmlgo/cmd/serve"
+	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/base"
+	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/build"
+	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/shared"
 	"github.com/spf13/cobra"
 )
+
+var cmds = []*base.Command{
+	build.Cmd,
+}
 
 var (
 	Tags    string
@@ -16,10 +23,7 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "gmlgo",
-	Short: "A tool for building gmlgo projects",
-	Long:  ``,
-	Run:   Run,
+	Use: "gmlgo",
 }
 
 var generateCmd = &cobra.Command{
@@ -54,41 +58,44 @@ var serveCmd = &cobra.Command{
 	},
 }
 
-// NOTE(Jake): 2019-01-23 - Github #89
-// The effort/cost of writing the fixing tool right now is not worth it.
-// It would be less time consuming to manually fix everything.
-//var fixCmd = &cobra.Command{
-//	Use:   fix.Use,
-//	Short: fix.ShortDescription,
-//	Long:  ``,
-//	Run: func(cmd *cobra.Command, args []string) {
-//		dir := ""
-//		if len(args) > 0 {
-//			dir = args[0]
-//		}
-//		fix.Run(fix.Arguments{
-//			Directory: dir,
-//		})
-//	},
-//}
-
 func main() {
 	log.SetFlags(0)
-	log.SetPrefix("gmlgo: ")
+	log.SetPrefix(shared.RootCmd + ": ")
 
 	rootCmd.AddCommand(generateCmd)
 	rootCmd.AddCommand(serveCmd)
+	//rootCmd.AddCommand(buildCmd)
 	//rootCmd.AddCommand(fixCmd)
 	generateCmd.Flags().BoolVar(&Verbose, "v", false, "verbose")
 	serveCmd.Flags().StringVar(&Tags, "tags", "", "a list of build tags to consider satisfied during the build")
-	//rootCmd.PersistentFlags().StringVarP(&Directory, "dir", "d", ".", "directory")
 
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+	if len(os.Args) < 2 {
+		fmt.Print(`
+GmlGo is a tool for building games using the GmlGo library
+
+Usage:
+
+        gmlgo <command> [arguments]
+
+The commands are:
+
+        build		run generate, assetpack and compile packages and dependencies
+        assetpack	[todo] make this build asset files
+        generate	generate Go files by processing gml.Object's and assets
+`)
 		os.Exit(1)
 	}
-}
-
-func Run(cmd *cobra.Command, args []string) {
-	panic(args)
+	args := os.Args[2:]
+	for _, cmd := range cmds {
+		if cmd.Name() == os.Args[1] {
+			cmd.Flag.Parse(args)
+			if !cmd.Flag.Parsed() {
+				cmd.Flag.PrintDefaults()
+				os.Exit(1)
+			}
+			args = cmd.Flag.Args()
+			cmd.Run(cmd, args)
+			break
+		}
+	}
 }
