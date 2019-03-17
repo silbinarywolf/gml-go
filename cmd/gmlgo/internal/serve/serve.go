@@ -2,6 +2,7 @@ package serve
 
 import (
 	"bytes"
+	"flag"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -11,12 +12,26 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/base"
 )
 
-const (
-	Use              = "serve [dir]"
-	ShortDescription = "Serve a build of your game for playing in a web browser, defaults to port 8080"
-)
+var Cmd = &base.Command{
+	UsageLine: "gmlgo serve [dir]",
+	Short:     `Serve a build of your game for playing in a web browser, defaults to port 8080`,
+	Flag:      flag.NewFlagSet("serve", flag.ExitOnError),
+	Long:      ``,
+	Run:       run,
+}
+
+var tags *string
+
+var verbose *bool
+
+func init() {
+	tags = Cmd.Flag.String("tags", "", "a list of build tags to consider satisfied during the build")
+	verbose = Cmd.Flag.Bool("verbose", false, "verbose")
+}
 
 const indexHTML = `<!DOCTYPE html>
 <head>
@@ -199,6 +214,23 @@ func ensureTmpOutputDir() (string, error) {
 	}
 	tmpOutputDir = tmp
 	return tmpOutputDir, nil
+}
+
+func run(cmd *base.Command, args []string) {
+	cmd.Flag.Parse(args)
+	if !cmd.Flag.Parsed() {
+		cmd.Flag.PrintDefaults()
+		os.Exit(1)
+	}
+	args = cmd.Flag.Args()
+	dir := ""
+	if len(args) > 0 {
+		dir = args[0]
+	}
+	Run(Arguments{
+		Directory: dir,
+		Tags:      *tags,
+	})
 }
 
 func Run(args Arguments) {

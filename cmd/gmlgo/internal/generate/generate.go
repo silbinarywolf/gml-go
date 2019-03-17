@@ -2,6 +2,7 @@ package generate
 
 import (
 	"bytes"
+	"flag"
 	"fmt"
 	"go/ast"
 	"go/build"
@@ -16,12 +17,26 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/base"
 )
 
-const (
-	Use              = "generate [dir]"
-	ShortDescription = "Generate code so that assets and objects can be referenced by constant IDs"
-)
+var Cmd = &base.Command{
+	UsageLine: "gmlgo generate [dir]",
+	Short:     `Generate code so that assets and objects can be referenced by constant IDs`,
+	Flag:      flag.NewFlagSet("generate", flag.ExitOnError),
+	Long:      ``,
+	Run:       run,
+}
+
+var tags *string
+
+var verbose *bool
+
+func init() {
+	tags = Cmd.Flag.String("tags", "", "a list of build tags to consider satisfied during the build")
+	verbose = Cmd.Flag.Bool("verbose", false, "verbose")
+}
 
 const (
 	genFile    = "gmlgo_gen.go"
@@ -32,6 +47,23 @@ const (
 type Arguments struct {
 	Directory string
 	Verbose   bool
+}
+
+func run(cmd *base.Command, args []string) {
+	cmd.Flag.Parse(args)
+	if !cmd.Flag.Parsed() {
+		cmd.Flag.PrintDefaults()
+		os.Exit(1)
+	}
+	args = cmd.Flag.Args()
+	dir := ""
+	if len(args) > 0 {
+		dir = args[0]
+	}
+	Run(Arguments{
+		Directory: dir,
+		Verbose:   *verbose,
+	})
 }
 
 func Run(args Arguments) {
@@ -113,7 +145,7 @@ func Run(args Arguments) {
 		if err != nil {
 			log.Fatalf("error writing output: %s\n", err)
 		}
-		if args.Verbose {
+		if *verbose {
 			log.Printf("%s\n", outputName)
 		}
 	}
@@ -163,7 +195,7 @@ func buildContext(tags []string) *build.Context {
 func (g *Generator) parsePackageDir(directory string, tags []string) {
 	pkg, err := buildContext(tags).ImportDir(directory, 0)
 	if err != nil {
-		log.Fatalf("parsePackageDir: cannot parse %s: %s", directory, err)
+		log.Fatalf("parsePackageDir: cannot parse %s", err)
 	}
 	var names []string
 	names = append(names, pkg.GoFiles...)
@@ -331,6 +363,10 @@ var _ = audio.InitSoundGeneratedData
 func (g *Generator) generateAssets(dir string) {
 	// Read asset names
 	assetDir := filepath.Join(dir, "asset")
+	if _, err := os.Stat(assetDir); os.IsNotExist(err) {
+		// Skip if we have no assets folder
+		return
+	}
 	files, err := ioutil.ReadDir(assetDir)
 	if err != nil {
 		log.Fatal(err)

@@ -7,8 +7,8 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/silbinarywolf/gml-go/cmd/gmlgo/cmd/generate"
 	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/base"
+	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/generate"
 )
 
 var Cmd = &base.Command{
@@ -29,8 +29,13 @@ func init() {
 }
 
 func run(cmd *base.Command, args []string) {
+	cmd.Flag.Parse(args)
+	if !cmd.Flag.Parsed() {
+		cmd.Flag.PrintDefaults()
+		os.Exit(1)
+	}
 	dir := ""
-	if len(args) > 0 {
+	if args := cmd.Flag.Args(); len(args) > 0 {
 		dir = args[0]
 	}
 
@@ -42,10 +47,17 @@ func run(cmd *base.Command, args []string) {
 
 	// Run "go build"
 	{
-		//panic(fmt.Sprintf("%v", os.Args[2:]))
-		args := make([]string, 0, len(os.Args[2:])+1)
-		args = append(args, "build")
-		args = append(args, os.Args[2:]...)
+		var args []string
+		if len(args) > 1 {
+			args = make([]string, 0, len(args[2:])+1)
+			args = append(args, "build")
+			args = append(args, args[2:]...)
+		} else {
+			args = []string{"build"}
+			if dir != "" {
+				args = append(args, dir)
+			}
+		}
 		cmd := exec.Command("go", args...)
 		cmd.Env = os.Environ()
 
