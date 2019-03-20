@@ -2,10 +2,9 @@ package gml
 
 import (
 	"bytes"
-	"encoding/gob"
+	"encoding/binary"
 	"math"
 
-	"github.com/silbinarywolf/gml-go/gml/internal/assert"
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
 )
@@ -140,46 +139,81 @@ func (inst Object) MarshalBinaryObject() ([]byte, error) {
 	if inst.internal.RoomInstanceIndex == 0 {
 		panic("RoomInstanceIndex cannot be 0")
 	}
-	w := objectSerialize{
-		Rect:        inst.Rect,
-		SpriteState: inst.SpriteState,
-		Internal:    inst.internal,
+	buf := new(bytes.Buffer)
+	if err := binary.Write(buf, binary.LittleEndian, inst.objectExternal.Rect); err != nil {
+		return nil, err
 	}
-	var buf bytes.Buffer
-	enc := gob.NewEncoder(&buf)
-	if err := enc.Encode(w); err != nil {
+	bytes, err := inst.objectExternal.SpriteState.MarshalBinary()
+	if err != nil {
+		return nil, err
+	}
+	if _, err := buf.Write(bytes); err != nil {
+		return nil, err
+	}
+	if err := binary.Write(buf, binary.LittleEndian, inst.internal.BboxOffset); err != nil {
+		return nil, err
+	}
+	if err := binary.Write(buf, binary.LittleEndian, int64(inst.internal.Depth)); err != nil {
+		return nil, err
+	}
+	if err := binary.Write(buf, binary.LittleEndian, inst.internal.ImageAngleRadians); err != nil {
+		return nil, err
+	}
+	if err := binary.Write(buf, binary.LittleEndian, inst.internal.InstanceIndex); err != nil {
+		return nil, err
+	}
+	if err := binary.Write(buf, binary.LittleEndian, inst.internal.IsDestroyed); err != nil {
+		return nil, err
+	}
+	if err := binary.Write(buf, binary.LittleEndian, inst.internal.ObjectIndex); err != nil {
+		return nil, err
+	}
+	if err := binary.Write(buf, binary.LittleEndian, inst.internal.RoomInstanceIndex); err != nil {
+		return nil, err
+	}
+	if err := binary.Write(buf, binary.LittleEndian, inst.internal.Solid); err != nil {
 		return nil, err
 	}
 	return buf.Bytes(), nil
 }
 
 func (inst *Object) UnmarshalBinaryObject(data []byte) error {
-	w := objectSerialize{}
-	reader := bytes.NewReader(data)
-	dec := gob.NewDecoder(reader)
-	if err := dec.Decode(&w); err != nil {
+	buf := bytes.NewReader(data)
+	if err := binary.Read(buf, binary.LittleEndian, &inst.objectExternal.Rect); err != nil {
 		return err
 	}
-	prevRoomIndex := inst.internal.RoomInstanceIndex
-
-	inst.Rect = w.Rect
-	inst.SpriteState = w.SpriteState
-	inst.internal = w.Internal
-
-	assert.DebugAssert(inst.X == 0, "X cannot be 0")
-	assert.DebugAssert(inst.Y == 0, "Y cannot be 0")
-	assert.DebugAssert(inst.internal.InstanceIndex == 0, "InstanceIndex cannot be 0")
-	assert.DebugAssert(inst.internal.RoomInstanceIndex == 0, "RoomInstanceIndex cannot be 0")
-
-	// NOTE: Jake: 2019-03-09
-	// This is incorrect behaviour and a hack.
-	// InstanceRestore should be updating the room that the player is in based on
-	// byte data. I need to do this in the near future.
-	// Add to room
-	if prevRoomIndex == 0 {
-		roomInst := &roomInstanceState.roomInstances[inst.internal.RoomInstanceIndex]
-		roomInst.instances = append(roomInst.instances, inst.internal.InstanceIndex)
+	bytes := make([]byte, binary.Size(inst.SpriteState))
+	if err := binary.Read(buf, binary.LittleEndian, &bytes); err != nil {
+		return err
 	}
-
+	if err := inst.objectExternal.SpriteState.UnmarshalBinary(bytes); err != nil {
+		return err
+	}
+	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.BboxOffset); err != nil {
+		return err
+	}
+	var d int64
+	if err := binary.Read(buf, binary.LittleEndian, &d); err != nil {
+		return err
+	}
+	inst.internal.Depth = int(d)
+	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.ImageAngleRadians); err != nil {
+		return err
+	}
+	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.InstanceIndex); err != nil {
+		return err
+	}
+	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.IsDestroyed); err != nil {
+		return err
+	}
+	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.ObjectIndex); err != nil {
+		return err
+	}
+	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.RoomInstanceIndex); err != nil {
+		return err
+	}
+	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.Solid); err != nil {
+		return err
+	}
 	return nil
 }

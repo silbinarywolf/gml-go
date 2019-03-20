@@ -2,7 +2,7 @@ package sprite
 
 import (
 	"bytes"
-	"encoding/gob"
+	"encoding/binary"
 
 	"github.com/silbinarywolf/gml-go/gml/internal/dt"
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
@@ -80,7 +80,18 @@ func (state *SpriteState) ImageUpdate() {
 }
 
 func (state SpriteState) MarshalBinary() ([]byte, error) {
-	w := spriteStateSerialize{
+	buf := new(bytes.Buffer)
+	if err := binary.Write(buf, binary.LittleEndian, state.spriteIndex); err != nil {
+		return nil, err
+	}
+	if err := binary.Write(buf, binary.LittleEndian, state.imageIndex); err != nil {
+		return nil, err
+	}
+	if err := binary.Write(buf, binary.LittleEndian, state.ImageScale); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+	/*w := spriteStateSerialize{
 		SpriteIndex: state.spriteIndex,
 		ImageScale:  state.ImageScale,
 		ImageIndex:  state.imageIndex,
@@ -90,11 +101,22 @@ func (state SpriteState) MarshalBinary() ([]byte, error) {
 	if err := enc.Encode(w); err != nil {
 		return nil, err
 	}
-	return buf.Bytes(), nil
+	return buf.Bytes(), nil*/
 }
 
 func (state *SpriteState) UnmarshalBinary(data []byte) error {
-	w := spriteStateSerialize{}
+	buf := bytes.NewReader(data)
+	if err := binary.Read(buf, binary.LittleEndian, &state.spriteIndex); err != nil {
+		return err
+	}
+	if err := binary.Read(buf, binary.LittleEndian, &state.imageIndex); err != nil {
+		return err
+	}
+	if err := binary.Read(buf, binary.LittleEndian, &state.ImageScale); err != nil {
+		return err
+	}
+	return nil
+	/*w := spriteStateSerialize{}
 	reader := bytes.NewReader(data)
 	dec := gob.NewDecoder(reader)
 	if err := dec.Decode(&w); err != nil {
@@ -103,5 +125,5 @@ func (state *SpriteState) UnmarshalBinary(data []byte) error {
 	state.SetSprite(w.SpriteIndex)
 	state.SetImageIndex(w.ImageIndex)
 	state.ImageScale = w.ImageScale
-	return nil
+	return nil*/
 }

@@ -2,7 +2,7 @@ package alarm
 
 import (
 	"bytes"
-	"encoding/gob"
+	"encoding/binary"
 
 	"github.com/silbinarywolf/gml-go/gml/internal/dt"
 )
@@ -77,20 +77,17 @@ func (alarm *Alarm) Repeat(ticks float64) bool {
 	return false
 }
 
-func (alarm Alarm) GobEncode() ([]byte, error) {
-	var buf bytes.Buffer
-	enc := gob.NewEncoder(&buf)
-	if err := enc.Encode(alarm.internal); err != nil {
+func (alarm Alarm) MarshalBinary() ([]byte, error) {
+	buf := new(bytes.Buffer)
+	if err := binary.Write(buf, binary.LittleEndian, alarm.internal); err != nil {
 		return nil, err
 	}
 	return buf.Bytes(), nil
 }
 
-func (alarm *Alarm) GobDecode(data []byte) error {
-	reader := bytes.NewReader(data)
-	dec := gob.NewDecoder(reader)
-	alarm.internal = alarmSerialize{}
-	if err := dec.Decode(&alarm.internal); err != nil {
+func (alarm *Alarm) UnmarshalBinary(data []byte) error {
+	buf := bytes.NewReader(data)
+	if err := binary.Read(buf, binary.LittleEndian, &alarm.internal); err != nil {
 		return err
 	}
 	return nil
