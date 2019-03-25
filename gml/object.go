@@ -135,6 +135,79 @@ func (inst *Object) SetImageAngleRadians(angleInRadians float64) {
 	inst.internal.ImageAngleRadians = angleInRadians
 }
 
+func (inst Object) UnsafeSnapshotMarshalBinary(buf *bytes.Buffer) error {
+	if inst.internal.RoomInstanceIndex == 0 {
+		panic("RoomInstanceIndex cannot be 0")
+	}
+	if err := binary.Write(buf, binary.LittleEndian, inst.objectExternal.Rect); err != nil {
+		return err
+	}
+	if err := inst.objectExternal.SpriteState.UnsafeSnapshotMarshalBinary(buf); err != nil {
+		return err
+	}
+	if err := binary.Write(buf, binary.LittleEndian, inst.internal.BboxOffset); err != nil {
+		return err
+	}
+	if err := binary.Write(buf, binary.LittleEndian, int64(inst.internal.Depth)); err != nil {
+		return err
+	}
+	if err := binary.Write(buf, binary.LittleEndian, inst.internal.ImageAngleRadians); err != nil {
+		return err
+	}
+	if err := binary.Write(buf, binary.LittleEndian, inst.internal.InstanceIndex); err != nil {
+		return err
+	}
+	if err := binary.Write(buf, binary.LittleEndian, inst.internal.IsDestroyed); err != nil {
+		return err
+	}
+	if err := binary.Write(buf, binary.LittleEndian, inst.internal.ObjectIndex); err != nil {
+		return err
+	}
+	if err := binary.Write(buf, binary.LittleEndian, inst.internal.RoomInstanceIndex); err != nil {
+		return err
+	}
+	if err := binary.Write(buf, binary.LittleEndian, inst.internal.Solid); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (inst *Object) UnsafeSnapshotUnmarshalBinary(buf *bytes.Buffer) error {
+	if err := binary.Read(buf, binary.LittleEndian, &inst.objectExternal.Rect); err != nil {
+		return err
+	}
+	if err := inst.objectExternal.SpriteState.UnsafeSnapshotUnmarshalBinary(buf); err != nil {
+		return err
+	}
+	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.BboxOffset); err != nil {
+		return err
+	}
+	var d int64
+	if err := binary.Read(buf, binary.LittleEndian, &d); err != nil {
+		return err
+	}
+	inst.internal.Depth = int(d)
+	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.ImageAngleRadians); err != nil {
+		return err
+	}
+	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.InstanceIndex); err != nil {
+		return err
+	}
+	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.IsDestroyed); err != nil {
+		return err
+	}
+	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.ObjectIndex); err != nil {
+		return err
+	}
+	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.RoomInstanceIndex); err != nil {
+		return err
+	}
+	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.Solid); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (inst Object) MarshalBinaryObject() ([]byte, error) {
 	if inst.internal.RoomInstanceIndex == 0 {
 		panic("RoomInstanceIndex cannot be 0")

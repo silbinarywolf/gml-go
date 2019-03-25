@@ -77,6 +77,20 @@ func (alarm *Alarm) Repeat(ticks float64) bool {
 	return false
 }
 
+func (alarm Alarm) UnsafeSnapshotMarshalBinary(buf *bytes.Buffer) error {
+	if err := binary.Write(buf, binary.LittleEndian, alarm.internal); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (alarm *Alarm) UnsafeSnapshotUnmarshalBinary(buf *bytes.Buffer) error {
+	if err := binary.Read(buf, binary.LittleEndian, &alarm.internal); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (alarm Alarm) MarshalBinary() ([]byte, error) {
 	buf := new(bytes.Buffer)
 	if err := binary.Write(buf, binary.LittleEndian, alarm.internal); err != nil {

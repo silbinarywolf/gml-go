@@ -79,6 +79,32 @@ func (state *SpriteState) ImageUpdate() {
 	}
 }
 
+func (state SpriteState) UnsafeSnapshotMarshalBinary(buf *bytes.Buffer) error {
+	if err := binary.Write(buf, binary.LittleEndian, state.spriteIndex); err != nil {
+		return err
+	}
+	if err := binary.Write(buf, binary.LittleEndian, state.imageIndex); err != nil {
+		return err
+	}
+	if err := binary.Write(buf, binary.LittleEndian, state.ImageScale); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (state SpriteState) UnsafeSnapshotUnmarshalBinary(buf *bytes.Buffer) error {
+	if err := binary.Read(buf, binary.LittleEndian, &state.spriteIndex); err != nil {
+		return err
+	}
+	if err := binary.Read(buf, binary.LittleEndian, &state.imageIndex); err != nil {
+		return err
+	}
+	if err := binary.Read(buf, binary.LittleEndian, &state.ImageScale); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (state SpriteState) MarshalBinary() ([]byte, error) {
 	buf := new(bytes.Buffer)
 	if err := binary.Write(buf, binary.LittleEndian, state.spriteIndex); err != nil {
