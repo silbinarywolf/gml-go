@@ -31,11 +31,12 @@ var Cmd = &base.Command{
 
 var tags *string
 
-var verbose *bool
+var verbose bool
 
 func init() {
 	tags = Cmd.Flag.String("tags", "", "a list of build tags to consider satisfied during the build")
-	verbose = Cmd.Flag.Bool("verbose", false, "verbose")
+	Cmd.Flag.BoolVar(&verbose, "v", false, "verbose")
+	Cmd.Flag.BoolVar(&verbose, "verbose", false, "verbose")
 }
 
 const (
@@ -62,7 +63,7 @@ func run(cmd *base.Command, args []string) {
 	}
 	Run(Arguments{
 		Directory: dir,
-		Verbose:   *verbose,
+		Verbose:   verbose,
 	})
 }
 
@@ -145,7 +146,7 @@ func Run(args Arguments) {
 		if err != nil {
 			log.Fatalf("error writing output: %s\n", err)
 		}
-		if *verbose {
+		if verbose {
 			log.Printf("%s\n", outputName)
 		}
 	}
@@ -267,7 +268,8 @@ func (pkg *Package) typeCheck(fs *token.FileSet, astFiles []*ast.File) {
 }
 
 type Struct struct {
-	Name string
+	Name   string
+	Struct *types.Struct
 }
 
 type AssetKind struct {
@@ -326,7 +328,8 @@ func (g *Generator) generate() {
 				}
 				if hasEmbeddedObjectRecursive(structTypeInfo) {
 					structsUsingGMLObject = append(structsUsingGMLObject, Struct{
-						Name: structName,
+						Name:   structName,
+						Struct: structTypeInfo,
 					})
 				}
 				return false
@@ -358,6 +361,72 @@ var _ = audio.InitSoundGeneratedData
 `)
 	g.generateObjectIndexes(structsUsingGMLObject)
 	g.generateObjectMetaAndMethods(structsUsingGMLObject)
+
+	for _, record := range structsUsingGMLObject {
+		fmt.Printf("name: %s\n", record.Name)
+		for i := 0; i < record.Struct.NumFields(); i++ {
+			field := record.Struct.Field(i)
+			switch fieldType := field.Type().(type) {
+			case *types.Named:
+				fieldType.NumMethods()
+				fmt.Printf("-- named: %v -- %s -- %T -- %T\n", fieldType.Obj().Name(), fieldType.Obj().Pkg().Path(), fieldType, fieldType.Underlying())
+				for i := 0; i < fieldType.NumMethods(); i++ {
+					method := fieldType.Method(i)
+					switch method.Name() {
+					case "UnsafeSnapshotMarshalBinary":
+						// Validate parameters
+						{
+							params := method.Type().(*types.Signature).Params()
+							fmt.Printf("---- method: %s -- %T -- %d\n", method.Name(), method.Type(), params.Len())
+							if params.Len() != 1 {
+								panic("Expected UnsafeSnapshotMarshalBinary to only have 1 parameter")
+							}
+							param, ok := params.At(0).Type().(*types.Pointer)
+							if !ok {
+								panic("Expected parameter 1 to be pointer " + param.String())
+							}
+							underlyingType, ok := param.Elem().(*types.Named)
+							if !ok {
+								panic("Expected parameter 1 to be named")
+							}
+							isBytesBuf := underlyingType.Obj().Pkg().Path() == "bytes" &&
+								underlyingType.Obj().Name() == "Buffer"
+							if !isBytesBuf {
+								panic("Expected parameter 1 to be bytes.Buffer")
+							}
+						}
+
+						//log.Fatalf("%s\n", underlyingType.Obj().Name())
+						/*for i := 0; i < params.Len(); i++ {
+							param := params.At(i)
+							log.Printf("-- type: %T\n", param.Type())
+						}*/
+					case "UnsafeSnapshotUnmarshalBinary":
+						fmt.Printf("---- todo method: %s -- %T\n", method.Name(), method.Type())
+					}
+				}
+				isGmlObject := fieldType.Obj().Pkg().Path() == "github.com/silbinarywolf/gml-go/gml" &&
+					fieldType.Obj().Name() == "Object"
+				if !isGmlObject {
+					switch fieldType := fieldType.Underlying().(type) {
+					case *types.Struct:
+						for i := 0; i < fieldType.NumFields(); i++ {
+							field := fieldType.Field(i)
+							fmt.Printf("-- field name: %s\n", field.Name())
+						}
+					default:
+						panic(fmt.Sprintf("field type not handled: %T\n", fieldType))
+					}
+				}
+				/*for i := 0; i < fieldType.NumMethods(); i++ {
+					field := fieldType.Method(i)
+					fmt.Printf("-- inner param: %v\n", field.FullName())
+				}*/
+			default:
+				fmt.Printf("default: %s, %T\n", field.Type().String(), field.Type())
+			}
+		}
+	}
 }
 
 func (g *Generator) generateAssets(dir string) {

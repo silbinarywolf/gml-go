@@ -21,10 +21,13 @@ var Cmd = &base.Command{
 
 var tags *string
 
+var verboseShort *bool
+
 var verbose *bool
 
 func init() {
 	tags = Cmd.Flag.String("tags", "", "a list of build tags to consider satisfied during the build")
+	verboseShort = Cmd.Flag.Bool("v", false, "verbose")
 	verbose = Cmd.Flag.Bool("verbose", false, "verbose")
 }
 
@@ -42,7 +45,7 @@ func run(cmd *base.Command, args []string) {
 	// Run "go generate"
 	generate.Run(generate.Arguments{
 		Directory: dir,
-		Verbose:   *verbose,
+		Verbose:   *verbose || *verboseShort,
 	})
 
 	// Run "go build"
@@ -71,7 +74,8 @@ func run(cmd *base.Command, args []string) {
 		errOutput, _ := ioutil.ReadAll(cmdErr)
 		stdOutput, _ := ioutil.ReadAll(cmdOut)
 		if len(errOutput) > 0 {
-			panic(errOutput)
+			fmt.Printf(string(errOutput))
+			os.Exit(1)
 		}
 		fmt.Printf("%s", stdOutput)
 	}

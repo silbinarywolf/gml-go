@@ -18,11 +18,6 @@ var cmds = []*base.Command{
 	serve.Cmd,
 }
 
-var (
-	Tags    string
-	Verbose bool
-)
-
 func main() {
 	log.SetFlags(0)
 	log.SetPrefix(shared.RootCmd + ": ")
