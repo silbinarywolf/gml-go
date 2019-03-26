@@ -54,6 +54,16 @@ func (roomInstanceIndex RoomInstanceIndex) RoomInstanceChangeRoom(inst ObjectTyp
 	if !roomInst.used {
 		return
 	}
+	baseObj := inst.BaseObject()
+	oldRoomInstanceIndex := baseObj.RoomInstanceIndex()
+	if oldRoomInstanceIndex == 0 {
+		baseObj.internal.RoomInstanceIndex = roomInstanceIndex
+		roomInst.instances = append(roomInst.instances, baseObj.InstanceIndex())
+		return
+	}
+	if oldRoomInstanceIndex == baseObj.internal.RoomInstanceIndex {
+		return
+	}
 	// NOTE(Jake): 2018-07-22
 	// For now instances default to the last instance layer
 	//layerIndex := len(roomInst.instanceLayers) - 1
@@ -193,4 +203,5 @@ func (roomInst *roomInstance) draw() {
 		}
 		inst.Draw()
 	}
+	DrawTextF(16, 16, "Instance Debug Draw Count: %v", len(roomInst.instances))
 }

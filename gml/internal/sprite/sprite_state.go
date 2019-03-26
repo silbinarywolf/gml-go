@@ -92,7 +92,7 @@ func (state SpriteState) UnsafeSnapshotMarshalBinary(buf *bytes.Buffer) error {
 	return nil
 }
 
-func (state SpriteState) UnsafeSnapshotUnmarshalBinary(buf *bytes.Buffer) error {
+func (state *SpriteState) UnsafeSnapshotUnmarshalBinary(buf *bytes.Buffer) error {
 	if err := binary.Read(buf, binary.LittleEndian, &state.spriteIndex); err != nil {
 		return err
 	}
@@ -103,53 +103,4 @@ func (state SpriteState) UnsafeSnapshotUnmarshalBinary(buf *bytes.Buffer) error 
 		return err
 	}
 	return nil
-}
-
-func (state SpriteState) MarshalBinary() ([]byte, error) {
-	buf := new(bytes.Buffer)
-	if err := binary.Write(buf, binary.LittleEndian, state.spriteIndex); err != nil {
-		return nil, err
-	}
-	if err := binary.Write(buf, binary.LittleEndian, state.imageIndex); err != nil {
-		return nil, err
-	}
-	if err := binary.Write(buf, binary.LittleEndian, state.ImageScale); err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
-	/*w := spriteStateSerialize{
-		SpriteIndex: state.spriteIndex,
-		ImageScale:  state.ImageScale,
-		ImageIndex:  state.imageIndex,
-	}
-	var buf bytes.Buffer
-	enc := gob.NewEncoder(&buf)
-	if err := enc.Encode(w); err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil*/
-}
-
-func (state *SpriteState) UnmarshalBinary(data []byte) error {
-	buf := bytes.NewReader(data)
-	if err := binary.Read(buf, binary.LittleEndian, &state.spriteIndex); err != nil {
-		return err
-	}
-	if err := binary.Read(buf, binary.LittleEndian, &state.imageIndex); err != nil {
-		return err
-	}
-	if err := binary.Read(buf, binary.LittleEndian, &state.ImageScale); err != nil {
-		return err
-	}
-	return nil
-	/*w := spriteStateSerialize{}
-	reader := bytes.NewReader(data)
-	dec := gob.NewDecoder(reader)
-	if err := dec.Decode(&w); err != nil {
-		return err
-	}
-	state.SetSprite(w.SpriteIndex)
-	state.SetImageIndex(w.ImageIndex)
-	state.ImageScale = w.ImageScale
-	return nil*/
 }

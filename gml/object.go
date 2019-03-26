@@ -3,6 +3,7 @@ package gml
 import (
 	"bytes"
 	"encoding/binary"
+	"log"
 	"math"
 
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
@@ -32,25 +33,19 @@ type objectExternal struct {
 }
 
 type objectInternal struct {
-	BboxOffset        geom.Vec
 	IsDestroyed       bool
+	Solid             bool
+	BboxOffset        geom.Vec
 	InstanceIndex     InstanceIndex     // global uuid
 	RoomInstanceIndex RoomInstanceIndex // Room Instance Index belongs to
 	ObjectIndex       ObjectIndex
 	Depth             int
-	Solid             bool
 	ImageAngleRadians float64 // Image Angle
 }
 
 type Object struct {
-	objectExternal
 	internal objectInternal
-}
-
-type objectSerialize struct {
-	Rect        geom.Rect
-	SpriteState sprite.SpriteState
-	Internal    objectInternal
+	objectExternal
 }
 
 func (inst *Object) Create() {}
@@ -139,6 +134,15 @@ func (inst Object) UnsafeSnapshotMarshalBinary(buf *bytes.Buffer) error {
 	if inst.internal.RoomInstanceIndex == 0 {
 		panic("RoomInstanceIndex cannot be 0")
 	}
+	if err := binary.Write(buf, binary.LittleEndian, inst.internal.InstanceIndex); err != nil {
+		return err
+	}
+	if err := binary.Write(buf, binary.LittleEndian, inst.internal.ObjectIndex); err != nil {
+		return err
+	}
+	if err := binary.Write(buf, binary.LittleEndian, inst.internal.RoomInstanceIndex); err != nil {
+		return err
+	}
 	if err := binary.Write(buf, binary.LittleEndian, inst.objectExternal.Rect); err != nil {
 		return err
 	}
@@ -148,31 +152,34 @@ func (inst Object) UnsafeSnapshotMarshalBinary(buf *bytes.Buffer) error {
 	if err := binary.Write(buf, binary.LittleEndian, inst.internal.BboxOffset); err != nil {
 		return err
 	}
-	if err := binary.Write(buf, binary.LittleEndian, int64(inst.internal.Depth)); err != nil {
+	if err := binary.Write(buf, binary.LittleEndian, int32(inst.internal.Depth)); err != nil {
 		return err
 	}
 	if err := binary.Write(buf, binary.LittleEndian, inst.internal.ImageAngleRadians); err != nil {
 		return err
 	}
-	if err := binary.Write(buf, binary.LittleEndian, inst.internal.InstanceIndex); err != nil {
-		return err
-	}
 	if err := binary.Write(buf, binary.LittleEndian, inst.internal.IsDestroyed); err != nil {
-		return err
-	}
-	if err := binary.Write(buf, binary.LittleEndian, inst.internal.ObjectIndex); err != nil {
-		return err
-	}
-	if err := binary.Write(buf, binary.LittleEndian, inst.internal.RoomInstanceIndex); err != nil {
 		return err
 	}
 	if err := binary.Write(buf, binary.LittleEndian, inst.internal.Solid); err != nil {
 		return err
 	}
+	log.Printf("MarshalObject: %v\n", inst)
 	return nil
 }
 
 func (inst *Object) UnsafeSnapshotUnmarshalBinary(buf *bytes.Buffer) error {
+	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.InstanceIndex); err != nil {
+		return err
+	}
+	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.ObjectIndex); err != nil {
+		return err
+	}
+	var roomInstanceIndex RoomInstanceIndex
+	if err := binary.Read(buf, binary.LittleEndian, &roomInstanceIndex); err != nil {
+		return err
+	}
+	roomInstanceIndex.RoomInstanceChangeRoom(inst)
 	if err := binary.Read(buf, binary.LittleEndian, &inst.objectExternal.Rect); err != nil {
 		return err
 	}
@@ -182,7 +189,7 @@ func (inst *Object) UnsafeSnapshotUnmarshalBinary(buf *bytes.Buffer) error {
 	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.BboxOffset); err != nil {
 		return err
 	}
-	var d int64
+	var d int32
 	if err := binary.Read(buf, binary.LittleEndian, &d); err != nil {
 		return err
 	}
@@ -190,103 +197,12 @@ func (inst *Object) UnsafeSnapshotUnmarshalBinary(buf *bytes.Buffer) error {
 	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.ImageAngleRadians); err != nil {
 		return err
 	}
-	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.InstanceIndex); err != nil {
-		return err
-	}
 	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.IsDestroyed); err != nil {
-		return err
-	}
-	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.ObjectIndex); err != nil {
-		return err
-	}
-	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.RoomInstanceIndex); err != nil {
 		return err
 	}
 	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.Solid); err != nil {
 		return err
 	}
-	return nil
-}
-
-func (inst Object) MarshalBinaryObject() ([]byte, error) {
-	if inst.internal.RoomInstanceIndex == 0 {
-		panic("RoomInstanceIndex cannot be 0")
-	}
-	buf := new(bytes.Buffer)
-	if err := binary.Write(buf, binary.LittleEndian, inst.objectExternal.Rect); err != nil {
-		return nil, err
-	}
-	bytes, err := inst.objectExternal.SpriteState.MarshalBinary()
-	if err != nil {
-		return nil, err
-	}
-	if _, err := buf.Write(bytes); err != nil {
-		return nil, err
-	}
-	if err := binary.Write(buf, binary.LittleEndian, inst.internal.BboxOffset); err != nil {
-		return nil, err
-	}
-	if err := binary.Write(buf, binary.LittleEndian, int64(inst.internal.Depth)); err != nil {
-		return nil, err
-	}
-	if err := binary.Write(buf, binary.LittleEndian, inst.internal.ImageAngleRadians); err != nil {
-		return nil, err
-	}
-	if err := binary.Write(buf, binary.LittleEndian, inst.internal.InstanceIndex); err != nil {
-		return nil, err
-	}
-	if err := binary.Write(buf, binary.LittleEndian, inst.internal.IsDestroyed); err != nil {
-		return nil, err
-	}
-	if err := binary.Write(buf, binary.LittleEndian, inst.internal.ObjectIndex); err != nil {
-		return nil, err
-	}
-	if err := binary.Write(buf, binary.LittleEndian, inst.internal.RoomInstanceIndex); err != nil {
-		return nil, err
-	}
-	if err := binary.Write(buf, binary.LittleEndian, inst.internal.Solid); err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
-}
-
-func (inst *Object) UnmarshalBinaryObject(data []byte) error {
-	buf := bytes.NewReader(data)
-	if err := binary.Read(buf, binary.LittleEndian, &inst.objectExternal.Rect); err != nil {
-		return err
-	}
-	bytes := make([]byte, binary.Size(inst.SpriteState))
-	if err := binary.Read(buf, binary.LittleEndian, &bytes); err != nil {
-		return err
-	}
-	if err := inst.objectExternal.SpriteState.UnmarshalBinary(bytes); err != nil {
-		return err
-	}
-	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.BboxOffset); err != nil {
-		return err
-	}
-	var d int64
-	if err := binary.Read(buf, binary.LittleEndian, &d); err != nil {
-		return err
-	}
-	inst.internal.Depth = int(d)
-	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.ImageAngleRadians); err != nil {
-		return err
-	}
-	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.InstanceIndex); err != nil {
-		return err
-	}
-	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.IsDestroyed); err != nil {
-		return err
-	}
-	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.ObjectIndex); err != nil {
-		return err
-	}
-	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.RoomInstanceIndex); err != nil {
-		return err
-	}
-	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.Solid); err != nil {
-		return err
-	}
+	log.Printf("UnmarshalObject: %v\n", inst)
 	return nil
 }
