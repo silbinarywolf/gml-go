@@ -363,25 +363,34 @@ var _ = audio.InitSoundGeneratedData
 	g.generateObjectMetaAndMethods(structsUsingGMLObject)
 
 	for _, record := range structsUsingGMLObject {
-		fmt.Printf("name: %s\n", record.Name)
+		g.Printf("func (self %s) UnsafeSnapshotMarshalBinaryRoot(buf *bytes.Buffer) error {", record.Name)
+		pkg := record.Struct.Field(0).Pkg()
 		for i := 0; i < record.Struct.NumFields(); i++ {
 			field := record.Struct.Field(i)
+			g.generateType(pkg, field, "")
+			/*panic(fmt.Sprintf("%T\n", field.Type()))
 			switch fieldType := field.Type().(type) {
+			case *types.Basic:
+				panic("hey")
 			case *types.Named:
-				fieldType.NumMethods()
-				fmt.Printf("-- named: %v -- %s -- %T -- %T\n", fieldType.Obj().Name(), fieldType.Obj().Pkg().Path(), fieldType, fieldType.Underlying())
+				hasMarshalMethod := false
+				//fmt.Printf("-- named: %v -- %s -- %T -- %T\n", fieldType.Obj().Name(), fieldType.Obj().Pkg().Path(), fieldType, fieldType.Underlying())
 				for i := 0; i < fieldType.NumMethods(); i++ {
 					method := fieldType.Method(i)
 					switch method.Name() {
 					case "UnsafeSnapshotMarshalBinary":
-						// Validate parameters
+						typeInfo, ok := method.Type().(*types.Signature)
+						if !ok {
+							panic("Expected method to have type signature")
+						}
+
+						// Validate params
 						{
-							params := method.Type().(*types.Signature).Params()
-							fmt.Printf("---- method: %s -- %T -- %d\n", method.Name(), method.Type(), params.Len())
-							if params.Len() != 1 {
+							values := typeInfo.Params()
+							if values.Len() != 1 {
 								panic("Expected UnsafeSnapshotMarshalBinary to only have 1 parameter")
 							}
-							param, ok := params.At(0).Type().(*types.Pointer)
+							param, ok := values.At(0).Type().(*types.Pointer)
 							if !ok {
 								panic("Expected parameter 1 to be pointer " + param.String())
 							}
@@ -396,36 +405,168 @@ var _ = audio.InitSoundGeneratedData
 							}
 						}
 
-						//log.Fatalf("%s\n", underlyingType.Obj().Name())
-						/*for i := 0; i < params.Len(); i++ {
-							param := params.At(i)
-							log.Printf("-- type: %T\n", param.Type())
-						}*/
-					case "UnsafeSnapshotUnmarshalBinary":
-						fmt.Printf("---- todo method: %s -- %T\n", method.Name(), method.Type())
-					}
-				}
-				isGmlObject := fieldType.Obj().Pkg().Path() == "github.com/silbinarywolf/gml-go/gml" &&
-					fieldType.Obj().Name() == "Object"
-				if !isGmlObject {
-					switch fieldType := fieldType.Underlying().(type) {
-					case *types.Struct:
-						for i := 0; i < fieldType.NumFields(); i++ {
-							field := fieldType.Field(i)
-							fmt.Printf("-- field name: %s\n", field.Name())
+						// Validate return
+						{
+							values := typeInfo.Results()
+							if values.Len() != 1 {
+								panic("Expected UnsafeSnapshotMarshalBinary to only have 1 return value")
+							}
+
+							value := values.At(0).Type().(*types.Named)
+							if value.Obj().Id() != "_.error" {
+								// NOTE: Jake: 2019-03-27
+								// Haven't checked if "_.error" is the correct way to confirm
+								// the error type is correct. Guessing!
+								panic("Expected return type error, not " + value.Obj().Name())
+							}
 						}
-					default:
-						panic(fmt.Sprintf("field type not handled: %T\n", fieldType))
+
+						hasMarshalMethod = true
+					case "UnsafeSnapshotUnmarshalBinary":
+						//fmt.Printf("---- todo unmarshal method: %s -- %T\n", method.Name(), method.Type())
 					}
 				}
-				/*for i := 0; i < fieldType.NumMethods(); i++ {
-					field := fieldType.Method(i)
-					fmt.Printf("-- inner param: %v\n", field.FullName())
-				}*/
+
+				if hasMarshalMethod {
+					fmt.Printf("self.Object.UnsafeSnapshotMarshalBinary(buf)\n")
+				} else {
+					fieldType := fieldType.Underlying().(*types.Struct)
+					for i := 0; i < fieldType.NumFields(); i++ {
+						field := fieldType.Field(i)
+						fmt.Printf("self.Object.UnsafeSnapshotMarshalBinary(buf)\n")
+						fmt.Printf("-- field name: %s, type: %T\n", field.Name(), field.Type())
+					}
+				}
 			default:
 				fmt.Printf("default: %s, %T\n", field.Type().String(), field.Type())
+			}*/
+		}
+		g.Printf("\n	return nil\n}\n")
+		/*if record.Name == "Player" {
+			panic("Player: " + string(g.format()))
+		}*/
+	}
+	panic(string(g.format()))
+}
+
+func (g *Generator) generateType(pkg *types.Package, field *types.Var, prefix string) {
+	isExportedOrSamePackage := field.Exported() || pkg.Path() == field.Pkg().Path()
+	if !isExportedOrSamePackage {
+		panic("self." + prefix + field.Name() + " not exported. Cannot generate serialization code if using struct with unexported fields.")
+	}
+	switch fieldType := field.Type().(type) {
+	case *types.Basic:
+		g.Printf(`
+if err := binary.Write(buf, binary.LittleEndian, self.%s%s); err != nil {
+	return err
+}`, prefix, field.Name())
+		/*switch fieldType.Kind() {
+		case types.Bool:
+		}
+		fmt.Printf("field: %s, %s -- %T\n", fieldType.Name(), fieldType.Kind(), fieldType.Info())*/
+	case *types.Named:
+		hasMarshalMethod := false
+		//fmt.Printf("-- named: %v -- %s -- %T -- %T\n", fieldType.Obj().Name(), fieldType.Obj().Pkg().Path(), fieldType, fieldType.Underlying())
+		for i := 0; i < fieldType.NumMethods(); i++ {
+			method := fieldType.Method(i)
+			switch method.Name() {
+			case "UnsafeSnapshotMarshalBinary":
+				typeInfo, ok := method.Type().(*types.Signature)
+				if !ok {
+					panic("Expected method to have type signature")
+				}
+
+				// Validate params
+				{
+					values := typeInfo.Params()
+					if values.Len() != 1 {
+						panic("Expected UnsafeSnapshotMarshalBinary to only have 1 parameter")
+					}
+					param, ok := values.At(0).Type().(*types.Pointer)
+					if !ok {
+						panic("Expected parameter 1 to be pointer " + param.String())
+					}
+					underlyingType, ok := param.Elem().(*types.Named)
+					if !ok {
+						panic("Expected parameter 1 to be named")
+					}
+					isBytesBuf := underlyingType.Obj().Pkg().Path() == "bytes" &&
+						underlyingType.Obj().Name() == "Buffer"
+					if !isBytesBuf {
+						panic("Expected parameter 1 to be bytes.Buffer")
+					}
+				}
+
+				// Validate return
+				{
+					values := typeInfo.Results()
+					if values.Len() != 1 {
+						panic("Expected UnsafeSnapshotMarshalBinary to only have 1 return value")
+					}
+
+					value := values.At(0).Type().(*types.Named)
+					if value.Obj().Id() != "_.error" {
+						// NOTE: Jake: 2019-03-27
+						// Haven't checked if "_.error" is the correct way to confirm
+						// the error type is correct. Guessing!
+						panic("Expected return type error, not " + value.Obj().Name())
+					}
+				}
+
+				hasMarshalMethod = true
+			case "UnsafeSnapshotUnmarshalBinary":
+				//fmt.Printf("---- todo unmarshal method: %s -- %T\n", method.Name(), method.Type())
 			}
 		}
+
+		if hasMarshalMethod {
+			g.Printf(`
+if err := self.%s.UnsafeSnapshotMarshalBinary(buf); err != nil {
+	return err
+}`, field.Name())
+		} else {
+			prefix := prefix + field.Name() + "."
+			switch fieldType := fieldType.Underlying().(type) {
+			case *types.Struct:
+				for i := 0; i < fieldType.NumFields(); i++ {
+					field := fieldType.Field(i)
+					g.generateType(pkg, field, prefix)
+				}
+			case *types.Basic:
+				/*g.Printf(`
+				if err := binary.Write(buf, binary.LittleEndian, self.%s); err != nil {
+					return err
+				}`, field.Name())*/
+				//g.generateType(pkg, field, prefix)
+				//panic(prefix + "." + field.Name())
+			default:
+				panic(fmt.Sprintf("Unhandled field type: %T\n", fieldType))
+			}
+			/*fieldType := fieldType.Underlying().(*types.Struct)
+			for i := 0; i < fieldType.NumFields(); i++ {
+				field := fieldType.Field(i)
+				g.generateType(field.Type())
+			}*/
+		}
+		/*isGmlObject := fieldType.Obj().Pkg().Path() == "github.com/silbinarywolf/gml-go/gml" &&
+			fieldType.Obj().Name() == "Object"
+		if !isGmlObject {
+			switch fieldType := fieldType.Underlying().(type) {
+			case *types.Struct:
+				for i := 0; i < fieldType.NumFields(); i++ {
+					field := fieldType.Field(i)
+					fmt.Printf("-- field name: %s, type: %T\n", field.Name(), field.Type())
+				}
+			default:
+				panic(fmt.Sprintf("field type not handled: %T\n", fieldType))
+			}
+		}*/
+		/*for i := 0; i < fieldType.NumMethods(); i++ {
+			field := fieldType.Method(i)
+			fmt.Printf("-- inner param: %v\n", field.FullName())
+		}*/
+	default:
+		fmt.Printf("default: %s, %T\n", fieldType.String(), fieldType)
 	}
 }
 
