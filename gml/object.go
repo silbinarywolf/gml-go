@@ -27,6 +27,10 @@ type ObjectType interface {
 	Draw()
 }
 
+// ObjectSerialize hints to the code generator to generate serialization functions
+type ObjectSerialize struct {
+}
+
 type objectExternal struct {
 	geom.Rect
 	sprite.SpriteState // Sprite (contains SetSprite)
