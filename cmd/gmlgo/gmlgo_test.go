@@ -180,11 +180,21 @@ func (self SerializablePlayer) UnsafeSnapshotMarshalBinaryRoot(buf *bytes.Buffer
 	if err := self.Object.UnsafeSnapshotMarshalBinary(buf); err != nil {
 		return err
 	}
+	if err := binary.Write(buf, binary.LittleEndian, int64(self.defaultInt)); err != nil {
+		return err
+	}
 	return nil
 }
 func (self *SerializablePlayer) UnsafeSnapshotUnmarshalBinaryRoot(buf *bytes.Buffer) error {
 	if err := self.Object.UnsafeSnapshotUnmarshalBinary(buf); err != nil {
 		return err
+	}
+	{
+		var d int64
+		if err := binary.Read(buf, binary.LittleEndian, &d); err != nil {
+			return err
+		}
+		self.defaultInt = int(d)
 	}
 	return nil
 }

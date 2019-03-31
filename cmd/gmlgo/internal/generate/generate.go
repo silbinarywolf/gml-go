@@ -438,21 +438,36 @@ func (g *Generator) generateType(pkg *types.Package, field *types.Var, prefix st
 	}
 	switch fieldType := field.Type().(type) {
 	case *types.Basic:
-		if isWrite {
-			g.Printf(`
+		switch fieldType.Kind() {
+		case types.Int:
+			if isWrite {
+				g.Printf(`
+if err := binary.Write(buf, binary.LittleEndian, int64(self.%s%s)); err != nil {
+	return err
+}`, prefix, field.Name())
+			} else {
+				g.Printf(`
+{
+var d int64
+if err := binary.Read(buf, binary.LittleEndian, &d); err != nil {
+	return err
+}
+self.%s%s = int(d)
+}`, prefix, field.Name())
+			}
+		default:
+			if isWrite {
+				g.Printf(`
 if err := binary.Write(buf, binary.LittleEndian, self.%s%s); err != nil {
 	return err
 }`, prefix, field.Name())
-		} else {
-			g.Printf(`
+			} else {
+				g.Printf(`
 if err := binary.Read(buf, binary.LittleEndian, &self.%s%s); err != nil {
 	return err
 }`, prefix, field.Name())
+			}
 		}
-		//switch fieldType.Kind() {
-		//case types.Bool:
-		//}
-		//fmt.Printf("field: %s, %s -- %T\n", fieldType.Name(), fieldType.Kind(), fieldType.Info())
 	case *types.Named:
 		hasMarshalMethod := false
 		for i := 0; i < fieldType.NumMethods(); i++ {
