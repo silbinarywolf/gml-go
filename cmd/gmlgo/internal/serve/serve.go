@@ -216,7 +216,7 @@ func ensureTmpOutputDir() (string, error) {
 	return tmpOutputDir, nil
 }
 
-func run(cmd *base.Command, args []string) {
+func run(cmd *base.Command, args []string) error {
 	cmd.Flag.Parse(args)
 	if !cmd.Flag.Parsed() {
 		cmd.Flag.PrintDefaults()
@@ -227,13 +227,13 @@ func run(cmd *base.Command, args []string) {
 	if len(args) > 0 {
 		dir = args[0]
 	}
-	Run(Arguments{
+	return Run(Arguments{
 		Directory: dir,
 		Tags:      *tags,
 	})
 }
 
-func Run(args Arguments) {
+func Run(args Arguments) error {
 	if args.Port == "" {
 		args.Port = ":8080"
 	}
@@ -244,4 +244,5 @@ func Run(args Arguments) {
 	log.Printf("listening on %q...", args.Port)
 	http.HandleFunc("/", handle)
 	log.Fatal(http.ListenAndServe(args.Port, nil))
+	return nil
 }

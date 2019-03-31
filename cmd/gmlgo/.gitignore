@@ -1,0 +1,4 @@
+*.exe
+gmlgo
+*.out
+testdata/**/gmlgo_gen.go

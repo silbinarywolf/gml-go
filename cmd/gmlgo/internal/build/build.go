@@ -31,7 +31,7 @@ func init() {
 	verbose = Cmd.Flag.Bool("verbose", false, "verbose")
 }
 
-func run(cmd *base.Command, args []string) {
+func run(cmd *base.Command, args []string) (err error) {
 	cmd.Flag.Parse(args)
 	if !cmd.Flag.Parsed() {
 		cmd.Flag.PrintDefaults()
@@ -79,4 +79,5 @@ func run(cmd *base.Command, args []string) {
 		}
 		fmt.Printf("%s", stdOutput)
 	}
+	return
 }

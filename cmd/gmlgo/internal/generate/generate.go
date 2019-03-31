@@ -50,7 +50,7 @@ type Arguments struct {
 	Verbose   bool
 }
 
-func run(cmd *base.Command, args []string) {
+func run(cmd *base.Command, args []string) error {
 	cmd.Flag.Parse(args)
 	if !cmd.Flag.Parsed() {
 		cmd.Flag.PrintDefaults()
@@ -61,13 +61,18 @@ func run(cmd *base.Command, args []string) {
 	if len(args) > 0 {
 		dir = args[0]
 	}
-	Run(Arguments{
+	return Run(Arguments{
 		Directory: dir,
 		Verbose:   verbose,
 	})
 }
 
-func Run(args Arguments) {
+func Run(args Arguments) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("%v", r)
+		}
+	}()
 	if args.Directory == "" {
 		args.Directory = "."
 	}
@@ -151,6 +156,7 @@ func Run(args Arguments) {
 			log.Printf("%s\n", outputName)
 		}
 	}
+	return
 }
 
 // isDirectory reports whether the named file is a directory.
