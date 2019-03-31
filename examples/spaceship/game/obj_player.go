@@ -4,11 +4,12 @@ import (
 	"math/rand"
 
 	"github.com/silbinarywolf/gml-go/gml"
+	"github.com/silbinarywolf/gml-go/gml/alarm"
 )
 
 type Player struct {
 	gml.Object
-	enemyCreateAlarm gml.Alarm
+	enemyCreateAlarm alarm.Alarm
 	Score            int
 }
 
