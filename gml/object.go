@@ -3,7 +3,6 @@ package gml
 import (
 	"bytes"
 	"encoding/binary"
-	"log"
 	"math"
 
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
@@ -168,7 +167,6 @@ func (inst Object) UnsafeSnapshotMarshalBinary(buf *bytes.Buffer) error {
 	if err := binary.Write(buf, binary.LittleEndian, inst.internal.Solid); err != nil {
 		return err
 	}
-	log.Printf("MarshalObject: %v\n", inst)
 	return nil
 }
 
@@ -207,6 +205,5 @@ func (inst *Object) UnsafeSnapshotUnmarshalBinary(buf *bytes.Buffer) error {
 	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.Solid); err != nil {
 		return err
 	}
-	log.Printf("UnmarshalObject: %v\n", inst)
 	return nil
 }
