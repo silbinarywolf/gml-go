@@ -30,6 +30,9 @@ func DrawSpriteColor(spriteIndex sprite.SpriteIndex, subimage float64, x, y floa
 func DrawSpriteExt(spr sprite.SpriteIndex, subimage float64, x, y float64, scale Vec, alpha float64) {
 }
 
+func DrawSpriteRotated(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64, rotation float64) {
+}
+
 func DrawRectangle(x, y, w, h float64, col color.Color) {
 }
 

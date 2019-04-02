@@ -50,18 +50,18 @@ func run(cmd *base.Command, args []string) (err error) {
 
 	// Run "go build"
 	{
-		var args []string
+		var buildArgs []string
 		if len(args) > 1 {
-			args = make([]string, 0, len(args[2:])+1)
-			args = append(args, "build")
-			args = append(args, args[2:]...)
+			buildArgs = make([]string, 0, len(args[2:])+1)
+			buildArgs = append(buildArgs, "build")
+			buildArgs = append(buildArgs, args...)
 		} else {
-			args = []string{"build"}
+			buildArgs = []string{"build"}
 			if dir != "" {
-				args = append(args, dir)
+				buildArgs = append(buildArgs, dir)
 			}
 		}
-		cmd := exec.Command("go", args...)
+		cmd := exec.Command("go", buildArgs...)
 		cmd.Env = os.Environ()
 
 		cmdOut, _ := cmd.StdoutPipe()
