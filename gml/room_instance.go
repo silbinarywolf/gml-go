@@ -175,12 +175,6 @@ func roomLastCreated() *roomInstance {
 	return roomGetInstance(roomInstanceState.lastCreatedRoom)
 }
 
-func (roomInst *roomInstance) update(animationUpdate bool) {
-	//for _, layer := range roomInst.instanceLayers {
-	//	layer.update(animationUpdate)
-	//}
-}
-
 func (roomInst *roomInstance) draw() {
 	// Sort by order
 	sort.SliceStable(roomInst.instances, func(i, j int) bool {

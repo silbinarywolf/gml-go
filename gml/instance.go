@@ -52,28 +52,12 @@ func allocateNewInstance(objectIndex ObjectIndex) (ObjectType, int) {
 	return inst, slot
 }
 
-// todo: Jake: 2018-12-16
-// Deprecate this in favour of one storage area for all entities
-type roomInstanceManager struct {
-	instances []ObjectType
-}
-
 func (inst *Object) InstanceIndex() InstanceIndex {
 	return inst.internal.InstanceIndex
 }
 
 func (inst *Object) RoomInstanceIndex() RoomInstanceIndex {
 	return inst.internal.RoomInstanceIndex
-}
-
-func newroomInstanceManager() *roomInstanceManager {
-	manager := new(roomInstanceManager)
-	manager.reset()
-	return manager
-}
-
-func (manager *roomInstanceManager) reset() {
-	*manager = roomInstanceManager{}
 }
 
 // getBaseObject get the base object for an instance
@@ -152,32 +136,4 @@ func InstanceDestroy(inst ObjectType) {
 	// NOTE(Jake): 2018-10-07
 	// Remove at the end of the frame (gState.update)
 	gState.instancesMarkedForDelete = append(gState.instancesMarkedForDelete, baseObj.InstanceIndex())
-}
-
-func (manager *roomInstanceManager) update(animationUpdate bool) {
-	{
-		instances := manager.instances
-		for _, inst := range instances {
-			if inst == nil {
-				continue
-			}
-			inst.Update()
-		}
-
-		if animationUpdate {
-			for _, inst := range instances {
-				baseObj := inst.BaseObject()
-				baseObj.SpriteState.ImageUpdate()
-			}
-		}
-	}
-}
-
-func (manager *roomInstanceManager) draw() {
-	for _, inst := range manager.instances {
-		if inst == nil {
-			continue
-		}
-		inst.Draw()
-	}
 }

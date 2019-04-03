@@ -9,7 +9,6 @@ var (
 )
 
 type state struct {
-	//globalInstances            *roomInstanceManager
 	instanceManager          instanceManager
 	instancesMarkedForDelete []InstanceIndex
 	isCreatingRoomInstance   bool
@@ -48,8 +47,12 @@ func (state *state) update() {
 		if baseObj.internal.IsDestroyed {
 			continue
 		}
-		inst.Update()
+		// NOTE(Jake): 2019-04-03
+		// Tested against Game Maker Studio 2, 2.2.2.326
+		// It updates ImageIndex by ImageSpeed *before* the Begin Step
 		baseObj.SpriteState.ImageUpdate()
+
+		inst.Update()
 	}
 
 	// Remove deleted entities
