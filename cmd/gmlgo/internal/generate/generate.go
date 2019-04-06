@@ -17,6 +17,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/base"
 )
@@ -68,11 +69,11 @@ func run(cmd *base.Command, args []string) error {
 }
 
 func Run(args Arguments) (err error) {
-	defer func() {
+	/*defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("%v", r)
 		}
-	}()
+	}()*/
 	if args.Directory == "" {
 		args.Directory = "."
 	}
@@ -288,7 +289,12 @@ type Struct struct {
 
 type AssetKind struct {
 	Name   string
-	Assets []string
+	Assets []Asset
+}
+
+type Asset struct {
+	Name string
+	Path string
 }
 
 // hasEmbeddedObjectRecursive checks to see if "gml.Object" has been embedded
@@ -622,42 +628,56 @@ func (g *Generator) generateAssets(dir string) {
 		case "font",
 			"sprite",
 			"sound":
-			files, err := ioutil.ReadDir(filepath.Join(assetDir, name))
-			if err != nil {
-				log.Fatal(err)
-			}
-			var assetNames []string
-			for _, f := range files {
-				if f.IsDir() {
-					assetName := f.Name()
-					if assetName == "data" &&
-						name == "font" {
-						// Ignore special "data" folder that's used
-						// by "font"
-						continue
+			//
+			filepathSet := make([]Asset, 0, 50)
+			{
+				assetDir := assetDir + "/" + name
+				dirs := make([]string, 0, 50)
+				dirs = append(dirs, assetDir)
+				for len(dirs) > 0 {
+					dir := dirs[len(dirs)-1]
+					dirs = dirs[:len(dirs)-1]
+					files, err := ioutil.ReadDir(dir)
+					if err != nil {
+						log.Fatal(err)
 					}
-					assetNames = append(assetNames, f.Name())
+					isAsset := false
+					for _, f := range files {
+						name := f.Name()
+						path := dir + "/" + name
+						if f.IsDir() {
+							dirs = append(dirs, path)
+							continue
+						}
+						isAsset = isAsset ||
+							(len(name) >= 2 && name[0] == '0' && name[1] == '.') || // ie. "0.png"
+							name == "config.json" ||
+							name == "sound.mp3" || name == "sound.wav"
+					}
+					if isAsset {
+						name := filepath.Base(dir)
+						isExported := false
+						for _, c := range name {
+							isExported = unicode.IsUpper(c)
+							break
+						}
+						if !isExported {
+							log.Fatal(fmt.Errorf("Asset names must begin with a capital letter: %s", name))
+						}
+						filepathSet = append(filepathSet, Asset{
+							Name: name,
+							Path: dir[len(assetDir)+1:],
+						})
+					}
 				}
 			}
-			if len(assetNames) > 0 {
+
+			if len(filepathSet) > 0 {
 				assetKinds = append(assetKinds, AssetKind{
 					Name:   name,
-					Assets: assetNames,
+					Assets: filepathSet,
 				})
 			}
-		//case "layer":
-		/*files, err := ioutil.ReadDir(filepath.Join(assetDir, name))
-		if err != nil {
-			log.Fatal(err)
-		}
-		var assetNames []string
-		for _, f := range files {
-			if !f.IsDir() {
-				assetName := f.Name()
-				assetNames = append(assetNames, f.Name())
-			}
-		}
-		*/
 		default:
 			if !f.IsDir() {
 				// Ignore files
@@ -688,25 +708,33 @@ func (g *Generator) generateAssets(dir string) {
 
 		{
 			g.Printf("const (\n")
-			for i, assetName := range assetKind.Assets {
+			for i, asset := range assetKind.Assets {
 				// ie. SprPlayer    gml.SpriteIndex = 1
-				g.Printf("	%s%s %s = %d\n", prefix, assetName, gotype, i+1)
+				g.Printf("	%s%s %s = %d\n", prefix, asset.Name, gotype, i+1)
 			}
 			g.Printf("\n)\n\n")
 		}
 		{
 			g.Printf("var _gen_%s_index_to_name = []string{\n", prefix)
-			for _, assetName := range assetKind.Assets {
+			for _, asset := range assetKind.Assets {
 				// ie. SprPlayer: "Player"
-				g.Printf("	%s%s: \"%s\",\n", prefix, assetName, assetName)
+				g.Printf("	%s%s: \"%s\",\n", prefix, asset.Name, asset.Name)
+			}
+			g.Printf("\n}\n\n")
+		}
+		{
+			g.Printf("var _gen_%s_index_to_path = []string{\n", prefix)
+			for _, asset := range assetKind.Assets {
+				// ie. SprPlayer: "Player"
+				g.Printf("	%s%s: \"%s\",\n", prefix, asset.Name, asset.Path)
 			}
 			g.Printf("\n}\n\n")
 		}
 		{
 			g.Printf("var _gen_%s_name_to_index = map[string]%s{\n", prefix, gotype)
-			for _, assetName := range assetKind.Assets {
+			for _, asset := range assetKind.Assets {
 				// ie. "Player": SprPlayer
-				g.Printf("	\"%s\": %s%s,\n", assetName, prefix, assetName)
+				g.Printf("	\"%s\": %s%s,\n", asset.Name, prefix, asset.Name)
 			}
 			g.Printf("\n}\n")
 		}
@@ -721,7 +749,7 @@ func init() {
 		case "sprite":
 			g.Printf(`
 func init() {
-	gml.InitSpriteGeneratedData(_gen_Spr_index_to_name, _gen_Spr_name_to_index)
+	gml.InitSpriteGeneratedData(_gen_Spr_index_to_name, _gen_Spr_name_to_index, _gen_Spr_index_to_path)
 }
 
 `)
@@ -809,10 +837,7 @@ func (g *Generator) format() []byte {
 	if err != nil {
 		// Should never happen, but can arise when developing this code.
 		// The user can compile the output to see the error.
-		log.Printf("warning: internal error: invalid Go generated: %s", err)
-		log.Printf("warning: compile the package to analyze the error")
-		return nil
-		//return buf.Bytes()
+		log.Fatalf("invalid Go generated: %s\n%s", err, buf.Bytes())
 	}
 	return src
 }

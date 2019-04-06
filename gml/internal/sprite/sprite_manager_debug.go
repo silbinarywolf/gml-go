@@ -70,8 +70,8 @@ FileWatchLoop:
 			continue
 		}
 		spr := spriteIndex.get()
-		newSprData := loadSprite(spriteName)
-		*spr = *newSprData
+		spr.loadSprite(spriteIndex)
+		//*spr = *newSprData
 	}
 }
 
@@ -110,8 +110,8 @@ func DebugWriteSpriteConfig(spriteIndex SpriteIndex) error {
 	return nil
 }
 
-func debugWriteSprite(name string) {
-	folderPath := file.AssetDirectory + "/" + SpriteDirectoryBase + "/" + name + "/"
+func debugWriteSprite(name string, path string) {
+	folderPath := file.AssetDirectory + "/" + SpriteDirectoryBase + "/" + path + "/"
 
 	// NOTE(Jake): 2018-06-18
 	//

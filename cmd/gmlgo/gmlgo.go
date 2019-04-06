@@ -42,8 +42,11 @@ The commands are:
 	args := os.Args[2:]
 	for _, cmd := range cmds {
 		if cmd.Name() == os.Args[1] {
-			cmd.Run(cmd, args)
-			break
+			if err := cmd.Run(cmd, args); err != nil {
+				panic(err)
+			}
+			return
 		}
 	}
+	panic("Unable to find command: " + os.Args[1])
 }
