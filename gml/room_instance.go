@@ -197,5 +197,6 @@ func (roomInst *roomInstance) draw() {
 		}
 		inst.Draw()
 	}
-	DrawTextF(16, 16, "Instance Debug Draw Count: %v", len(roomInst.instances))
+
+	// DrawTextF(16, 16, "Instance Debug Draw Count: %v", len(roomInst.instances))
 }

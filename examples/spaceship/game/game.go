@@ -1,6 +1,9 @@
 package game
 
-import "github.com/silbinarywolf/gml-go/gml"
+import (
+	"github.com/silbinarywolf/gml-go/examples/spaceship/asset"
+	"github.com/silbinarywolf/gml-go/gml"
+)
 
 var Global = new(GameController)
 
@@ -11,7 +14,7 @@ type GameController struct {
 }
 
 func (_ *GameController) GameStart() {
-	gml.DrawSetFont(FntDefault)
+	gml.DrawSetFont(asset.FntDefault)
 
 	// Setup global variables
 	Global.ShipsSighted = 0

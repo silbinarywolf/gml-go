@@ -5,6 +5,7 @@ import (
 	"math"
 	"math/rand"
 
+	"github.com/silbinarywolf/gml-go/examples/worm/asset"
 	"github.com/silbinarywolf/gml-go/gml"
 	"github.com/silbinarywolf/gml-go/gml/audio"
 )
@@ -54,7 +55,7 @@ func (*GameController) HasWormStopped() bool {
 }
 
 func (*GameController) GameStart() {
-	gml.DrawSetFont(FntDefault)
+	gml.DrawSetFont(asset.FntDefault)
 
 	// Setup "kinda" delta time
 	gml.SetDesignedTPS(DesignedMaxTPS)
@@ -62,7 +63,7 @@ func (*GameController) GameStart() {
 
 	// Play song
 	if !Global.MusicDisabled {
-		Global.MusicPlaying = SndSunnyFields
+		Global.MusicPlaying = asset.SndSunnyFields
 		Global.MusicPlaying.Play()
 	}
 
@@ -95,9 +96,9 @@ func (*GameController) MusicRandomizeTrack() {
 	}
 
 	if Global.MusicPlaying != 0 &&
-		Global.MusicPlaying != SndClassicTrack {
+		Global.MusicPlaying != asset.SndClassicTrack {
 		if rand.Int63n(1000) == 1 {
-			Global.MusicPlaying = SndClassicTrack
+			Global.MusicPlaying = asset.SndClassicTrack
 			Global.MusicPlaying.Play()
 			return
 		}
@@ -108,10 +109,10 @@ func (*GameController) MusicRandomizeTrack() {
 	// as I expected but this is how the original code worked, so I'm
 	// leaving it as is.
 	switch Global.MusicPlaying {
-	case SndSunnyFields:
-		Global.MusicPlaying = SndRacer
+	case asset.SndSunnyFields:
+		Global.MusicPlaying = asset.SndRacer
 	default:
-		Global.MusicPlaying = SndSunnyFields
+		Global.MusicPlaying = asset.SndSunnyFields
 	}
 	Global.MusicPlaying.Play()
 }
@@ -131,9 +132,9 @@ func (*GameController) GameReset() {
 	inst.Reset()
 
 	// Reset game music if game over
-	if Global.MusicPlaying == SndGameover {
+	if Global.MusicPlaying == asset.SndGameover {
 		Global.MusicPlaying.Stop()
-		Global.MusicPlaying = SndSunnyFields
+		Global.MusicPlaying = asset.SndSunnyFields
 		Global.MusicPlaying.Play()
 	}
 
@@ -155,7 +156,7 @@ func (*GameController) GameReset() {
 		inst.Vec = inst.Start
 		inst.Y = -140
 		inst.Speed.Y = 0
-		inst.SetSprite(SprWormHead)
+		inst.SetSprite(asset.SprWormHead)
 		inst.Dead = false
 	}
 }
@@ -171,7 +172,7 @@ func (*GameController) GamePostDraw() {
 		// Split score into seperate numbers
 		i := 0
 		score := playerInst.Score
-		fontWidth := SprScoreFont.Size().X
+		fontWidth := asset.SprScoreFont.Size().X
 		textWidth := 0.0
 		for score >= 1 {
 			index := math.Mod(score, 10)
@@ -187,8 +188,8 @@ func (*GameController) GamePostDraw() {
 		for i > 0 {
 			i--
 			index := scoreIndexes[i]
-			gml.DrawSpriteColor(SprScoreFont, index, x-1, y, color.Black)
-			gml.DrawSprite(SprScoreFont, index, x, y+1)
+			gml.DrawSpriteColor(asset.SprScoreFont, index, x-1, y, color.Black)
+			gml.DrawSprite(asset.SprScoreFont, index, x, y+1)
 			x += fontWidth
 		}
 	}

@@ -1,6 +1,7 @@
 package game
 
 import (
+	"github.com/silbinarywolf/gml-go/examples/worm/asset"
 	"github.com/silbinarywolf/gml-go/gml"
 	"github.com/silbinarywolf/gml-go/gml/alarm"
 )
@@ -24,7 +25,7 @@ func (self *MenuGameover) Create() {
 	if Global.MusicPlaying != 0 {
 		Global.MusicPlaying.Stop()
 	}
-	Global.MusicPlaying = SndGameover
+	Global.MusicPlaying = asset.SndGameover
 	Global.MusicPlaying.Play()
 
 	//
@@ -33,7 +34,7 @@ func (self *MenuGameover) Create() {
 
 	// Gameover
 	{
-		self.SetSprite(SprGameover)
+		self.SetSprite(asset.SprGameover)
 		screenSize := gml.CameraGetViewSize(0)
 		self.Size = self.SpriteIndex().Size()
 		self.X = (screenSize.X / 2) - (self.Size.X / 2)
@@ -43,7 +44,7 @@ func (self *MenuGameover) Create() {
 	// Retry Button
 	self.RetryButton.X = 153
 	self.RetryButton.Y = 95
-	self.RetryButton.Size = SprRetryButton.Size()
+	self.RetryButton.Size = asset.SprRetryButton.Size()
 }
 
 func (self *MenuGameover) Update() {
@@ -65,7 +66,7 @@ func (self *MenuGameover) Update() {
 	if self.MedalDisplayUpdateTimer.Tick() {
 		if self.DisplayScore != Global.CurrentRound {
 			if Global.SoundDisabled {
-				SndMedalObtained.Play()
+				asset.SndMedalObtained.Play()
 			}
 			self.DisplayScore = Global.CurrentRound
 		}
@@ -98,10 +99,10 @@ func (self *MenuGameover) Draw() {
 		if self.IsHoveringOnMenu {
 			imageIndex = 1
 		}
-		gml.DrawSprite(SprRetryButton, imageIndex, self.X+self.RetryButton.X, self.Y+self.RetryButton.Y)
+		gml.DrawSprite(asset.SprRetryButton, imageIndex, self.X+self.RetryButton.X, self.Y+self.RetryButton.Y)
 	}
 
 	// Draw worm medal and flight medal
-	gml.DrawSprite(SprMedalWorm, float64(self.DisplayScore.MedalWorm), self.X+41, self.Y+73)
-	gml.DrawSprite(SprMedalWing, float64(self.DisplayScore.MedalWing), self.X+290, self.Y+84)
+	gml.DrawSprite(asset.SprMedalWorm, float64(self.DisplayScore.MedalWorm), self.X+41, self.Y+73)
+	gml.DrawSprite(asset.SprMedalWing, float64(self.DisplayScore.MedalWing), self.X+290, self.Y+84)
 }

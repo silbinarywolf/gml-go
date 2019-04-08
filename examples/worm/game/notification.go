@@ -3,6 +3,7 @@ package game
 import (
 	"image/color"
 
+	"github.com/silbinarywolf/gml-go/examples/worm/asset"
 	"github.com/silbinarywolf/gml-go/gml"
 )
 
@@ -53,9 +54,9 @@ func (self *Notification) Update() {
 func (self *Notification) Draw() {
 	//NotificationBackX := (display_get_gui_width() >> 1) - (notification_width >> 1)
 	var x, y float64
-	x = gml.CameraGetViewSize(0).X/2 - SprNotificationBg.Size().X/2
+	x = gml.CameraGetViewSize(0).X/2 - asset.SprNotificationBg.Size().X/2
 	y = -110 + (200 * LerpGain(self.Lerp, 0.25))
-	gml.DrawSprite(SprNotificationBg, 0, x, y)
+	gml.DrawSprite(asset.SprNotificationBg, 0, x, y)
 	x += 15
 	y += 15
 	// NOTE(Jake): 2019-02-04

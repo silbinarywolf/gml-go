@@ -3,6 +3,7 @@ package game
 import (
 	"image/color"
 
+	"github.com/silbinarywolf/gml-go/examples/worm/asset"
 	"github.com/silbinarywolf/gml-go/gml"
 )
 
@@ -21,7 +22,7 @@ func (self *Menu) Create() {
 	self.SetDepth(DepthMenu)
 	self.ImageAlpha = 1.0
 
-	size := SprPlayButton.Size()
+	size := asset.SprPlayButton.Size()
 	screenSize := gml.CameraGetViewSize(0)
 	self.X = (screenSize.X / 2) - (size.X / 2)
 	self.Y = (screenSize.Y / 2) - (size.Y / 2)
@@ -55,16 +56,16 @@ func (self *Menu) Draw() {
 
 	// Draw sound icon
 	{
-		spr := SprSoundIcon
+		spr := asset.SprSoundIcon
 		gml.DrawSpriteAlpha(spr, 0, x, y, self.ImageAlpha)
 		x += spr.Size().X
 	}
 
 	// Draw music icon
-	gml.DrawSpriteAlpha(SprMusicIcon, 0, x+4, y, self.ImageAlpha)
+	gml.DrawSpriteAlpha(asset.SprMusicIcon, 0, x+4, y, self.ImageAlpha)
 
 	// Draw title
-	gml.DrawSpriteAlpha(SprTitle, 0, (screenSize.X/2)-(SprTitle.Size().X/2), 20, self.ImageAlpha)
+	gml.DrawSpriteAlpha(asset.SprTitle, 0, (screenSize.X/2)-(asset.SprTitle.Size().X/2), 20, self.ImageAlpha)
 
 	// Draw button
 	{
@@ -72,7 +73,7 @@ func (self *Menu) Draw() {
 		if self.IsHoveringOnMenu {
 			frame = 1
 		}
-		gml.DrawSpriteAlpha(SprPlayButton, frame, self.X, self.Y, self.ImageAlpha)
+		gml.DrawSpriteAlpha(asset.SprPlayButton, frame, self.X, self.Y, self.ImageAlpha)
 	}
 
 	// Draw credits

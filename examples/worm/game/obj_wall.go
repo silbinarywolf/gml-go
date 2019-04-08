@@ -1,6 +1,7 @@
 package game
 
 import (
+	"github.com/silbinarywolf/gml-go/examples/worm/asset"
 	"github.com/silbinarywolf/gml-go/gml"
 )
 
@@ -23,7 +24,7 @@ type Wall struct {
 }
 
 func (self *Wall) Create() {
-	self.SetSprite(SprWall)
+	self.SetSprite(asset.SprWall)
 	self.SetDepth(2)
 }
 

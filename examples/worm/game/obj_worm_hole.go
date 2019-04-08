@@ -1,6 +1,7 @@
 package game
 
 import (
+	"github.com/silbinarywolf/gml-go/examples/worm/asset"
 	"github.com/silbinarywolf/gml-go/gml"
 )
 
@@ -9,7 +10,7 @@ type WormHole struct {
 }
 
 func (self *WormHole) Create() {
-	self.SetSprite(SprWormHole)
+	self.SetSprite(asset.SprWormHole)
 	self.SetDepth(1)
 }
 

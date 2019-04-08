@@ -3,6 +3,7 @@ package game
 import (
 	"math"
 
+	"github.com/silbinarywolf/gml-go/examples/worm/asset"
 	"github.com/silbinarywolf/gml-go/examples/worm/game/input"
 	"github.com/silbinarywolf/gml-go/examples/worm/game/wall"
 	"github.com/silbinarywolf/gml-go/gml"
@@ -43,7 +44,7 @@ type Worm struct {
 }
 
 func (self *Worm) Create() {
-	self.SetSprite(SprWormHead)
+	self.SetSprite(asset.SprWormHead)
 	self.SetDepth(DepthWorm)
 
 	self.Start.X = WormStartX
@@ -92,9 +93,9 @@ func (self *Worm) SetStartingBodyParts(bodyParts int) {
 func (self *Worm) TriggerDeath() {
 	if !self.Dead {
 		if Global.SoundDisabled {
-			SndWormDie.Play()
+			asset.SndWormDie.Play()
 		}
-		self.SetSprite(SprWormHeadDead)
+		self.SetSprite(asset.SprWormHeadDead)
 		self.Dead = true
 
 		// Show game over menu
@@ -199,14 +200,14 @@ func (self *Worm) Draw() {
 		if !bodyPart.HasSprouted {
 			continue
 		}
-		gml.DrawSprite(SprWormBody, 0, bodyPart.X, bodyPart.Y)
+		gml.DrawSprite(asset.SprWormBody, 0, bodyPart.X, bodyPart.Y)
 		if self.WingCount > float64(i) {
 			imageIndex := 0.0
 			if self.Speed.Y < 0 &&
 				self.FlapCounter == float64(i+1) {
 				imageIndex = 1
 			}
-			gml.DrawSprite(SprWing, imageIndex, bodyPart.X-12, bodyPart.Y+24)
+			gml.DrawSprite(asset.SprWing, imageIndex, bodyPart.X-12, bodyPart.Y+24)
 		}
 	}
 
@@ -297,7 +298,7 @@ func (self *Worm) Update() {
 				self.FlapCounter++
 			}
 			if Global.SoundDisabled {
-				SndPlay.Play()
+				asset.SndPlay.Play()
 			}
 		}
 	}

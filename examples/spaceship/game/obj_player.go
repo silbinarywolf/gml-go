@@ -3,6 +3,7 @@ package game
 import (
 	"math/rand"
 
+	"github.com/silbinarywolf/gml-go/examples/spaceship/asset"
 	"github.com/silbinarywolf/gml-go/gml"
 	"github.com/silbinarywolf/gml-go/gml/alarm"
 )
@@ -14,7 +15,7 @@ type Player struct {
 }
 
 func (self *Player) Create() {
-	self.SetSprite(SprSpaceship)
+	self.SetSprite(asset.SprSpaceship)
 }
 
 func (self *Player) Update() {

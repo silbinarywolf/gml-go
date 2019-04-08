@@ -1,6 +1,7 @@
 package game
 
 import (
+	"github.com/silbinarywolf/gml-go/examples/spaceship/asset"
 	"github.com/silbinarywolf/gml-go/gml"
 )
 
@@ -10,7 +11,7 @@ type Bullet struct {
 }
 
 func (self *Bullet) Create() {
-	self.SetSprite(SprBullet)
+	self.SetSprite(asset.SprBullet)
 }
 
 func (self *Bullet) Update() {

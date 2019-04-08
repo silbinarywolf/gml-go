@@ -1,6 +1,7 @@
 package game
 
 import (
+	"github.com/silbinarywolf/gml-go/examples/spaceship/asset"
 	"github.com/silbinarywolf/gml-go/gml"
 )
 
@@ -9,7 +10,7 @@ type EnemyShip struct {
 }
 
 func (self *EnemyShip) Create() {
-	self.SetSprite(SprSpaceship)
+	self.SetSprite(asset.SprSpaceship)
 	self.ImageScale.Y = -1
 }
 
