@@ -78,8 +78,8 @@ FileWatchLoop:
 // DebugWriteSpriteConfig is called by the animation editor
 func DebugWriteSpriteConfig(spriteIndex SpriteIndex) error {
 	spr := spriteIndex.get()
-	name := spr.Name()
-	config := loadConfig(name)
+	path := gSpriteManager.assetIndexToPath[spriteIndex]
+	config := loadConfig(path)
 
 	// Write collision masks
 	{
@@ -97,7 +97,7 @@ func DebugWriteSpriteConfig(spriteIndex SpriteIndex) error {
 		config.CollisionMasks = collisionMasks
 	}
 
-	configPath := file.AssetDirectory + "/" + SpriteDirectoryBase + "/" + name + "/config.json"
+	configPath := file.AssetDirectory + "/" + SpriteDirectoryBase + "/" + path + "/config.json"
 
 	json, err := json.MarshalIndent(config, "", "\t")
 	if err != nil {
@@ -122,7 +122,7 @@ func debugWriteSprite(name string, path string) {
 
 	// Read config information (if it exists)
 	var config spriteConfig
-	config = loadConfig(name)
+	config = loadConfig(path)
 
 	// Load frames
 	//

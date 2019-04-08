@@ -73,7 +73,7 @@ func (state *SpriteState) ImageUpdate() {
 	if imageNumber > 0 {
 		imageSpeed := state.ImageSpeed() * dt.DeltaTime()
 		state.imageIndex += imageSpeed
-		for state.imageIndex >= state.ImageNumber() {
+		if state.imageIndex >= state.ImageNumber() {
 			// NOTE(Jake): 2019-04-03
 			// Tested against Game Maker Studio 2, 2.2.2.326
 			// It resets to zero after going over.

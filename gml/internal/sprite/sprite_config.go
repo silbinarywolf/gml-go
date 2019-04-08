@@ -17,8 +17,8 @@ type spriteConfig struct {
 	CollisionMasks map[int]map[int]CollisionMask `json:"CollisionMasks"`
 }
 
-func loadConfig(name string) spriteConfig {
-	configPath := file.AssetDirectory + "/" + SpriteDirectoryBase + "/" + name + "/config.json"
+func loadConfig(path string) spriteConfig {
+	configPath := file.AssetDirectory + "/" + SpriteDirectoryBase + "/" + path + "/config.json"
 	fileData, err := file.OpenFile(configPath)
 	if err != nil {
 		return spriteConfig{}
