@@ -31,11 +31,7 @@ package game
 
 import (
 	"github.com/silbinarywolf/gml-go/gml"
-	"github.com/silbinarywolf/gml-go/gml/audio"
 )
-
-// Silence errors if audio is unused
-var _ = audio.InitSoundGeneratedData
 
 const (
 	ObjPlayer gml.ObjectIndex = 1
@@ -66,11 +62,7 @@ package game
 
 import (
 	"github.com/silbinarywolf/gml-go/gml"
-	"github.com/silbinarywolf/gml-go/gml/audio"
 )
-
-// Silence errors if audio is unused
-var _ = audio.InitSoundGeneratedData
 
 const (
 	ObjGameObject  gml.ObjectIndex = 1
@@ -105,11 +97,7 @@ package game
 
 import (
 	"github.com/silbinarywolf/gml-go/gml"
-	"github.com/silbinarywolf/gml-go/gml/audio"
 )
-
-// Silence errors if audio is unused
-var _ = audio.InitSoundGeneratedData
 
 const (
 	ObjGameObject      gml.ObjectIndex = 1
@@ -151,11 +139,7 @@ import (
 	"encoding/binary"
 
 	"github.com/silbinarywolf/gml-go/gml"
-	"github.com/silbinarywolf/gml-go/gml/audio"
 )
-
-// Silence errors if audio is unused
-var _ = audio.InitSoundGeneratedData
 
 const (
 	ObjSerializablePlayer gml.ObjectIndex = 1
@@ -213,14 +197,25 @@ func TestBuild(t *testing.T) {
 			expected := n.output
 
 			os.Remove(genFile)
-			err := generate.Cmd.Run(generate.Cmd, []string{projectDir})
-			if err != nil {
-				if fmt.Sprintf("%v", err) != expected {
-					t.Errorf("%s: got\n====\n%s\n====\nexpected\n====\n%s", genFile, fmt.Sprintf("%v", err), expected)
-					return
-				}
+
+			skipBecauseGotExpectedError := false
+			func() {
+				defer func() {
+					if r := recover(); r != nil {
+						if got := fmt.Sprintf("%v", r); got != expected {
+							t.Errorf("%s: got\n====\n%s\n====\nexpected\n====\n%s", genFile, got, expected)
+							return
+						}
+						skipBecauseGotExpectedError = true
+						return
+					}
+				}()
+				generate.Cmd.Run(generate.Cmd, []string{projectDir})
+			}()
+			if skipBecauseGotExpectedError {
 				return
 			}
+
 			bytes, err := ioutil.ReadFile(genFile)
 			if err != nil {
 				t.Errorf("%s", err)
