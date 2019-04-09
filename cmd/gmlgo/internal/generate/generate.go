@@ -652,15 +652,16 @@ var _ = audio.InitSoundGeneratedData
 		log.Fatal(err)
 	}
 	var assetKinds []AssetKind
+	assetNamesUsed := make(map[string]string, len(files))
 	for _, f := range files {
-		switch name := f.Name(); name {
+		switch rootFolderName := f.Name(); rootFolderName {
 		case "font",
 			"sprite",
 			"sound":
 			// Read asset directory recursively
 			filepathSet := make([]Asset, 0, 50)
 			{
-				assetDir := assetDir + "/" + name
+				assetDir := assetDir + "/" + rootFolderName
 				dirs := make([]string, 0, 50)
 				dirs = append(dirs, assetDir)
 				for len(dirs) > 0 {
@@ -685,25 +686,38 @@ var _ = audio.InitSoundGeneratedData
 					}
 					if isAsset {
 						name := filepath.Base(dir)
+						path := dir[len(assetDir)+1:]
+
+						// Check if asset name is valid Go
 						isExported := false
 						for _, c := range name {
 							isExported = unicode.IsUpper(c)
 							break
 						}
 						if !isExported {
-							log.Fatal(fmt.Errorf("Asset names must begin with a capital letter: %s", name))
+							panic(fmt.Errorf("Asset names must begin with a capital letter: %s", name))
 						}
+
+						// Check if duplicate
+						if otherPath, ok := assetNamesUsed[name]; ok {
+							panic(fmt.Errorf("Cannot have duplicate asset names:\n- %s\n- %s", rootFolderName+"/"+path, otherPath))
+						}
+
 						filepathSet = append(filepathSet, Asset{
 							Name: name,
-							Path: dir[len(assetDir)+1:],
+							Path: path,
 						})
+						assetNamesUsed[name] = rootFolderName + "/" + path
 					}
 				}
+				sort.Slice(filepathSet, func(i, j int) bool {
+					return filepathSet[i].Name < filepathSet[j].Name
+				})
 			}
 
 			if len(filepathSet) > 0 {
 				assetKinds = append(assetKinds, AssetKind{
-					Name:   name,
+					Name:   rootFolderName,
 					Assets: filepathSet,
 				})
 			}
@@ -712,7 +726,7 @@ var _ = audio.InitSoundGeneratedData
 				// Ignore files
 				continue
 			}
-			log.Fatal(fmt.Errorf("Unexpected asset kind directory: %s", name))
+			log.Fatal(fmt.Errorf("Unexpected asset kind directory: %s", rootFolderName))
 		}
 	}
 	// Generate asset indexes
@@ -720,16 +734,16 @@ var _ = audio.InitSoundGeneratedData
 		if len(assetKind.Assets) == 0 {
 			continue
 		}
-		var prefix, gotype string
+		var kind, gotype string
 		switch assetKind.Name {
 		case "font":
-			prefix = "Fnt"
+			kind = "Fnt"
 			gotype = "gml.FontIndex"
 		case "sprite":
-			prefix = "Spr"
+			kind = "Spr"
 			gotype = "gml.SpriteIndex"
 		case "sound":
-			prefix = "Snd"
+			kind = "Snd"
 			gotype = "audio.SoundIndex"
 		default:
 			panic("Unimplemented asset kind: " + assetKind.Name)
@@ -738,32 +752,32 @@ var _ = audio.InitSoundGeneratedData
 		{
 			g.Printf("const (\n")
 			for i, asset := range assetKind.Assets {
-				// ie. SprPlayer    gml.SpriteIndex = 1
-				g.Printf("	%s%s %s = %d\n", prefix, asset.Name, gotype, i+1)
+				// ie. Player    gml.SpriteIndex = 1
+				g.Printf("	%s %s = %d\n", asset.Name, gotype, i+1)
 			}
 			g.Printf("\n)\n\n")
 		}
 		{
-			g.Printf("var _gen_%s_index_to_name = []string{\n", prefix)
+			g.Printf("var _gen_%s_index_to_name = []string{\n", kind)
 			for _, asset := range assetKind.Assets {
-				// ie. SprPlayer: "Player"
-				g.Printf("	%s%s: \"%s\",\n", prefix, asset.Name, asset.Name)
+				// ie. Player: "Player"
+				g.Printf("	%s: \"%s\",\n", asset.Name, asset.Name)
 			}
 			g.Printf("\n}\n\n")
 		}
 		{
-			g.Printf("var _gen_%s_index_to_path = []string{\n", prefix)
+			g.Printf("var _gen_%s_index_to_path = []string{\n", kind)
 			for _, asset := range assetKind.Assets {
-				// ie. SprPlayer: "objects/Player"
-				g.Printf("	%s%s: \"%s\",\n", prefix, asset.Name, asset.Path)
+				// ie. Player: "objects/Player"
+				g.Printf("	%s: \"%s\",\n", asset.Name, asset.Path)
 			}
 			g.Printf("\n}\n\n")
 		}
 		{
-			g.Printf("var _gen_%s_name_to_index = map[string]%s{\n", prefix, gotype)
+			g.Printf("var _gen_%s_name_to_index = map[string]%s{\n", kind, gotype)
 			for _, asset := range assetKind.Assets {
 				// ie. "Player": SprPlayer
-				g.Printf("	\"%s\": %s%s,\n", asset.Name, prefix, asset.Name)
+				g.Printf("	\"%s\": %s,\n", asset.Name, asset.Name)
 			}
 			g.Printf("\n}\n")
 		}
