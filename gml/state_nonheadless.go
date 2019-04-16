@@ -32,5 +32,9 @@ func (state *state) draw() {
 		// Render camera onto OS-window
 		cameraDraw(i)
 	}
-	cameraClearActive()
+	//cameraClearActive()
+	// NOTE(Jake): 2019-04-15
+	// Default to first camera for level editors / animation editor
+	// etc.
+	cameraSetActive(0)
 }

@@ -4,6 +4,7 @@ package gml
 
 import (
 	"encoding/json"
+	"fmt"
 	"image/color"
 	"io/ioutil"
 	"math"
@@ -369,7 +370,7 @@ func animationEditorUpdate() {
 		basePos.Y -= 210
 
 		imageIndex := int(math.Floor(editor.spriteViewing.ImageIndex()))
-		DrawTextF(basePos.X, basePos.Y, "Frame: %d", imageIndex)
+		DrawText(basePos.X, basePos.Y, fmt.Sprintf("Frame: %d", imageIndex), color.White)
 		basePos.Y += 24
 		if drawButton(basePos, "Kind: Inherit") {
 			collisionMask = sprite.GetCollisionMask(spriteIndex, imageIndex, 0)

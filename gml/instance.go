@@ -1,8 +1,6 @@
 package gml
 
 import (
-	"reflect"
-
 	"github.com/silbinarywolf/gml-go/gml/internal/assert"
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 )
@@ -33,21 +31,10 @@ func InstanceRestore(oldInstanceIndex InstanceIndex, objectIndex ObjectIndex) Ob
 }
 
 func allocateNewInstance(objectIndex ObjectIndex) (ObjectType, int) {
+	inst := objectIndex.new()
 	manager := &gState.instanceManager
-
-	// Allocate new instance
-	valToCopy := gObjectManager.idToEntityData[objectIndex]
-	if valToCopy == nil {
-		panic("Invalid objectIndex")
-	}
-	// todo(Jake): 2018-12-18
-	// Explore allocating from a large fixed-size pool
-	{
-		inst := reflect.New(reflect.ValueOf(valToCopy).Elem().Type()).Interface().(ObjectType)
-		manager.instances = append(manager.instances, inst)
-	}
+	manager.instances = append(manager.instances, inst)
 	slot := len(manager.instances) - 1
-	inst := manager.instances[slot]
 	inst.BaseObject().internal.ObjectIndex = objectIndex
 	return inst, slot
 }
@@ -97,7 +84,6 @@ func instanceCreate(x, y float64, objectIndex ObjectIndex, callback func(inst *O
 		gState.instanceManager.instanceIndexToIndex[baseObj.internal.InstanceIndex] = slot
 		assert.DebugAssert(baseObj.internal.RoomInstanceIndex == 0, "Room Instance Index cannot be 0")
 		if assignNewInstanceIndex {
-			baseObj.create()
 			inst.Create()
 		}
 	}

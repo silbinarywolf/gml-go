@@ -25,7 +25,7 @@ func (self *MenuGameover) Create() {
 	if Global.MusicPlaying != 0 {
 		Global.MusicPlaying.Stop()
 	}
-	Global.MusicPlaying = asset.SndGameover
+	Global.MusicPlaying = asset.MusGameover
 	Global.MusicPlaying.Play()
 
 	//

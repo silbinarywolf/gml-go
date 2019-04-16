@@ -63,7 +63,7 @@ func (*GameController) GameStart() {
 
 	// Play song
 	if !Global.MusicDisabled {
-		Global.MusicPlaying = asset.SndSunnyFields
+		Global.MusicPlaying = asset.MusSunnyFields
 		Global.MusicPlaying.Play()
 	}
 
@@ -96,9 +96,9 @@ func (*GameController) MusicRandomizeTrack() {
 	}
 
 	if Global.MusicPlaying != 0 &&
-		Global.MusicPlaying != asset.SndClassicTrack {
+		Global.MusicPlaying != asset.MusClassicTrack {
 		if rand.Int63n(1000) == 1 {
-			Global.MusicPlaying = asset.SndClassicTrack
+			Global.MusicPlaying = asset.MusClassicTrack
 			Global.MusicPlaying.Play()
 			return
 		}
@@ -109,10 +109,10 @@ func (*GameController) MusicRandomizeTrack() {
 	// as I expected but this is how the original code worked, so I'm
 	// leaving it as is.
 	switch Global.MusicPlaying {
-	case asset.SndSunnyFields:
-		Global.MusicPlaying = asset.SndRacer
+	case asset.MusSunnyFields:
+		Global.MusicPlaying = asset.MusRacer
 	default:
-		Global.MusicPlaying = asset.SndSunnyFields
+		Global.MusicPlaying = asset.MusSunnyFields
 	}
 	Global.MusicPlaying.Play()
 }
@@ -132,9 +132,9 @@ func (*GameController) GameReset() {
 	inst.Reset()
 
 	// Reset game music if game over
-	if Global.MusicPlaying == asset.SndGameover {
+	if Global.MusicPlaying == asset.MusGameover {
 		Global.MusicPlaying.Stop()
-		Global.MusicPlaying = asset.SndSunnyFields
+		Global.MusicPlaying = asset.MusSunnyFields
 		Global.MusicPlaying.Play()
 	}
 

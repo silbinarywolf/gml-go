@@ -298,7 +298,7 @@ func (self *Worm) Update() {
 				self.FlapCounter++
 			}
 			if Global.SoundDisabled {
-				asset.SndPlay.Play()
+				asset.SndJump.Play()
 			}
 		}
 	}

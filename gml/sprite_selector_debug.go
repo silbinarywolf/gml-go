@@ -83,13 +83,13 @@ func (viewer *debugSpriteViewer) update() (sprite.SpriteIndex, bool) {
 
 		{
 			searchText := "Search for image (type + press enter)"
-			DrawText(ui.X-(StringWidth(searchText)/4), ui.Y, searchText)
+			DrawText(ui.X-(StringWidth(searchText)/4), ui.Y, searchText, color.White)
 			ui.Y += 24
 		}
 		{
 			typingText := KeyboardString()
-			DrawText(ui.X, ui.Y, typingText)
-			DrawText(ui.X+StringWidth(typingText), ui.Y, "|")
+			DrawText(ui.X, ui.Y, typingText, color.White)
+			DrawText(ui.X+StringWidth(typingText), ui.Y, "|", color.White)
 			ui.Y += 24
 		}
 		previewSize := geom.Vec{32, 32}
@@ -105,7 +105,7 @@ func (viewer *debugSpriteViewer) update() (sprite.SpriteIndex, bool) {
 			calcPreviewSize.Y /= float64(spr.Size().Y)
 			DrawSpriteScaled(spr, 0, pos.X, pos.Y, calcPreviewSize)
 			name := spr.Name()
-			DrawText(ui.X, ui.Y, name)
+			DrawText(ui.X, ui.Y, name, color.White)
 			ui.Y += previewSize.Y + 16
 		}
 	}

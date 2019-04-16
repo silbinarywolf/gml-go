@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"math"
+	"reflect"
 
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
@@ -16,6 +17,23 @@ import (
 
 type ObjectIndex int32
 
+//func (id ObjectIndex) Name() string {
+//	return gObjectManager.indexToName[id]
+//}
+
+// new allocates a new struct for that object as data only
+func (id ObjectIndex) new() ObjectType {
+	valToCopy := gObjectManager.idToEntityData[id]
+	if valToCopy == nil {
+		panic("Invalid objectIndex given")
+	}
+	inst := reflect.New(reflect.ValueOf(valToCopy).Elem().Type()).Interface().(ObjectType)
+	baseObj := inst.BaseObject()
+	baseObj.reset()
+	baseObj.internal.ObjectIndex = id
+	return inst
+}
+
 type ObjectType interface {
 	BaseObject() *Object
 	ObjectIndex() ObjectIndex
@@ -27,8 +45,7 @@ type ObjectType interface {
 }
 
 // ObjectSerialize hints to the code generator to generate serialization functions
-type ObjectSerialize struct {
-}
+type ObjectSerialize struct{}
 
 type objectExternal struct {
 	geom.Rect
@@ -81,7 +98,7 @@ func (inst *Object) bboxAt(x, y float64) geom.Rect {
 	}
 }
 
-func (inst *Object) create() {
+func (inst *Object) reset() {
 	inst.ImageScale.X = 1.0
 	inst.ImageScale.Y = 1.0
 }

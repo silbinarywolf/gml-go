@@ -49,12 +49,11 @@ func RoomInstanceNew() RoomInstanceIndex {
 	return roomInst.index
 }
 
-func (roomInstanceIndex RoomInstanceIndex) RoomInstanceChangeRoom(inst ObjectType) {
+func (roomInstanceIndex RoomInstanceIndex) RoomInstanceChangeRoom(baseObj *Object) {
 	roomInst := &roomInstanceState.roomInstances[roomInstanceIndex]
 	if !roomInst.used {
 		return
 	}
-	baseObj := inst.BaseObject()
 	oldRoomInstanceIndex := baseObj.RoomInstanceIndex()
 	if oldRoomInstanceIndex == 0 {
 		baseObj.internal.RoomInstanceIndex = roomInstanceIndex
@@ -83,21 +82,6 @@ func (roomInstanceIndex RoomInstanceIndex) InstanceCreate(x, y float64, objectIn
 		roomInst := &roomInstanceState.roomInstances[roomInstanceIndex]
 		roomInst.instances = append(roomInst.instances, inst.InstanceIndex())
 	}, true)
-	/*inst := allocateNewInstance(objectIndex)
-	{
-		baseObj := inst.BaseObject()
-		baseObj.Vec = geom.Vec{x, y}
-		baseObj.objectIndex = objectIndex
-
-		baseObj.roomInstanceIndex = roomInstanceIndex
-		roomInst := &roomInstanceStateManager.roomInstances[roomInstanceIndex]
-		roomInst.instances = append(roomInst.instances, baseObj.InstanceIndex())
-
-		baseObj.create()
-		inst.Create()
-	}
-
-	return inst*/
 }
 
 // Destroy destroys a room instance

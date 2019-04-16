@@ -3,7 +3,6 @@
 package gml
 
 import (
-	"fmt"
 	"image/color"
 	"math"
 	"strings"
@@ -143,8 +142,8 @@ func DrawRectangleBorder(x, y, w, h float64, color color.Color, borderSize float
 	drawRect(drawGetTarget(), position.X, position.Y, size.X, size.Y, color)
 }
 
-func DrawText(x, y float64, message string) {
-	DrawTextColor(x, y, message, color.White)
+func DrawText(x, y float64, message string, col color.Color) {
+	DrawTextColor(x, y, message, col)
 }
 
 func DrawTextColorAlpha(x, y float64, message string, col color.Color, alpha float64) {
@@ -197,9 +196,9 @@ func DrawTextColor(x, y float64, message string, col color.Color) {
 	text.Draw(drawGetTarget(), message, fontFont(gFontManager.currentFont), int(position.X), int(position.Y), color.White)
 }*/
 
-func DrawTextF(x, y float64, format string, args ...interface{}) {
-	DrawText(x, y, fmt.Sprintf(format, args...))
-}
+//func DrawTextF(x, y float64, col color.Color, format string, args ...interface{}) {
+//	DrawText(x, y, fmt.Sprintf(format, args...), color)
+//}
 
 func drawGetTarget() *ebiten.Image {
 	// NOTE(Jake): 2019-01-26

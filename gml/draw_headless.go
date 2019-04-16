@@ -39,7 +39,7 @@ func DrawRectangle(x, y, w, h float64, col color.Color) {
 func DrawRectangleBorder(x, y, w, h float64, color color.Color, borderSize float64, borderColor color.Color) {
 }
 
-func DrawText(x, y float64, message string) {
+func DrawText(x, y float64, message string, col color.Color) {
 }
 
 func DrawTextColorAlpha(x, y float64, message string, col color.Color, alpha float64) {
@@ -48,5 +48,5 @@ func DrawTextColorAlpha(x, y float64, message string, col color.Color, alpha flo
 func DrawTextColor(x, y float64, message string, col color.Color) {
 }
 
-func DrawTextF(x, y float64, message string, args ...interface{}) {
-}
+//func DrawTextF(x, y float64, message string, args ...interface{}) {
+//}

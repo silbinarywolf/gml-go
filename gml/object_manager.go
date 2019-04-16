@@ -1,18 +1,13 @@
 package gml
 
-import (
-	"reflect"
-)
-
 var (
 	gObjectManager *objectManager = newObjectManager()
 )
 
 type objectManager struct {
 	idToEntityData []ObjectType
-	//objectIndexList []ObjectIndex
-	indexToName []string
-	nameToID    map[string]ObjectIndex
+	indexToName    []string
+	nameToID       map[string]ObjectIndex
 }
 
 func newObjectManager() *objectManager {
@@ -25,9 +20,6 @@ func newObjectManager() *objectManager {
 // InitObjectGeneratedData is required to be called so the engine can create game objects
 func InitObjectGeneratedData(indexToName []string, nameToIndex map[string]ObjectIndex, objTypes []ObjectType) {
 	manager := gObjectManager
-	//if manager.idToEntityData == objTypes {
-	//	panic("Cannot call init type function more than once.")
-	//}
 	manager.idToEntityData = objTypes
 	manager.indexToName = indexToName
 	manager.nameToID = nameToIndex
@@ -36,9 +28,16 @@ func InitObjectGeneratedData(indexToName []string, nameToIndex map[string]Object
 	}
 }
 
-//func ObjectIndexList() []ObjectIndex {
-//	return gObjectManager.objectIndexList
-//}
+// UnsafeObjectTypeList provides a copy of the list of object type definition data
+// this is to be used by custom tools like a room editor or similar.
+func UnsafeObjectTypeList() []ObjectType {
+	r := make([]ObjectType, 0, len(gObjectManager.idToEntityData))
+	for id := 1; id < len(gObjectManager.idToEntityData); id++ {
+		inst := ObjectIndex(id).new()
+		r = append(r, inst)
+	}
+	return r
+}
 
 //
 // This is used to get an object index by the object name.
@@ -52,20 +51,12 @@ func InitObjectGeneratedData(indexToName []string, nameToIndex map[string]Object
 	baseObj.layerInstanceIndex = layerIndex
 }*/
 
-func newRawInstance(objectIndex ObjectIndex, index int, roomInstanceIndex RoomInstanceIndex) ObjectType {
-	valToCopy := gObjectManager.idToEntityData[objectIndex]
-	if valToCopy == nil {
-		panic("Invalid objectIndex given")
-	}
-	inst := reflect.New(reflect.ValueOf(valToCopy).Elem().Type()).Interface().(ObjectType)
-	//moveInstance(inst, index, roomInstanceIndex, layerIndex)
+/*func newRawInstance(objectIndex ObjectIndex, index int, roomInstanceIndex RoomInstanceIndex) ObjectType {
+	inst := objectIndex.New()
 	baseObj := inst.BaseObject()
-	//baseObj.index = index
 	baseObj.internal.RoomInstanceIndex = roomInstanceIndex
-	baseObj.internal.ObjectIndex = objectIndex
-	baseObj.create()
 	return inst
-}
+}*/
 
 func ObjectGetIndex(name string) (ObjectIndex, bool) {
 	res, ok := gObjectManager.nameToID[name]
