@@ -31,6 +31,9 @@ func InitObjectGeneratedData(indexToName []string, nameToIndex map[string]Object
 // UnsafeObjectTypeList provides a copy of the list of object type definition data
 // this is to be used by custom tools like a room editor or similar.
 func UnsafeObjectTypeList() []ObjectType {
+	if len(gObjectManager.idToEntityData) == 0 {
+		panic("UnsafeObjectTypeList is not initialized yet")
+	}
 	r := make([]ObjectType, 0, len(gObjectManager.idToEntityData))
 	for id := 1; id < len(gObjectManager.idToEntityData); id++ {
 		inst := ObjectIndex(id).new()
