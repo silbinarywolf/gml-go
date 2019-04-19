@@ -1,6 +1,8 @@
 package game
 
 import (
+	"fmt"
+	"image/color"
 	"math/rand"
 
 	"github.com/silbinarywolf/gml-go/examples/spaceship/asset"
@@ -45,5 +47,5 @@ func (self *Player) Update() {
 
 func (self *Player) Draw() {
 	self.Object.Draw()
-	gml.DrawTextF(16, 16, "Score: %v\n\nShips Sighted: %v", self.Score, Global.ShipsSighted)
+	gml.DrawText(16, 16, fmt.Sprintf("Score: %v\n\nShips Sighted: %v", self.Score, Global.ShipsSighted), color.White)
 }
