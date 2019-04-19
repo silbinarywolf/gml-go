@@ -144,7 +144,7 @@ func Run(args Arguments) (err error) {
 		// Run parser
 		p := new(Parser)
 		p.parsePackageDir(gameDir, []string{})
-		structsUsingObject := p.getGameObjectStructs()
+		structsUsingObject := p.parseGameObjectStructs()
 
 		// Run generate
 		generateGameObject(gameDir, p.pkg.name, structsUsingObject)
@@ -284,7 +284,7 @@ func hasEmbeddedObjectRecursive(structTypeInfo *types.Struct) bool {
 	return false
 }
 
-func (p *Parser) getGameObjectStructs() []Struct {
+func (p *Parser) parseGameObjectStructs() []Struct {
 	var structsUsingGMLObject []Struct
 	for _, file := range p.pkg.files {
 		if file.file == nil {
@@ -313,6 +313,7 @@ func (p *Parser) getGameObjectStructs() []Struct {
 				}
 				return false
 			}
+
 			return true
 		})
 	}
@@ -729,12 +730,14 @@ var _ = audio.InitSoundGeneratedData
 					Assets: filepathSet,
 				})
 			}
+		case "custom":
+			// no-op, for game-specific assets.
 		default:
 			if !f.IsDir() {
 				// Ignore files
 				continue
 			}
-			log.Fatal(fmt.Errorf("Unexpected asset kind directory: %s", rootFolderName))
+			log.Fatal(fmt.Errorf("Unexpected asset directory type: %s, create and use a \"custom/%s\" folder for custom asset systems.", rootFolderName, rootFolderName))
 		}
 	}
 	// Generate asset indexes
