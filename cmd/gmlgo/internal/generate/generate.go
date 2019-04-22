@@ -237,7 +237,12 @@ func (pkg *Package) typeCheck(fs *token.FileSet, astFiles []*ast.File) {
 	}
 	typesPkg, err := config.Check(pkg.dir, fs, astFiles, info)
 	if err != nil {
-		log.Fatalf("type checking package: %s", err)
+		// NOTE(Jake): 2019-04-20
+		// I explored getting error messages that were more in-line
+		// with a typical Go error message but it's not a simple task.
+		// We can live with the generate error messages being not the same as
+		// they still assist us in debugging the problem.
+		panic(err)
 	}
 	pkg.typesPkg = typesPkg
 }

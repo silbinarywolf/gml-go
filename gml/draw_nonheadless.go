@@ -124,7 +124,7 @@ func DrawRectangle(x, y, w, h float64, col color.Color) {
 	drawRect(drawGetTarget(), position.X, position.Y, w, h, col)
 }
 
-func DrawRectangleBorder(x, y, w, h float64, color color.Color, borderSize float64, borderColor color.Color) {
+func DrawRectangleBorder(x, y, w, h float64, col color.Color, borderSize float64, borderColor color.Color) {
 	position := geom.Vec{
 		X: x,
 		Y: y,
@@ -139,7 +139,9 @@ func DrawRectangleBorder(x, y, w, h float64, color color.Color, borderSize float
 	position.Y += borderSize
 	size.X -= borderSize * 2
 	size.Y -= borderSize * 2
-	drawRect(drawGetTarget(), position.X, position.Y, size.X, size.Y, color)
+	if col != color.Transparent {
+		drawRect(drawGetTarget(), position.X, position.Y, size.X, size.Y, col)
+	}
 }
 
 func DrawText(x, y float64, message string, col color.Color) {
