@@ -71,7 +71,7 @@ func isMouseOver(pos geom.Vec, size geom.Vec) bool {
 }
 
 func isMouseScreenOver(pos geom.Vec, size geom.Vec) bool {
-	mousePos := mouseScreenPosition()
+	mousePos := MouseScreenPosition()
 	left := pos.X
 	right := left + float64(size.X)
 	top := pos.Y

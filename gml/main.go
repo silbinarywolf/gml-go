@@ -10,7 +10,7 @@ import (
 	"github.com/silbinarywolf/gml-go/gml/internal/file"
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
-	"github.com/silbinarywolf/gml-go/gml/internal/timegml"
+	"github.com/silbinarywolf/gml-go/gml/timeprec"
 )
 
 type GameSettings struct {
@@ -137,7 +137,7 @@ func Run(controller gameController, gameSettings GameSettings) {
 }
 
 func update() error {
-	frameStartTime := timegml.Now()
+	frameStartTime := timeprec.Now()
 	keyboardUpdate()
 	keyboardStringUpdate()
 	mouseUpdate()
@@ -179,10 +179,7 @@ func update() error {
 		panic("Invalid debug mode.")
 	}
 
-	// NOTE(Jake): 2019-01-26
-	// Swapped to high precision timer on Windows.
-	// So this should be accurate.
-	frameBudgetUsed := timegml.Now() - frameStartTime
+	frameBudgetUsed := timeprec.Now() - frameStartTime
 	gState.frameBudgetNanosecondsUsed = frameBudgetUsed
 	return nil
 }

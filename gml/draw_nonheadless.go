@@ -187,10 +187,14 @@ func DrawTextColor(x, y float64, message string, col color.Color) {
 	}
 
 	// Draw lines
+	pos := maybeApplyOffsetByCamera(Vec{
+		X: x,
+		Y: y,
+	})
 	leadingHeight := float64(fontFace.Metrics().Height.Ceil())
 	for _, line := range lines {
-		text.Draw(drawGetTarget(), line, fontFace, int(x), int(y), col)
-		y += leadingHeight
+		text.Draw(drawGetTarget(), line, fontFace, int(pos.X), int(pos.Y), col)
+		pos.Y += leadingHeight
 	}
 }
 

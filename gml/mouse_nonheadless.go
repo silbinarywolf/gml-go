@@ -31,6 +31,7 @@ func MouseCheckPressed(button int) bool {
 	return isHeld*/
 }
 
+// MouseScreenPosition returns the camera viewport
 func MousePosition() geom.Vec {
 	x, y := ebiten.CursorPosition()
 	r := geom.Vec{float64(x), float64(y)}
@@ -40,8 +41,8 @@ func MousePosition() geom.Vec {
 	return r
 }
 
-// Get the mouse position relative to the window
-func mouseScreenPosition() geom.Vec {
+// MouseScreenPosition returns the mouse position relative to the window
+func MouseScreenPosition() geom.Vec {
 	x, y := ebiten.CursorPosition()
 	return geom.Vec{float64(x), float64(y)}
 }

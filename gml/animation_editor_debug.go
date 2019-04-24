@@ -244,7 +244,7 @@ func animationEditorUpdate() {
 			// Get distance mouse moved
 			var diffX, diffY float64
 			{
-				mousePos := mouseScreenPosition()
+				mousePos := MouseScreenPosition()
 				handleBeginPos := editor.handleDragBeginPos
 				diffX = mousePos.X - handleBeginPos.X
 				diffY = mousePos.Y - handleBeginPos.Y
@@ -345,7 +345,7 @@ func animationEditorUpdate() {
 			}
 			{
 				// Update State
-				editor.handleDragBeginPos = mouseScreenPosition()
+				editor.handleDragBeginPos = MouseScreenPosition()
 				if !MouseCheckButton(MbLeft) {
 					editor.handleDragging = handleDragNone
 				}

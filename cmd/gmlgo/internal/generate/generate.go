@@ -220,11 +220,31 @@ func (p *Parser) parsePackage(directory string, names []string, text interface{}
 	p.pkg.name = astFiles[0].Name.Name
 	p.pkg.files = files
 	p.pkg.dir = directory
-	p.pkg.typeCheck(fs, astFiles)
+	p.pkg.defs = make(map[*ast.Ident]types.Object)
+	config := types.Config{
+		IgnoreFuncBodies:         true, // We only need to evaluate constants.
+		Importer:                 defaultImporter(),
+		FakeImportC:              true,
+		DisableUnusedImportCheck: true,
+	}
+	info := &types.Info{
+		Defs: p.pkg.defs,
+	}
+	typesPkg, err := config.Check(p.pkg.dir, fs, astFiles, info)
+	if err != nil {
+		// NOTE(Jake): 2019-04-20
+		// I explored getting error messages that were more in-line
+		// with a typical Go error message but it's not a simple task.
+		// We can live with the generate error messages being not the same as
+		// they still assist us in debugging the problem.
+		panic(err)
+	}
+	p.pkg.typesPkg = typesPkg
+	//p.pkg.typeCheck(fs, astFiles)
 }
 
 // check type-checks the package so we can evaluate contants whose values we are printing.
-func (pkg *Package) typeCheck(fs *token.FileSet, astFiles []*ast.File) {
+/*func (pkg *Package) typeCheck(fs *token.FileSet, astFiles []*ast.File) {
 	pkg.defs = make(map[*ast.Ident]types.Object)
 	config := types.Config{
 		IgnoreFuncBodies:         true, // We only need to evaluate constants.
@@ -245,7 +265,7 @@ func (pkg *Package) typeCheck(fs *token.FileSet, astFiles []*ast.File) {
 		panic(err)
 	}
 	pkg.typesPkg = typesPkg
-}
+}*/
 
 type Struct struct {
 	Name   string
@@ -301,7 +321,15 @@ func (p *Parser) parseGameObjectStructs() []Struct {
 			// type XXXX struct
 			case *ast.TypeSpec:
 				structName := n.Name.Name
-				typeInfo, ok := p.pkg.typesPkg.Scope().Lookup(structName).Type().(*types.Named)
+				if p.pkg.typesPkg == nil {
+					return false
+				}
+				typeName := p.pkg.typesPkg.Scope().Lookup(structName)
+				if typeName == nil {
+					// Skip if cannot lookup struct name
+					return false
+				}
+				typeInfo, ok := typeName.Type().(*types.Named)
 				if !ok {
 					// Skip if can't determine type
 					return false
