@@ -104,11 +104,6 @@ func run(cmd *base.Command, args []string) error {
 }
 
 func Run(args Arguments) (err error) {
-	/*defer func() {
-		if r := recover(); r != nil {
-			err = fmt.Errorf("%v", r)
-		}
-	}()*/
 	if args.Directory == "" {
 		args.Directory = "."
 	}
@@ -651,6 +646,62 @@ func (g *Generator) generateCodeGenHeader() {
 	g.Headerf("\n")
 }
 
+func getFilesRecursively(rootDir string, assetNamesUsed map[string]string) []Asset {
+	filepathSet := make([]Asset, 0, 50)
+	dirs := make([]string, 0, 50)
+	dirs = append(dirs, rootDir)
+	for len(dirs) > 0 {
+		dir := dirs[len(dirs)-1]
+		dirs = dirs[:len(dirs)-1]
+		files, err := ioutil.ReadDir(dir)
+		if err != nil {
+			log.Fatal(err)
+		}
+		isAsset := false
+		for _, f := range files {
+			name := f.Name()
+			path := dir + "/" + name
+			if f.IsDir() {
+				dirs = append(dirs, path)
+				continue
+			}
+			isAsset = isAsset ||
+				(len(name) >= 2 && name[0] == '0' && name[1] == '.') || // ie. "0.png"
+				name == "config.json" ||
+				name == "sound.mp3" || name == "sound.wav"
+		}
+		if isAsset {
+			name := filepath.Base(dir)
+			path := dir[len(rootDir)+1:]
+
+			// Check if asset name is valid Go
+			isExported := false
+			for _, c := range name {
+				isExported = unicode.IsUpper(c)
+				break
+			}
+			if !isExported {
+				panic(fmt.Errorf("Asset names must begin with a capital letter: %s", name))
+			}
+
+			// Check if duplicate
+			if otherPath, ok := assetNamesUsed[name]; ok {
+				panic(fmt.Errorf("Cannot have duplicate asset names:\n- %s\n- %s", rootDir+"/"+path, otherPath))
+			}
+
+			filepathSet = append(filepathSet, Asset{
+				Name: name,
+				Path: path,
+			})
+			assetNamesUsed[name] = rootDir + "/" + path
+		}
+	}
+	sort.Slice(filepathSet, func(i, j int) bool {
+		return filepathSet[i].Name < filepathSet[j].Name
+	})
+	return filepathSet
+}
+
 func generateAssets(dir string) {
 	g := Generator{}
 
@@ -699,63 +750,9 @@ var _ = audio.InitSoundGeneratedData
 		switch rootFolderName := f.Name(); rootFolderName {
 		case "font",
 			"sprite",
-			"sound":
-			// Read asset directory recursively
-			filepathSet := make([]Asset, 0, 50)
-			{
-				assetDir := assetDir + "/" + rootFolderName
-				dirs := make([]string, 0, 50)
-				dirs = append(dirs, assetDir)
-				for len(dirs) > 0 {
-					dir := dirs[len(dirs)-1]
-					dirs = dirs[:len(dirs)-1]
-					files, err := ioutil.ReadDir(dir)
-					if err != nil {
-						log.Fatal(err)
-					}
-					isAsset := false
-					for _, f := range files {
-						name := f.Name()
-						path := dir + "/" + name
-						if f.IsDir() {
-							dirs = append(dirs, path)
-							continue
-						}
-						isAsset = isAsset ||
-							(len(name) >= 2 && name[0] == '0' && name[1] == '.') || // ie. "0.png"
-							name == "config.json" ||
-							name == "sound.mp3" || name == "sound.wav"
-					}
-					if isAsset {
-						name := filepath.Base(dir)
-						path := dir[len(assetDir)+1:]
-
-						// Check if asset name is valid Go
-						isExported := false
-						for _, c := range name {
-							isExported = unicode.IsUpper(c)
-							break
-						}
-						if !isExported {
-							panic(fmt.Errorf("Asset names must begin with a capital letter: %s", name))
-						}
-
-						// Check if duplicate
-						if otherPath, ok := assetNamesUsed[name]; ok {
-							panic(fmt.Errorf("Cannot have duplicate asset names:\n- %s\n- %s", rootFolderName+"/"+path, otherPath))
-						}
-
-						filepathSet = append(filepathSet, Asset{
-							Name: name,
-							Path: path,
-						})
-						assetNamesUsed[name] = rootFolderName + "/" + path
-					}
-				}
-				sort.Slice(filepathSet, func(i, j int) bool {
-					return filepathSet[i].Name < filepathSet[j].Name
-				})
-			}
+			"sound",
+			"custom":
+			filepathSet := getFilesRecursively(assetDir+"/"+rootFolderName, assetNamesUsed)
 
 			if len(filepathSet) > 0 {
 				assetKinds = append(assetKinds, AssetKind{
@@ -763,8 +760,6 @@ var _ = audio.InitSoundGeneratedData
 					Assets: filepathSet,
 				})
 			}
-		case "custom":
-			// no-op, for game-specific assets.
 		default:
 			if !f.IsDir() {
 				// Ignore files
@@ -789,6 +784,32 @@ var _ = audio.InitSoundGeneratedData
 		case "sound":
 			kind = "Snd"
 			gotype = "audio.SoundIndex"
+		case "custom":
+			kind = "Cus"
+			gotype = "gml.CustomAssetIndex"
+			{
+				g.Printf("const (\n")
+				for i, asset := range assetKind.Assets {
+					// ie. Player    gml.SpriteIndex = 1
+					g.Printf("	%s %s = %d\n", asset.Name, gotype, i+1)
+				}
+				g.Printf("\n)\n\n")
+			}
+			{
+				g.Printf("var _gen_Cus_index_to_path = []string{\n")
+				for _, asset := range assetKind.Assets {
+					// ie. Player: "objects/Player"
+					g.Printf("	%s: \"%s\",\n", asset.Name, asset.Path)
+				}
+				g.Printf("\n}\n\n")
+			}
+			g.Printf(`
+func init() {
+	gml.InitCustomAsset(_gen_Cus_index_to_path)
+}
+
+`)
+			continue
 		default:
 			panic("Unimplemented asset kind: " + assetKind.Name)
 		}
@@ -847,6 +868,8 @@ func init() {
 }
 
 `)
+		case "custom":
+			// no-op
 		default:
 			panic("Unimplemented asset kind: " + assetKind.Name)
 		}
