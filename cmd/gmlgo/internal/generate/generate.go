@@ -647,7 +647,7 @@ func (g *Generator) generateCodeGenHeader() {
 }
 
 func getFilesRecursively(assetDir string, assetTypeDir string, assetNamesUsed map[string]string) []Asset {
-	rootDir := filepath.Clean(assetDir + string(filepath.Separator) + assetTypeDir)
+	rootDir := filepath.Clean(assetDir + "/" + assetTypeDir)
 	filepathSet := make([]Asset, 0, 50)
 	dirs := make([]string, 0, 50)
 	dirs = append(dirs, rootDir)
@@ -661,7 +661,7 @@ func getFilesRecursively(assetDir string, assetTypeDir string, assetNamesUsed ma
 		isAsset := false
 		for _, f := range files {
 			name := f.Name()
-			path := dir + string(filepath.Separator) + name
+			path := dir + "/" + name
 			if f.IsDir() {
 				dirs = append(dirs, path)
 				continue
@@ -690,12 +690,12 @@ func getFilesRecursively(assetDir string, assetTypeDir string, assetNamesUsed ma
 
 			// Check if duplicate
 			if otherPath, ok := assetNamesUsed[name]; ok {
-				panic(fmt.Errorf("Cannot have duplicate asset names:\n- %s\n- %s", filepath.ToSlash(relativeAssetPath), filepath.ToSlash(otherPath)))
+				panic(fmt.Errorf("Cannot have duplicate asset names:\n- %s\n- %s", relativeAssetPath, otherPath))
 			}
 
 			filepathSet = append(filepathSet, Asset{
 				Name: name,
-				Path: relativeAssetPath,
+				Path: relativeAssetPath[len(assetTypeDir)+1:],
 			})
 			assetNamesUsed[name] = relativeAssetPath
 		}
