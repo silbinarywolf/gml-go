@@ -646,7 +646,8 @@ func (g *Generator) generateCodeGenHeader() {
 	g.Headerf("\n")
 }
 
-func getFilesRecursively(rootDir string, assetNamesUsed map[string]string) []Asset {
+func getFilesRecursively(assetDir string, assetTypeDir string, assetNamesUsed map[string]string) []Asset {
+	rootDir := filepath.Clean(assetDir + string(filepath.Separator) + assetTypeDir)
 	filepathSet := make([]Asset, 0, 50)
 	dirs := make([]string, 0, 50)
 	dirs = append(dirs, rootDir)
@@ -660,11 +661,14 @@ func getFilesRecursively(rootDir string, assetNamesUsed map[string]string) []Ass
 		isAsset := false
 		for _, f := range files {
 			name := f.Name()
-			path := dir + "/" + name
+			path := dir + string(filepath.Separator) + name
 			if f.IsDir() {
 				dirs = append(dirs, path)
 				continue
 			}
+			// NOTE(Jake): 2019-04-27
+			// Maybe change this "isAsset" check into a function callback
+			// so each asset type has explicit rules (except for "custom", whose rule would be any non-folder file)
 			isAsset = isAsset ||
 				(len(name) >= 2 && name[0] == '0' && name[1] == '.') || // ie. "0.png"
 				name == "config.json" ||
@@ -672,7 +676,7 @@ func getFilesRecursively(rootDir string, assetNamesUsed map[string]string) []Ass
 		}
 		if isAsset {
 			name := filepath.Base(dir)
-			path := dir[len(rootDir)+1:]
+			relativeAssetPath := dir[len(assetDir)+1:]
 
 			// Check if asset name is valid Go
 			isExported := false
@@ -686,14 +690,14 @@ func getFilesRecursively(rootDir string, assetNamesUsed map[string]string) []Ass
 
 			// Check if duplicate
 			if otherPath, ok := assetNamesUsed[name]; ok {
-				panic(fmt.Errorf("Cannot have duplicate asset names:\n- %s\n- %s", rootDir+"/"+path, otherPath))
+				panic(fmt.Errorf("Cannot have duplicate asset names:\n- %s\n- %s", filepath.ToSlash(relativeAssetPath), filepath.ToSlash(otherPath)))
 			}
 
 			filepathSet = append(filepathSet, Asset{
 				Name: name,
-				Path: path,
+				Path: relativeAssetPath,
 			})
-			assetNamesUsed[name] = rootDir + "/" + path
+			assetNamesUsed[name] = relativeAssetPath
 		}
 	}
 	sort.Slice(filepathSet, func(i, j int) bool {
@@ -747,25 +751,25 @@ var _ = audio.InitSoundGeneratedData
 	var assetKinds []AssetKind
 	assetNamesUsed := make(map[string]string, len(files))
 	for _, f := range files {
-		switch rootFolderName := f.Name(); rootFolderName {
+		switch assetTypeFolderName := f.Name(); assetTypeFolderName {
 		case "font",
 			"sprite",
 			"sound",
 			"custom":
-			filepathSet := getFilesRecursively(assetDir+"/"+rootFolderName, assetNamesUsed)
-
-			if len(filepathSet) > 0 {
-				assetKinds = append(assetKinds, AssetKind{
-					Name:   rootFolderName,
-					Assets: filepathSet,
-				})
+			filepathSet := getFilesRecursively(assetDir, assetTypeFolderName, assetNamesUsed)
+			if len(filepathSet) == 0 {
+				continue
 			}
+			assetKinds = append(assetKinds, AssetKind{
+				Name:   assetTypeFolderName,
+				Assets: filepathSet,
+			})
 		default:
 			if !f.IsDir() {
 				// Ignore files
 				continue
 			}
-			log.Fatal(fmt.Errorf("Unexpected asset directory type: %s, create and use a \"custom/%s\" folder for custom asset systems.", rootFolderName, rootFolderName))
+			log.Fatal(fmt.Errorf("Unexpected asset directory type: %s, create and use a \"custom/%s\" folder for custom asset systems.", assetTypeFolderName, assetTypeFolderName))
 		}
 	}
 	// Generate asset indexes
@@ -822,6 +826,10 @@ func init() {
 			}
 			g.Printf("\n)\n\n")
 		}
+
+		// todo(Jake): 2019-04-27
+		// Deprecate providing name, the filepath should
+		// be all thats required / the unique key to the asset
 		{
 			g.Printf("var _gen_%s_index_to_name = []string{\n", kind)
 			for _, asset := range assetKind.Assets {

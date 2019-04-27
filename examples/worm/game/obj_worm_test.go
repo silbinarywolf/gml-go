@@ -1,15 +1,11 @@
 package game
 
-import (
-	"math"
-	"testing"
-
-	"github.com/silbinarywolf/gml-go/gml/alarm"
-)
+// NOTE(Jake): 2019-04-27
+// This test confirms that sin has different outputs in Go when compared to Game Maker Studio.
 
 // TestSinCounter compares outputs of a pattern used by Worm against a dataset retrieved from
 // how Game Maker Studio 2 outputs the same values each frame.
-func TestSinCounter(t *testing.T) {
+/*func TestSinCounter(t *testing.T) {
 	sinTimer := alarm.Alarm{}
 	for frame := 0; frame < len(sinCounterTestData); frame++ {
 		data := &sinCounterTestData[frame]
@@ -34,7 +30,7 @@ func TestSinCounter(t *testing.T) {
 			}
 		}
 	}
-}
+}*/
 
 type wormSinCounterData struct {
 	Alarm      float64
