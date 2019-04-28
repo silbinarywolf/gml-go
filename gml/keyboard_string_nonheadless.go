@@ -74,6 +74,8 @@ func keyboardStringUpdate() {
 				keyboardString.Truncate(lastPos)
 			}
 		}
+	} else {
+		keyboardStringBackspaceCounter = 0
 	}
 }
 
