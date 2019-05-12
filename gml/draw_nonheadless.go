@@ -156,7 +156,6 @@ func DrawTextColorAlpha(x, y float64, message string, col color.Color, alpha flo
 	c := color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
 	c.A = uint8(float64(c.A) * alpha)
 	DrawTextColor(x, y, message, c)
-	//text.Draw(drawGetTarget(), message, fontFont(gFontManager.currentFont), int(x), int(y), c)
 }
 
 func DrawTextColor(x, y float64, message string, col color.Color) {
@@ -168,22 +167,12 @@ func DrawTextColor(x, y float64, message string, col color.Color) {
 		return
 	}
 
-	lines := strings.Split(message, "\n")
-
-	// Calculate largest string height for initial space
-	// This seems to be identical to how Game Maker gets the initial
-	// space after a font.
-	// (overlapped screenshot of Worm in the Pipes Game Maker and
-	// this version, it's identical)
+	// NOTE(Jake): 2019-05-12
+	// Add initial space so text draws from the left-top corner.
+	// Changed from previous string height calculation method
 	{
-		var stringHeight float64
-		for _, line := range lines {
-			height := StringHeight(line)
-			if height > stringHeight {
-				stringHeight = height
-			}
-		}
-		y += stringHeight
+		ascent := float64(fontFace.Metrics().Ascent.Ceil())
+		y += ascent
 	}
 
 	// Draw lines
@@ -192,19 +181,11 @@ func DrawTextColor(x, y float64, message string, col color.Color) {
 		Y: y,
 	})
 	leadingHeight := float64(fontFace.Metrics().Height.Ceil())
-	for _, line := range lines {
+	for _, line := range strings.Split(message, "\n") {
 		text.Draw(drawGetTarget(), line, fontFace, int(pos.X), int(pos.Y), col)
 		pos.Y += leadingHeight
 	}
 }
-
-/*func drawText(font FontIndex, message string) {
-	text.Draw(drawGetTarget(), message, fontFont(gFontManager.currentFont), int(position.X), int(position.Y), color.White)
-}*/
-
-//func DrawTextF(x, y float64, col color.Color, format string, args ...interface{}) {
-//	DrawText(x, y, fmt.Sprintf(format, args...), color)
-//}
 
 func drawGetTarget() *ebiten.Image {
 	// NOTE(Jake): 2019-01-26
