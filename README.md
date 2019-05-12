@@ -16,7 +16,7 @@ go get github.com/silbinarywolf/gml-go
 
 ## Requirements
 
-* Golang 1.11+
+* Golang 1.12.5+
 
 ## Documentation
 
