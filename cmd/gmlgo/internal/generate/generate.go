@@ -19,6 +19,7 @@ import (
 	"strings"
 	"unicode"
 
+	"golang.org/x/tools/go/packages"
 	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/base"
 )
 
@@ -135,10 +136,14 @@ func Run(args Arguments) (err error) {
 		// Replace "game" with scanning each sub-package, throw an error if multiple packages
 		// have multiple objects. Constraint for now will be all object types need to be in the same package
 		gameDir := filepath.Join(dir, "game")
+		gameDir, err := filepath.Abs(gameDir)
+		if err != nil {
+			panic(err)
+		}
 
 		// Run parser
 		p := new(Parser)
-		p.parsePackageDir(gameDir, []string{})
+		p.parseGamePackageDir(dir, gameDir, []string{})
 		structsUsingObject := p.parseGameObjectStructs()
 
 		// Run generate
@@ -162,16 +167,43 @@ func buildContext(tags []string) *build.Context {
 	return &ctx
 }
 
-// parsePackageDir parses the package residing in the directory.
-func (p *Parser) parsePackageDir(directory string, tags []string) {
-	pkg, err := buildContext(tags).ImportDir(directory, 0)
-	if err != nil {
-		log.Fatalf("parsePackageDir: cannot parse %s", err)
+// parseGamePackageDir parses the package residing in the directory.
+func (p *Parser) parseGamePackageDir(directory string, gameDir string, tags []string) {
+	cfg := &packages.Config{
+		Mode: packages.LoadFiles | packages.LoadSyntax,
+		Dir: gameDir,
+		// TODO: Need to think about constants in test files. Maybe write type_string_test.go
+		// in a separate pass? For later.
+		Tests:      false,
+		BuildFlags: []string{fmt.Sprintf("-tags=%s", strings.Join(tags, " "))},
 	}
-	var names []string
-	names = append(names, pkg.GoFiles...)
-	names = prefixDirectory(directory, names)
-	p.parsePackage(directory, names, nil)
+	pkgs, err := packages.Load(cfg, directory)// packages.Load(cfg, patterns...)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if len(pkgs) != 1 {
+		log.Fatalf("error: %d packages found", len(pkgs))
+	}
+
+	pkg := pkgs[0]
+	if pkg.Name == "" {
+		panic("Cannot determine package name from directory: " + gameDir)
+	}
+	p.pkg = &Package{
+		name:  pkg.Name,
+		defs:  pkg.TypesInfo.Defs,
+		typesPkg: pkg.Types,
+		files: make([]*File, len(pkg.Syntax)),
+	}
+
+	for i, file := range pkg.Syntax {
+		p.pkg.files[i] = &File{
+			file:        file,
+			pkg:         p.pkg,
+			//trimPrefix:  p.trimPrefix,
+			//lineComment: p.lineComment,
+		}
+	}
 }
 
 // prefixDirectory places the directory name on the beginning of each name in the list.
@@ -189,7 +221,7 @@ func prefixDirectory(directory string, names []string) []string {
 // parsePackage analyzes the single package constructed from the named files.
 // If text is non-nil, it is a string to be used instead of the content of the file,
 // to be used for testing. parsePackage exits if there is an error.
-func (p *Parser) parsePackage(directory string, names []string, text interface{}) {
+/*func (p *Parser) parsePackage(directory string, names []string, text interface{}) {
 	var files []*File
 	var astFiles []*ast.File
 	p.pkg = new(Package)
@@ -236,7 +268,7 @@ func (p *Parser) parsePackage(directory string, names []string, text interface{}
 	}
 	p.pkg.typesPkg = typesPkg
 	//p.pkg.typeCheck(fs, astFiles)
-}
+}*/
 
 // check type-checks the package so we can evaluate contants whose values we are printing.
 /*func (pkg *Package) typeCheck(fs *token.FileSet, astFiles []*ast.File) {
