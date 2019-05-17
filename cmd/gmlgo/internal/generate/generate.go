@@ -7,8 +7,6 @@ import (
 	"go/ast"
 	"go/build"
 	"go/format"
-	"go/parser"
-	"go/token"
 	"go/types"
 	"io/ioutil"
 	"log"
@@ -122,7 +120,7 @@ func Run(args Arguments) (err error) {
 			if !info.IsDir() {
 				continue
 			}
-			dirs = append(dirs, dir+"/"+info.Name())
+			dirs = append(dirs, dir + "/" + info.Name())
 		}
 	} else {
 		dirs = []string{dir}
@@ -132,18 +130,11 @@ func Run(args Arguments) (err error) {
 		// Generate assets
 		generateAssets(dir)
 
-		// todo(Jake): 2018-12-03 - #33
-		// Replace "game" with scanning each sub-package, throw an error if multiple packages
-		// have multiple objects. Constraint for now will be all object types need to be in the same package
 		gameDir := filepath.Join(dir, "game")
-		gameDir, err := filepath.Abs(gameDir)
-		if err != nil {
-			panic(err)
-		}
 
 		// Run parser
 		p := new(Parser)
-		p.parseGamePackageDir(dir, gameDir, []string{})
+		p.parseGamePackageDir(gameDir, []string{})
 		structsUsingObject := p.parseGameObjectStructs()
 
 		// Run generate
@@ -168,7 +159,11 @@ func buildContext(tags []string) *build.Context {
 }
 
 // parseGamePackageDir parses the package residing in the directory.
-func (p *Parser) parseGamePackageDir(directory string, gameDir string, tags []string) {
+func (p *Parser) parseGamePackageDir(gameDir string, tags []string) {
+	gameDir, err := filepath.Abs(gameDir)
+	if err != nil {
+		panic(err)
+	}
 	cfg := &packages.Config{
 		Mode: packages.LoadFiles | packages.LoadSyntax,
 		Dir: gameDir,
@@ -177,9 +172,12 @@ func (p *Parser) parseGamePackageDir(directory string, gameDir string, tags []st
 		Tests:      false,
 		BuildFlags: []string{fmt.Sprintf("-tags=%s", strings.Join(tags, " "))},
 	}
-	pkgs, err := packages.Load(cfg, directory)// packages.Load(cfg, patterns...)
+	pkgs, err := packages.Load(cfg, gameDir) // packages.Load(cfg, patterns...)
 	if err != nil {
 		log.Fatal(err)
+	}
+	if len(pkgs) == 0 {
+		log.Fatalf("error: no packages found")
 	}
 	if len(pkgs) != 1 {
 		log.Fatalf("error: %d packages found", len(pkgs))
@@ -448,9 +446,8 @@ import (`)
 		log.Fatalf("no gml.Object structs found, no output for %s\n", outputName)
 	}
 
-	// Check if any changes
+	// Don't write to file if there are no changes
 	if bytes.Equal(input, src) {
-		//log.Printf("no changes to %s\n", outputName)
 		return
 	}
 
