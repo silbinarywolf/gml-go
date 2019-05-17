@@ -166,11 +166,12 @@ func (p *Parser) parseGamePackageDir(gameDir string, tags []string) {
 	}
 	cfg := &packages.Config{
 		Mode: packages.LoadFiles | packages.LoadSyntax,
-		Dir: gameDir,
-		// TODO: Need to think about constants in test files. Maybe write type_string_test.go
-		// in a separate pass? For later.
+		// NOTE(Jake): 2019-05-17
+		// Tests shouldn't have game objects in them, so set to false
 		Tests:      false,
-		BuildFlags: []string{fmt.Sprintf("-tags=%s", strings.Join(tags, " "))},
+		// NOTE(Jake): 2019-05-17
+		// Build tags probably don't matter for game object structure parsing.
+		//BuildFlags: []string{fmt.Sprintf("-tags=%s", strings.Join(tags, " "))},
 	}
 	pkgs, err := packages.Load(cfg, gameDir) // packages.Load(cfg, patterns...)
 	if err != nil {
