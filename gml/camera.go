@@ -120,6 +120,9 @@ func CameraGetViewPos(index int) geom.Vec {
 }
 
 func CameraGetViewSize(index int) geom.Vec {
+	// NOTE(Jake): 2019-05-18
+	// Consider renaming to CameraSize(index) as thats what
+	// I assumed it was without autocomplete
 	view := &gCameraManager.cameras[index]
 	return view.Size
 }
