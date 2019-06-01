@@ -54,8 +54,9 @@ func (state *state) update() {
 
 		inst.Update()
 	}
+}
 
-	// Remove deleted entities
+func (state *state) removeDeletedEntities() {
 	manager := &state.instanceManager
 	for _, instanceIndex := range state.instancesMarkedForDelete {
 		dataIndex, ok := manager.instanceIndexToIndex[instanceIndex]
@@ -67,22 +68,24 @@ func (state *state) update() {
 		{
 			roomInstanceIndex := manager.instances[dataIndex].BaseObject().RoomInstanceIndex()
 			roomInst := roomGetInstance(roomInstanceIndex)
-			instances := roomInst.instances
-			if len(instances) == 1 {
-				if instanceIndex == instances[0] {
-					instances = instances[:len(instances)-1]
-				}
-			} else {
-				for dataIndex, otherInstanceIndex := range instances {
-					if instanceIndex == otherInstanceIndex {
-						lastEntry := instances[len(instances)-1]
-						instances[dataIndex] = lastEntry
+			if roomInst != nil {
+				instances := roomInst.instances
+				if len(instances) == 1 {
+					if instanceIndex == instances[0] {
 						instances = instances[:len(instances)-1]
-						break
+					}
+				} else {
+					for dataIndex, otherInstanceIndex := range instances {
+						if instanceIndex == otherInstanceIndex {
+							lastEntry := instances[len(instances)-1]
+							instances[dataIndex] = lastEntry
+							instances = instances[:len(instances)-1]
+							break
+						}
 					}
 				}
+				roomInst.instances = instances
 			}
-			roomInst.instances = instances
 		}
 
 		if dataIndex == len(manager.instances)-1 {

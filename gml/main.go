@@ -150,6 +150,9 @@ func update() error {
 		gState.update()
 		gController.GamePostUpdate()
 
+		// Remove deleted entities at safe point
+		gState.removeDeletedEntities();
+
 		// NOTE: Jake: 2019-02-24
 		// `cameraUpdate` should run after all update logic so that it snaps
 		// to the object being followed. If a user needs to update the camera after
