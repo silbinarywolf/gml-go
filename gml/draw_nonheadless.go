@@ -57,7 +57,7 @@ func DrawSprite(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64) 
 }
 
 func DrawSpriteAlpha(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64, alpha float64) {
-	DrawSpriteExt(spriteIndex, subimage, x, y, 0, geom.Vec{1, 1}, alpha)
+	DrawSpriteExt(spriteIndex, subimage, x, y, 0, geom.Vec{X: 1, Y: 1}, alpha)
 }
 
 func DrawSpriteScaled(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64, scale geom.Vec) {
@@ -65,7 +65,7 @@ func DrawSpriteScaled(spriteIndex sprite.SpriteIndex, subimage float64, x, y flo
 }
 
 func DrawSpriteRotated(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64, rotation float64) {
-	DrawSpriteExt(spriteIndex, subimage, x, y, rotation, geom.Vec{1, 1}, 1.0)
+	DrawSpriteExt(spriteIndex, subimage, x, y, rotation, geom.Vec{X: 1, Y: 1}, 1.0)
 }
 
 func DrawSpriteExt(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64, rotation float64, scale geom.Vec, alpha float64) {

@@ -26,9 +26,9 @@ type fontManager struct {
 }
 
 type fontConfig struct {
-	Name     string  `json:Name`
-	FontSize float64 `json:FontSize`
-	DPI      float64 `json:DPI`
+	Name     string  `json:"Name"`
+	FontSize float64 `json:"FontSize"`
+	DPI      float64 `json:"DPI"`
 }
 
 func hasFontSet() bool {

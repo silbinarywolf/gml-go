@@ -76,7 +76,7 @@ func instanceCreate(x, y float64, objectIndex ObjectIndex, callback func(inst *O
 			gState.instanceManager.nextInstanceIndex++
 			baseObj.internal.InstanceIndex = gState.instanceManager.nextInstanceIndex
 		}
-		baseObj.Vec = geom.Vec{x, y}
+		baseObj.Vec = geom.Vec{X: x, Y: y}
 
 		callback(baseObj)
 
