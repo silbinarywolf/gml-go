@@ -54,7 +54,7 @@ func SpriteCollisionMask(spriteIndex SpriteIndex) geom.Rect {
 	switch collisionMask.Kind {
 	case CollisionMaskInherit:
 		return geom.Rect{
-			Vec:  geom.Vec{0, 0},
+			Vec:  geom.Vec{},
 			Size: sprite.size,
 		}
 	case CollisionMaskManual:
