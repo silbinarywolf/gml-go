@@ -1,5 +1,9 @@
 package assetman
 
+import (
+	"sync"
+)
+
 var assetManagers []assetManager
 
 var isHasLoadedAll bool
@@ -12,10 +16,17 @@ func LoadAll() {
 	if isHasLoadedAll {
 		panic("Cannot call LoadAll() more than once")
 	}
-	for _, manager := range assetManagers {
-		manager.LoadAll()
+	var wg sync.WaitGroup
+	wg.Add(len(assetManagers))
+	for _, m := range assetManagers {
+		go func(manager assetManager) {
+			manager.LoadAll()
+			wg.Done()
+		}(m)
 	}
+	wg.Wait()
 	isHasLoadedAll = true
+
 }
 
 type assetManager interface {
