@@ -5,11 +5,10 @@ import (
 	"runtime"
 
 	"github.com/hajimehoshi/ebiten"
-	"github.com/silbinarywolf/gml-go/gml/audio"
+	"github.com/silbinarywolf/gml-go/gml/assetman"
 	"github.com/silbinarywolf/gml-go/gml/internal/dt"
 	"github.com/silbinarywolf/gml-go/gml/internal/file"
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
-	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
 	"github.com/silbinarywolf/gml-go/gml/timeprec"
 )
 
@@ -56,8 +55,7 @@ func setup(controller gameController, gameSettings *GameSettings) {
 	gCameraManager.reset()
 
 	// Load all assets
-	audio.InitAndLoadAllSounds()
-	sprite.LoadAllSprites()
+	assetman.LoadAll()
 
 	// Setup TPS
 	SetDesignedTPS(dt.DefaultMaxTPS)
@@ -151,7 +149,7 @@ func update() error {
 		gController.GamePostUpdate()
 
 		// Remove deleted entities at safe point
-		gState.removeDeletedEntities();
+		gState.removeDeletedEntities()
 
 		// NOTE: Jake: 2019-02-24
 		// `cameraUpdate` should run after all update logic so that it snaps
