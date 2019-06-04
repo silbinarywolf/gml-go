@@ -94,13 +94,18 @@ func (manager *soundManagerData) LoadAll() {
 		// call TestBootstrap()
 		return
 	}
+	assetList := soundManager.assetNameToIndex
+	if len(assetList) == 0 {
+		// Don't initialize audio if there are no audio assets
+		return
+	}
 	var err error
 	audioContext, err = audio.NewContext(sampleRate)
 	if err != nil {
 		panic(err)
 	}
 	// Load all sounds
-	for _, soundIndex := range soundManager.assetNameToIndex {
+	for _, soundIndex := range assetList {
 		loadSound(soundIndex)
 	}
 }

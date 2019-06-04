@@ -58,8 +58,8 @@ func (manager *spriteManager) LoadAll() {
 	const StartOffset = 1
 	chunkCount := 4
 	chunkSize := (len(assetList) + chunkCount - 1) / chunkCount
-	wg.Add(chunkCount)
 	for start := StartOffset; start < len(assetList); start += chunkSize {
+		wg.Add(1)
 		end := start + chunkSize
 
 		if end > len(assetList) {
