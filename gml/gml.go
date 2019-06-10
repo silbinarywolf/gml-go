@@ -177,7 +177,7 @@ func update() error {
 		cameraDraw(0)
 		cameraClearActive()
 	default:
-		panic("Invalid debug mode.")
+		panic("Invalid debug mode id")
 	}
 
 	frameBudgetUsed := monotime.Now() - frameStartTime

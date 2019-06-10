@@ -46,9 +46,6 @@ func debugUpdate() {
 		if KeyboardCheckPressed(VkA) {
 			debugMenuOpenOrToggleClosed(debugMenuAnimationEditor)
 		}
-		if KeyboardCheckPressed(VkR) {
-			debugMenuOpenOrToggleClosed(debugMenuRoomEditor)
-		}
 	}
 }
 
