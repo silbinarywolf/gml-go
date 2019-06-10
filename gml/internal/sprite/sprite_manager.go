@@ -39,10 +39,10 @@ func newSpriteManager() *spriteManager {
 
 // LoadAll sprite assets
 func (manager *spriteManager) LoadAll() {
-	/*start := timeprec.Now()
+	/*start := monotime.Now()
 	defer func() {
 		const NanosecondsPerMillisecond = 1000000
-		taken := timeprec.Now() - start
+		taken := monotime.Now() - start
 		budget := float64(taken) / NanosecondsPerMillisecond
 		fmt.Printf("DEBUG: Time spent loading sprites: %vns (%vms)\n", taken, budget)
 	}()*/

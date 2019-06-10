@@ -9,7 +9,7 @@ import (
 	"github.com/silbinarywolf/gml-go/gml/internal/dt"
 	"github.com/silbinarywolf/gml-go/gml/internal/file"
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
-	"github.com/silbinarywolf/gml-go/gml/timeprec"
+	"github.com/silbinarywolf/gml-go/gml/monotime"
 )
 
 type GameSettings struct {
@@ -135,7 +135,7 @@ func Run(controller gameController, gameSettings GameSettings) {
 }
 
 func update() error {
-	frameStartTime := timeprec.Now()
+	frameStartTime := monotime.Now()
 	keyboardUpdate()
 	keyboardStringUpdate()
 	mouseUpdate()
@@ -180,7 +180,7 @@ func update() error {
 		panic("Invalid debug mode.")
 	}
 
-	frameBudgetUsed := timeprec.Now() - frameStartTime
+	frameBudgetUsed := monotime.Now() - frameStartTime
 	gState.frameBudgetNanosecondsUsed = frameBudgetUsed
 	return nil
 }

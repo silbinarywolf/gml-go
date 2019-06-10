@@ -1,11 +1,11 @@
 // +build !js,!windows
 
-package timeprec
+package monotime
 
 import (
 	"time"
 )
 
-func Now() int64 {
+func now() int64 {
 	return time.Now().UnixNano()
 }

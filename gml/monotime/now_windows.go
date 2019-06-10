@@ -1,6 +1,6 @@
 // +build windows
 
-package timeprec
+package monotime
 
 import (
 	"syscall"
@@ -34,7 +34,7 @@ func init() {
 	}
 }
 
-func Now() int64 {
+func now() int64 {
 	var ctr uint64
 	if ret, _, err := qpc.Call(uintptr(unsafe.Pointer(&ctr))); ret == 0 {
 		panic(err)
