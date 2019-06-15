@@ -55,7 +55,7 @@ func setup(controller gameController, gameSettings *GameSettings) {
 	gCameraManager.reset()
 
 	// Load all assets
-	assetman.LoadAll()
+	assetman.UnsafeLoadAll()
 
 	// Setup TPS
 	SetDesignedTPS(dt.DefaultMaxTPS)
