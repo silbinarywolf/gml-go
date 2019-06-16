@@ -35,7 +35,7 @@ func (manager *cameraManager) reset() {
 	}
 
 	// Setup 1st camera
-	CameraCreate(0, 0, 0, WindowWidth(), WindowHeight())
+	CameraCreate(0, 0, 0, WindowSize().X, WindowSize().Y)
 }
 
 func CameraCreate(index int, windowX, windowY, windowWidth, windowHeight float64) {
@@ -64,13 +64,13 @@ func CameraDestroy(index int) {
 	gCameraManager.camerasEnabledCount--
 }
 
-func CameraSetSize(index int, windowWidth, windowHeight float64) {
+func CameraSetViewSize(index int, width, height float64) {
 	view := &gCameraManager.cameras[index]
 	if !view.enabled {
 		panic("Camera " + strconv.Itoa(index) + " is not enabled.")
 	}
-	view.Size.X = windowWidth
-	view.Size.Y = windowHeight
+	view.Size.X = width
+	view.Size.Y = height
 }
 
 // cameraUpdate wlll move the camera to center on the follow object and
@@ -140,14 +140,6 @@ func CameraSetViewPos(index int, x, y float64) {
 func CameraSetUpdateFunction(index int, updateFunc func()) {
 	view := &gCameraManager.cameras[index]
 	view.updateFunc = updateFunc
-}
-
-func CameraSetViewSize(index int, width, height float64) {
-	view := &gCameraManager.cameras[index]
-	view.Size = geom.Vec{
-		X: width,
-		Y: height,
-	}
 }
 
 func CameraSetViewTarget(index int, inst InstanceIndex) {

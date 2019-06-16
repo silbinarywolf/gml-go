@@ -77,7 +77,7 @@ func (viewer *debugSpriteViewer) update() (sprite.SpriteIndex, bool) {
 		DrawRectangle(0, 0, 2048, 2048, color.RGBA{0, 0, 0, 190})
 
 		ui := geom.Vec{
-			X: float64(WindowWidth()) / 2,
+			X: float64(WindowSize().X) / 2,
 			Y: 32,
 		}
 

@@ -212,8 +212,8 @@ func animationEditorUpdate() {
 	if spriteIndex := editor.spriteViewing.SpriteIndex(); spriteIndex != 0 {
 		size := spriteIndex.Size()
 		pos := geom.Vec{
-			X: float64(WindowWidth()/2) - (float64(size.X) / 2),
-			Y: float64(WindowHeight()/2) - (float64(size.Y) / 2),
+			X: float64(WindowSize().X/2) - (float64(size.X) / 2),
+			Y: float64(WindowSize().Y/2) - (float64(size.Y) / 2),
 		}
 
 		{
@@ -366,7 +366,7 @@ func animationEditorUpdate() {
 	}
 
 	if spriteIndex := editor.spriteViewing.SpriteIndex(); spriteIndex != 0 {
-		basePos := geom.Vec{(float64(WindowWidth()) / 2) - 140, float64(WindowHeight())}
+		basePos := geom.Vec{(float64(WindowSize().X) / 2) - 140, float64(WindowSize().Y)}
 		basePos.Y -= 210
 
 		imageIndex := int(math.Floor(editor.spriteViewing.ImageIndex()))

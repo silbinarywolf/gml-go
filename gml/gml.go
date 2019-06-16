@@ -1,6 +1,7 @@
 package gml
 
 import (
+	"math"
 	"path/filepath"
 	"runtime"
 
@@ -180,11 +181,11 @@ func update() error {
 		panic("Invalid debug mode id")
 	}
 
-	frameBudgetUsed := monotime.Now() - frameStartTime
-	gState.frameBudgetNanosecondsUsed = frameBudgetUsed
+	gState.frameBudgetNanosecondsUsed = monotime.Now() - frameStartTime
 	return nil
 }
 
+// WindowSize will get the size of the current game window
 func WindowSize() geom.Vec {
 	return geom.Vec{
 		X: gGameSettings.WindowWidth,
@@ -192,12 +193,15 @@ func WindowSize() geom.Vec {
 	}
 }
 
-func WindowWidth() float64 {
-	return gGameSettings.WindowWidth
+func WindowSetSize(width, height float64) {
+	gGameSettings.WindowWidth = width
+	gGameSettings.WindowHeight = height
+	ebiten.SetScreenSize(int(math.Floor(width)), int(math.Floor(height)))
 }
 
-func WindowHeight() float64 {
-	return gGameSettings.WindowHeight
+func WindowSetScale(scale float64) {
+	gGameSettings.WindowScale = scale
+	ebiten.SetScreenScale(scale)
 }
 
 func WindowScale() float64 {
