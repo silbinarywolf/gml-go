@@ -8,6 +8,8 @@ import (
 
 type RoomInstanceIndex int32
 
+const roomUndefined RoomInstanceIndex = 0
+
 type roomInstanceStateManager struct {
 	roomInstances          []roomInstance
 	lastCreatedRoom        RoomInstanceIndex
@@ -128,7 +130,7 @@ func (roomInstanceIndex RoomInstanceIndex) Size() geom.Vec {
 func (roomIndex RoomInstanceIndex) WithAll() []InstanceIndex {
 	roomInst := roomGetInstance(roomIndex)
 	if roomInst == nil {
-		panic("RoomInstance this object belongs to has been destroyed")
+		panic("Cannot call WithAll() on room that doesn't exist")
 	}
 	var list []InstanceIndex
 	for _, otherIndex := range roomInst.instances {
