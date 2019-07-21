@@ -124,6 +124,13 @@ func DrawRectangle(x, y, w, h float64, col color.Color) {
 	drawRect(drawGetTarget(), position.X, position.Y, w, h, col)
 }
 
+func DrawRectangleAlpha(x, y, w, h float64, col color.Color, alpha float64) {
+	r, g, b, a := col.RGBA()
+	c := color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
+	c.A = uint8(float64(c.A) * alpha)
+	DrawRectangle(x, y, w, h, c)
+}
+
 func DrawRectangleBorder(x, y, w, h float64, col color.Color, borderSize float64, borderColor color.Color) {
 	position := geom.Vec{
 		X: x,
@@ -144,14 +151,14 @@ func DrawRectangleBorder(x, y, w, h float64, col color.Color, borderSize float64
 	}
 }
 
+// DrawText is deprecated. Use DrawTextColor.
+// *note* might make more sense to rename DrawTextColor to DrawText
+//		  and DrawTextColorAlpha to DrawTextAlpha
 func DrawText(x, y float64, message string, col color.Color) {
 	DrawTextColor(x, y, message, col)
 }
 
 func DrawTextColorAlpha(x, y float64, message string, col color.Color, alpha float64) {
-	//if !hasFontSet() {
-	//	panic("Must call DrawSetFont() before calling DrawText.")
-	//}
 	r, g, b, a := col.RGBA()
 	c := color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
 	c.A = uint8(float64(c.A) * alpha)
