@@ -12,6 +12,7 @@ type state struct {
 	instanceManager          instanceManager
 	instancesMarkedForDelete []InstanceIndex
 	isCreatingRoomInstance   bool
+	hasGameEnded             bool
 	//gWidth                     int
 	gHeight                    int
 	frameBudgetNanosecondsUsed int64

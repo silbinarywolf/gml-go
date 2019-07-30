@@ -1,6 +1,7 @@
 package gml
 
 import (
+	"errors"
 	"math"
 	"path/filepath"
 	"runtime"
@@ -33,6 +34,7 @@ const (
 var (
 	gController   gameController
 	gGameSettings GameSettings
+	errGameEnd    = errors.New("Game ended")
 )
 
 func setup(controller gameController, gameSettings *GameSettings) {
@@ -135,6 +137,14 @@ func Run(controller gameController, gameSettings GameSettings) {
 	run(gameSettings)
 }
 
+// GameEnd will close the game
+func GameEnd() {
+	if gState.hasGameEnded {
+		return
+	}
+	gState.hasGameEnded = true
+}
+
 func update() error {
 	frameStartTime := monotime.Now()
 	keyboardUpdate()
@@ -182,6 +192,9 @@ func update() error {
 	}
 
 	gState.frameBudgetNanosecondsUsed = monotime.Now() - frameStartTime
+	if gState.hasGameEnded {
+		return errGameEnd
+	}
 	return nil
 }
 
