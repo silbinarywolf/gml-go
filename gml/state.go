@@ -12,6 +12,7 @@ type state struct {
 	instanceManager          instanceManager
 	instancesMarkedForDelete []InstanceIndex
 	isCreatingRoomInstance   bool
+	isInstanceUpdatePaused   bool
 	hasGameEnded             bool
 	//gWidth                     int
 	gHeight                    int
@@ -40,7 +41,28 @@ func IsCreatingRoomInstance() bool {
 	return gState.isCreatingRoomInstance
 }
 
+// InstanceResumeAll will re-enable execution of the
+// Update method for each instance.
+func InstanceResumeAll() {
+	gState.isInstanceUpdatePaused = false
+}
+
+// InstancePauseAll will disable the execution of the
+// Update method for each instance. This can be used for pause screens.
+func InstancePauseAll() {
+	gState.isInstanceUpdatePaused = true
+}
+
+// HasInstancePauseAll will return whether executing the Update method of instances is disabled
+func HasInstancePauseAll() bool {
+	return gState.isInstanceUpdatePaused
+}
+
 func (state *state) update() {
+	if gState.isInstanceUpdatePaused {
+		return
+	}
+
 	// Simulate each active instance
 	for i := 0; i < len(state.instanceManager.instances); i++ {
 		inst := state.instanceManager.instances[i]

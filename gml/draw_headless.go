@@ -36,6 +36,9 @@ func DrawSpriteRotated(spriteIndex sprite.SpriteIndex, subimage float64, x, y fl
 func DrawRectangle(x, y, w, h float64, col color.Color) {
 }
 
+func DrawRectangleAlpha(x, y, w, h float64, col color.Color, alpha float64) {
+}
+
 func DrawRectangleBorder(x, y, w, h float64, color color.Color, borderSize float64, borderColor color.Color) {
 }
 
