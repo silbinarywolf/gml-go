@@ -2,7 +2,6 @@ package gml
 
 import (
 	"errors"
-	"math"
 	"path/filepath"
 	"runtime"
 
@@ -10,7 +9,6 @@ import (
 	"github.com/silbinarywolf/gml-go/gml/assetman"
 	"github.com/silbinarywolf/gml-go/gml/internal/dt"
 	"github.com/silbinarywolf/gml-go/gml/internal/file"
-	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 	"github.com/silbinarywolf/gml-go/gml/monotime"
 )
 
@@ -196,27 +194,4 @@ func update() error {
 		return errGameEnd
 	}
 	return nil
-}
-
-// WindowSize will get the size of the current game window
-func WindowSize() geom.Vec {
-	return geom.Vec{
-		X: gGameSettings.WindowWidth,
-		Y: gGameSettings.WindowHeight,
-	}
-}
-
-func WindowSetSize(width, height float64) {
-	gGameSettings.WindowWidth = width
-	gGameSettings.WindowHeight = height
-	ebiten.SetScreenSize(int(math.Floor(width)), int(math.Floor(height)))
-}
-
-func WindowSetScale(scale float64) {
-	gGameSettings.WindowScale = scale
-	ebiten.SetScreenScale(scale)
-}
-
-func WindowScale() float64 {
-	return gGameSettings.WindowScale
 }
