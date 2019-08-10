@@ -17,10 +17,10 @@ import (
 )
 
 var Cmd = &base.Command{
-	UsageLine: "gmlgo serve [dir]",
-	Short:     `Serve a build of your game for playing in a web browser, defaults to port 8080`,
+	UsageLine: "serve [dir]",
+	Short:     `build and run your game in a browser`,
+	Long:      `serve a build of your game for playing in a web browser, defaults to port 8080`,
 	Flag:      flag.NewFlagSet("serve", flag.ExitOnError),
-	Long:      ``,
 	Run:       run,
 }
 

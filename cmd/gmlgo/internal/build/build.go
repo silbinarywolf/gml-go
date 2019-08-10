@@ -12,10 +12,10 @@ import (
 )
 
 var Cmd = &base.Command{
-	UsageLine: "gmlgo build [dir]",
-	Short:     `Run "gmlgo generate" and "go build"`,
+	UsageLine: "build [dir]",
+	Short:     `compile game executable`,
+	Long:      `run "gmlgo generate" and "go build"`,
 	Flag:      flag.NewFlagSet("build", flag.ExitOnError),
-	Long:      ``,
 	Run:       run,
 }
 
@@ -49,35 +49,38 @@ func run(cmd *base.Command, args []string) (err error) {
 	})
 
 	// Run "go build"
-	{
-		var buildArgs []string
-		if len(args) > 1 {
-			buildArgs = make([]string, 0, len(args[2:])+1)
-			buildArgs = append(buildArgs, "build")
-			buildArgs = append(buildArgs, args...)
-		} else {
-			buildArgs = []string{"build"}
-			if dir != "" {
-				buildArgs = append(buildArgs, dir)
-			}
-		}
-		cmd := exec.Command("go", buildArgs...)
-		cmd.Env = os.Environ()
+	Build(dir, args)
 
-		cmdOut, _ := cmd.StdoutPipe()
-		cmdErr, _ := cmd.StderrPipe()
-
-		err := cmd.Start()
-		if err != nil {
-			panic(err)
-		}
-		errOutput, _ := ioutil.ReadAll(cmdErr)
-		stdOutput, _ := ioutil.ReadAll(cmdOut)
-		if len(errOutput) > 0 {
-			fmt.Printf(string(errOutput))
-			os.Exit(1)
-		}
-		fmt.Printf("%s", stdOutput)
-	}
 	return
+}
+
+func Build(dir string, args []string) {
+	var buildArgs []string
+	if len(args) > 1 {
+		buildArgs = make([]string, 0, len(args[2:])+1)
+		buildArgs = append(buildArgs, "build")
+		buildArgs = append(buildArgs, args...)
+	} else {
+		buildArgs = []string{"build"}
+		if dir != "" {
+			buildArgs = append(buildArgs, dir)
+		}
+	}
+	cmd := exec.Command("go", buildArgs...)
+	cmd.Env = os.Environ()
+
+	cmdOut, _ := cmd.StdoutPipe()
+	cmdErr, _ := cmd.StderrPipe()
+
+	err := cmd.Start()
+	if err != nil {
+		panic(err)
+	}
+	errOutput, _ := ioutil.ReadAll(cmdErr)
+	stdOutput, _ := ioutil.ReadAll(cmdOut)
+	if len(errOutput) > 0 {
+		fmt.Printf(string(errOutput))
+		os.Exit(1)
+	}
+	fmt.Printf("%s", stdOutput)
 }

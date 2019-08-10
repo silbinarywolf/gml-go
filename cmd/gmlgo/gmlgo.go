@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sort"
+	"strings"
+	"text/tabwriter"
 
 	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/base"
 	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/build"
@@ -16,6 +19,10 @@ var cmds = []*base.Command{
 	build.Cmd,
 	generate.Cmd,
 	serve.Cmd,
+	//publish.Cmd,
+	// todo(Jake): 2019-08-10
+	//
+	// assetpack	[todo] make this build asset files
 }
 
 func main() {
@@ -23,7 +30,7 @@ func main() {
 	log.SetPrefix(shared.RootCmd + ": ")
 
 	if len(os.Args) < 2 {
-		fmt.Print(`
+		fmt.Printf(`
 GmlGo is a tool for building games using the GmlGo library
 
 Usage:
@@ -32,11 +39,18 @@ Usage:
 
 The commands are:
 
-        build		run generate, assetpack and compile packages and dependencies
-        assetpack	[todo] make this build asset files
-        generate	generate Go files by processing gml.Object's and assets
-        serve		serve a build of your game for playing in a web browser, defaults to port 8080
 `)
+		cmdsSorted := append([]*base.Command{}, cmds...)
+		sort.Slice(cmdsSorted[:], func(i, j int) bool {
+			// sort alphabetically
+			return cmdsSorted[i].UsageLine < cmdsSorted[j].UsageLine
+		})
+		w := tabwriter.NewWriter(os.Stdout, 4, 4, 4, '\t', tabwriter.AlignRight)
+		for _, cmd := range cmdsSorted {
+			cmdName := strings.SplitN(cmd.UsageLine, " ", 2)[0]
+			fmt.Fprintln(w, "\t"+cmdName+"\t"+cmd.Short)
+		}
+		w.Flush()
 		os.Exit(1)
 	}
 	args := os.Args[2:]
@@ -48,5 +62,6 @@ The commands are:
 			return
 		}
 	}
-	panic("Unable to find command: " + os.Args[1])
+	fmt.Println("Unable to find command: " + os.Args[1])
+	os.Exit(1)
 }

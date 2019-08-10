@@ -17,15 +17,15 @@ import (
 	"strings"
 	"unicode"
 
-	"golang.org/x/tools/go/packages"
 	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/base"
+	"golang.org/x/tools/go/packages"
 )
 
 var Cmd = &base.Command{
-	UsageLine: "gmlgo generate [dir]",
-	Short:     `Generate code so that assets and objects can be referenced by constant IDs`,
+	UsageLine: "generate [dir]",
+	Short:     `generate code required by the game framework`,
+	Long:      `generate code so that assets and objects can be referenced by constant IDs`,
 	Flag:      flag.NewFlagSet("generate", flag.ExitOnError),
-	Long:      ``,
 	Run:       run,
 }
 
@@ -120,7 +120,7 @@ func Run(args Arguments) (err error) {
 			if !info.IsDir() {
 				continue
 			}
-			dirs = append(dirs, dir + "/" + info.Name())
+			dirs = append(dirs, dir+"/"+info.Name())
 		}
 	} else {
 		dirs = []string{dir}
@@ -168,7 +168,7 @@ func (p *Parser) parseGamePackageDir(gameDir string, tags []string) {
 		Mode: packages.LoadFiles | packages.LoadSyntax,
 		// NOTE(Jake): 2019-05-17
 		// Tests shouldn't have game objects in them, so set to false
-		Tests:      false,
+		Tests: false,
 		// NOTE(Jake): 2019-05-17
 		// Build tags probably don't matter for game object structure parsing.
 		//BuildFlags: []string{fmt.Sprintf("-tags=%s", strings.Join(tags, " "))},
@@ -189,16 +189,16 @@ func (p *Parser) parseGamePackageDir(gameDir string, tags []string) {
 		panic("Cannot determine package name from directory: " + gameDir)
 	}
 	p.pkg = &Package{
-		name:  pkg.Name,
-		defs:  pkg.TypesInfo.Defs,
+		name:     pkg.Name,
+		defs:     pkg.TypesInfo.Defs,
 		typesPkg: pkg.Types,
-		files: make([]*File, len(pkg.Syntax)),
+		files:    make([]*File, len(pkg.Syntax)),
 	}
 
 	for i, file := range pkg.Syntax {
 		p.pkg.files[i] = &File{
-			file:        file,
-			pkg:         p.pkg,
+			file: file,
+			pkg:  p.pkg,
 			//trimPrefix:  p.trimPrefix,
 			//lineComment: p.lineComment,
 		}
