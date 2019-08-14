@@ -11,6 +11,7 @@ import (
 	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/base"
 	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/build"
 	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/generate"
+	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/publish"
 	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/serve"
 	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/shared"
 )
@@ -19,7 +20,7 @@ var cmds = []*base.Command{
 	build.Cmd,
 	generate.Cmd,
 	serve.Cmd,
-	//publish.Cmd,
+	publish.Cmd,
 	// todo(Jake): 2019-08-10
 	//
 	// assetpack	[todo] make this build asset files

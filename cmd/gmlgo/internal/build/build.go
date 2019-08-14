@@ -49,12 +49,12 @@ func run(cmd *base.Command, args []string) (err error) {
 	})
 
 	// Run "go build"
-	Build(dir, args)
+	Build(dir, args, nil)
 
 	return
 }
 
-func Build(dir string, args []string) {
+func Build(dir string, args []string, envVars []string) {
 	var buildArgs []string
 	if len(args) > 1 {
 		buildArgs = make([]string, 0, len(args[2:])+1)
@@ -68,6 +68,7 @@ func Build(dir string, args []string) {
 	}
 	cmd := exec.Command("go", buildArgs...)
 	cmd.Env = os.Environ()
+	cmd.Env = append(cmd.Env, envVars...)
 
 	cmdOut, _ := cmd.StdoutPipe()
 	cmdErr, _ := cmd.StderrPipe()

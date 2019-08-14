@@ -2,12 +2,16 @@ package publish
 
 import (
 	"flag"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 	"time"
 
+	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/asset"
 	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/base"
 	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/build"
 	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/generate"
+	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/shared"
 )
 
 var Cmd = &base.Command{
@@ -36,13 +40,25 @@ func run(cmd *base.Command, args []string) (err error) {
 		cmd.Flag.PrintDefaults()
 		os.Exit(1)
 	}
-	dir := ""
+	dir := "."
 	if dirArgs := cmd.Flag.Args(); len(dirArgs) > 0 {
 		dir = dirArgs[0]
 	}
 
+	indexHTMLData, err := shared.ReadDefaultIndexHTML()
+	if err != nil {
+		return err
+	}
+	wasmJSData, err := shared.ReadDefaultWasmJS()
+	if err != nil {
+		return err
+	}
+
 	// Generate unique folder name
-	distFolder := "dist/" + time.Now().Format("2006-01-02_15-04-05")
+	distFolder, err := filepath.Abs("dist/" + time.Now().Format("2006-01-02_15-04-05"))
+	if err != nil {
+		return err
+	}
 	if err := os.MkdirAll(distFolder, os.ModePerm); err != nil {
 		return err
 	}
@@ -55,15 +71,23 @@ func run(cmd *base.Command, args []string) (err error) {
 
 	// Build web
 	{
-		dir := distFolder + "/web"
-		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+		outputDir := distFolder + "/web"
+		if err := os.MkdirAll(outputDir, os.ModePerm); err != nil {
 			return err
 		}
 		args := args
-		args = append(args, "-o", dir+"/game.wasm")
-		build.Build(dir, args)
+		args = append(args, "-o", outputDir+"/main.wasm")
+		build.Build(outputDir, args, []string{"GOOS=js", "GOARCH=wasm"})
+		if err := ioutil.WriteFile(outputDir+"/index.html", indexHTMLData, os.ModePerm); err != nil {
+			return err
+		}
+		if err := ioutil.WriteFile(outputDir+"/wasm_exec.js", wasmJSData, os.ModePerm); err != nil {
+			return err
+		}
+		if err := asset.CopyAssetDirectory(dir+"/asset", outputDir+"/asset"); err != nil {
+			return err
+		}
 	}
-	build.Build(dir, args)
 
 	return nil
 }
