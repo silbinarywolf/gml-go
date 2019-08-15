@@ -9,6 +9,9 @@ cache:
     - $HOME/.cache/go-build
     - $HOME/gopath/pkg/mod
 
+services:
+  - xvfb
+
 addons:
   apt:
     sources:
