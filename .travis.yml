@@ -9,6 +9,8 @@ cache:
     - $HOME/.cache/go-build
     - $HOME/gopath/pkg/mod
 
+dist: xenial
+
 services:
   - xvfb
 
