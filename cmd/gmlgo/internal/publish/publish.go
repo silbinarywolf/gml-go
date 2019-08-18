@@ -4,7 +4,6 @@ import (
 	"flag"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/asset"
@@ -53,21 +52,18 @@ func run(cmd *base.Command, args []string) error {
 	// Get WASM files
 	{
 		var err error
-		indexHTMLData, err = shared.ReadDefaultIndexHTML()
+		indexHTMLData, err = shared.ReadDefaultIndexHTML(dir)
 		if err != nil {
 			return err
 		}
-		wasmJSData, err = shared.ReadDefaultWasmJS()
+		wasmJSData, err = shared.ReadDefaultWasmJS(dir)
 		if err != nil {
 			return err
 		}
 	}
 
 	// Generate unique folder name
-	distFolder, err := filepath.Abs("dist/" + time.Now().Format("2006-01-02_15-04-05"))
-	if err != nil {
-		return err
-	}
+	distFolder := dir + "/dist/" + time.Now().Format("2006-01-02_15-04-05")
 	if err := os.MkdirAll(distFolder, os.ModePerm); err != nil {
 		return err
 	}
@@ -153,8 +149,11 @@ func compileBinary(gameDir string, outputDir string, binaryName string, GOOS str
 	if err := os.MkdirAll(outputDir, os.ModePerm); err != nil {
 		return err
 	}
-	args = append(args, "-o", outputDir+"/"+binaryName)
-	if err := build.Build(outputDir, args, []string{"GOOS=" + GOOS, "GOARCH=" + GOARCH}); err != nil {
+	argsNew := make([]string, 0, 3)
+	argsNew = append(argsNew, "-o", outputDir+"/"+binaryName)
+	argsNew = append(argsNew, args...)
+	//panic(fmt.Sprintf("%v", args))
+	if err := build.Build(outputDir, argsNew, []string{"GOOS=" + GOOS, "GOARCH=" + GOARCH}); err != nil {
 		return err
 	}
 	if err := asset.CopyAssetDirectory(gameDir+"/asset", outputDir+"/asset"); err != nil {

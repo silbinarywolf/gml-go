@@ -17,8 +17,8 @@ var (
 	cmdErr error
 )
 
-func computeCmdSourceDir() (string, error) {
-	currentDir, err := filepath.Abs(".")
+func computeCmdSourceDir(gameDir string) (string, error) {
+	currentDir, err := filepath.Abs(gameDir)
 	if err != nil {
 		return "", err
 	}
@@ -40,17 +40,8 @@ func computeCmdSourceDir() (string, error) {
 	return dir, nil
 }
 
-// getCmdSourceDir returns a cached copy of computeCmdSourceDir
-func getCmdSourceDir() (string, error) {
-	if cmdDir != "" || cmdErr != nil {
-		return cmdDir, cmdErr
-	}
-	cmdDir, cmdErr = computeCmdSourceDir()
-	return cmdDir, cmdErr
-}
-
-func ReadDefaultIndexHTML() ([]byte, error) {
-	dir, err := getCmdSourceDir()
+func ReadDefaultIndexHTML(gameDir string) ([]byte, error) {
+	dir, err := computeCmdSourceDir(gameDir)
 	if err != nil {
 		return nil, err
 	}
@@ -62,8 +53,8 @@ func ReadDefaultIndexHTML() ([]byte, error) {
 	return data, nil
 }
 
-func ReadDefaultWasmJS() ([]byte, error) {
-	dir, err := getCmdSourceDir()
+func ReadDefaultWasmJS(gameDir string) ([]byte, error) {
+	dir, err := computeCmdSourceDir(gameDir)
 	if err != nil {
 		return nil, err
 	}

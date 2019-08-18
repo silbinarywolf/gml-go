@@ -8,6 +8,7 @@ require (
 	github.com/gofrs/flock v0.7.1 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/gopherjs/gopherjs v0.0.0-20190430165422-3e4dfb77656c // indirect
+	github.com/gopherjs/gopherwasm v1.1.0
 	github.com/hajimehoshi/ebiten v1.9.3
 	github.com/hajimehoshi/go-mp3 v0.2.1 // indirect
 	github.com/kr/pty v1.1.4 // indirect

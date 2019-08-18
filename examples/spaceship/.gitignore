@@ -14,4 +14,6 @@ gmlgo_gen.go
 *.wasm
 # Ignore binary for Linux / Mac
 ./spaceship
+# Ignore dist files (gmlgo publish)
+/dist
 ## GMLGO END ##
