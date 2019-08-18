@@ -28,13 +28,18 @@ var verboseShort *bool
 
 var verbose *bool
 
+var (
+	indexHTMLData []byte
+	wasmJSData    []byte
+)
+
 func init() {
 	tags = Cmd.Flag.String("tags", "", "a list of build tags to consider satisfied during the build")
 	verboseShort = Cmd.Flag.Bool("v", false, "verbose")
 	verbose = Cmd.Flag.Bool("verbose", false, "verbose")
 }
 
-func run(cmd *base.Command, args []string) (err error) {
+func run(cmd *base.Command, args []string) error {
 	cmd.Flag.Parse(args)
 	if !cmd.Flag.Parsed() {
 		cmd.Flag.PrintDefaults()
@@ -45,13 +50,17 @@ func run(cmd *base.Command, args []string) (err error) {
 		dir = dirArgs[0]
 	}
 
-	indexHTMLData, err := shared.ReadDefaultIndexHTML()
-	if err != nil {
-		return err
-	}
-	wasmJSData, err := shared.ReadDefaultWasmJS()
-	if err != nil {
-		return err
+	// Get WASM files
+	{
+		var err error
+		indexHTMLData, err = shared.ReadDefaultIndexHTML()
+		if err != nil {
+			return err
+		}
+		wasmJSData, err = shared.ReadDefaultWasmJS()
+		if err != nil {
+			return err
+		}
 	}
 
 	// Generate unique folder name
@@ -69,25 +78,87 @@ func run(cmd *base.Command, args []string) (err error) {
 		Verbose:   *verbose || *verboseShort,
 	})
 
-	// Build web
-	{
-		outputDir := distFolder + "/web"
-		if err := os.MkdirAll(outputDir, os.ModePerm); err != nil {
-			return err
-		}
-		args := args
-		args = append(args, "-o", outputDir+"/main.wasm")
-		build.Build(outputDir, args, []string{"GOOS=js", "GOARCH=wasm"})
-		if err := ioutil.WriteFile(outputDir+"/index.html", indexHTMLData, os.ModePerm); err != nil {
-			return err
-		}
-		if err := ioutil.WriteFile(outputDir+"/wasm_exec.js", wasmJSData, os.ModePerm); err != nil {
-			return err
-		}
-		if err := asset.CopyAssetDirectory(dir+"/asset", outputDir+"/asset"); err != nil {
-			return err
-		}
+	// Build
+	if err := compile(dir, distFolder, args); err != nil {
+		return err
 	}
 
+	return nil
+}
+
+func compileWeb(dir string, distFolder string, args []string) error {
+	distFolder = distFolder + "/web"
+	if err := compileBinary(
+		dir,
+		distFolder,
+		"main.wasm",
+		"js",
+		"wasm",
+		args,
+	); err != nil {
+		return err
+	}
+	if err := ioutil.WriteFile(distFolder+"/index.html", indexHTMLData, os.ModePerm); err != nil {
+		return err
+	}
+	if err := ioutil.WriteFile(distFolder+"/wasm_exec.js", wasmJSData, os.ModePerm); err != nil {
+		return err
+	}
+	return nil
+}
+
+func compileWindows(dir string, distFolder string, args []string) error {
+	if err := compileBinary(
+		dir,
+		distFolder+"/windows",
+		"game.exe",
+		"windows",
+		"amd64",
+		args,
+	); err != nil {
+		return err
+	}
+	return nil
+}
+
+func compileLinux(dir string, distFolder string, args []string) error {
+	if err := compileBinary(
+		dir,
+		distFolder+"/linux",
+		"game",
+		"linux",
+		"amd64",
+		args,
+	); err != nil {
+		return err
+	}
+	return nil
+}
+
+func compileMac(dir string, distFolder string, args []string) error {
+	if err := compileBinary(
+		dir,
+		distFolder+"/mac",
+		"game",
+		"darwin",
+		"amd64",
+		args,
+	); err != nil {
+		return err
+	}
+	return nil
+}
+
+func compileBinary(gameDir string, outputDir string, binaryName string, GOOS string, GOARCH string, args []string) error {
+	if err := os.MkdirAll(outputDir, os.ModePerm); err != nil {
+		return err
+	}
+	args = append(args, "-o", outputDir+"/"+binaryName)
+	if err := build.Build(outputDir, args, []string{"GOOS=" + GOOS, "GOARCH=" + GOARCH}); err != nil {
+		return err
+	}
+	if err := asset.CopyAssetDirectory(gameDir+"/asset", outputDir+"/asset"); err != nil {
+		return err
+	}
 	return nil
 }

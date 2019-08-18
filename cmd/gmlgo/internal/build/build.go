@@ -49,12 +49,14 @@ func run(cmd *base.Command, args []string) (err error) {
 	})
 
 	// Run "go build"
-	Build(dir, args, nil)
+	if err := Build(dir, args, nil); err != nil {
+		return err
+	}
 
 	return
 }
 
-func Build(dir string, args []string, envVars []string) {
+func Build(dir string, args []string, envVars []string) error {
 	var buildArgs []string
 	if len(args) > 1 {
 		buildArgs = make([]string, 0, len(args[2:])+1)
@@ -75,13 +77,13 @@ func Build(dir string, args []string, envVars []string) {
 
 	err := cmd.Start()
 	if err != nil {
-		panic(err)
+		return err
 	}
 	errOutput, _ := ioutil.ReadAll(cmdErr)
 	stdOutput, _ := ioutil.ReadAll(cmdOut)
 	if len(errOutput) > 0 {
-		fmt.Printf(string(errOutput))
-		os.Exit(1)
+		return fmt.Errorf("%s", errOutput)
 	}
 	fmt.Printf("%s", stdOutput)
+	return nil
 }
