@@ -4,7 +4,7 @@
 [![Documentation](https://godoc.org/github.com/silbinarywolf/gml-go?status.svg)](https://godoc.org/github.com/silbinarywolf/gml-go)
 [![Report Card](https://goreportcard.com/badge/github.com/silbinarywolf/gml-go)](https://goreportcard.com/report/github.com/silbinarywolf/gml-go)
 
-**NOTE: This project exists currently only for my personal use. There are no plans to ensure stability of any kind as of this time. Consider building your games with the well supported [Ebiten](https://github.com/hajimehoshi/ebiten) library.
+**NOTE: This project exists currently only for my personal use. There are no plans to ensure stability of any kind as of this time. Consider building your games with the well supported [Ebiten](https://github.com/hajimehoshi/ebiten) library.**
 
 This is an engine that aims to strike a balance between capturing the simplicity of the Game Maker API whilst not losing any performance given to you by Go. It has been designed with multiplayer games in mind and differs itself from Game Maker by allowing you to "run" multiple rooms at once so that every player does not have to be in the same room.
 

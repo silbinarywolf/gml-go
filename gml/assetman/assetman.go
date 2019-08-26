@@ -16,24 +16,36 @@ func Register(manager assetManager) {
 }
 
 // UnsafeLoadAll is called at initialization time by GML-Go
+// For internal use only. No backwards compatibility guaranteed.
 func UnsafeLoadAll() {
 	if isHasLoadedAll {
 		panic("Cannot call LoadAll() more than once")
 	}
-	var wg sync.WaitGroup
-	wg.Add(len(assetManagers))
-	for _, m := range assetManagers {
-		go func(manager assetManager) {
-			manager.LoadAll()
-			wg.Done()
-		}(m)
-	}
-	wg.Wait()
-	isHasLoadedAll = true
 
+	// Load all assets
+	// (or generate *.data files in debug mode)
+	{
+		var wg sync.WaitGroup
+		wg.Add(len(assetManagers))
+		for _, m := range assetManagers {
+			go func(manager assetManager) {
+				manager.LoadAll()
+				wg.Done()
+			}(m)
+		}
+		wg.Wait()
+		isHasLoadedAll = true
+	}
+
+	// Write manifest file in debug mode
+	debugWriteManifest()
+
+	// Read manifest file
+	loadManifest()
 }
 
 type assetManager interface {
 	//DebugUpdateAll()
 	LoadAll()
+	ManifestJSON() (string, map[string]string)
 }

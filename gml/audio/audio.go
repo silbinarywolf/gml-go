@@ -59,6 +59,12 @@ func (index SoundIndex) IsPlaying() bool {
 	return sound.audioPlayer.IsPlaying()
 }
 
+// Name of the sound asset
+func (index SoundIndex) Name() string {
+	sound := &soundManager.assetList[index]
+	return sound.name
+}
+
 const (
 	sampleRate = 48000
 )
@@ -110,8 +116,19 @@ func (manager *soundManagerData) LoadAll() {
 	}
 }
 
+func (manager *soundManagerData) ManifestJSON() (string, map[string]string) {
+	result := make(map[string]string)
+	assetList := manager.assetNameToIndex
+	for _, soundIndex := range assetList {
+		name := soundIndex.Name()
+		result[name] = name
+	}
+	return "audio", result
+}
+
 type sound struct {
 	audioPlayer *audio.Player
+	name        string
 }
 
 type soundAsset struct {
@@ -155,6 +172,7 @@ func loadSound(index SoundIndex) {
 	}
 	soundManager.assetList[index] = sound{
 		audioPlayer: audioPlayer,
+		name:        name,
 	}
 }
 
