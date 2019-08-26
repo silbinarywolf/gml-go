@@ -38,49 +38,123 @@
 				<div class="progress-bar"></div>
 			</div>
 		</div>
-	</body>
-	<script src="wasm_exec.js"></script>
-	<script>
-		window.onerror = function(message, source, lineno, colno, error) {
-			var el = document.createElement("div");
-			el.classList.add("error-container");
-			var newContent = document.createTextNode(message); 
-			el.appendChild(newContent);
-			document.body.appendChild(el);
-		}
-		var progressBar = document.body.querySelector(".progress-bar");
-		if (!progressBar) {
-			throw new Error("Missing .progress-bar.")
-		}
-		function updateProgressBar(percent) {
-			progressBar.style.width = String(percent) + "%";
-		}
-		request = new XMLHttpRequest();
-		request.addEventListener("progress", function (e) {
+		<script src="wasm_exec.js"></script>
+		<script>
+			window.onerror = function(message, source, lineno, colno, error) {
+				let el = document.createElement("div");
+				el.classList.add("error-container");
+				let newContent = document.createTextNode(message); 
+				el.appendChild(newContent);
+				document.body.appendChild(el);
+			}
+			let goRequest;
+			let progressBar = document.body.querySelector(".progress-bar");
+
 			if (!progressBar) {
-				return;
+				throw new Error("Missing .progress-bar.")
 			}
-			if (e.lengthComputable) {
-				var percent = (e.loaded / e.total * 100 | 0);
-				updateProgressBar(percent);
+			function setProgressBar(percent) {
+				progressBar.style.width = String(percent) + "%";
 			}
-		});
-		request.addEventListener("load", function () {
-			if (request.status !== 200) {
-				throw new Error(request.status + " " + request.statusText);
-			}
-			updateProgressBar(100);
-			const go = new Go();
-			WebAssembly.instantiate(request.response, go.importObject).then((result) => {
-				while (document.body.hasChildNodes()) {
-					document.body.removeChild(document.body.childNodes[0]);
+			let filesProgress = {};
+			function updateProgressBar() {
+				if (!progressBar) {
+					return;
 				}
-				go.run(result.instance);
-			});
-		});
-		request.responseType = "arraybuffer";
-		request.open("GET", "main.wasm");
-		request.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-		request.send();
-	</script>
+				let percent = 0;
+				let i = 0;
+				for (let key in filesProgress) {
+					if (!filesProgress.hasOwnProperty(key)) {
+						continue;
+					}
+					percent += filesProgress[key]
+					i++;
+				}
+				const totalPercent = percent / i;
+				setProgressBar(totalPercent);
+				if (totalPercent < 100) {
+					return;
+				}
+				const go = new Go();
+				WebAssembly.instantiate(goRequest.response, go.importObject).then((result) => {
+					while (document.body.hasChildNodes()) {
+						document.body.removeChild(document.body.childNodes[0]);
+					}
+					go.run(result.instance);
+				});
+			}
+			function preloadFile(path) {
+				const preloadLink = document.createElement("link");
+				preloadLink.href = path;
+				preloadLink.rel = "preload";
+				preloadLink.as = "fetch";
+				filesProgress[path] = 0;
+				preloadLink.addEventListener("progress", function (e) {
+					if (e.lengthComputable) {
+						const percent = (e.loaded / e.total * 100 | 0);
+						filesProgress[path] = percent;
+						updateProgressBar();
+					}
+				});
+				preloadLink.addEventListener("load", function (e) {
+					filesProgress[path] = 100;
+					updateProgressBar();
+				});
+				document.head.appendChild(preloadLink);
+			}
+			function getBinary() {
+				let fullAssetName = "main.wasm";
+				filesProgress[fullAssetName] = 0;
+				let request = new XMLHttpRequest();
+				goRequest = request;
+				request.addEventListener("progress", function (e) {
+					if (e.lengthComputable) {
+						let percent = (e.loaded / e.total * 100 | 0);
+						filesProgress[fullAssetName] = percent;
+						updateProgressBar();
+					}
+				});
+				request.addEventListener("load", function () {
+					if (request.status !== 200) {
+						throw new Error(request.status + " " + request.statusText);
+					}
+					filesProgress[fullAssetName] = 100;
+					updateProgressBar();
+				});
+				request.responseType = "arraybuffer";
+				request.open("GET", fullAssetName);
+				request.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+				request.send();
+				return request;
+			}
+			function getManifest() {
+				let request = new XMLHttpRequest();
+				request.overrideMimeType("application/json");
+				request.open("GET", "asset/manifest.json");
+				request.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+				request.addEventListener("load", function() {
+					let jsonResponse = request.response;
+					let json = JSON.parse(jsonResponse);
+
+					getBinary();
+					for (let groupName in json) {
+						if (!json.hasOwnProperty(groupName)) {
+							continue;
+						}
+						let group = json[groupName];
+						for (let key in group) {
+							if (!group.hasOwnProperty(key)) {
+								continue;
+							}
+							let name = group[key];
+							let fullAssetName = "asset/" + groupName + "/" + name + ".data";
+							preloadFile(fullAssetName);
+						}
+					}
+				});
+				request.send();
+			}
+			getManifest();
+		</script>
+	</body>
 </html>

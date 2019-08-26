@@ -33,72 +33,166 @@ func init() {
 	verbose = Cmd.Flag.Bool("verbose", false, "verbose")
 }
 
-const indexHTML = `<!DOCTYPE html>
-<head>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<style>
-		* {
-			box-sizing: border-box;
-		}
+const indexHTML = `<html>
+	<head>
+		<meta charset="utf-8">
+		<style>
+			body {
+				background-color: #000;
+				color: #fff;
+				font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+			}
 
-		body,
-		html {
-			height: 100%;
-			margin: 0;
-			padding: 0;
-		}
+			.error-container {
+				background-color: #F47F7F;
+				border: 1px solid #531212;
+				color: #000;
+				padding: 10px 10px;
+			}
+			.container {
+				width: 1280px;
+				max-width: 100%;
+				margin: 0 auto;
+			}
+			.progress-bar-wrapper {
+				width: 100%;
+				height: 10px;
+				border: 1px solid #266926;
+			}
+			.progress-bar {
+				width: 0%;
+				height: inherit;
+				background-color: #46C346;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<p>Loading...</p>
+			<div class="progress-bar-wrapper">
+				<div class="progress-bar"></div>
+			</div>
+		</div>
+		<script src="wasm_exec.js"></script>
+		<script>
+			window.onerror = function(message, source, lineno, colno, error) {
+				let el = document.createElement("div");
+				el.classList.add("error-container");
+				let newContent = document.createTextNode(message); 
+				el.appendChild(newContent);
+				document.body.appendChild(el);
+			}
+			let goRequest;
+			let progressBar = document.body.querySelector(".progress-bar");
 
-		body {
-			position: relative;
-			z-index: 0;
-			color: #fff; 
-			background-color: #000; 
-		}
+			if (!progressBar) {
+				throw new Error("Missing .progress-bar.")
+			}
+			function setProgressBar(percent) {
+				progressBar.style.width = String(percent) + "%";
+			}
+			let filesProgress = {};
+			function updateProgressBar() {
+				if (!progressBar) {
+					return;
+				}
+				let percent = 0;
+				let i = 0;
+				for (let key in filesProgress) {
+					if (!filesProgress.hasOwnProperty(key)) {
+						continue;
+					}
+					percent += filesProgress[key]
+					i++;
+				}
+				const totalPercent = percent / i;
+				setProgressBar(totalPercent);
+				if (totalPercent < 100) {
+					return;
+				}
+				const go = new Go();
+				WebAssembly.instantiate(goRequest.response, go.importObject).then((result) => {
+					while (document.body.hasChildNodes()) {
+						document.body.removeChild(document.body.childNodes[0]);
+					}
+					go.run(result.instance);
+				});
+			}
+			function preloadFile(path) {
+				const preloadLink = document.createElement("link");
+				preloadLink.href = path;
+				preloadLink.rel = "preload";
+				preloadLink.as = "fetch";
+				filesProgress[path] = 0;
+				preloadLink.addEventListener("progress", function (e) {
+					if (e.lengthComputable) {
+						const percent = (e.loaded / e.total * 100 | 0);
+						filesProgress[path] = percent;
+						updateProgressBar();
+					}
+				});
+				preloadLink.addEventListener("load", function (e) {
+					filesProgress[path] = 100;
+					updateProgressBar();
+				});
+				document.head.appendChild(preloadLink);
+			}
+			function getBinary() {
+				let fullAssetName = "main.wasm";
+				filesProgress[fullAssetName] = 0;
+				let request = new XMLHttpRequest();
+				goRequest = request;
+				request.addEventListener("progress", function (e) {
+					if (e.lengthComputable) {
+						let percent = (e.loaded / e.total * 100 | 0);
+						filesProgress[fullAssetName] = percent;
+						updateProgressBar();
+					}
+				});
+				request.addEventListener("load", function () {
+					if (request.status !== 200) {
+						throw new Error(request.status + " " + request.statusText);
+					}
+					filesProgress[fullAssetName] = 100;
+					updateProgressBar();
+				});
+				request.responseType = "arraybuffer";
+				request.open("GET", fullAssetName);
+				request.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+				request.send();
+				return request;
+			}
+			function getManifest() {
+				let request = new XMLHttpRequest();
+				request.overrideMimeType("application/json");
+				request.open("GET", "asset/manifest.json");
+				request.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+				request.addEventListener("load", function() {
+					let jsonResponse = request.response;
+					let json = JSON.parse(jsonResponse);
 
-		pre {
-			margin: 5px;
-		}
-
-		.load-info {
-			position: absolute;
-			left: calc((100% - 640px) / 2); 
-			top: calc((100% - 480px) / 2);
-			z-index: 0;
-			width: 640px;
-			height: 480px;
-			font-size: 32px;
-			text-align: center; 
-			vertical-align: middle;
-		}
-	</style>
-</head>
-<body>
-	<div class="load-info">
-		<p>Loading...</p>
-	</div>
-	<script src="wasm_exec.js"></script>
-	<script>
-	(async () => {
-	  const infoEl = document.body.querySelector('.load-info');
-	  const textEl = infoEl.querySelector('p');
-	  textEl.textContent = 'Compiling...';
-	  const resp = await fetch('main.wasm');
-	  if (infoEl) {
-	  	infoEl.style.display = "none";
-	  }
-	  if (!resp.ok) {
-	    const pre = document.createElement('pre');
-	    pre.innerText = await resp.text();
-	    document.body.appendChild(pre);
-	    return;
-	  }
-	  const src = await resp.arrayBuffer();
-	  const go = new Go();
-	  const result = await WebAssembly.instantiate(src, go.importObject);
-	  go.run(result.instance);
-	})();
-	</script>
-</body>
+					getBinary();
+					for (let groupName in json) {
+						if (!json.hasOwnProperty(groupName)) {
+							continue;
+						}
+						let group = json[groupName];
+						for (let key in group) {
+							if (!group.hasOwnProperty(key)) {
+								continue;
+							}
+							let name = group[key];
+							let fullAssetName = "asset/" + groupName + "/" + name + ".data";
+							preloadFile(fullAssetName);
+						}
+					}
+				});
+				request.send();
+			}
+			getManifest();
+		</script>
+	</body>
+</html>
 `
 
 var (
