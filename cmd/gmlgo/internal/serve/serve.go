@@ -123,6 +123,8 @@ const indexHTML = `<html>
 				preloadLink.href = path;
 				preloadLink.rel = "preload";
 				preloadLink.as = "fetch";
+				preloadLink.type = "application/octet-stream";
+				preloadLink.setAttribute("crossorigin", "crossorigin");
 				filesProgress[path] = 0;
 				preloadLink.addEventListener("progress", function (e) {
 					if (e.lengthComputable) {
