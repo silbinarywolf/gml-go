@@ -37,3 +37,8 @@ func WindowSetScale(scale float64) {
 func WindowScale() float64 {
 	return gGameSettings.WindowScale
 }
+
+// IsBrowser will return true if the game is playing in a web browser
+func IsBrowser() bool {
+	return isBrowser
+}
