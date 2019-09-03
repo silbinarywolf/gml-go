@@ -65,7 +65,7 @@ func (self *MenuGameover) Update() {
 	// Update medals
 	if self.MedalDisplayUpdateTimer.Tick() {
 		if self.DisplayScore != Global.CurrentRound {
-			if Global.SoundDisabled {
+			if !Global.SoundDisabled {
 				asset.SndMedalObtained.Play()
 			}
 			self.DisplayScore = Global.CurrentRound
