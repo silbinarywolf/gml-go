@@ -84,8 +84,29 @@ func run(cmd *base.Command, args []string) error {
 	})
 
 	// Build
-	if err := compile(dir, distFolder, args); err != nil {
-		return xerrors.Errorf("failed compiling: %w", err)
+	{
+		// NOTE(Jake): 2019-08-16
+		// Skip some of these as I get the following on Windows 10:
+		// - cannot load github.com/go-gl/glfw/v3.2/glfw: no Go source files
+		//
+		// This is most likely due to a lack of the package but it
+		// could also fail if a publisher doesn't have CGo.
+		if err := compileWeb(dir, distFolder, args); err != nil {
+			return xerrors.Errorf("error compiling web: %w", err)
+		}
+		if !isWindows {
+			if err := compileLinux(dir, distFolder, args); err != nil {
+				return xerrors.Errorf("error compiling linux: %w", err)
+			}
+		}
+		if err := compileWindows(dir, distFolder, args); err != nil {
+			return xerrors.Errorf("error compiling windows: %w", err)
+		}
+		if !isWindows {
+			if err := compileMac(dir, distFolder, args); err != nil {
+				return xerrors.Errorf("error compiling mac: %w", err)
+			}
+		}
 	}
 
 	return nil
