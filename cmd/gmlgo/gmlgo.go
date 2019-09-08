@@ -58,7 +58,7 @@ The commands are:
 	for _, cmd := range cmds {
 		if cmd.Name() == os.Args[1] {
 			if err := cmd.Run(cmd, args); err != nil {
-				panic(err)
+				panic(err.Error())
 			}
 			return
 		}

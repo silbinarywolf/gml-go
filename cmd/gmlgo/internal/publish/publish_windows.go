@@ -2,12 +2,14 @@
 
 package publish
 
+import "golang.org/x/xerrors"
+
 func compile(dir string, distFolder string, args []string) error {
 	if err := compileWeb(dir, distFolder, args); err != nil {
-		return err
+		return xerrors.Errorf("error compiling web: %w", err)
 	}
 	if err := compileWindows(dir, distFolder, args); err != nil {
-		return err
+		return xerrors.Errorf("error compiling windows: %w", err)
 	}
 	// NOTE(Jake): 2019-08-16
 	// Skip these as I get the following on Windows 10:

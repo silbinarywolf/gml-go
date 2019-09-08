@@ -11,6 +11,7 @@ import (
 	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/build"
 	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/generate"
 	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/shared"
+	"golang.org/x/xerrors"
 )
 
 var Cmd = &base.Command{
@@ -49,23 +50,31 @@ func run(cmd *base.Command, args []string) error {
 		dir = dirArgs[0]
 	}
 
+	if _, err := os.Stat(dir); err != nil {
+		if os.IsNotExist(err) {
+			return xerrors.Errorf("Directory does not exist: %s", dir)
+		}
+		return xerrors.Errorf("Error opening directory: %w", err)
+	}
+
 	// Get WASM files
 	{
 		var err error
 		indexHTMLData, err = shared.ReadDefaultIndexHTML(dir)
 		if err != nil {
-			return err
+			return xerrors.Errorf("reading index.html failed: %w", err)
 		}
 		wasmJSData, err = shared.ReadDefaultWasmJS(dir)
 		if err != nil {
-			return err
+			return xerrors.Errorf("reading wasm_exec.js failed: %w", err)
 		}
 	}
 
 	// Generate unique folder name
-	distFolder := dir + "/dist/" + time.Now().Format("2006-01-02_15-04-05")
+	relativeFolder := "dist/" + time.Now().Format("2006-01-02_15-04-05")
+	distFolder := dir + "/" + relativeFolder
 	if err := os.MkdirAll(distFolder, os.ModePerm); err != nil {
-		return err
+		return xerrors.Errorf("creating \""+relativeFolder+"\" folder failed: %w", err)
 	}
 
 	// Run "go generate"
@@ -76,7 +85,7 @@ func run(cmd *base.Command, args []string) error {
 
 	// Build
 	if err := compile(dir, distFolder, args); err != nil {
-		return err
+		return xerrors.Errorf("failed compiling: %w", err)
 	}
 
 	return nil
@@ -152,12 +161,12 @@ func compileBinary(gameDir string, outputDir string, binaryName string, GOOS str
 	argsNew := make([]string, 0, 3)
 	argsNew = append(argsNew, "-o", outputDir+"/"+binaryName)
 	argsNew = append(argsNew, args...)
-	//panic(fmt.Sprintf("%v", args))
+	//panic(xerrors.Sprintf("%v", args))
 	if err := build.Build(outputDir, argsNew, []string{"GOOS=" + GOOS, "GOARCH=" + GOARCH}); err != nil {
 		return err
 	}
 	if err := asset.CopyAssetDirectory(gameDir+"/asset", outputDir+"/asset"); err != nil {
-		return err
+		return xerrors.Errorf("error copying asset directory: %w", err)
 	}
 	return nil
 }
