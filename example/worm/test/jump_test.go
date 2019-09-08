@@ -5,8 +5,8 @@ package test
 import (
 	"math"
 
-	"github.com/silbinarywolf/gml-go/examples/worm/game"
-	"github.com/silbinarywolf/gml-go/examples/worm/game/input"
+	"github.com/silbinarywolf/gml-go/example/worm/game"
+	"github.com/silbinarywolf/gml-go/example/worm/game/input"
 	"github.com/silbinarywolf/gml-go/gml"
 
 	"testing"

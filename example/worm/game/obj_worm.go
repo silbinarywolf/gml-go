@@ -3,9 +3,9 @@ package game
 import (
 	"math"
 
-	"github.com/silbinarywolf/gml-go/examples/worm/asset"
-	"github.com/silbinarywolf/gml-go/examples/worm/game/input"
-	"github.com/silbinarywolf/gml-go/examples/worm/game/wall"
+	"github.com/silbinarywolf/gml-go/example/worm/asset"
+	"github.com/silbinarywolf/gml-go/example/worm/game/input"
+	"github.com/silbinarywolf/gml-go/example/worm/game/wall"
 	"github.com/silbinarywolf/gml-go/gml"
 	"github.com/silbinarywolf/gml-go/gml/alarm"
 )

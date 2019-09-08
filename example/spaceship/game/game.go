@@ -1,7 +1,7 @@
 package game
 
 import (
-	"github.com/silbinarywolf/gml-go/examples/spaceship/asset"
+	"github.com/silbinarywolf/gml-go/example/spaceship/asset"
 	"github.com/silbinarywolf/gml-go/gml"
 )
 

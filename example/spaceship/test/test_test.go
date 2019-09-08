@@ -3,7 +3,7 @@
 package test
 
 import (
-	"github.com/silbinarywolf/gml-go/examples/spaceship/game"
+	"github.com/silbinarywolf/gml-go/example/spaceship/game"
 	"github.com/silbinarywolf/gml-go/gml"
 
 	"testing"

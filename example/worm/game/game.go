@@ -5,7 +5,7 @@ import (
 	"math"
 	"math/rand"
 
-	"github.com/silbinarywolf/gml-go/examples/worm/asset"
+	"github.com/silbinarywolf/gml-go/example/worm/asset"
 	"github.com/silbinarywolf/gml-go/gml"
 	"github.com/silbinarywolf/gml-go/gml/audio"
 )

@@ -3,7 +3,7 @@ package game
 import (
 	"image/color"
 
-	"github.com/silbinarywolf/gml-go/examples/worm/asset"
+	"github.com/silbinarywolf/gml-go/example/worm/asset"
 	"github.com/silbinarywolf/gml-go/gml"
 )
 
@@ -52,17 +52,20 @@ func (self *Menu) Destroy() {
 func (self *Menu) Draw() {
 	screenSize := gml.CameraGetViewSize(0)
 	x := 16.0
-	y := 16.0
+	//y := 16.0
 
 	// Draw sound icon
 	{
 		spr := asset.SprSoundIcon
-		gml.DrawSpriteAlpha(spr, 0, x, y, self.ImageAlpha)
+		// todo(Jake): 2019-09-08
+		// Bring this back if we make muting/unmuting sound possible againgml.DrawSpriteAlpha(spr, 0, x, y, self.ImageAlpha)
 		x += spr.Size().X
 	}
 
 	// Draw music icon
-	gml.DrawSpriteAlpha(asset.SprMusicIcon, 0, x+4, y, self.ImageAlpha)
+	// todo(Jake): 2019-09-08
+	// Bring this back if we make muting/unmuting music possible again
+	//gml.DrawSpriteAlpha(asset.SprMusicIcon, 0, x+4, y, self.ImageAlpha)
 
 	// Draw title
 	gml.DrawSpriteAlpha(asset.SprTitle, 0, (screenSize.X/2)-(asset.SprTitle.Size().X/2), 20, self.ImageAlpha)

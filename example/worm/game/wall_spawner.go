@@ -3,7 +3,7 @@ package game
 import (
 	"math/rand"
 
-	"github.com/silbinarywolf/gml-go/examples/worm/game/wall"
+	"github.com/silbinarywolf/gml-go/example/worm/game/wall"
 	"github.com/silbinarywolf/gml-go/gml"
 	"github.com/silbinarywolf/gml-go/gml/alarm"
 )

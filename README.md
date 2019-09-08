@@ -8,6 +8,9 @@
 
 This is an engine that aims to strike a balance between capturing the simplicity of the Game Maker API whilst not losing any performance given to you by Go. It has been designed with multiplayer games in mind and differs itself from Game Maker by allowing you to "run" multiple rooms at once so that every player does not have to be in the same room.
 
+![A worm jumping between two pipes](docs/images/worm1.png)
+*A screenshot of the example game, [Worm in the Pipes](tree/master/example/worm)*
+
 ## Install
 
 ```
@@ -28,4 +31,5 @@ go get github.com/silbinarywolf/gml-go
 
 * [Hajime Hoshi](https://github.com/hajimehoshi/ebiten) for their fantastically simple 2D game library, [Ebiten](https://github.com/hajimehoshi/ebiten).
 * [Yann Le Coroller](http://www.yannlecoroller.com) for their free to use Helvetica style font.
-* [milkroscope](https://www.artstation.com/milkroscope) for their artwork on Worm In The Pipes (example/worm)
+* [magicdweedoo](http://magicdweedoo.com/) for making the soundtrack on [Worm in the Pipes](tree/master/example/worm) example game.
+* [milkroscope](https://www.artstation.com/milkroscope) for their artwork [Worm in the Pipes](tree/master/example/worm) example game.

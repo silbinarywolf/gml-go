@@ -3,7 +3,7 @@ package game
 import (
 	"image/color"
 
-	"github.com/silbinarywolf/gml-go/examples/worm/asset"
+	"github.com/silbinarywolf/gml-go/example/worm/asset"
 	"github.com/silbinarywolf/gml-go/gml"
 )
 

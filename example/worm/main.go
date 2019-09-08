@@ -7,7 +7,7 @@ import (
 	//"net/http"
 	//_ "net/http/pprof"
 
-	"github.com/silbinarywolf/gml-go/examples/worm/game"
+	"github.com/silbinarywolf/gml-go/example/worm/game"
 	"github.com/silbinarywolf/gml-go/gml"
 )
 
