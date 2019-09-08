@@ -3,6 +3,7 @@ module github.com/silbinarywolf/gml-go
 go 1.12
 
 require (
+	github.com/bwmarrin/snowflake v0.3.0
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/go-gl/glfw v0.0.0-20190409004039-e6da0acd62b1 // indirect
 	github.com/gofrs/flock v0.7.1 // indirect
