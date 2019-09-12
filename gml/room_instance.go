@@ -89,12 +89,9 @@ func (roomInstanceIndex RoomInstanceIndex) InstanceCreate(x, y float64, objectIn
 // Destroy destroys a room instance
 func (roomInstanceIndex RoomInstanceIndex) Destroy() {
 	if roomInst := roomGetInstance(roomInstanceIndex); roomInst != nil {
-		// NOTE(Jake): 2018-08-21
-		// Running Destroy() on each rather than InstanceDestroy()
-		// for speed purposes
 		for _, instanceIndex := range roomInst.instances {
 			if inst := instanceIndex.Get(); inst != nil {
-				fastInstanceDestroy(inst)
+				fastInstanceFree(inst)
 			}
 		}
 		if roomInstanceState.lastCreatedRoom == roomInst.index {

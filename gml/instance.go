@@ -100,14 +100,16 @@ func InstanceExists(inst ObjectType) bool {
 
 // fastInstanceDestroy exists to quickly destroy instances without removing
 // from an array. Used by rooms when they're destroying themselves
-func fastInstanceDestroy(inst ObjectType) {
-	// Run user-destroy code
-	inst.Destroy()
+func fastInstanceFree(inst ObjectType) {
+	// Run free code
+	inst.Free()
 
-	// Mark as destroyed
+	// Mark as freed / destroyed
 	inst.BaseObject().internal.IsDestroyed = true
 }
 
+// InstanceDestroy will make an object call its Destroy then its Free method and
+// then it will no longer exist.
 func InstanceDestroy(inst ObjectType) {
 	baseObj := inst.BaseObject()
 	if baseObj.internal.IsDestroyed {
@@ -117,9 +119,30 @@ func InstanceDestroy(inst ObjectType) {
 		panic("Cannot call InstanceDestroy on an object more than once.")
 	}
 
-	fastInstanceDestroy(inst)
+	// Run user-destroy code
+	inst.Destroy()
+
+	fastInstanceFree(inst)
 
 	// NOTE(Jake): 2018-10-07
+	// Remove at the end of the frame (gState.update)
+	gState.instancesMarkedForDelete = append(gState.instancesMarkedForDelete, baseObj.InstanceIndex())
+}
+
+// InstanceFree will make an object call its Free method and
+// then it will no longer exist.
+func InstanceFree(inst ObjectType) {
+	baseObj := inst.BaseObject()
+	if baseObj.internal.IsDestroyed {
+		// NOTE(Jake): 2019-09-12
+		// Maybe making this just silently returning will be better / less error
+		// prone? For now lets be strict.
+		panic("Cannot call InstanceFree on an object more than once.")
+	}
+
+	fastInstanceFree(inst)
+
+	// NOTE(Jake): 2019-09-12
 	// Remove at the end of the frame (gState.update)
 	gState.instancesMarkedForDelete = append(gState.instancesMarkedForDelete, baseObj.InstanceIndex())
 }

@@ -53,10 +53,21 @@ func (index SoundIndex) IsPlaying() bool {
 		return true
 	}
 	if index == sndUndefined {
-		panic("Cannot check if unset sound is playing")
+		panic("IsPlaying: Cannot check if unset sound is playing")
 	}
 	sound := &soundManager.assetList[index]
 	return sound.audioPlayer.IsPlaying()
+}
+
+func (index SoundIndex) SetVolume(volume float64) {
+	if disableAudio {
+		return
+	}
+	if index == sndUndefined {
+		panic("SetVolume: Cannot check if unset sound is playing")
+	}
+	sound := &soundManager.assetList[index]
+	sound.audioPlayer.SetVolume(volume)
 }
 
 // Name of the sound asset

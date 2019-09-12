@@ -40,6 +40,7 @@ type ObjectType interface {
 	ObjectName() string
 	Create()
 	Destroy()
+	Free()
 	Update()
 	Draw()
 }
@@ -73,6 +74,8 @@ func (inst *Object) Create() {}
 func (inst *Object) Update() {}
 
 func (inst *Object) Destroy() {}
+
+func (inst *Object) Free() {}
 
 func (inst *Object) Draw() {
 	DrawSprite(inst.SpriteIndex(), inst.ImageIndex(), inst.X, inst.Y)
