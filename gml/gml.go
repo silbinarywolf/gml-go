@@ -23,6 +23,9 @@ type GameSettings struct {
 type TestSettings struct {
 	PreUpdate  func()
 	PostUpdate func() bool
+	// SpeedMultiplier is the number of times Update() methods are called
+	// per frame when running tests in headed mode. If set to 0, it will default to 1.
+	SpeedMultiplier int
 }
 
 const (
@@ -55,6 +58,7 @@ func setup(controller gameController, gameSettings *GameSettings) {
 	// Initialize
 	file.InitAssetDir()
 	gCameraManager.reset()
+	initDraw()
 
 	// Load all assets
 	assetman.UnsafeLoadAll()
@@ -65,6 +69,20 @@ func setup(controller gameController, gameSettings *GameSettings) {
 
 	// Bootup game
 	controller.GameStart()
+}
+
+func runTestUpdateLoop(testSettings TestSettings) error {
+	if testSettings.PreUpdate != nil {
+		testSettings.PreUpdate()
+	}
+	if err := update(); err != nil {
+		return err
+	}
+	if testSettings.PostUpdate != nil &&
+		!testSettings.PostUpdate() {
+		return errors.New("Test exited")
+	}
+	return nil
 }
 
 // MaxTPS returns the current maximum TPS.
@@ -103,6 +121,8 @@ func DeltaTime() float64 {
 // TestBootstrap the game to give control over continuing / stopping execution per-frame
 // this method is for additional control when testing
 func TestBootstrap(controller gameController, gameSettings GameSettings, testSettings TestSettings) {
+	runtime.LockOSThread()
+
 	// Set asset directory relative to the test code file path
 	// for `go test` support
 	_, filename, _, _ := runtime.Caller(1)
@@ -113,23 +133,7 @@ func TestBootstrap(controller gameController, gameSettings GameSettings, testSet
 	file.SetAssetDir(dir)
 
 	setup(controller, &gameSettings)
-
-	// NOTE(Jake): 2018-12-30
-	// We currently run the update loop as fast as possible as
-	// the simulation is fixed 60 FPS and we don't have a concept of delta-time
-	// or anything like that (yet?)
-	for {
-		if testSettings.PreUpdate != nil {
-			testSettings.PreUpdate()
-		}
-		if err := update(); err != nil {
-			break
-		}
-		if testSettings.PostUpdate != nil &&
-			!testSettings.PostUpdate() {
-			break
-		}
-	}
+	runTest(gameSettings, testSettings)
 }
 
 // Run
@@ -169,9 +173,6 @@ func update() error {
 		// to the object being followed. If a user needs to update the camera after
 		// that,
 		cameraUpdate()
-
-		// Draw
-		draw()
 	case debugMenuAnimationEditor:
 		//debugMenuRoomEditor,
 		cameraSetActive(0)

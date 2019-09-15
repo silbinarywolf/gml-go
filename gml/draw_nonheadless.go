@@ -204,7 +204,7 @@ func drawGetTarget() *ebiten.Image {
 	return gScreen
 }
 
-func init() {
+func initDraw() {
 	emptyImage, _ = ebiten.NewImage(16, 16, ebiten.FilterDefault)
 	emptyImage.Fill(color.White)
 }

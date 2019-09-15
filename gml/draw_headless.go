@@ -8,6 +8,9 @@ import (
 	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
 )
 
+func initDraw() {
+}
+
 func DrawGetGUI() bool {
 	return false
 }

@@ -12,17 +12,13 @@ var (
 
 func updateEbiten(s *ebiten.Image) error {
 	gScreen = s
-	err := update()
-	//if gGameSettings.updateCallback != nil &&
-	//	!gGameSettings.updateCallback() {
-	//	return errors.New("todo")
-	//}
-	return err
+	result := update()
+	draw()
+	return result
 }
 
 func draw() {
 	if ebiten.IsDrawingSkipped() {
-		//log.Printf("Warning: Rendering is slow, skipping render this frame\n")
 		return
 	}
 	// Draw
@@ -31,7 +27,27 @@ func draw() {
 	gController.GamePostDraw()
 }
 
-func run(gameSettings GameSettings) {
+func runBefore() {
 	ebiten.SetRunnableInBackground(true)
+}
+
+func run(gameSettings GameSettings) {
+	runBefore()
 	ebiten.Run(updateEbiten, int(gameSettings.WindowWidth), int(gameSettings.WindowHeight), gameSettings.WindowScale, gameSettings.WindowTitle)
+}
+
+// runTest is run by TestBootstrap
+func runTest(gameSettings GameSettings, testSettings TestSettings) {
+	runBefore()
+	ebiten.Run(func(s *ebiten.Image) error {
+		gScreen = s
+		for i := 0; i < testSettings.SpeedMultiplier; i++ {
+			if err := runTestUpdateLoop(testSettings); err != nil {
+				draw()
+				return err
+			}
+		}
+		draw()
+		return nil
+	}, int(gameSettings.WindowWidth), int(gameSettings.WindowHeight), gameSettings.WindowScale, gameSettings.WindowTitle)
 }
