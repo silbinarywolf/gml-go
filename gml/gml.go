@@ -2,6 +2,7 @@ package gml
 
 import (
 	"errors"
+	"os"
 	"path/filepath"
 	"runtime"
 
@@ -106,6 +107,9 @@ func TestBootstrap(controller gameController, gameSettings GameSettings, testSet
 	// for `go test` support
 	_, filename, _, _ := runtime.Caller(1)
 	dir := filepath.Clean(filepath.Dir(filename) + "/../" + file.AssetDirectoryBase)
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		panic("Cannot find asset directory: " + dir + ", integration tests must go inside \"{project}/test\"")
+	}
 	file.SetAssetDir(dir)
 
 	setup(controller, &gameSettings)
