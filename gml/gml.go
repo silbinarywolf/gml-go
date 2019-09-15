@@ -121,7 +121,13 @@ func DeltaTime() float64 {
 // TestBootstrap the game to give control over continuing / stopping execution per-frame
 // this method is for additional control when testing
 func TestBootstrap(controller gameController, gameSettings GameSettings, testSettings TestSettings) {
+	// NOTE(Jake): 2019-09-05
+	// This might be a dangerous operation / incorrect.
+	// However it *works* for the time being on Windows and
+	// in the worst case, I can drop support for headed automated testing.
+	// https://github.com/golang/go/wiki/LockOSThread
 	runtime.LockOSThread()
+	defer runtime.UnlockOSThread()
 
 	// Set asset directory relative to the test code file path
 	// for `go test` support
