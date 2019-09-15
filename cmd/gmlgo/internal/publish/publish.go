@@ -176,7 +176,7 @@ func compileMac(dir string, distFolder string, args []string) error {
 
 func compileBinary(gameDir string, outputDir string, binaryName string, GOOS string, GOARCH string, args []string) error {
 	if err := os.MkdirAll(outputDir, os.ModePerm); err != nil {
-		return err
+		return xerrors.Errorf("error making output dir: %w", err)
 	}
 	argsNew := make([]string, 0, 3)
 	argsNew = append(argsNew, "-o", outputDir+"/"+binaryName)

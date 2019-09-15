@@ -7,12 +7,12 @@ asset/font/data/*.rtf#
 gmlgo_gen.go
 **/gmlgo_gen.go
 # Ignore Windows build
-*.exe
+/*.exe
 # Ignore GopherJS build
-*.js
-*.js.map
+/*.js
+/*.js.map
 # Ignore WebAssembly build
-*.wasm
+/*.wasm
 # Ignore binary for Linux / Mac
 /worm
 # Ignore dist files (gmlgo publish)
