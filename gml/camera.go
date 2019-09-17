@@ -116,7 +116,10 @@ func cameraClearActive() {
 
 func CameraGetViewPos(index int) geom.Vec {
 	view := &gCameraManager.cameras[index]
-	return view.Vec
+	return geom.Vec{
+		X: math.Floor(view.Vec.X),
+		Y: math.Floor(view.Vec.Y),
+	}
 }
 
 func CameraGetViewSize(index int) geom.Vec {
