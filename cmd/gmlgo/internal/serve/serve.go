@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/base"
+	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/shared"
 )
 
 var Cmd = &base.Command{
@@ -339,6 +340,7 @@ func Run(args Arguments) error {
 	arguments = args
 	log.Printf("listening on %q...", args.Port)
 	http.HandleFunc("/", handle)
+	shared.OpenBrowser("http://localhost" + args.Port)
 	log.Fatal(http.ListenAndServe(args.Port, nil))
 	return nil
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/silbinarywolf/gml-go/gml/assetman"
 	"github.com/silbinarywolf/gml-go/gml/internal/dt"
 	"github.com/silbinarywolf/gml-go/gml/internal/file"
+	_ "github.com/silbinarywolf/gml-go/gml/internal/paniccatch"
 	"github.com/silbinarywolf/gml-go/gml/monotime"
 )
 

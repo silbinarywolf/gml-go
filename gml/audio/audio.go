@@ -134,7 +134,7 @@ func (manager *soundManagerData) ManifestJSON() (string, map[string]string) {
 		name := soundIndex.Name()
 		result[name] = name
 	}
-	return "audio", result
+	return "sound", result
 }
 
 type sound struct {

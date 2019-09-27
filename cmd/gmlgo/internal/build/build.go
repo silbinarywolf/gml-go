@@ -25,10 +25,15 @@ var verboseShort *bool
 
 var verbose *bool
 
+// buildDirShort is not unused, we use it to silence errors about passing an "-o" flag
+// We pass it seamlessly to "go build" by doing nothing
+var buildDirShort *string
+
 func init() {
 	tags = Cmd.Flag.String("tags", "", "a list of build tags to consider satisfied during the build")
 	verboseShort = Cmd.Flag.Bool("v", false, "verbose")
 	verbose = Cmd.Flag.Bool("verbose", false, "verbose")
+	buildDirShort = Cmd.Flag.String("o", "", "build dir")
 }
 
 func run(cmd *base.Command, args []string) (err error) {

@@ -2,8 +2,11 @@ package shared
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 
 	"golang.org/x/tools/go/packages"
 )
@@ -38,6 +41,27 @@ func computeCmdSourceDir(gameDir string) (string, error) {
 	}
 	dir := filepath.Dir(pkg.GoFiles[0])
 	return dir, nil
+}
+
+// OpenBrowsers open web browser with a given url
+// (can be http:// or file://)
+func OpenBrowser(url string) {
+	// Taken from:
+	// https://presstige.io/p/Using-Go-instead-of-bash-for-scripts-6b51885c1f6940aeb40476000d0eb0fc
+	var err error
+	switch runtime.GOOS {
+	case "linux":
+		err = exec.Command("xdg-open", url).Start()
+	case "windows":
+		err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+	case "darwin":
+		err = exec.Command("open", url).Start()
+	default:
+		err = fmt.Errorf("unsupported platform")
+	}
+	if err != nil {
+		panic(err)
+	}
 }
 
 func ReadDefaultIndexHTML(gameDir string) ([]byte, error) {
