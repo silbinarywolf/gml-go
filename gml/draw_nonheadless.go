@@ -17,6 +17,7 @@ import (
 var (
 	isDrawGuiMode = false
 	emptyImage    *ebiten.Image
+	maskedImage   *ebiten.Image
 	op            = &ebiten.DrawImageOptions{}
 )
 
@@ -28,6 +29,52 @@ func DrawGetGUI() bool {
 // DrawSetGUI allows you to set whether you want to draw relative to the screen (true) or to the world (false)
 func DrawSetGUI(guiMode bool) {
 	isDrawGuiMode = guiMode
+}
+
+type SpriteFrame struct {
+	SpriteIndex sprite.SpriteIndex
+	ImageIndex  float64
+}
+
+type DrawSpriteMaskOptions struct {
+	Masks []SpriteFrame
+}
+
+// DrawSpriteCutMask will draw the given sprite but allow you to pass multiple sprite images in to cut out transparency.
+func DrawSpriteCutMask(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64, options DrawSpriteMaskOptions) {
+	if spriteIndex == sprite.SprUndefined {
+		// If no sprite in use, draw nothing
+		return
+	}
+
+	// Draw on surface
+	{
+		frame := sprite.GetRawFrame(spriteIndex, int(math.Floor(subimage)))
+		maskedImage.Fill(color.RGBA{0, 0, 0, 0})
+		op.GeoM.Reset()
+		op.ColorM.Reset()
+		maskedImage.DrawImage(frame, op)
+		op.CompositeMode = ebiten.CompositeModeDestinationOut
+		for _, mask := range options.Masks {
+			maskFrame := sprite.GetRawFrame(mask.SpriteIndex, int(math.Floor(mask.ImageIndex)))
+			maskedImage.DrawImage(maskFrame, op)
+		}
+		op.CompositeMode = ebiten.CompositeModeSourceOver
+	}
+
+	position := geom.Vec{
+		X: x,
+		Y: y,
+	}
+	position = maybeApplyOffsetByCamera(position)
+	position.X = math.Floor(position.X)
+	position.Y = math.Floor(position.Y)
+
+	op.GeoM.Reset()
+	op.GeoM.Translate(position.X, position.Y)
+	op.ColorM.Reset()
+
+	drawGetTarget().DrawImage(maskedImage, op)
 }
 
 func DrawSprite(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64) {
@@ -79,6 +126,8 @@ func DrawSpriteExt(spriteIndex sprite.SpriteIndex, subimage float64, x, y float6
 		Y: y,
 	}
 	position = maybeApplyOffsetByCamera(position)
+	position.X = math.Floor(position.X)
+	position.Y = math.Floor(position.Y)
 
 	frame := sprite.GetRawFrame(spriteIndex, int(math.Floor(subimage)))
 	op.GeoM.Reset()
@@ -207,6 +256,7 @@ func drawGetTarget() *ebiten.Image {
 func initDraw() {
 	emptyImage, _ = ebiten.NewImage(16, 16, ebiten.FilterDefault)
 	emptyImage.Fill(color.White)
+	maskedImage, _ = ebiten.NewImage(1024, 1024, ebiten.FilterDefault)
 }
 
 func maybeApplyOffsetByCamera(position geom.Vec) geom.Vec {
