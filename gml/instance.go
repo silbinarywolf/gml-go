@@ -1,10 +1,5 @@
 package gml
 
-import (
-	"github.com/silbinarywolf/gml-go/gml/internal/assert"
-	"github.com/silbinarywolf/gml-go/gml/internal/geom"
-)
-
 // Noone is to be used when checking if there is no instance with InstanceIndex type
 const Noone InstanceIndex = 0
 
@@ -64,30 +59,6 @@ func (index InstanceIndex) Get() ObjectType {
 	if !InstanceExists(inst) {
 		return nil
 	}
-	return inst
-}
-
-func instanceCreate(x, y float64, objectIndex ObjectIndex, callback func(inst *Object), assignNewInstanceIndex bool) ObjectType {
-	inst, slot := allocateNewInstance(objectIndex)
-	{
-		baseObj := inst.BaseObject()
-		if assignNewInstanceIndex {
-			// Get next instance index
-			gState.instanceManager.nextInstanceIndex++
-			baseObj.internal.InstanceIndex = gState.instanceManager.nextInstanceIndex
-		}
-		baseObj.Vec = geom.Vec{X: x, Y: y}
-
-		callback(baseObj)
-
-		assert.DebugAssert(baseObj.internal.RoomInstanceIndex == 0, "Instance index cannot be 0")
-		gState.instanceManager.instanceIndexToIndex[baseObj.internal.InstanceIndex] = slot
-		assert.DebugAssert(baseObj.internal.RoomInstanceIndex == 0, "Room Instance Index cannot be 0")
-		if assignNewInstanceIndex {
-			inst.Create()
-		}
-	}
-
 	return inst
 }
 

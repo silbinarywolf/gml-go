@@ -3,6 +3,7 @@ package gml
 import (
 	"sort"
 
+	"github.com/silbinarywolf/gml-go/gml/internal/assert"
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 )
 
@@ -78,12 +79,26 @@ func (roomInstanceIndex RoomInstanceIndex) RoomInstanceChangeRoom(baseObj *Objec
 	//manager.instances = append(manager.instances, inst)
 }
 
+// InstanceCreate will create a new instance in the room and call its Create() event.
 func (roomInstanceIndex RoomInstanceIndex) InstanceCreate(x, y float64, objectIndex ObjectIndex) ObjectType {
-	return instanceCreate(x, y, objectIndex, func(inst *Object) {
-		inst.internal.RoomInstanceIndex = roomInstanceIndex
-		roomInst := &roomInstanceState.roomInstances[roomInstanceIndex]
-		roomInst.instances = append(roomInst.instances, inst.InstanceIndex())
-	}, true)
+	inst, slot := allocateNewInstance(objectIndex)
+	baseObj := inst.BaseObject()
+
+	// Get next instance index
+	gState.instanceManager.nextInstanceIndex++
+	baseObj.internal.InstanceIndex = gState.instanceManager.nextInstanceIndex
+	baseObj.Vec = geom.Vec{X: x, Y: y}
+
+	baseObj.internal.RoomInstanceIndex = roomInstanceIndex
+	roomInst := &roomInstanceState.roomInstances[roomInstanceIndex]
+	roomInst.instances = append(roomInst.instances, baseObj.InstanceIndex())
+
+	assert.DebugAssert(baseObj.internal.InstanceIndex == 0, "Instance index cannot be 0")
+	gState.instanceManager.instanceIndexToIndex[baseObj.internal.InstanceIndex] = slot
+	assert.DebugAssert(baseObj.internal.RoomInstanceIndex == 0, "Room Instance Index cannot be 0")
+
+	inst.Create()
+	return inst
 }
 
 // Destroy destroys a room instance
