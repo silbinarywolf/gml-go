@@ -61,7 +61,7 @@ func (self *Notification) Draw() {
 	y += 15
 	// NOTE(Jake): 2019-02-04
 	// Original source code used: draw_set_color(make_color_rgb(3,3,3))
-	gml.DrawTextColor(x, y, self.Text, color.RGBA{3, 3, 3, 255})
+	gml.DrawText(x, y, self.Text, color.RGBA{3, 3, 3, 255})
 }
 
 // Lerp Bias

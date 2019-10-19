@@ -130,15 +130,15 @@ func animationEditorUpdate() {
 			X: 16,
 			Y: 16,
 		}
-		DrawTextColor(pos.X, pos.Y, "Animation Editor", color.White)
+		DrawText(pos.X, pos.Y, "Animation Editor", color.White)
 		pos.Y += 24
-		DrawTextColor(pos.X, pos.Y, "Space = Play/Pause Animation", color.White)
+		DrawText(pos.X, pos.Y, "Space = Play/Pause Animation", color.White)
 		pos.Y += 24
-		DrawTextColor(pos.X, pos.Y, "CTRL + P = Open Sprite List", color.White)
+		DrawText(pos.X, pos.Y, "CTRL + P = Open Sprite List", color.White)
 
 		if spriteIndex := editor.spriteViewing.SpriteIndex(); spriteIndex != sprite.SprUndefined {
 			pos.Y += 24
-			DrawTextColor(pos.X, pos.Y, "CTRL + S = Save", color.White)
+			DrawText(pos.X, pos.Y, "CTRL + S = Save", color.White)
 
 			if KeyboardCheck(VkControl) && KeyboardCheckPressed(VkS) {
 				err := sprite.DebugWriteSpriteConfig(spriteIndex)

@@ -84,7 +84,7 @@ func (self *Menu) Draw() {
 		x := (screenSize.X / 2) - (gml.StringWidth(CreditText) / 2) + 4 // 48.0
 		y := screenSize.Y - 35
 
-		gml.DrawTextColorAlpha(x-1, y, CreditText, color.Black, self.ImageAlpha)
-		gml.DrawTextColorAlpha(x, y+1, CreditText, color.White, self.ImageAlpha)
+		gml.DrawTextAlpha(x-1, y, CreditText, color.Black, self.ImageAlpha)
+		gml.DrawTextAlpha(x, y+1, CreditText, color.White, self.ImageAlpha)
 	}
 }

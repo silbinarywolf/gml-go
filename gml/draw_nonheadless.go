@@ -200,21 +200,10 @@ func DrawRectangleBorder(x, y, w, h float64, col color.Color, borderSize float64
 	}
 }
 
-// DrawText is deprecated. Use DrawTextColor.
-// *note* might make more sense to rename DrawTextColor to DrawText
-//		  and DrawTextColorAlpha to DrawTextAlpha
+// DrawText is deprecated. Use DrawText.
+// *note* might make more sense to rename DrawText to DrawText
+//		  and DrawTextAlpha to DrawTextAlpha
 func DrawText(x, y float64, message string, col color.Color) {
-	DrawTextColor(x, y, message, col)
-}
-
-func DrawTextColorAlpha(x, y float64, message string, col color.Color, alpha float64) {
-	r, g, b, a := col.RGBA()
-	c := color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
-	c.A = uint8(float64(c.A) * alpha)
-	DrawTextColor(x, y, message, c)
-}
-
-func DrawTextColor(x, y float64, message string, col color.Color) {
 	if !hasFontSet() {
 		panic("Must call DrawSetFont() before calling DrawText.")
 	}
@@ -241,6 +230,13 @@ func DrawTextColor(x, y float64, message string, col color.Color) {
 		text.Draw(drawGetTarget(), line, fontFace, int(pos.X), int(pos.Y), col)
 		pos.Y += leadingHeight
 	}
+}
+
+func DrawTextAlpha(x, y float64, message string, col color.Color, alpha float64) {
+	r, g, b, a := col.RGBA()
+	c := color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
+	c.A = uint8(float64(c.A) * alpha)
+	DrawText(x, y, message, c)
 }
 
 func drawGetTarget() *ebiten.Image {
