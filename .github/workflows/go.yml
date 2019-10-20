@@ -77,11 +77,6 @@ jobs:
           with:
             go-version: ${{ matrix.go }}
 
-        # - name: Setup environment vars
-        #   run: |
-        #     setx GO111MODULE on
-        #     setx PATH  "%PATH%;%USERPROFILE%\go\bin"
-
         - name: Get Go dependencies
           run: |
             echo ::add-path::%USERPROFILE%\go\bin
@@ -102,9 +97,11 @@ jobs:
             go build -v ./example/...
 
         - name: Test
+          # NOTE(Jake): 2019-10-20
+          # Disable headed tests on Windows as they fail
+          # panic: runtime error: invalid memory address or nil pointer dereference
+          # github.com/hajimehoshi/ebiten/internal/glfw.(*Window).GetMonitor(0x0, 0x0)
           run: |
-            go test -v ./gml/...
-            go test -tags debug -v ./gml/...
             go test -tags headless -v ./gml/...
             go test -tags "debug headless" -v ./gml/...
             go test -v ./cmd/...
