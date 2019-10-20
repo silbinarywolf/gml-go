@@ -183,7 +183,7 @@ func compileBinary(gameDir string, outputDir string, binaryName string, GOOS str
 	argsNew = append(argsNew, args...)
 	//panic(xerrors.Sprintf("%v", args))
 	if err := build.Build(outputDir, argsNew, []string{"GOOS=" + GOOS, "GOARCH=" + GOARCH}); err != nil {
-		return err
+		return xerrors.Errorf("%w", err)
 	}
 	if err := asset.CopyAssetDirectory(gameDir+"/asset", outputDir+"/asset"); err != nil {
 		return xerrors.Errorf("error copying asset directory: %w", err)

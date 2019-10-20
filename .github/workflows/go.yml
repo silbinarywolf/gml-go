@@ -27,7 +27,7 @@ jobs:
         go mod download
         go get -v
 
-    - name: Generate, Build and Publish
+    - name: Generate and Build
       run: |
         export PATH=${PATH}:`go env GOPATH`/bin
         go install -v -tags debug ./gml
@@ -40,7 +40,6 @@ jobs:
         go build -tags headless -v ./example/...
         go build -tags "debug headless" -v ./example/...
         go build -v ./example/...
-        gmlgo publish -v ./example/spaceship
 
     - name: Test
       run: |
@@ -53,3 +52,8 @@ jobs:
         go test -v ./cmd/...
         go test -tags "debug headless" -coverprofile="coverage_spaceship.out" -coverpkg=$(go list ./example/spaceship/game) ./example/spaceship/test
         go test -tags "debug headless" -coverprofile="coverage_worm.out" -coverpkg=$(go list ./example/worm/game) ./example/worm/test
+
+    - name: Publish
+      run: |
+        export PATH=${PATH}:`go env GOPATH`/bin
+        gmlgo publish -v ./example/spaceship
