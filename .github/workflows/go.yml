@@ -52,8 +52,11 @@ jobs:
         go test -v ./cmd/...
         go test -tags "debug headless" -coverprofile="coverage_spaceship.out" -coverpkg=$(go list ./example/spaceship/game) ./example/spaceship/test
         go test -tags "debug headless" -coverprofile="coverage_worm.out" -coverpkg=$(go list ./example/worm/game) ./example/worm/test
-
-    - name: Publish
-      run: |
-        export PATH=${PATH}:`go env GOPATH`/bin
-        gmlgo publish -v ./example/spaceship
+# NOTE(Jake): 2019-10-20
+# Publishing was failing with a vague error:
+# panic: error compiling web: errors
+# https://github.com/silbinarywolf/gml-go/commit/27de09fb760118ecb9b0047f6e9db3c04f603ec5/checks?check_suite_id=272768795
+#    - name: Publish
+#      run: |
+#        export PATH=${PATH}:`go env GOPATH`/bin
+#        gmlgo publish -v ./example/spaceship
