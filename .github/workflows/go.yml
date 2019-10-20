@@ -3,7 +3,7 @@ on: [push, pull_request]
 jobs:
 
   linux:
-    name: Linux
+    name: Go ${{ matrix.go }} on Ubuntu
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -67,7 +67,7 @@ jobs:
       strategy:
         matrix:
           go: ['1.12']
-      name: Test with Go ${{ matrix.go }} on Windows
+      name: Go ${{ matrix.go }} on Windows
       steps:
         - name: Check out code into the Go module directory
           uses: actions/checkout@v1
@@ -76,6 +76,11 @@ jobs:
           uses: actions/setup-go@v1
           with:
             go-version: ${{ matrix.go }}
+
+        - name: Setup environment vars
+          run: |
+            setx GO111MODULE on
+            setx PATH  "%PATH%;%USERPROFILE%\go\bin"
 
         - name: Get Go dependencies
           run: |
