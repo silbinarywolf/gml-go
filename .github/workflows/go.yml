@@ -77,11 +77,6 @@ jobs:
           with:
             go-version: ${{ matrix.go }}
 
-        - name: Setup environment vars
-          run: |
-            setx GO111MODULE on
-            setx PATH  "%PATH%;%USERPROFILE%\go\bin"
-
         - name: Get Go dependencies
           run: |
             go mod download
@@ -89,7 +84,6 @@ jobs:
 
         - name: Generate and Build
           run: |
-            export PATH=${PATH}:`go env GOPATH`/bin
             go install -v -tags debug ./gml
             go install -v -tags headless ./gml
             go install -v -tags "debug headless" ./gml
@@ -103,8 +97,6 @@ jobs:
 
         - name: Test
           run: |
-            export DISPLAY=:99.0
-            Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
             go test -v ./gml/...
             go test -tags debug -v ./gml/...
             go test -tags headless -v ./gml/...
