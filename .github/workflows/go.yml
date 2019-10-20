@@ -55,4 +55,5 @@ jobs:
 
     - name: Publish
       run: |
+        export PATH=${PATH}:`go env GOPATH`/bin
         gmlgo publish -v ./example/spaceship
