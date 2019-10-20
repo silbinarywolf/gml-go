@@ -77,13 +77,14 @@ jobs:
           with:
             go-version: ${{ matrix.go }}
 
-        - name: Setup environment vars
-          run: |
-            setx GO111MODULE on
-            setx PATH  "%PATH%;%USERPROFILE%\go\bin"
+        # - name: Setup environment vars
+        #   run: |
+        #     setx GO111MODULE on
+        #     setx PATH  "%PATH%;%USERPROFILE%\go\bin"
 
         - name: Get Go dependencies
           run: |
+            echo ::add-path::%USERPROFILE%\go\bin
             go mod download
             go get -v
 
