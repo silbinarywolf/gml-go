@@ -9,6 +9,7 @@ import (
 
 	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/base"
 	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/generate"
+	"golang.org/x/xerrors"
 )
 
 var Cmd = &base.Command{
@@ -82,12 +83,12 @@ func Build(dir string, args []string, envVars []string) error {
 
 	err := cmd.Start()
 	if err != nil {
-		return err
+		return xerrors.Errorf("%w", err)
 	}
 	errOutput, _ := ioutil.ReadAll(cmdErr)
 	stdOutput, _ := ioutil.ReadAll(cmdOut)
 	if len(errOutput) > 0 {
-		return fmt.Errorf("%s", errOutput)
+		return xerrors.Errorf("%s", errOutput)
 	}
 	fmt.Printf("%s", stdOutput)
 	return nil
