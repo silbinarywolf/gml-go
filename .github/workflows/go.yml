@@ -2,112 +2,6 @@ name: Go
 on: [push, pull_request]
 jobs:
 
-  linux:
-    name: Go ${{ matrix.go }} on Ubuntu
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go: ['1.12']
-    steps:
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v1
-
-    - name: Set up Go ${{ matrix.go }}
-      uses: actions/setup-go@v1
-      with:
-        go-version: ${{ matrix.go }}
-      id: go
-
-    - name: Set up *nix dependencies
-      run: |
-        sudo -E apt-add-repository -y "ppa:ubuntu-toolchain-r"
-        sudo apt-get install libasound2-dev libglew-dev libgles2-mesa-dev libalut-dev libxcursor-dev libxi-dev libxinerama-dev libxrandr-dev libxxf86vm-dev
-
-    - name: Get Go dependencies
-      run: |
-        export GO111MODULE=on
-        go mod download
-        go get -v
-
-    - name: Generate and Build
-      run: |
-        export PATH=${PATH}:`go env GOPATH`/bin
-        go install -v -tags debug ./gml
-        go install -v -tags headless ./gml
-        go install -v -tags "debug headless" ./gml
-        go install -v ./gml
-        go install -v ./cmd/gmlgo
-        gmlgo generate -v ./example/...
-        go build -tags debug -v ./example/...
-        go build -tags headless -v ./example/...
-        go build -tags "debug headless" -v ./example/...
-        go build -v ./example/...
-
-    - name: Test
-      run: |
-        export DISPLAY=:99.0
-        Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-        go test -v ./gml/...
-        go test -tags debug -v ./gml/...
-        go test -tags headless -v ./gml/...
-        go test -tags "debug headless" -v ./gml/...
-        go test -v ./cmd/...
-        go test -tags "debug headless" -coverprofile="coverage_spaceship.out" -coverpkg=$(go list ./example/spaceship/game) ./example/spaceship/test
-        go test -tags "debug headless" -coverprofile="coverage_worm.out" -coverpkg=$(go list ./example/worm/game) ./example/worm/test
-# NOTE(Jake): 2019-10-20
-# Publishing was failing with a vague error:
-# panic: error compiling web: errors
-# https://github.com/silbinarywolf/gml-go/commit/27de09fb760118ecb9b0047f6e9db3c04f603ec5/checks?check_suite_id=272768795
-#    - name: Publish
-#      run: |
-#        export PATH=${PATH}:`go env GOPATH`/bin
-#        gmlgo publish -v ./example/spaceship
-  windows:
-      runs-on: windows-latest
-      strategy:
-        matrix:
-          go: ['1.12']
-      name: Go ${{ matrix.go }} on Windows
-      steps:
-        - name: Check out code into the Go module directory
-          uses: actions/checkout@v1
-
-        - name: Setup Go
-          uses: actions/setup-go@v1
-          with:
-            go-version: ${{ matrix.go }}
-
-        - name: Get Go dependencies
-          run: |
-            echo ::add-path::%USERPROFILE%\go\bin
-            go mod download
-            go get -v
-
-        - name: Generate and Build
-          run: |
-            go install -v -tags debug ./gml
-            go install -v -tags headless ./gml
-            go install -v -tags "debug headless" ./gml
-            go install -v ./gml
-            go install -v ./cmd/gmlgo
-            gmlgo generate -v ./example/...
-            go build -tags debug -v ./example/...
-            go build -tags headless -v ./example/...
-            go build -tags "debug headless" -v ./example/...
-            go build -v ./example/...
-
-        - name: Test
-          # NOTE(Jake): 2019-10-20
-          # Disable headed tests on Windows as they fail
-          # panic: runtime error: invalid memory address or nil pointer dereference
-          # github.com/hajimehoshi/ebiten/internal/glfw.(*Window).GetMonitor(0x0, 0x0)
-          run: |
-            go test -tags headless -v ./gml/...
-            go test -tags "debug headless" -v ./gml/...
-            go test -v ./cmd/...
-            go test -tags "debug headless" -coverprofile="coverage_spaceship.out" -coverpkg=github.com/silbinarywolf/gml-go/example/spaceship/game ./example/spaceship/test
-            go test -tags "debug headless" -coverprofile="coverage_worm.out" -coverpkg=github.com/silbinarywolf/gml-go/example/worm/game ./example/worm/test
-
   macos:
       runs-on: macOS-latest
       strategy:
@@ -148,6 +42,7 @@ jobs:
           # panic: runtime error: invalid memory address or nil pointer dereference
           # github.com/hajimehoshi/ebiten/internal/glfw.(*Window).GetMonitor(0x0, 0x0)
           run: |
+            go test -v ./gml/...
             go test -tags headless -v ./gml/...
             go test -tags "debug headless" -v ./gml/...
             go test -v ./cmd/...
