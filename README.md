@@ -1,7 +1,6 @@
 # Game Maker Language Go
 
 [![Actions Status](https://github.com/silbinarywolf/gml-go/workflows/Go/badge.svg)](https://github.com/silbinarywolf/gml-go/actions)
-[![Build Status](https://travis-ci.org/silbinarywolf/gml-go.svg?branch=master)](https://travis-ci.org/silbinarywolf/gml-go)
 [![Documentation](https://godoc.org/github.com/silbinarywolf/gml-go?status.svg)](https://godoc.org/github.com/silbinarywolf/gml-go)
 [![Report Card](https://goreportcard.com/badge/github.com/silbinarywolf/gml-go)](https://goreportcard.com/report/github.com/silbinarywolf/gml-go)
 
