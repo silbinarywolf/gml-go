@@ -4,7 +4,16 @@ package gml
 
 import (
 	"time"
+
+	"github.com/silbinarywolf/gml-go/gml/internal/dt"
 )
+
+// SetMaxTPS sets the maximum TPS (ticks per second), that represents how many updating function is called per second. The initial value is 60.
+//
+// If tps is UncappedTPS, TPS is uncapped and the game is updated per frame. If tps is negative but not UncappedTPS, SetMaxTPS panics.
+func SetMaxTPS(tps int) {
+	dt.SetMaxTPS(tps)
+}
 
 func draw() {
 	// no-op
