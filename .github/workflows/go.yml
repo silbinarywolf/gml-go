@@ -107,3 +107,49 @@ jobs:
             go test -v ./cmd/...
             go test -tags "debug headless" -coverprofile="coverage_spaceship.out" -coverpkg=github.com/silbinarywolf/gml-go/example/spaceship/game ./example/spaceship/test
             go test -tags "debug headless" -coverprofile="coverage_worm.out" -coverpkg=github.com/silbinarywolf/gml-go/example/worm/game ./example/worm/test
+
+  macos:
+      runs-on: macOS-latest
+      strategy:
+        matrix:
+          go: ['1.12']
+      name: Go ${{ matrix.go }} on MacOS
+      steps:
+        - name: Check out code into the Go module directory
+          uses: actions/checkout@v1
+
+        - name: Setup Go
+          uses: actions/setup-go@v1
+          with:
+            go-version: ${{ matrix.go }}
+
+        - name: Get Go dependencies
+          run: |
+            echo ::add-path::%USERPROFILE%\go\bin
+            go mod download
+            go get -v
+
+        - name: Generate and Build
+          run: |
+            go install -v -tags debug ./gml
+            go install -v -tags headless ./gml
+            go install -v -tags "debug headless" ./gml
+            go install -v ./gml
+            go install -v ./cmd/gmlgo
+            gmlgo generate -v ./example/...
+            go build -tags debug -v ./example/...
+            go build -tags headless -v ./example/...
+            go build -tags "debug headless" -v ./example/...
+            go build -v ./example/...
+
+        - name: Test
+          # NOTE(Jake): 2019-10-20
+          # Disable headed tests on Windows as they fail
+          # panic: runtime error: invalid memory address or nil pointer dereference
+          # github.com/hajimehoshi/ebiten/internal/glfw.(*Window).GetMonitor(0x0, 0x0)
+          run: |
+            go test -tags headless -v ./gml/...
+            go test -tags "debug headless" -v ./gml/...
+            go test -v ./cmd/...
+            go test -tags "debug headless" -coverprofile="coverage_spaceship.out" -coverpkg=github.com/silbinarywolf/gml-go/example/spaceship/game ./example/spaceship/test
+            go test -tags "debug headless" -coverprofile="coverage_worm.out" -coverpkg=github.com/silbinarywolf/gml-go/example/worm/game ./example/worm/test
