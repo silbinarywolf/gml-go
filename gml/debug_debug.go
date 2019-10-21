@@ -34,7 +34,7 @@ func debugMenuOpenOrToggleClosed(id debugMenu) {
 		debugMenuID = debugMenuNone
 
 		// Reset camera
-		CameraSetViewSize(0, WindowWidth(), WindowHeight())
+		CameraSetViewSize(0, WindowSize().X, WindowSize().Y)
 		CameraSetViewTarget(0, Noone)
 	}
 }
@@ -45,9 +45,6 @@ func debugUpdate() {
 	if KeyboardCheck(VkControl) {
 		if KeyboardCheckPressed(VkA) {
 			debugMenuOpenOrToggleClosed(debugMenuAnimationEditor)
-		}
-		if KeyboardCheckPressed(VkR) {
-			debugMenuOpenOrToggleClosed(debugMenuRoomEditor)
 		}
 	}
 }
@@ -71,7 +68,7 @@ func isMouseOver(pos geom.Vec, size geom.Vec) bool {
 }
 
 func isMouseScreenOver(pos geom.Vec, size geom.Vec) bool {
-	mousePos := mouseScreenPosition()
+	mousePos := MouseScreenPosition()
 	left := pos.X
 	right := left + float64(size.X)
 	top := pos.Y

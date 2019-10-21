@@ -3,7 +3,8 @@ package geom
 import "math"
 
 type Vec struct {
-	X, Y float64
+	X float64 `json:"X"`
+	Y float64 `json:"Y"`
 }
 
 func (v Vec) Sub(ov Vec) Vec { return Vec{v.X - ov.X, v.Y - ov.Y} }

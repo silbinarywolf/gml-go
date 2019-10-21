@@ -1,0 +1,20 @@
+## GMLGO BEGIN ##
+# Ignore compiled asset data
+asset/manifest.json
+asset/**/*.data
+asset/font/data/*.rtf#
+# Ignore code generated files
+gmlgo_gen.go
+**/gmlgo_gen.go
+# Ignore Windows build
+/*.exe
+# Ignore GopherJS build
+/*.js
+/*.js.map
+# Ignore WebAssembly build
+/*.wasm
+# Ignore binary for Linux / Mac
+/worm
+# Ignore dist files (gmlgo publish)
+/dist
+## GMLGO END ##

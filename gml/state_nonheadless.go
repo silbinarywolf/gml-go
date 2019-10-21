@@ -17,14 +17,14 @@ func (state *state) draw() {
 			// Render instances in same room as instance following
 			roomInst := roomGetInstance(inst.RoomInstanceIndex())
 			if roomInst == nil {
-				panic("RoomInstance this object belongs to has been destroyed")
+				panic("draw: RoomInstance this object belongs to has been destroyed")
 			}
 			roomInst.draw()
 		} else {
 			// If no follower is configured, just render the first active room found
-			roomInst := roomGetInstance(1)
+			roomInst := roomLastCreated()
 			if roomInst == nil {
-				panic("Unable to find room instance: 1")
+				panic("No room exists, you must create a room")
 			}
 			roomInst.draw()
 		}
@@ -32,5 +32,9 @@ func (state *state) draw() {
 		// Render camera onto OS-window
 		cameraDraw(i)
 	}
-	cameraClearActive()
+	//cameraClearActive()
+	// NOTE(Jake): 2019-04-15
+	// Default to first camera for level editors / animation editor
+	// etc.
+	cameraSetActive(0)
 }

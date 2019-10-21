@@ -19,7 +19,7 @@ var keyboardVkToEbiten = []ebiten.Key{
 	VkShift:       ebiten.KeyShift,       // either of the shift keys
 	VkControl:     ebiten.KeyControl,     // either of the control keys
 	VkAlt:         ebiten.KeyAlt,         // alt key
-	VkBackspace:   ebiten.KeyBackslash,   // backspace key
+	VkBackspace:   ebiten.KeyBackspace,   // backspace key
 	VkTab:         ebiten.KeyTab,         // tab key
 	VkHome:        ebiten.KeyHome,        // home key
 	VkEnd:         ebiten.KeyEnd,         // end key

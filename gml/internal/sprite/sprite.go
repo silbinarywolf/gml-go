@@ -54,7 +54,7 @@ func SpriteCollisionMask(spriteIndex SpriteIndex) geom.Rect {
 	switch collisionMask.Kind {
 	case CollisionMaskInherit:
 		return geom.Rect{
-			Vec:  geom.Vec{0, 0},
+			Vec:  geom.Vec{},
 			Size: sprite.size,
 		}
 	case CollisionMaskManual:
@@ -88,8 +88,8 @@ func (spriteIndex SpriteIndex) get() *Sprite {
 	return &spr.frames[index]
 }*/
 
-func newSprite(name string, frames []SpriteFrame, config spriteConfig) *Sprite {
-	spr := new(Sprite)
+func newSprite(name string, frames []SpriteFrame, config spriteConfig) Sprite {
+	spr := Sprite{}
 	spr.isLoaded = true
 	spr.name = name
 	spr.frames = frames

@@ -4,6 +4,7 @@ package gml
 
 import (
 	"encoding/json"
+	"fmt"
 	"image/color"
 	"io/ioutil"
 	"math"
@@ -129,15 +130,15 @@ func animationEditorUpdate() {
 			X: 16,
 			Y: 16,
 		}
-		DrawTextColor(pos.X, pos.Y, "Animation Editor", color.White)
+		DrawText(pos.X, pos.Y, "Animation Editor", color.White)
 		pos.Y += 24
-		DrawTextColor(pos.X, pos.Y, "Space = Play/Pause Animation", color.White)
+		DrawText(pos.X, pos.Y, "Space = Play/Pause Animation", color.White)
 		pos.Y += 24
-		DrawTextColor(pos.X, pos.Y, "CTRL + P = Open Sprite List", color.White)
+		DrawText(pos.X, pos.Y, "CTRL + P = Open Sprite List", color.White)
 
 		if spriteIndex := editor.spriteViewing.SpriteIndex(); spriteIndex != sprite.SprUndefined {
 			pos.Y += 24
-			DrawTextColor(pos.X, pos.Y, "CTRL + S = Save", color.White)
+			DrawText(pos.X, pos.Y, "CTRL + S = Save", color.White)
 
 			if KeyboardCheck(VkControl) && KeyboardCheckPressed(VkS) {
 				err := sprite.DebugWriteSpriteConfig(spriteIndex)
@@ -211,8 +212,8 @@ func animationEditorUpdate() {
 	if spriteIndex := editor.spriteViewing.SpriteIndex(); spriteIndex != 0 {
 		size := spriteIndex.Size()
 		pos := geom.Vec{
-			X: float64(WindowWidth()/2) - (float64(size.X) / 2),
-			Y: float64(WindowHeight()/2) - (float64(size.Y) / 2),
+			X: float64(WindowSize().X/2) - (float64(size.X) / 2),
+			Y: float64(WindowSize().Y/2) - (float64(size.Y) / 2),
 		}
 
 		{
@@ -243,7 +244,7 @@ func animationEditorUpdate() {
 			// Get distance mouse moved
 			var diffX, diffY float64
 			{
-				mousePos := mouseScreenPosition()
+				mousePos := MouseScreenPosition()
 				handleBeginPos := editor.handleDragBeginPos
 				diffX = mousePos.X - handleBeginPos.X
 				diffY = mousePos.Y - handleBeginPos.Y
@@ -344,7 +345,7 @@ func animationEditorUpdate() {
 			}
 			{
 				// Update State
-				editor.handleDragBeginPos = mouseScreenPosition()
+				editor.handleDragBeginPos = MouseScreenPosition()
 				if !MouseCheckButton(MbLeft) {
 					editor.handleDragging = handleDragNone
 				}
@@ -365,11 +366,11 @@ func animationEditorUpdate() {
 	}
 
 	if spriteIndex := editor.spriteViewing.SpriteIndex(); spriteIndex != 0 {
-		basePos := geom.Vec{(float64(WindowWidth()) / 2) - 140, float64(WindowHeight())}
+		basePos := geom.Vec{(float64(WindowSize().X) / 2) - 140, float64(WindowSize().Y)}
 		basePos.Y -= 210
 
 		imageIndex := int(math.Floor(editor.spriteViewing.ImageIndex()))
-		DrawTextF(basePos.X, basePos.Y, "Frame: %d", imageIndex)
+		DrawText(basePos.X, basePos.Y, fmt.Sprintf("Frame: %d", imageIndex), color.White)
 		basePos.Y += 24
 		if drawButton(basePos, "Kind: Inherit") {
 			collisionMask = sprite.GetCollisionMask(spriteIndex, imageIndex, 0)

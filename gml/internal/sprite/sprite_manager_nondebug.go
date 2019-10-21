@@ -8,5 +8,5 @@ func DebugWatch() {
 func DebugWriteSpriteConfig(spr *Sprite) {
 }
 
-func debugWriteSprite(name string) {
+func debugWriteSprite(name string, path string) {
 }

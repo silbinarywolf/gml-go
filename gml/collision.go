@@ -25,19 +25,18 @@ func CollisionRectList(instType collisionObject, x, y float64) []InstanceIndex {
 	// improve performance.
 	var list []InstanceIndex
 	//list = list[:0]
-	for i := 0; i < len(room.instanceLayers); i++ {
-		for _, otherIndex := range room.instanceLayers[i].instances {
-			other := otherIndex.getBaseObject()
-			if other == nil {
-				continue
-			}
-			if r1.CollisionRectangle(other.Bbox()) &&
-				!other.isDestroyed &&
-				inst != other {
-				list = append(list, otherIndex)
-			}
+	for _, otherIndex := range room.instances {
+		other := otherIndex.getBaseObject()
+		if other == nil {
+			continue
+		}
+		if r1.CollisionRectangle(other.Bbox()) &&
+			!other.internal.IsDestroyed &&
+			inst != other {
+			list = append(list, otherIndex)
 		}
 	}
+
 	if len(list) == 0 {
 		return nil
 	}
@@ -54,57 +53,17 @@ func PlaceFree(instType collisionObject, x, y float64) bool {
 	// Create collision rect at position provided in function
 	r1 := inst.bboxAt(x, y)
 
-	//var debugString string
 	hasCollision := false
-	for i := 0; i < len(room.instanceLayers); i++ {
-		for _, otherIndex := range room.instanceLayers[i].instances {
-			other := otherIndex.getBaseObject()
-			if other == nil {
-				continue
-			}
-			if other.Solid() &&
-				r1.CollisionRectangle(other.Bbox()) &&
-				inst != other {
-				hasCollision = true
-			}
-		}
-	}
-	for i := 0; i < len(room.spriteLayers); i++ {
-		layer := &room.spriteLayers[i]
-		if !layer.hasCollision {
+	for _, otherIndex := range room.instances {
+		other := otherIndex.getBaseObject()
+		if other == nil {
 			continue
 		}
-		for _, other := range layer.sprites {
-			// todo: Fix Rect() to return position plus bounding box
-			// of sprite (or delete sprite layer as planned)
-			if r1.CollisionRectangle(other.Rect()) {
-				hasCollision = true
-			}
+		if other.Solid() &&
+			r1.CollisionRectangle(other.Bbox()) &&
+			inst != other {
+			hasCollision = true
 		}
 	}
-
-	/*if DEBUG_COLLISION &&
-		len(debugString) > 0 {
-		// Get calling function name / line
-		var message string
-		{
-			callIndex := 1
-			for i := 0; i < 1; i++ {
-				_, file, line, ok := runtime.Caller(callIndex)
-
-				if ok {
-					// Reduce full filepath to just the scope of the game
-					fileParts := strings.Split(file, "/")
-					if len(fileParts) >= 3 {
-						file = fileParts[len(fileParts)-3] + "/" + fileParts[len(fileParts)-2] + "/" + fileParts[len(fileParts)-1]
-					}
-					message = message + file + "(" + strconv.Itoa(line) + ")"
-				}
-				callIndex++
-			}
-		}
-		fmt.Printf("PlaceFree: collision between %s:\n%s%s\n\n", e.Sprite().name, debugString, message)
-	}
-	fmt.Printf("EndPlaceFree\n\n")*/
 	return !hasCollision
 }

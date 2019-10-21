@@ -18,11 +18,11 @@ func MousePosition() Vec {
 	return geom.Vec{}
 }
 
-func mousePosition() geom.Vec {
+func MouseScreenPosition() Vec {
 	return geom.Vec{}
 }
 
-func mouseScreenPosition() Vec {
+func mousePosition() geom.Vec {
 	return geom.Vec{}
 }
 

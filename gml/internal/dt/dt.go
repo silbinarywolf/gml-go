@@ -29,6 +29,11 @@ func DesignedTPS() int {
 	return designedTPS
 }
 
+// MaxTPS returns the current maximum TPS.
+func MaxTPS() int {
+	return maxTPS
+}
+
 // SetMaxTPS is the ticks-per-second the game is trying to run at. ie. 240tps, 480tps
 func SetMaxTPS(tps int) {
 	maxTPS = tps

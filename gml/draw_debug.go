@@ -10,7 +10,7 @@ import (
 
 func drawInputText(pos *geom.Vec, label string, text string, isFocused bool) bool {
 	size := geom.Vec{100, 20}
-	DrawTextColor(pos.X, pos.Y, label, color.White)
+	DrawText(pos.X, pos.Y, label, color.White)
 	pos.Y += 12
 	borderCol := color.RGBA{255, 255, 255, 255}
 	isMouseOver := debugDrawIsMouseOver(*pos, size)
@@ -22,7 +22,7 @@ func drawInputText(pos *geom.Vec, label string, text string, isFocused bool) boo
 		borderCol = color.RGBA{255, 0, 0, 255}
 	}
 	DrawRectangleBorder(pos.X, pos.Y, size.X, size.Y, color.Black, 2, borderCol)
-	DrawTextColor(pos.X+8, pos.Y+16, text, color.White)
+	DrawText(pos.X+8, pos.Y+16, text, color.White)
 	pos.Y += size.Y
 	if MouseCheckPressed(MbLeft) && isMouseOver {
 		if !isFocused {
@@ -65,6 +65,6 @@ func drawButton(pos geom.Vec, text string) bool {
 	// Draw Text
 	pos.X += paddingH * 0.5
 	pos.Y += 16
-	DrawTextColor(pos.X, pos.Y, text, color.Black)
+	DrawText(pos.X, pos.Y, text, color.Black)
 	return MouseCheckPressed(MbLeft) && isMouseOver
 }

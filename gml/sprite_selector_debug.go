@@ -77,19 +77,19 @@ func (viewer *debugSpriteViewer) update() (sprite.SpriteIndex, bool) {
 		DrawRectangle(0, 0, 2048, 2048, color.RGBA{0, 0, 0, 190})
 
 		ui := geom.Vec{
-			X: float64(WindowWidth()) / 2,
+			X: float64(WindowSize().X) / 2,
 			Y: 32,
 		}
 
 		{
 			searchText := "Search for image (type + press enter)"
-			DrawText(ui.X-(StringWidth(searchText)/4), ui.Y, searchText)
+			DrawText(ui.X-(StringWidth(searchText)/4), ui.Y, searchText, color.White)
 			ui.Y += 24
 		}
 		{
 			typingText := KeyboardString()
-			DrawText(ui.X, ui.Y, typingText)
-			DrawText(ui.X+StringWidth(typingText), ui.Y, "|")
+			DrawText(ui.X, ui.Y, typingText, color.White)
+			DrawText(ui.X+StringWidth(typingText), ui.Y, "|", color.White)
 			ui.Y += 24
 		}
 		previewSize := geom.Vec{32, 32}
@@ -105,7 +105,7 @@ func (viewer *debugSpriteViewer) update() (sprite.SpriteIndex, bool) {
 			calcPreviewSize.Y /= float64(spr.Size().Y)
 			DrawSpriteScaled(spr, 0, pos.X, pos.Y, calcPreviewSize)
 			name := spr.Name()
-			DrawText(ui.X, ui.Y, name)
+			DrawText(ui.X, ui.Y, name, color.White)
 			ui.Y += previewSize.Y + 16
 		}
 	}

@@ -8,6 +8,10 @@ func AssetDirectory() string {
 	return file.AssetDirectory
 }
 
+func CustomAssetDirectory() string {
+	return file.AssetDirectory + "/custom"
+}
+
 func ProgramDirectory() string {
 	return file.ProgramDirectory
 }

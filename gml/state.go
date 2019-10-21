@@ -9,11 +9,11 @@ var (
 )
 
 type state struct {
-	//globalInstances            *roomInstanceManager
 	instanceManager          instanceManager
-	roomInstances            []roomInstance
 	instancesMarkedForDelete []InstanceIndex
 	isCreatingRoomInstance   bool
+	isInstanceUpdatePaused   bool
+	hasGameEnded             bool
 	//gWidth                     int
 	gHeight                    int
 	frameBudgetNanosecondsUsed int64
@@ -21,7 +21,6 @@ type state struct {
 
 func newState() *state {
 	s := new(state)
-	s.roomInstances = make([]roomInstance, 1, 10)
 	s.instanceManager.instanceIndexToIndex = make(map[InstanceIndex]int)
 	return s
 }
@@ -42,63 +41,45 @@ func IsCreatingRoomInstance() bool {
 	return gState.isCreatingRoomInstance
 }
 
-func (state *state) createNewRoomInstance() *roomInstance {
-	state.roomInstances = append(state.roomInstances, roomInstance{
-		used: true,
-	})
-	state.isCreatingRoomInstance = true
-	defer func() {
-		state.isCreatingRoomInstance = false
-	}()
-	index := len(state.roomInstances) - 1
-	roomInst := &state.roomInstances[index]
-	roomInst.index = RoomInstanceIndex(index)
-
-	// Create default instance layer if...
-	// - No instance layers exist in the room data
-	// - Creating blank room
-	roomInst.instanceLayers = make([]roomInstanceLayerInstance, 1)
-	roomInst.instanceLayers[0] = roomInstanceLayerInstance{
-		index: 0,
-	}
-	roomInst.drawLayers = append(roomInst.drawLayers, &roomInst.instanceLayers[0])
-
-	// If creating room programmatically, default the room size
-	// to the size of the screen
-	roomInst.Size = WindowSize()
-
-	return roomInst
+// InstanceResumeAll will re-enable execution of the
+// Update method for each instance.
+func InstanceResumeAll() {
+	gState.isInstanceUpdatePaused = false
 }
 
-func (state *state) deleteRoomInstance(roomInst *roomInstance) {
-	for _, layer := range roomInst.instanceLayers {
-		// NOTE(Jake): 2018-08-21
-		// Running Destroy() on each rather than InstanceDestroy()
-		// for speed purposes
-		for _, instanceIndex := range layer.instances {
-			if inst := instanceIndex.Get(); inst != nil {
-				inst.Destroy()
-				cameraInstanceDestroy(instanceIndex)
-			}
-		}
-		layer.instances = nil
-	}
+// InstancePauseAll will disable the execution of the
+// Update method for each instance. This can be used for pause screens.
+func InstancePauseAll() {
+	gState.isInstanceUpdatePaused = true
+}
 
-	roomInst.used = false
-	*roomInst = roomInstance{}
+// HasInstancePauseAll will return whether executing the Update method of instances is disabled
+func HasInstancePauseAll() bool {
+	return gState.isInstanceUpdatePaused
 }
 
 func (state *state) update() {
+	if gState.isInstanceUpdatePaused {
+		return
+	}
+
 	// Simulate each active instance
 	for i := 0; i < len(state.instanceManager.instances); i++ {
 		inst := state.instanceManager.instances[i]
 		baseObj := inst.BaseObject()
+		if baseObj.internal.IsDestroyed {
+			continue
+		}
+		// NOTE(Jake): 2019-04-03
+		// Tested against Game Maker Studio 2, 2.2.2.326
+		// It updates ImageIndex by ImageSpeed *before* the Begin Step
+		baseObj.SpriteState.ImageUpdate()
 
 		inst.Update()
-		baseObj.SpriteState.ImageUpdate()
 	}
+}
 
-	// Remove deleted entities
+func (state *state) removeDeletedEntities() {
 	manager := &state.instanceManager
 	for _, instanceIndex := range state.instancesMarkedForDelete {
 		dataIndex, ok := manager.instanceIndexToIndex[instanceIndex]
@@ -109,23 +90,25 @@ func (state *state) update() {
 		// Remove from room instance draw list
 		{
 			roomInstanceIndex := manager.instances[dataIndex].BaseObject().RoomInstanceIndex()
-			roomInstance := roomGetInstance(roomInstanceIndex)
-			roomInstanceInstances := roomInstance.instanceLayers[0].instances
-			if len(roomInstanceInstances) == 1 {
-				if instanceIndex == roomInstanceInstances[0] {
-					roomInstanceInstances = roomInstanceInstances[:len(roomInstanceInstances)-1]
-				}
-			} else {
-				for dataIndex, otherInstanceIndex := range roomInstanceInstances {
-					if instanceIndex == otherInstanceIndex {
-						lastEntry := roomInstanceInstances[len(roomInstanceInstances)-1]
-						roomInstanceInstances[dataIndex] = lastEntry
-						roomInstanceInstances = roomInstanceInstances[:len(manager.instances)-1]
-						break
+			roomInst := roomGetInstance(roomInstanceIndex)
+			if roomInst != nil {
+				instances := roomInst.instances
+				if len(instances) == 1 {
+					if instanceIndex == instances[0] {
+						instances = instances[:len(instances)-1]
+					}
+				} else {
+					for dataIndex, otherInstanceIndex := range instances {
+						if instanceIndex == otherInstanceIndex {
+							lastEntry := instances[len(instances)-1]
+							instances[dataIndex] = lastEntry
+							instances = instances[:len(instances)-1]
+							break
+						}
 					}
 				}
+				roomInst.instances = instances
 			}
-			roomInstance.instanceLayers[0].instances = roomInstanceInstances
 		}
 
 		if dataIndex == len(manager.instances)-1 {

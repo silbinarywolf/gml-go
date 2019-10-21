@@ -1,9 +1,18 @@
 package sprite
 
 import (
+	"bytes"
+	"encoding/binary"
+
 	"github.com/silbinarywolf/gml-go/gml/internal/dt"
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 )
+
+type spriteStateSerialize struct {
+	SpriteIndex SpriteIndex
+	ImageScale  geom.Vec
+	ImageIndex  float64
+}
 
 type SpriteState struct {
 	spriteIndex SpriteIndex
@@ -64,8 +73,39 @@ func (state *SpriteState) ImageUpdate() {
 	if imageNumber > 0 {
 		imageSpeed := state.ImageSpeed() * dt.DeltaTime()
 		state.imageIndex += imageSpeed
-		for state.imageIndex >= state.ImageNumber() {
-			state.imageIndex -= state.ImageNumber()
+		if state.imageIndex >= state.ImageNumber() {
+			// NOTE(Jake): 2019-04-03
+			// Tested against Game Maker Studio 2, 2.2.2.326
+			// It resets to zero after going over.
+			// This is important as it allows us to test if the animation
+			// has ended on the current frame without adding extra state.
+			state.imageIndex = 0
 		}
 	}
+}
+
+func (state SpriteState) UnsafeSnapshotMarshalBinary(buf *bytes.Buffer) error {
+	if err := binary.Write(buf, binary.LittleEndian, state.spriteIndex); err != nil {
+		return err
+	}
+	if err := binary.Write(buf, binary.LittleEndian, state.imageIndex); err != nil {
+		return err
+	}
+	if err := binary.Write(buf, binary.LittleEndian, state.ImageScale); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (state *SpriteState) UnsafeSnapshotUnmarshalBinary(buf *bytes.Buffer) error {
+	if err := binary.Read(buf, binary.LittleEndian, &state.spriteIndex); err != nil {
+		return err
+	}
+	if err := binary.Read(buf, binary.LittleEndian, &state.imageIndex); err != nil {
+		return err
+	}
+	if err := binary.Read(buf, binary.LittleEndian, &state.ImageScale); err != nil {
+		return err
+	}
+	return nil
 }

@@ -3,7 +3,6 @@
 package gml
 
 import (
-	"fmt"
 	"image/color"
 	"math"
 	"strings"
@@ -18,6 +17,7 @@ import (
 var (
 	isDrawGuiMode = false
 	emptyImage    *ebiten.Image
+	maskedImage   *ebiten.Image
 	op            = &ebiten.DrawImageOptions{}
 )
 
@@ -29,6 +29,52 @@ func DrawGetGUI() bool {
 // DrawSetGUI allows you to set whether you want to draw relative to the screen (true) or to the world (false)
 func DrawSetGUI(guiMode bool) {
 	isDrawGuiMode = guiMode
+}
+
+type SpriteFrame struct {
+	SpriteIndex sprite.SpriteIndex
+	ImageIndex  float64
+}
+
+type DrawSpriteMaskOptions struct {
+	Masks []SpriteFrame
+}
+
+// DrawSpriteCutMask will draw the given sprite but allow you to pass multiple sprite images in to cut out transparency.
+func DrawSpriteCutMask(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64, options DrawSpriteMaskOptions) {
+	if spriteIndex == sprite.SprUndefined {
+		// If no sprite in use, draw nothing
+		return
+	}
+
+	// Draw on surface
+	{
+		frame := sprite.GetRawFrame(spriteIndex, int(math.Floor(subimage)))
+		maskedImage.Fill(color.RGBA{0, 0, 0, 0})
+		op.GeoM.Reset()
+		op.ColorM.Reset()
+		maskedImage.DrawImage(frame, op)
+		op.CompositeMode = ebiten.CompositeModeDestinationOut
+		for _, mask := range options.Masks {
+			maskFrame := sprite.GetRawFrame(mask.SpriteIndex, int(math.Floor(mask.ImageIndex)))
+			maskedImage.DrawImage(maskFrame, op)
+		}
+		op.CompositeMode = ebiten.CompositeModeSourceOver
+	}
+
+	position := geom.Vec{
+		X: x,
+		Y: y,
+	}
+	position = maybeApplyOffsetByCamera(position)
+	position.X = math.Floor(position.X)
+	position.Y = math.Floor(position.Y)
+
+	op.GeoM.Reset()
+	op.GeoM.Translate(position.X, position.Y)
+	op.ColorM.Reset()
+
+	drawGetTarget().DrawImage(maskedImage, op)
 }
 
 func DrawSprite(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64) {
@@ -58,14 +104,18 @@ func DrawSprite(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64) 
 }
 
 func DrawSpriteAlpha(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64, alpha float64) {
-	DrawSpriteExt(spriteIndex, subimage, x, y, geom.Vec{1, 1}, alpha)
+	DrawSpriteExt(spriteIndex, subimage, x, y, 0, geom.Vec{X: 1, Y: 1}, alpha)
 }
 
 func DrawSpriteScaled(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64, scale geom.Vec) {
-	DrawSpriteExt(spriteIndex, subimage, x, y, scale, 1.0)
+	DrawSpriteExt(spriteIndex, subimage, x, y, 0, scale, 1.0)
 }
 
-func DrawSpriteExt(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64, scale geom.Vec, alpha float64) {
+func DrawSpriteRotated(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64, rotation float64) {
+	DrawSpriteExt(spriteIndex, subimage, x, y, rotation, geom.Vec{X: 1, Y: 1}, 1.0)
+}
+
+func DrawSpriteExt(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64, rotation float64, scale geom.Vec, alpha float64) {
 	if spriteIndex == sprite.SprUndefined {
 		// If no sprite in use, draw nothing
 		return
@@ -76,10 +126,13 @@ func DrawSpriteExt(spriteIndex sprite.SpriteIndex, subimage float64, x, y float6
 		Y: y,
 	}
 	position = maybeApplyOffsetByCamera(position)
+	position.X = math.Floor(position.X)
+	position.Y = math.Floor(position.Y)
 
 	frame := sprite.GetRawFrame(spriteIndex, int(math.Floor(subimage)))
 	op.GeoM.Reset()
 	op.GeoM.Scale(scale.X, scale.Y)
+	op.GeoM.Rotate(rotation / 57.2958)
 	op.GeoM.Translate(position.X, position.Y)
 	op.ColorM.Reset()
 	op.ColorM.Scale(1.0, 1.0, 1.0, alpha)
@@ -120,7 +173,14 @@ func DrawRectangle(x, y, w, h float64, col color.Color) {
 	drawRect(drawGetTarget(), position.X, position.Y, w, h, col)
 }
 
-func DrawRectangleBorder(x, y, w, h float64, color color.Color, borderSize float64, borderColor color.Color) {
+func DrawRectangleAlpha(x, y, w, h float64, col color.Color, alpha float64) {
+	r, g, b, a := col.RGBA()
+	c := color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
+	c.A = uint8(float64(c.A) * alpha)
+	DrawRectangle(x, y, w, h, c)
+}
+
+func DrawRectangleBorder(x, y, w, h float64, col color.Color, borderSize float64, borderColor color.Color) {
 	position := geom.Vec{
 		X: x,
 		Y: y,
@@ -135,25 +195,15 @@ func DrawRectangleBorder(x, y, w, h float64, color color.Color, borderSize float
 	position.Y += borderSize
 	size.X -= borderSize * 2
 	size.Y -= borderSize * 2
-	drawRect(drawGetTarget(), position.X, position.Y, size.X, size.Y, color)
+	if col != color.Transparent {
+		drawRect(drawGetTarget(), position.X, position.Y, size.X, size.Y, col)
+	}
 }
 
-func DrawText(x, y float64, message string) {
-	DrawTextColor(x, y, message, color.White)
-}
-
-func DrawTextColorAlpha(x, y float64, message string, col color.Color, alpha float64) {
-	//if !hasFontSet() {
-	//	panic("Must call DrawSetFont() before calling DrawText.")
-	//}
-	r, g, b, a := col.RGBA()
-	c := color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
-	c.A = uint8(float64(c.A) * alpha)
-	DrawTextColor(x, y, message, c)
-	//text.Draw(drawGetTarget(), message, fontFont(gFontManager.currentFont), int(x), int(y), c)
-}
-
-func DrawTextColor(x, y float64, message string, col color.Color) {
+// DrawText is deprecated. Use DrawText.
+// *note* might make more sense to rename DrawText to DrawText
+//		  and DrawTextAlpha to DrawTextAlpha
+func DrawText(x, y float64, message string, col color.Color) {
 	if !hasFontSet() {
 		panic("Must call DrawSetFont() before calling DrawText.")
 	}
@@ -162,38 +212,31 @@ func DrawTextColor(x, y float64, message string, col color.Color) {
 		return
 	}
 
-	lines := strings.Split(message, "\n")
-
-	// Calculate largest string height for initial space
-	// This seems to be identical to how Game Maker gets the initial
-	// space after a font.
-	// (overlapped screenshot of Worm in the Pipes Game Maker and
-	// this version, it's identical)
+	// NOTE(Jake): 2019-05-12
+	// Add initial space so text draws from the left-top corner.
+	// Changed from previous string height calculation method
 	{
-		var stringHeight float64
-		for _, line := range lines {
-			height := StringHeight(line)
-			if height > stringHeight {
-				stringHeight = height
-			}
-		}
-		y += stringHeight
+		ascent := float64(fontFace.Metrics().Ascent.Ceil())
+		y += ascent
 	}
 
 	// Draw lines
+	pos := maybeApplyOffsetByCamera(Vec{
+		X: x,
+		Y: y,
+	})
 	leadingHeight := float64(fontFace.Metrics().Height.Ceil())
-	for _, line := range lines {
-		text.Draw(drawGetTarget(), line, fontFace, int(x), int(y), col)
-		y += leadingHeight
+	for _, line := range strings.Split(message, "\n") {
+		text.Draw(drawGetTarget(), line, fontFace, int(pos.X), int(pos.Y), col)
+		pos.Y += leadingHeight
 	}
 }
 
-/*func drawText(font FontIndex, message string) {
-	text.Draw(drawGetTarget(), message, fontFont(gFontManager.currentFont), int(position.X), int(position.Y), color.White)
-}*/
-
-func DrawTextF(x, y float64, format string, args ...interface{}) {
-	DrawText(x, y, fmt.Sprintf(format, args...))
+func DrawTextAlpha(x, y float64, message string, col color.Color, alpha float64) {
+	r, g, b, a := col.RGBA()
+	c := color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
+	c.A = uint8(float64(c.A) * alpha)
+	DrawText(x, y, message, c)
 }
 
 func drawGetTarget() *ebiten.Image {
@@ -206,9 +249,10 @@ func drawGetTarget() *ebiten.Image {
 	return gScreen
 }
 
-func init() {
+func initDraw() {
 	emptyImage, _ = ebiten.NewImage(16, 16, ebiten.FilterDefault)
 	emptyImage.Fill(color.White)
+	maskedImage, _ = ebiten.NewImage(1024, 1024, ebiten.FilterDefault)
 }
 
 func maybeApplyOffsetByCamera(position geom.Vec) geom.Vec {

@@ -22,7 +22,8 @@ type camera struct {
 	enabled bool
 	follow  InstanceIndex
 	geom.Rect
-	scale geom.Vec
+	scale      geom.Vec
+	updateFunc func()
 }
 
 func (manager *cameraManager) reset() {
@@ -34,7 +35,7 @@ func (manager *cameraManager) reset() {
 	}
 
 	// Setup 1st camera
-	CameraCreate(0, 0, 0, WindowWidth(), WindowHeight())
+	CameraCreate(0, 0, 0, WindowSize().X, WindowSize().Y)
 }
 
 func CameraCreate(index int, windowX, windowY, windowWidth, windowHeight float64) {
@@ -63,13 +64,13 @@ func CameraDestroy(index int) {
 	gCameraManager.camerasEnabledCount--
 }
 
-func CameraSetSize(index int, windowWidth, windowHeight float64) {
+func CameraSetViewSize(index int, width, height float64) {
 	view := &gCameraManager.cameras[index]
 	if !view.enabled {
 		panic("Camera " + strconv.Itoa(index) + " is not enabled.")
 	}
-	view.Size.X = windowWidth
-	view.Size.Y = windowHeight
+	view.Size.X = width
+	view.Size.Y = height
 }
 
 // cameraUpdate wlll move the camera to center on the follow object and
@@ -77,12 +78,25 @@ func CameraSetSize(index int, windowWidth, windowHeight float64) {
 func cameraUpdate() {
 	for i, _ := range gCameraManager.cameras {
 		view := &gCameraManager.cameras[i]
-		if inst := view.follow.Get(); inst != nil {
-			inst := inst.BaseObject()
-			view.X = inst.X - (view.Size.X / 2)
-			view.Y = inst.Y - (view.Size.Y / 2)
+
+		if view.updateFunc != nil {
+			view.updateFunc()
+		} else {
+			// NOTE: Jake: 2019-03-09
+			// We want the ability for someone to be able to
+			// use their own update function and follow an instance
+			// at the same time. This allows us to determine what
+			// Room to render for that camera.
+
+			// Default behaviour is to follow an instance and
+			// center the camera
+			if inst := view.follow.Get(); inst != nil {
+				inst := inst.BaseObject()
+				view.X = inst.X - (view.Size.X / 2)
+				view.Y = inst.Y - (view.Size.Y / 2)
+			}
+			view.cameraFitToRoomDimensions()
 		}
-		view.cameraFitToRoomDimensions()
 	}
 }
 
@@ -102,10 +116,16 @@ func cameraClearActive() {
 
 func CameraGetViewPos(index int) geom.Vec {
 	view := &gCameraManager.cameras[index]
-	return view.Vec
+	return geom.Vec{
+		X: math.Floor(view.Vec.X),
+		Y: math.Floor(view.Vec.Y),
+	}
 }
 
 func CameraGetViewSize(index int) geom.Vec {
+	// NOTE(Jake): 2019-05-18
+	// Consider renaming to CameraSize(index) as thats what
+	// I assumed it was without autocomplete
 	view := &gCameraManager.cameras[index]
 	return view.Size
 }
@@ -120,12 +140,9 @@ func CameraSetViewPos(index int, x, y float64) {
 	view.cameraFitToRoomDimensions()
 }
 
-func CameraSetViewSize(index int, width, height float64) {
+func CameraSetUpdateFunction(index int, updateFunc func()) {
 	view := &gCameraManager.cameras[index]
-	view.Size = geom.Vec{
-		X: width,
-		Y: height,
-	}
+	view.updateFunc = updateFunc
 }
 
 func CameraSetViewTarget(index int, inst InstanceIndex) {
@@ -137,16 +154,6 @@ func CameraSetViewTarget(index int, inst InstanceIndex) {
 // rendering to an offscreen surface if using 1 camera.
 func cameraHasMultipleEnabled() bool {
 	return gCameraManager.camerasEnabledCount > 1
-}
-
-func cameraInstanceDestroy(instanceIndex InstanceIndex) {
-	manager := gCameraManager
-	for i := 0; i < len(manager.cameras); i++ {
-		view := &manager.cameras[i]
-		if view.follow == instanceIndex {
-			view.follow = Noone
-		}
-	}
 }
 
 func (view *camera) cameraFitToRoomDimensions() {

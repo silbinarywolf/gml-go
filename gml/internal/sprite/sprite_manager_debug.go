@@ -70,16 +70,16 @@ FileWatchLoop:
 			continue
 		}
 		spr := spriteIndex.get()
-		newSprData := loadSprite(spriteName)
-		*spr = *newSprData
+		spr.loadSprite(spriteIndex)
+		//*spr = *newSprData
 	}
 }
 
 // DebugWriteSpriteConfig is called by the animation editor
 func DebugWriteSpriteConfig(spriteIndex SpriteIndex) error {
 	spr := spriteIndex.get()
-	name := spr.Name()
-	config := loadConfig(name)
+	path := gSpriteManager.assetIndexToPath[spriteIndex]
+	config := loadConfig(path)
 
 	// Write collision masks
 	{
@@ -97,7 +97,7 @@ func DebugWriteSpriteConfig(spriteIndex SpriteIndex) error {
 		config.CollisionMasks = collisionMasks
 	}
 
-	configPath := file.AssetDirectory + "/" + SpriteDirectoryBase + "/" + name + "/config.json"
+	configPath := file.AssetDirectory + "/" + SpriteDirectoryBase + "/" + path + "/config.json"
 
 	json, err := json.MarshalIndent(config, "", "\t")
 	if err != nil {
@@ -110,8 +110,8 @@ func DebugWriteSpriteConfig(spriteIndex SpriteIndex) error {
 	return nil
 }
 
-func debugWriteSprite(name string) {
-	folderPath := file.AssetDirectory + "/" + SpriteDirectoryBase + "/" + name + "/"
+func debugWriteSprite(name string, path string) {
+	folderPath := file.AssetDirectory + "/" + SpriteDirectoryBase + "/" + path + "/"
 
 	// NOTE(Jake): 2018-06-18
 	//
@@ -122,7 +122,7 @@ func debugWriteSprite(name string) {
 
 	// Read config information (if it exists)
 	var config spriteConfig
-	config = loadConfig(name)
+	config = loadConfig(path)
 
 	// Load frames
 	//

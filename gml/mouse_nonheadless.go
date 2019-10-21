@@ -10,7 +10,6 @@ import (
 var (
 	mouseButtonPress             [MbSize]int // this array is reset every frame
 	pressingMouseButtonLastFrame [MbSize]bool
-	_mousePos                    geom.Vec
 )
 
 func MouseCheckButton(button int) bool {
@@ -32,14 +31,20 @@ func MouseCheckPressed(button int) bool {
 	return isHeld*/
 }
 
+// MouseScreenPosition returns the camera viewport
 func MousePosition() geom.Vec {
-	return _mousePos
+	x, y := ebiten.CursorPosition()
+	r := geom.Vec{X: float64(x), Y: float64(y)}
+	viewPos := CameraGetViewPos(0)
+	r.X += viewPos.X
+	r.Y += viewPos.Y
+	return r
 }
 
-// Get the mouse position relative to the window
-func mouseScreenPosition() geom.Vec {
+// MouseScreenPosition returns the mouse position relative to the window
+func MouseScreenPosition() geom.Vec {
 	x, y := ebiten.CursorPosition()
-	return geom.Vec{float64(x), float64(y)}
+	return geom.Vec{X: float64(x), Y: float64(y)}
 }
 
 //
@@ -57,26 +62,6 @@ func mouseScreenPosition() geom.Vec {
 }*/
 
 func mouseUpdate() {
-	x, y := ebiten.CursorPosition()
-	newPos := geom.Vec{float64(x), float64(y)}
-
-	// NOTE(Jake): 2018-06-09
-	//
-	// We offset the mouse position to the location
-	// in the world, like Game Maker.
-	//
-	// This is probably incorrect to only use the
-	// hardcode to camera 0, it should probably account for the
-	// camera you're clicking into and then offset.
-	//
-	// This is future-me's problem though!
-	//
-	viewPos := CameraGetViewPos(0)
-	newPos.X += viewPos.X
-	newPos.Y += viewPos.Y
-
-	_mousePos = newPos
-
 	// Add code to check mouse inputs
 	for btn := MbLeft; btn < MbSize; btn++ {
 		if MouseCheckButton(btn) {

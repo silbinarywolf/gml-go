@@ -33,8 +33,24 @@ func StringWidth(text string) float64 {
 	if fontFace == nil {
 		return 0
 	}
-	x := font.MeasureString(fontFace, text)
-	return float64(x.Ceil())
+	width := 0
+	start := 0
+	prevI := 0
+	for i, c := range text {
+		if c == '\n' {
+			newWidth := font.MeasureString(fontFace, text[start:prevI]).Ceil()
+			start = i
+			if newWidth > width {
+				width = newWidth
+			}
+		}
+		prevI = i
+	}
+	newWidth := font.MeasureString(fontFace, text[start:]).Ceil()
+	if newWidth > width {
+		width = newWidth
+	}
+	return float64(width)
 }
 
 // StringHeight will return height of the input string in pixels.
