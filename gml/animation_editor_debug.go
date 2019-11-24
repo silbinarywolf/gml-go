@@ -122,7 +122,17 @@ func (editor *debugAnimationEditor) animationEditorToggleMenu(menu animMenu) {
 	editor.menuOpened = menu
 }
 
+func (editor *debugAnimationEditor) Open() {
+	editor.LazyLoad()
+}
+
+func (editor *debugAnimationEditor) Close() {
+}
+
 func (editor *debugAnimationEditor) Update() {
+}
+
+func (editor *debugAnimationEditor) Draw() {
 	cameraSetActive(0)
 	cameraClearSurface(0)
 	defer func() {
@@ -130,7 +140,6 @@ func (editor *debugAnimationEditor) Update() {
 		cameraClearActive()
 	}()
 
-	editor.LazyLoad()
 	DrawSetGUI(true)
 
 	//

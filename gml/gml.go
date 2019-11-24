@@ -9,11 +9,18 @@ import (
 	"github.com/silbinarywolf/gml-go/gml/assetman"
 	"github.com/silbinarywolf/gml-go/gml/internal/dt"
 	"github.com/silbinarywolf/gml-go/gml/internal/file"
+	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 	_ "github.com/silbinarywolf/gml-go/gml/internal/paniccatch"
 	"github.com/silbinarywolf/gml-go/gml/monotime"
 )
 
 type DefaultContext struct{}
+
+func (context *DefaultContext) Open() {
+}
+
+func (context *DefaultContext) Close() {
+}
 
 func (context *DefaultContext) Update() {
 	// Update
@@ -30,6 +37,49 @@ func (context *DefaultContext) Update() {
 	// to the object being followed. If a user needs custom camera behaviour,
 	// they can leverage CameraSetUpdateFunction()
 	cameraUpdate()
+}
+
+func (context *DefaultContext) Draw() {
+	// PreDraw
+	gController.GamePreDraw()
+
+	// Draw
+	for i := 0; i < len(gCameraManager.cameras); i++ {
+		view := &gCameraManager.cameras[i]
+		if !view.enabled {
+			continue
+		}
+		cameraSetActive(i)
+		cameraPreDraw(i)
+		cameraClearSurface(i)
+
+		if inst := view.follow.getBaseObject(); inst != nil {
+			// Render instances in same room as instance following
+			roomInst := roomGetInstance(inst.RoomInstanceIndex())
+			if roomInst == nil {
+				panic("draw: RoomInstance this object belongs to has been destroyed")
+			}
+			roomInst.draw()
+		} else {
+			// If no follower is configured, just render the first active room found
+			roomInst := roomLastCreated()
+			if roomInst == nil {
+				panic("No room exists, you must create a room")
+			}
+			roomInst.draw()
+		}
+
+		// Render camera onto OS-window
+		cameraDraw(i)
+	}
+	//cameraClearActive()
+	// NOTE(Jake): 2019-04-15
+	// Default to first camera for level editors / animation editor
+	// etc.
+	cameraSetActive(0)
+
+	// PostDraw
+	gController.GamePostDraw()
 }
 
 type GameSettings struct {
@@ -167,7 +217,16 @@ func GameEnd() {
 }
 
 type contextUpdateLoop interface {
+	Open()
+	Close()
 	Update()
+	Draw()
+}
+
+type contextUpdateLoopItem struct {
+	windowCursorVisible bool
+	windowSize          geom.Vec
+	WindowScale         geom.Vec
 }
 
 // UpdateContext is the current context being utilized by the game
@@ -182,6 +241,7 @@ func ContextUpdatePop(currentContext contextUpdateLoop) {
 	if current != currentContext {
 		panic("Can only pop context if you can provide a reference to the current context")
 	}
+	currentContext.Close()
 	gUpdateContextStack = gUpdateContextStack[:len(gUpdateContextStack)-1]
 }
 
@@ -192,6 +252,7 @@ func ContextUpdatePush(context contextUpdateLoop) {
 	if current == context {
 		panic("Cannot push current context again")
 	}
+	context.Open()
 	gUpdateContextStack = append(gUpdateContextStack, context)
 }
 
