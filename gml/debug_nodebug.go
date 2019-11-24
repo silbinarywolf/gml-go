@@ -6,9 +6,5 @@ const (
 	debugMode = false
 )
 
-const (
-	debugMenuID = debugMenuNone
-)
-
 func debugUpdate() {
 }

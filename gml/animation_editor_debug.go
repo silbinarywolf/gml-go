@@ -51,12 +51,15 @@ type animationEditorConfig struct {
 	SpriteSelected string `json:"SpriteSelected,omitempty"`
 }
 
-func animationEditorLazyLoad() {
+func (editor *debugAnimationEditor) LazyLoad() {
 	if animationEditor != nil {
 		return
 	}
 	animationEditor = new(debugAnimationEditor)
 	animationEditor.animationConfigLoad()
+	if animationEditor.spriteViewing.SpriteIndex() == 0 {
+		animationEditor.spriteViewing.SetSprite(1)
+	}
 }
 
 func (editor *debugAnimationEditor) animationConfigLoad() {
@@ -119,9 +122,15 @@ func (editor *debugAnimationEditor) animationEditorToggleMenu(menu animMenu) {
 	editor.menuOpened = menu
 }
 
-func animationEditorUpdate() {
-	animationEditorLazyLoad()
-	editor := animationEditor
+func (editor *debugAnimationEditor) Update() {
+	cameraSetActive(0)
+	cameraClearSurface(0)
+	defer func() {
+		cameraDraw(0)
+		cameraClearActive()
+	}()
+
+	editor.LazyLoad()
 	DrawSetGUI(true)
 
 	//

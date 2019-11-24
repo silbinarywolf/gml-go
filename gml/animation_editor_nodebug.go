@@ -2,4 +2,7 @@
 
 package gml
 
-func animationEditorUpdate() {}
+type debugAnimationEditor struct{}
+
+func (editor *debugAnimationEditor) Update() {
+}

@@ -13,6 +13,25 @@ import (
 	"github.com/silbinarywolf/gml-go/gml/monotime"
 )
 
+type DefaultContext struct{}
+
+func (context *DefaultContext) Update() {
+	// Update
+	gController.GamePreUpdate()
+	gState.update()
+	gController.GamePostUpdate()
+
+	// Remove deleted entities at safe point
+	// ie. not while executign user-code / at the end of the frame
+	gState.removeDeletedEntities()
+
+	// NOTE: Jake: 2019-02-24
+	// `cameraUpdate` should run after all update logic so that it snaps
+	// to the object being followed. If a user needs custom camera behaviour,
+	// they can leverage CameraSetUpdateFunction()
+	cameraUpdate()
+}
+
 type GameSettings struct {
 	WindowTitle  string
 	WindowWidth  float64
@@ -34,9 +53,10 @@ const (
 )
 
 var (
-	gController   gameController
-	gGameSettings GameSettings
-	errGameEnd    = errors.New("Game ended")
+	gController         gameController
+	gGameSettings       GameSettings
+	gUpdateContextStack []contextUpdateLoop
+	errGameEnd          = errors.New("Game ended")
 )
 
 func setup(controller gameController, gameSettings *GameSettings) {
@@ -66,6 +86,11 @@ func setup(controller gameController, gameSettings *GameSettings) {
 	// Setup TPS
 	SetDesignedTPS(dt.DefaultMaxTPS)
 	SetMaxTPS(dt.DefaultMaxTPS)
+
+	// Setup default context
+	// note: we dont call ContextUpdatePush() as it checks the current context first
+	//		 which isn't pushed / doesn't exist yet.
+	gUpdateContextStack = append(gUpdateContextStack, &DefaultContext{})
 
 	// Bootup game
 	controller.GameStart()
@@ -141,14 +166,52 @@ func GameEnd() {
 	gState.hasGameEnded = true
 }
 
+type contextUpdateLoop interface {
+	Update()
+}
+
+// UpdateContext is the current context being utilized by the game
+// ie. game state mode, animation editor mode, map editor mode
+func contextUpdate() contextUpdateLoop {
+	current := gUpdateContextStack[len(gUpdateContextStack)-1]
+	return current
+}
+
+func ContextUpdatePop(currentContext contextUpdateLoop) {
+	current := gUpdateContextStack[len(gUpdateContextStack)-1]
+	if current != currentContext {
+		panic("Can only pop context if you can provide a reference to the current context")
+	}
+	gUpdateContextStack = gUpdateContextStack[:len(gUpdateContextStack)-1]
+}
+
+// PushUpdateContext allows you to override the state of the game with
+// a special behaviour interface
+func ContextUpdatePush(context contextUpdateLoop) {
+	current := gUpdateContextStack[len(gUpdateContextStack)-1]
+	if current == context {
+		panic("Cannot push current context again")
+	}
+	gUpdateContextStack = append(gUpdateContextStack, context)
+}
+
 func update() error {
 	frameStartTime := monotime.Now()
+
+	// update inputs
 	keyboardUpdate()
 	keyboardStringUpdate()
 	mouseUpdate()
+
+	// debugUpdate will do things like live-asset reloading
 	debugUpdate()
 
-	switch debugMenuID {
+	// run game loop, or debug animation editor or other update-loop context
+	// depending on the stack
+	context := contextUpdate()
+	context.Update()
+
+	/*switch debugMenuID {
 	case debugMenuNone:
 		// Update
 		gController.GamePreUpdate()
@@ -156,12 +219,13 @@ func update() error {
 		gController.GamePostUpdate()
 
 		// Remove deleted entities at safe point
+		// ie. not while executign user-code / at the end of the frame
 		gState.removeDeletedEntities()
 
 		// NOTE: Jake: 2019-02-24
 		// `cameraUpdate` should run after all update logic so that it snaps
-		// to the object being followed. If a user needs to update the camera after
-		// that,
+		// to the object being followed. If a user needs custom camera behaviour,
+		// they can leverage CameraSetUpdateFunction()
 		cameraUpdate()
 	case debugMenuAnimationEditor:
 		//debugMenuRoomEditor,
@@ -182,7 +246,7 @@ func update() error {
 		cameraClearActive()
 	default:
 		panic("Invalid debug mode id")
-	}
+	}*/
 
 	gState.frameBudgetNanosecondsUsed = monotime.Now() - frameStartTime
 	if gState.hasGameEnded {
