@@ -17,58 +17,10 @@
 package file
 
 import (
-	"bytes"
-	"errors"
-	"fmt"
-
-	"syscall/js"
+	"github.com/hajimehoshi/ebiten/ebitenutil"
 )
 
-type file struct {
-	*bytes.Reader
-}
-
-func (f *file) Close() error {
-	return nil
-}
-
 func OpenFile(path string) (readSeekCloser, error) {
-	var err error
-	var content js.Value
-	ch := make(chan struct{})
-	req := js.Global().Get("XMLHttpRequest").New()
-	req.Call("open", "GET", path, true)
-	req.Set("responseType", "arraybuffer")
-	loadf := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		defer close(ch)
-		status := req.Get("status").Int()
-		if 200 <= status && status < 400 {
-			content = req.Get("response")
-			return nil
-		}
-		err = errors.New(fmt.Sprintf("http error: %d", status))
-		return nil
-	})
-	defer loadf.Release()
-	req.Call("addEventListener", "load", loadf)
-	errorf := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		defer close(ch)
-		err = errors.New(fmt.Sprintf("XMLHttpRequest error: %s", req.Get("statusText").String()))
-		return nil
-	})
-	req.Call("addEventListener", "error", errorf)
-	defer errorf.Release()
-	req.Call("send")
-	<-ch
-	if err != nil {
-		return nil, err
-	}
-
-	uint8contentWrapper := js.Global().Get("Uint8Array").New(content)
-	data := make([]byte, uint8contentWrapper.Get("byteLength").Int())
-	arr := js.TypedArrayOf(data)
-	arr.Call("set", uint8contentWrapper)
-	arr.Release()
-	f := &file{bytes.NewReader(data)}
-	return f, nil
+	f, err := ebitenutil.OpenFile(path)
+	return f, err
 }
