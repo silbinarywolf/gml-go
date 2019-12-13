@@ -11,9 +11,15 @@ var (
 	gCameraManager *cameraManager = new(cameraManager)
 )
 
+const (
+	// todo(Jake): 2019-12-13
+	// Change all camera code so that 0 = inactive camera
+	cameraNone = -1
+)
+
 type cameraManager struct {
 	cameras             [8]camera
-	current             *camera
+	currentIndex        int
 	camerasEnabledCount int
 }
 
@@ -24,6 +30,12 @@ type camera struct {
 	geom.Rect
 	scale      geom.Vec
 	updateFunc func()
+}
+
+func newCameraManager() *cameraManager {
+	c := &cameraManager{}
+	c.currentIndex = cameraNone
+	return c
 }
 
 func (manager *cameraManager) reset() {
@@ -100,18 +112,27 @@ func cameraUpdate() {
 	}
 }
 
+// CameraGetActive will get the current camera that is actively being drawn on.
+// Will panic not in Draw calls or in an invalid context
+func CameraGetActive() int {
+	if gCameraManager.currentIndex == cameraNone {
+		panic("Cannot call CameraGetActive() outside of Draw() calls")
+	}
+	return gCameraManager.currentIndex
+}
+
 // cameraGetActive gets the current camera we're drawing objects onto
 func cameraGetActive() *camera {
-	return gCameraManager.current
+	return &gCameraManager.cameras[gCameraManager.currentIndex]
 }
 
 // cameraSetActive gets the current camera we want to draw objects onto
 func cameraSetActive(index int) {
-	gCameraManager.current = &gCameraManager.cameras[index]
+	gCameraManager.currentIndex = index
 }
 
 func cameraClearActive() {
-	gCameraManager.current = nil
+	gCameraManager.currentIndex = cameraNone
 }
 
 func CameraGetViewPos(index int) geom.Vec {
