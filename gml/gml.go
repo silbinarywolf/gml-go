@@ -258,6 +258,7 @@ func ContextUpdatePush(context contextUpdateLoop) {
 
 func update() error {
 	frameStartTime := monotime.Now()
+	gState.frameCount++
 
 	// update inputs
 	keyboardUpdate()
@@ -271,43 +272,6 @@ func update() error {
 	// depending on the stack
 	context := contextUpdate()
 	context.Update()
-
-	/*switch debugMenuID {
-	case debugMenuNone:
-		// Update
-		gController.GamePreUpdate()
-		gState.update()
-		gController.GamePostUpdate()
-
-		// Remove deleted entities at safe point
-		// ie. not while executign user-code / at the end of the frame
-		gState.removeDeletedEntities()
-
-		// NOTE: Jake: 2019-02-24
-		// `cameraUpdate` should run after all update logic so that it snaps
-		// to the object being followed. If a user needs custom camera behaviour,
-		// they can leverage CameraSetUpdateFunction()
-		cameraUpdate()
-	case debugMenuAnimationEditor:
-		//debugMenuRoomEditor,
-		cameraSetActive(0)
-		cameraClearSurface(0)
-
-		switch debugMenuID {
-		//case debugMenuRoomEditor:
-		//editorLazyInit()
-		//editorUpdate()
-		case debugMenuAnimationEditor:
-			animationEditorUpdate()
-		default:
-			panic("Invalid inner debug mode.")
-		}
-
-		cameraDraw(0)
-		cameraClearActive()
-	default:
-		panic("Invalid debug mode id")
-	}*/
 
 	gState.frameBudgetNanosecondsUsed = monotime.Now() - frameStartTime
 	if gState.hasGameEnded {

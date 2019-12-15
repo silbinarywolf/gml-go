@@ -2,12 +2,14 @@
 
 package gml
 
-type gamepadButton int
-
-func GamepadCheckPressed(id int, button gamepadButton) bool {
+func GamepadCheckPressed(id int, button GamepadButton) bool {
 	return false
 }
 
-func GamepadCheck(id int, button gamepadButton) bool {
+func GamepadCheck(id int, button GamepadButton) bool {
 	return false
+}
+
+func GamepadAxisValue(id int, axis GamepadAxis) float64 {
+	return 0
 }

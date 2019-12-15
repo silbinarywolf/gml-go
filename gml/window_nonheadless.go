@@ -25,6 +25,14 @@ func WindowSize() geom.Vec {
 	}
 }
 
+func WindowGetFullscreen() bool {
+	return ebiten.IsFullscreen()
+}
+
+func WindowSetFullscreen(value bool) {
+	ebiten.SetFullscreen(value)
+}
+
 func WindowSetSize(width, height float64) {
 	gGameSettings.WindowWidth = width
 	gGameSettings.WindowHeight = height

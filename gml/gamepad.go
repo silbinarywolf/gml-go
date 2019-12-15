@@ -1,13 +1,13 @@
 package gml
 
-type gamepadButton int
+type GamepadButton int32
 
-type gamepadAxis int
+type GamepadAxis int32
 
 const maxGamepads = 12
 
 const (
-	GpFace1      gamepadButton = 1 + iota // Top button 1 (this maps to the "A" on an Xbox 360 controller and the cross on a PS controller)
+	GpFace1      GamepadButton = 1 + iota // Top button 1 (this maps to the "A" on an Xbox 360 controller and the cross on a PS controller)
 	GpFace2                               // Top button 2 (this maps to the "B" on an Xbox 360 controller and the circle on a PS controller)
 	GpFace3                               // Top button 3 (this maps to the "X" on an Xbox 360 controller and the square on a PS controller)
 	GpFace4                               // Top button 4 (this maps to the "Y" on an Xbox 360 controller and the triangle on a PS controller)
@@ -23,6 +23,7 @@ const (
 	GpPadDown
 	GpPadLeft
 	GpPadRight
+	GpSize
 	/*GamepadButton0
 	GamepadButton1
 	GamepadButton2
@@ -55,11 +56,10 @@ const (
 	GamepadButton29
 	GamepadButton30
 	GamepadButton31*/
-	gpSize
 )
 
 const (
-	GpAxisLH gamepadAxis = 1 + iota
+	GpAxisLH GamepadAxis = 1 + iota
 	GpAxisLV
 	gpAxisSize
 )

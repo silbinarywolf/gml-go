@@ -56,20 +56,30 @@ var gamepadToEbiten = []ebiten.GamepadButton{
 }
 
 var (
-	pressingButtonLastFrame [maxGamepads][gpSize]bool
+	pressingButtonLastFrame [maxGamepads][GpSize]bool
 )
 
-func GamepadCheck(id int, button gamepadButton) bool {
+/*func GamepadGetDeviceCount() int {
+	return len(ebiten.GamepadIDs())
+}*/
+
+func GamepadCheck(id int, button GamepadButton) bool {
 	switch button {
 	case GpShoulderLT:
-		return ebiten.GamepadAxis(id, 4) > -0.5
+		if ebiten.GamepadAxisNum(id) > 4 {
+			return ebiten.GamepadAxis(id, 4) > -0.5
+		}
+		return false
 	case GpShoulderRT:
-		return ebiten.GamepadAxis(id, 5) > -0.5
+		if ebiten.GamepadAxisNum(id) > 5 {
+			return ebiten.GamepadAxis(id, 5) > -0.5
+		}
+		return false
 	}
 	return ebiten.IsGamepadButtonPressed(id, gamepadToEbiten[button])
 }
 
-func GamepadCheckPressed(id int, button gamepadButton) bool {
+func GamepadCheckPressed(id int, button GamepadButton) bool {
 	isHeld := GamepadCheck(id, button)
 	if !isHeld {
 		pressingButtonLastFrame[id][button] = false
@@ -81,4 +91,8 @@ func GamepadCheckPressed(id int, button gamepadButton) bool {
 		pressingButtonLastFrame[id][button] = true
 	}
 	return isHeld
+}
+
+func GamepadAxisValue(id int, axis GamepadAxis) float64 {
+	return ebiten.GamepadAxis(id, int(axis))
 }

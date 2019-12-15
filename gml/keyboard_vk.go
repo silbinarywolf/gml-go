@@ -1,29 +1,29 @@
 package gml
 
 const (
-	VkNoKey       = 0 + iota // keycode representing that no key is pressed
-	VkAnykey                 // keycode representing that any key is pressed
-	VkLeft                   // keycode for left arrow key
-	VkRight                  // keycode for right arrow key
-	VkUp                     // keycode for up arrow key
-	VkDown                   // keycode for down arrow key
-	VkEnter                  // enter key
-	VkEscape                 // escape key
-	VkSpace                  // space key
-	VkShift                  // either of the shift keys
-	VkControl                // either of the control keys
-	VkAlt                    // alt key
-	VkBackspace              // backspace key
-	VkTab                    // tab key
-	VkHome                   // home key
-	VkEnd                    // end key
-	VkDelete                 // delete key
-	VkInsert                 // insert key
-	VkPageUp                 // pageup key
-	VkPageDown               // pagedown key
-	VkPause                  // pause/break key
-	VkPrintScreen            // printscreen/sysrq key
-	VkF1                     // keycode for the function keys F1 to F12
+	VkNoKey       Key = 0 + iota // keycode representing that no key is pressed
+	VkAnykey                     // keycode representing that any key is pressed
+	VkLeft                       // keycode for left arrow key
+	VkRight                      // keycode for right arrow key
+	VkUp                         // keycode for up arrow key
+	VkDown                       // keycode for down arrow key
+	VkEnter                      // enter key
+	VkEscape                     // escape key
+	VkSpace                      // space key
+	VkShift                      // either of the shift keys
+	VkControl                    // either of the control keys
+	VkAlt                        // alt key
+	VkBackspace                  // backspace key
+	VkTab                        // tab key
+	VkHome                       // home key
+	VkEnd                        // end key
+	VkDelete                     // delete key
+	VkInsert                     // insert key
+	VkPageUp                     // pageup key
+	VkPageDown                   // pagedown key
+	VkPause                      // pause/break key
+	VkPrintScreen                // printscreen/sysrq key
+	VkF1                         // keycode for the function keys F1 to F12
 	VkF2
 	VkF3
 	VkF4
@@ -61,8 +61,6 @@ const (
 	VkAdd      // key on the numeric keypad
 	VkSubtract // subtract key on the numeric keypad
 	VkDecimal  // decimal dot keys on the numeric keypad
-
-	// The following in GML are letters keys, handled like: keyboard_check(ord("R")), however we'll just use VK
 	VkA
 	VkB
 	VkC
@@ -89,15 +87,5 @@ const (
 	VkX
 	VkY
 	VkZ
-
-	// The following constants can only be used with keyboard_check_direct()
-	// Therefore, they are not supported.
-	//VkLShift
-	//VkLControl
-	//VkLAlt
-	//VkRShift
-	//VkRControl
-	//VkRAlt
-
-	vkSize
+	VkSize
 )
