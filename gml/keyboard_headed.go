@@ -27,3 +27,7 @@ func KeyboardCheckPressed(key Key) bool {
 	}
 	return isHeld
 }
+
+func keyboardUpdate() {
+	// no-op needed here yet
+}
