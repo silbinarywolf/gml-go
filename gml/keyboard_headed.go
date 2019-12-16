@@ -7,14 +7,14 @@ import (
 )
 
 var (
-	pressingKeyLastFrame [vkSize]bool
+	pressingKeyLastFrame [VkSize]bool
 )
 
-func KeyboardCheck(key int16) bool {
+func KeyboardCheck(key Key) bool {
 	return ebiten.IsKeyPressed(keyboardVkToEbiten[key])
 }
 
-func KeyboardCheckPressed(key int16) bool {
+func KeyboardCheckPressed(key Key) bool {
 	isHeld := KeyboardCheck(key)
 	if !isHeld {
 		pressingKeyLastFrame[key] = false
@@ -26,4 +26,8 @@ func KeyboardCheckPressed(key int16) bool {
 		pressingKeyLastFrame[key] = true
 	}
 	return isHeld
+}
+
+func keyboardUpdate() {
+	// no-op needed here yet
 }

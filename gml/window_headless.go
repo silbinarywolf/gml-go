@@ -13,6 +13,13 @@ func WindowCursorVisible() bool {
 func WindowSetCursorVisible(visible bool) {
 }
 
+func WindowGetFullscreen() bool {
+	return false
+}
+
+func WindowSetFullscreen(value bool) {
+}
+
 // WindowSize will get the size of the current game window
 func WindowSize() geom.Vec {
 	return geom.Vec{

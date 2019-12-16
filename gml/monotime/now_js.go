@@ -5,7 +5,7 @@ package monotime
 import (
 	"time"
 
-	"github.com/gopherjs/gopherwasm/js"
+	"syscall/js"
 )
 
 func now() int64 {

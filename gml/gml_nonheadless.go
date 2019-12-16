@@ -19,7 +19,7 @@ func SetMaxTPS(tps int) {
 	dt.SetMaxTPS(tps)
 }
 
-func updateEbiten(s *ebiten.Image) error {
+func updateAndDrawEbiten(s *ebiten.Image) error {
 	gScreen = s
 	result := update()
 	draw()
@@ -27,13 +27,10 @@ func updateEbiten(s *ebiten.Image) error {
 }
 
 func draw() {
-	if ebiten.IsDrawingSkipped() {
-		return
+	if !ebiten.IsDrawingSkipped() {
+		context := contextUpdate()
+		context.Draw()
 	}
-	// Draw
-	gController.GamePreDraw()
-	gState.draw()
-	gController.GamePostDraw()
 }
 
 func runBefore() {
@@ -42,7 +39,7 @@ func runBefore() {
 
 func run(gameSettings GameSettings) {
 	runBefore()
-	ebiten.Run(updateEbiten, int(gameSettings.WindowWidth), int(gameSettings.WindowHeight), gameSettings.WindowScale, gameSettings.WindowTitle)
+	ebiten.Run(updateAndDrawEbiten, int(gameSettings.WindowWidth), int(gameSettings.WindowHeight), gameSettings.WindowScale, gameSettings.WindowTitle)
 }
 
 // runTest is run by TestBootstrap

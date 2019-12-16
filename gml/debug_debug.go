@@ -14,10 +14,6 @@ const (
 	debugMode = true
 )
 
-var (
-	debugMenuID = debugMenuNone
-)
-
 func debugConfigPath(name string) string {
 	configPath := user.HomeDir() + "/.gmlgo"
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
@@ -27,24 +23,20 @@ func debugConfigPath(name string) string {
 	return configPath
 }
 
-func debugMenuOpenOrToggleClosed(id debugMenu) {
-	if debugMenuID != id {
-		debugMenuID = id
-	} else {
-		debugMenuID = debugMenuNone
-
-		// Reset camera
-		CameraSetViewSize(0, WindowSize().X, WindowSize().Y)
-		CameraSetViewTarget(0, Noone)
-	}
-}
-
 func debugUpdate() {
 	sprite.DebugWatch()
 
 	if KeyboardCheck(VkControl) {
 		if KeyboardCheckPressed(VkA) {
-			debugMenuOpenOrToggleClosed(debugMenuAnimationEditor)
+			if contextUpdate() != animationEditor {
+				ContextUpdatePush(animationEditor)
+			} else {
+				ContextUpdatePop(animationEditor)
+
+				// Reset camera
+				CameraSetViewSize(0, WindowSize().X, WindowSize().Y)
+				CameraSetViewTarget(0, Noone)
+			}
 		}
 	}
 }

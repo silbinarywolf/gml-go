@@ -12,8 +12,9 @@ type state struct {
 	instanceManager          instanceManager
 	instancesMarkedForDelete []InstanceIndex
 	isCreatingRoomInstance   bool
-	isInstanceUpdatePaused   bool
+	pauseCallback            func() bool
 	hasGameEnded             bool
+	frameCount               int
 	//gWidth                     int
 	gHeight                    int
 	frameBudgetNanosecondsUsed int64
@@ -41,25 +42,25 @@ func IsCreatingRoomInstance() bool {
 	return gState.isCreatingRoomInstance
 }
 
-// InstanceResumeAll will re-enable execution of the
-// Update method for each instance.
-func InstanceResumeAll() {
-	gState.isInstanceUpdatePaused = false
+// DebugFrameCount is incremented by 1 per frame and can be used to debug
+func DebugFrameCount() int {
+	return gState.frameCount
 }
 
-// InstancePauseAll will disable the execution of the
-// Update method for each instance. This can be used for pause screens.
-func InstancePauseAll() {
-	gState.isInstanceUpdatePaused = true
+// InstanceSetPauseCallback will call the provided function to check if instances
+// should call their Update() method or not.
+func InstanceSetPauseCallback(callback func() bool) {
+	gState.pauseCallback = callback
 }
 
-// HasInstancePauseAll will return whether executing the Update method of instances is disabled
-func HasInstancePauseAll() bool {
-	return gState.isInstanceUpdatePaused
+// InstanceIsPaused will return whether executing the Update() method of instances is disabled.
+// Update() method of instances can be disabled by utilizing InstanceSetPauseCallback()
+func InstanceIsPaused() bool {
+	return gState.pauseCallback != nil && gState.pauseCallback()
 }
 
 func (state *state) update() {
-	if gState.isInstanceUpdatePaused {
+	if InstanceIsPaused() {
 		return
 	}
 

@@ -2,11 +2,11 @@
 
 package gml
 
-func KeyboardCheck(key int16) bool {
+func KeyboardCheck(key Key) bool {
 	return false
 }
 
-func KeyboardCheckPressed(key int16) bool {
+func KeyboardCheckPressed(key Key) bool {
 	return false
 }
 
