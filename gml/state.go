@@ -5,19 +5,30 @@ import (
 )
 
 var (
-	gState *state = newState()
+	gState       *state       = newState()
+	gGameGlobals *gameGlobals = new(gameGlobals)
 )
 
+// todo: rename to world
 type state struct {
 	instanceManager          instanceManager
 	instancesMarkedForDelete []InstanceIndex
 	isCreatingRoomInstance   bool
 	pauseCallback            func() bool
-	hasGameEnded             bool
-	frameCount               int
-	//gWidth                     int
-	gHeight                    int
-	frameBudgetNanosecondsUsed int64
+}
+
+type gameGlobals struct {
+	hasGameEnded bool
+	// frameCount is how many draw calls have executed since
+	// the application started, ie. not skipped by ebiten
+	frameCount int
+	// tickCount is how many update ticks have executed since
+	// the application started
+	tickCount int
+	// frameUpdateBudgetNanosecondsUsed is used to calc a percentage
+	// of how much time was spent updating and rendering the frame
+	// out of how much time or budget you have
+	frameUpdateBudgetNanosecondsUsed int64
 }
 
 func newState() *state {
@@ -26,25 +37,30 @@ func newState() *state {
 	return s
 }
 
-// FrameUsage returns a string like "1% (55ns)" to tell you how much
-// of your frame budget has been utilized. (Assumes 60FPS)
-func FrameUsage() string {
-	frameBudgetUsed := gState.frameBudgetNanosecondsUsed
-	timeTaken := float64(frameBudgetUsed) / 16000000.0
-	//fmt.Printf("Time used: %v / 16000000.0\n", frameBudgetUsed)
+// DebugFrameUsage returns a string like "1% (55ns)" to tell you how much
+// of your frame budget has been utilized.
+func DebugFrameUsage() string {
+	frameBudgetUsed := gGameGlobals.frameUpdateBudgetNanosecondsUsed
+	timePerFrame := (1000000000 / float64(DesignedTPS())) // 1 second divided by 60 TPS, (1 = 1000000000 in nanoseconds)
+	timeTaken := float64(frameBudgetUsed) / timePerFrame
 	text := strconv.FormatFloat(timeTaken*100, 'f', 6, 64)
-	return text + "% (" + strconv.Itoa(int(gState.frameBudgetNanosecondsUsed)) + "ns)"
+	return text + "% (" + strconv.Itoa(int(frameBudgetUsed)) + "ns)"
+}
+
+// DebugTickCount is incremented by 1 per update() call
+func DebugTickCount() int {
+	return gGameGlobals.tickCount
+}
+
+// DebugFrameCount is similar to DebugTickCount but doesn't increase if ebiten skips the draw
+func DebugFrameCount() int {
+	return gGameGlobals.frameCount
 }
 
 // IsCreatingRoomInstance is to be used in the Create() event of your objects, this will only
 // return true if the object is being created from room data, not code.
 func IsCreatingRoomInstance() bool {
 	return gState.isCreatingRoomInstance
-}
-
-// DebugFrameCount is incremented by 1 per frame and can be used to debug
-func DebugFrameCount() int {
-	return gState.frameCount
 }
 
 // InstanceSetPauseCallback will call the provided function to check if instances

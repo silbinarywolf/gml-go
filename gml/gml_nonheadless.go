@@ -5,6 +5,7 @@ package gml
 import (
 	"github.com/hajimehoshi/ebiten"
 	"github.com/silbinarywolf/gml-go/gml/internal/dt"
+	"github.com/silbinarywolf/gml-go/gml/monotime"
 )
 
 var (
@@ -20,16 +21,26 @@ func SetMaxTPS(tps int) {
 }
 
 func updateAndDrawEbiten(s *ebiten.Image) error {
-	gScreen = s
-	result := update()
-	draw()
-	return result
+	frameStartTime := monotime.Now()
+
+	// Update/Draw
+	var err error
+	{
+		gScreen = s
+		err = update()
+		draw()
+	}
+
+	gGameGlobals.frameUpdateBudgetNanosecondsUsed = monotime.Now() - frameStartTime
+	gGameGlobals.tickCount++
+	return err
 }
 
 func draw() {
 	if !ebiten.IsDrawingSkipped() {
 		context := contextUpdate()
 		context.Draw()
+		gGameGlobals.frameCount++
 	}
 }
 

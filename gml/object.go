@@ -201,7 +201,7 @@ func (inst *Object) UnsafeSnapshotUnmarshalBinary(buf *bytes.Buffer) error {
 	if err := binary.Read(buf, binary.LittleEndian, &roomInstanceIndex); err != nil {
 		return err
 	}
-	roomInstanceIndex.RoomInstanceChangeRoom(inst)
+	roomInstanceIndex.InstanceChangeRoom(inst)
 	if err := binary.Read(buf, binary.LittleEndian, &inst.objectExternal.Rect); err != nil {
 		return err
 	}

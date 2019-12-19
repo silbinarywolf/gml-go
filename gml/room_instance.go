@@ -52,7 +52,7 @@ func RoomInstanceNew() RoomInstanceIndex {
 	return roomInst.index
 }
 
-func (roomInstanceIndex RoomInstanceIndex) RoomInstanceChangeRoom(baseObj *Object) {
+func (roomInstanceIndex RoomInstanceIndex) InstanceChangeRoom(baseObj *Object) {
 	roomInst := &roomInstanceState.roomInstances[roomInstanceIndex]
 	if !roomInst.used {
 		return

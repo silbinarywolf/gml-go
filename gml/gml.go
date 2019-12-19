@@ -11,7 +11,6 @@ import (
 	"github.com/silbinarywolf/gml-go/gml/internal/file"
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 	_ "github.com/silbinarywolf/gml-go/gml/internal/paniccatch"
-	"github.com/silbinarywolf/gml-go/gml/monotime"
 )
 
 type DefaultContext struct{}
@@ -210,10 +209,7 @@ func Run(controller gameController, gameSettings GameSettings) {
 
 // GameEnd will close the game
 func GameEnd() {
-	if gState.hasGameEnded {
-		return
-	}
-	gState.hasGameEnded = true
+	gGameGlobals.hasGameEnded = true
 }
 
 type contextUpdateLoop interface {
@@ -257,8 +253,6 @@ func ContextUpdatePush(context contextUpdateLoop) {
 }
 
 func update() error {
-	frameStartTime := monotime.Now()
-	gState.frameCount++
 
 	// update inputs
 	keyboardUpdate()
@@ -273,8 +267,7 @@ func update() error {
 	context := contextUpdate()
 	context.Update()
 
-	gState.frameBudgetNanosecondsUsed = monotime.Now() - frameStartTime
-	if gState.hasGameEnded {
+	if gGameGlobals.hasGameEnded {
 		return errGameEnd
 	}
 	return nil
