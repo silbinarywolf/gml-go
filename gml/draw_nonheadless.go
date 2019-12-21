@@ -31,15 +31,6 @@ func DrawSetGUI(guiMode bool) {
 	isDrawGuiMode = guiMode
 }
 
-type SpriteFrame struct {
-	SpriteIndex sprite.SpriteIndex
-	ImageIndex  float64
-}
-
-type DrawSpriteMaskOptions struct {
-	Masks []SpriteFrame
-}
-
 // DrawSpriteCutMask will draw the given sprite but allow you to pass multiple sprite images in to cut out transparency.
 func DrawSpriteCutMask(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64, options DrawSpriteMaskOptions) {
 	if spriteIndex == sprite.SprUndefined {

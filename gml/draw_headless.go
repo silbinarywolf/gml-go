@@ -50,3 +50,6 @@ func DrawText(x, y float64, message string, col color.Color) {
 
 func DrawTextAlpha(x, y float64, message string, col color.Color, alpha float64) {
 }
+
+func DrawSpriteCutMask(spriteIndex sprite.SpriteIndex, subimage float64, x, y float64, options DrawSpriteMaskOptions) {
+}
