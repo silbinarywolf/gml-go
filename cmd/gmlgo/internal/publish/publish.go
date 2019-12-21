@@ -133,6 +133,10 @@ func compileWeb(src string, distFolder string, args []string) error {
 }
 
 func compileWindows(src string, distFolder string, args []string) error {
+	// NOTE(Jae): 2019-12-21
+	// We dont want to show the console window for published builds
+	args = append(args, "-ldflags", "-H=windowsgui")
+
 	dest := distFolder + "/windows"
 	if err := compileBinary(
 		src,
