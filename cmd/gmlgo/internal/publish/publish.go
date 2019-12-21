@@ -111,11 +111,11 @@ func run(cmd *base.Command, args []string) error {
 	return nil
 }
 
-func compileWeb(dir string, distFolder string, args []string) error {
-	distFolder = distFolder + "/web"
+func compileWeb(src string, distFolder string, args []string) error {
+	dest := distFolder + "/web"
 	if err := compileBinary(
-		dir,
-		distFolder,
+		src,
+		dest,
 		"main.wasm",
 		"js",
 		"wasm",
@@ -123,19 +123,20 @@ func compileWeb(dir string, distFolder string, args []string) error {
 	); err != nil {
 		return err
 	}
-	if err := ioutil.WriteFile(distFolder+"/index.html", indexHTMLData, os.ModePerm); err != nil {
+	if err := ioutil.WriteFile(dest+"/index.html", indexHTMLData, os.ModePerm); err != nil {
 		return err
 	}
-	if err := ioutil.WriteFile(distFolder+"/wasm_exec.js", wasmJSData, os.ModePerm); err != nil {
+	if err := ioutil.WriteFile(dest+"/wasm_exec.js", wasmJSData, os.ModePerm); err != nil {
 		return err
 	}
 	return nil
 }
 
-func compileWindows(dir string, distFolder string, args []string) error {
+func compileWindows(src string, distFolder string, args []string) error {
+	dest := distFolder + "/windows"
 	if err := compileBinary(
-		dir,
-		distFolder+"/windows",
+		src,
+		dest,
 		"game.exe",
 		"windows",
 		"amd64",
@@ -143,13 +144,17 @@ func compileWindows(dir string, distFolder string, args []string) error {
 	); err != nil {
 		return err
 	}
+	if err := asset.CopyAllFilesWithExt(src, dest, ".dll"); err != nil {
+		return err
+	}
 	return nil
 }
 
-func compileLinux(dir string, distFolder string, args []string) error {
+func compileLinux(src string, distFolder string, args []string) error {
+	dest := distFolder + "/linux"
 	if err := compileBinary(
-		dir,
-		distFolder+"/linux",
+		src,
+		dest,
 		"game",
 		"linux",
 		"amd64",
@@ -157,18 +162,25 @@ func compileLinux(dir string, distFolder string, args []string) error {
 	); err != nil {
 		return err
 	}
+	if err := asset.CopyAllFilesWithExt(src, dest, ".so"); err != nil {
+		return err
+	}
 	return nil
 }
 
-func compileMac(dir string, distFolder string, args []string) error {
+func compileMac(src string, distFolder string, args []string) error {
+	dest := distFolder + "/mac"
 	if err := compileBinary(
-		dir,
-		distFolder+"/mac",
+		src,
+		dest,
 		"game",
 		"darwin",
 		"amd64",
 		args,
 	); err != nil {
+		return err
+	}
+	if err := asset.CopyAllFilesWithExt(src, dest, ".dylib"); err != nil {
 		return err
 	}
 	return nil
@@ -181,7 +193,6 @@ func compileBinary(gameDir string, outputDir string, binaryName string, GOOS str
 	argsNew := make([]string, 0, 3)
 	argsNew = append(argsNew, "-o", outputDir+"/"+binaryName)
 	argsNew = append(argsNew, args...)
-	//panic(xerrors.Sprintf("%v", args))
 	if err := build.Build(outputDir, argsNew, []string{"GOOS=" + GOOS, "GOARCH=" + GOARCH}); err != nil {
 		return err
 	}

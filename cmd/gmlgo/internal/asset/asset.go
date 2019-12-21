@@ -15,6 +15,34 @@ var whitelistExt = map[string]bool{
 	".json": true,
 }
 
+// CopyAllFilesWithExt was built to copy files specific to certain OS builds
+// to the correct folders
+func CopyAllFilesWithExt(src, dst, ext string) error {
+	entries, err := ioutil.ReadDir(src)
+	if err != nil {
+		return err
+	}
+	for _, entry := range entries {
+		sourcePath := filepath.Join(src, entry.Name())
+		destPath := filepath.Join(dst, entry.Name())
+		fileInfo, err := os.Stat(sourcePath)
+		if err != nil {
+			return err
+		}
+		switch fileInfo.Mode() & os.ModeType {
+		case os.ModeDir, os.ModeSymlink:
+			// ignore
+		default:
+			if filepath.Ext(sourcePath) == ext {
+				if err := CopyFile(sourcePath, destPath); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
+}
+
 // CopyAssetDirectory recursively copies a src directory to a destination.
 func CopyAssetDirectory(src, dst string) error {
 	entries, err := ioutil.ReadDir(src)
@@ -57,7 +85,7 @@ func CopyAssetDirectory(src, dst string) error {
 			// ignore
 		default:
 			if _, ok := whitelistExt[filepath.Ext(sourcePath)]; ok {
-				if err := copyFile(sourcePath, destPath); err != nil {
+				if err := CopyFile(sourcePath, destPath); err != nil {
 					return err
 				}
 				createdFileOrDir = true
@@ -97,7 +125,7 @@ func copyDirectory(src, dst string) error {
 			// ignore
 		default:
 			if _, ok := whitelistExt[filepath.Ext(sourcePath)]; ok {
-				if err := copyFile(sourcePath, destPath); err != nil {
+				if err := CopyFile(sourcePath, destPath); err != nil {
 					return err
 				}
 				isSymlink := entry.Mode()&os.ModeSymlink != 0
@@ -140,7 +168,7 @@ func copyDirectoryRecursive(src, dst string) error {
 			// ignore
 		default:
 			if _, ok := whitelistExt[filepath.Ext(sourcePath)]; ok {
-				if err := copyFile(sourcePath, destPath); err != nil {
+				if err := CopyFile(sourcePath, destPath); err != nil {
 					return err
 				}
 				createdFileOrDir = true
@@ -160,7 +188,7 @@ func copyDirectoryRecursive(src, dst string) error {
 }
 
 // Copy copies a src file to a dst file where src and dst are regular files.
-func copyFile(src, dst string) error {
+func CopyFile(src, dst string) error {
 	sourceFileStat, err := os.Stat(src)
 	if err != nil {
 		return err
