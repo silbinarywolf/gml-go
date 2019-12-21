@@ -10,10 +10,6 @@ import (
 	"github.com/silbinarywolf/gml-go/gml/internal/user"
 )
 
-const (
-	debugMode = true
-)
-
 func debugConfigPath(name string) string {
 	configPath := user.HomeDir() + "/.gmlgo"
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {

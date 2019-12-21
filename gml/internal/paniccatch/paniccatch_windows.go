@@ -1,9 +1,4 @@
-// Log the panic under windows to the log file
-//
-// Code from minix, via
-//
-// http://play.golang.org/p/kLtct7lSUg
-// https://stackoverflow.com/questions/34772012/capturing-panic-in-golang
+// +build windows
 
 package paniccatch
 
