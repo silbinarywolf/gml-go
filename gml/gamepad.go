@@ -10,6 +10,8 @@ const maxGamepads = 12
 
 const (
 	GpButtonNone GamepadButton = 0
+	// GpButtonFirst is to be used for looping over all buttons
+	GpButtonFirst = GpButton0
 )
 
 // WARNING: Do not reorder or change for backwards compatibility.
@@ -71,10 +73,16 @@ const (
 	GpPadLeft
 )
 
+// WARNING: Do not reorder or change for backwards compatibility.
+// This allows these values to be used when storing gamepad settings to persistent storage.
 const (
-	GpAxisLH GamepadAxis = 1 + iota
-	GpAxisLV
-	gpAxisSize
+	// GpAxisFirst is to be used for looping over all axises
+	GpAxisFirst = GpAxisLH
+
+	GpAxisNone = 0
+	GpAxisLH   = 1
+	GpAxisLV   = 2
+	gpAxisSize = 3
 )
 
 func (button GamepadAxis) String() string {

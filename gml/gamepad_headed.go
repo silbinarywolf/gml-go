@@ -57,8 +57,8 @@ var (
 	gamepadStateList [maxGamepads][GpSize]gamepadState
 )
 
-func GamepadButtonCount(id int) int {
-	return ebiten.GamepadButtonNum(id)
+func GamepadButtonCount(id int) GamepadButton {
+	return GamepadButton(ebiten.GamepadButtonNum(id))
 }
 
 //func GamepadGetDeviceCount() int {
@@ -85,8 +85,12 @@ func GamepadCheckPressed(id int, button GamepadButton) bool {
 	return gamepadStateList[id][button] == gamepadPressed
 }
 
+func GamepadAxisCount(id int) GamepadAxis {
+	return GamepadAxis(ebiten.GamepadAxisNum(id))
+}
+
 func GamepadAxisValue(id int, axis GamepadAxis) float64 {
-	return ebiten.GamepadAxis(id, int(axis))
+	return ebiten.GamepadAxis(id, int(axis-1))
 }
 
 func gamepadUpdate() {
