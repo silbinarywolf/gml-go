@@ -2,7 +2,9 @@
 
 package gml
 
-import "github.com/hajimehoshi/ebiten"
+import (
+	"github.com/hajimehoshi/ebiten"
+)
 
 type gamepadState int32
 

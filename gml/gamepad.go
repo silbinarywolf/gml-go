@@ -1,5 +1,7 @@
 package gml
 
+import "strconv"
+
 type GamepadButton int32
 
 type GamepadAxis int32
@@ -74,6 +76,10 @@ const (
 	GpAxisLV
 	gpAxisSize
 )
+
+func (button GamepadAxis) String() string {
+	return "Axis " + strconv.Itoa(int(button))
+}
 
 var gamepadToString = []string{
 	GpButton0:  "Button 0",
