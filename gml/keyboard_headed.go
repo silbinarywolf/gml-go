@@ -6,7 +6,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 )
 
-type keyState int
+type keyState int32
 
 const (
 	keyNotHeld keyState = 0 + iota

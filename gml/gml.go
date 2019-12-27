@@ -256,6 +256,7 @@ func update() error {
 
 	// update inputs
 	keyboardUpdate()
+	gamepadUpdate()
 	keyboardStringUpdate()
 	mouseUpdate()
 

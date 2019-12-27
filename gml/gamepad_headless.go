@@ -13,3 +13,6 @@ func GamepadCheck(id int, button GamepadButton) bool {
 func GamepadAxisValue(id int, axis GamepadAxis) float64 {
 	return 0
 }
+
+func gamepadUpdate() {
+}
