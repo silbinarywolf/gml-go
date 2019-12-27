@@ -93,6 +93,10 @@ func GamepadAxisValue(id int, axis GamepadAxis) float64 {
 	return ebiten.GamepadAxis(id, int(axis-1))
 }
 
+func GamepadGetDescription(id int) string {
+	return ebiten.GamepadName(id)
+}
+
 func gamepadUpdate() {
 	for deviceId := 0; deviceId < maxGamepads; deviceId++ {
 		for i, _ := range gamepadStateList[deviceId] {
