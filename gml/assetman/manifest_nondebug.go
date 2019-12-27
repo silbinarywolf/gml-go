@@ -1,4 +1,4 @@
-// +build !debug
+// +build js !debug
 
 package assetman
 
