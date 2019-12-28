@@ -98,7 +98,22 @@ func GamepadGetDescription(id int) string {
 }
 
 func gamepadUpdate() {
-	for deviceId := 0; deviceId < maxGamepads; deviceId++ {
+	// Get gamepads connected
+	gamepadCount := 0
+	{
+		gamepadIds := ebiten.GamepadIDs()
+		for _, id := range gamepadIds {
+			id += 1
+			if id > gamepadCount {
+				gamepadCount = id
+			}
+		}
+		if gamepadCount >= maxGamepads {
+			gamepadCount = maxGamepads - 1
+		}
+	}
+
+	for deviceId := 0; deviceId < gamepadCount; deviceId++ {
 		for i, _ := range gamepadStateList[deviceId] {
 			ebitenKey := gamepadToEbiten[i]
 			if ebitenKey <= 0 {
