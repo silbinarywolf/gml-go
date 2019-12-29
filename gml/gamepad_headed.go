@@ -93,6 +93,10 @@ func GamepadAxisValue(id int, axis GamepadAxis) float64 {
 	return ebiten.GamepadAxis(id, int(axis-1))
 }
 
+func GamepadGetGUID(id int) string {
+	return ebiten.GamepadGUID(id)
+}
+
 func GamepadGetDescription(id int) string {
 	return ebiten.GamepadName(id)
 }

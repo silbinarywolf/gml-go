@@ -22,6 +22,10 @@ func GamepadAxisValue(id int, axis GamepadAxis) float64 {
 	return 0
 }
 
+func GamepadGetGUID(id int) string {
+	return ""
+}
+
 func GamepadGetDescription(id int) string {
 	return ""
 }
