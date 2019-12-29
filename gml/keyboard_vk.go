@@ -1,5 +1,7 @@
 package gml
 
+// WARNING: Do not reorder or change for backwards compatibility.
+// This allows these values to be used when storing keyboard settings to persistent storage.
 const (
 	VkNoKey       Key = 0 + iota // keycode representing that no key is pressed
 	VkAnykey                     // keycode representing that any key is pressed

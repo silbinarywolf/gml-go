@@ -7,7 +7,7 @@ import (
 )
 
 var keyboardVkToEbiten = []ebiten.Key{
-	VkNoKey:       -1,                    // keycode representing that no key is pressed
+	VkNoKey:       0,                     // keycode representing that no key is pressed
 	VkAnykey:      0,                     // keycode representing that any key is pressed
 	VkLeft:        ebiten.KeyLeft,        // keycode for left arrow key
 	VkRight:       ebiten.KeyRight,       // keycode for right arrow key
