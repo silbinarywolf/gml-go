@@ -1,7 +1,6 @@
 package serve
 
 import (
-	"bytes"
 	"flag"
 	"io/ioutil"
 	"log"
@@ -29,174 +28,14 @@ var tags *string
 
 var verbose *bool
 
+var wasmJSPath string
+
+var indexHTMLPath string
+
 func init() {
 	tags = Cmd.Flag.String("tags", "", "a list of build tags to consider satisfied during the build")
 	verbose = Cmd.Flag.Bool("verbose", false, "verbose")
 }
-
-const indexHTML = `<html>
-	<head>
-		<meta charset="utf-8">
-		<style>
-			body {
-				background-color: #000;
-				color: #fff;
-				font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-			}
-
-			.error-container {
-				background-color: #F47F7F;
-				border: 1px solid #531212;
-				color: #000;
-				padding: 10px 10px;
-			}
-			.container {
-				width: 1280px;
-				max-width: 100%;
-				margin: 0 auto;
-			}
-			.progress-bar-wrapper {
-				width: 100%;
-				height: 10px;
-				border: 1px solid #266926;
-			}
-			.progress-bar {
-				width: 0%;
-				height: inherit;
-				background-color: #46C346;
-			}
-		</style>
-	</head>
-	<body>
-		<div class="container">
-			<p>Loading...</p>
-			<div class="progress-bar-wrapper">
-				<div class="progress-bar"></div>
-			</div>
-		</div>
-		<script src="wasm_exec.js"></script>
-		<script>
-			window.onerror = function(message, source, lineno, colno, error) {
-				let el = document.createElement("div");
-				el.classList.add("error-container");
-				let newContent = document.createTextNode(message); 
-				el.appendChild(newContent);
-				document.body.appendChild(el);
-			}
-			let goRequest;
-			let progressBar = document.body.querySelector(".progress-bar");
-
-			if (!progressBar) {
-				throw new Error("Missing .progress-bar.")
-			}
-			function setProgressBar(percent) {
-				progressBar.style.width = String(percent) + "%";
-			}
-			let filesProgress = {};
-			function updateProgressBar() {
-				if (!progressBar) {
-					return;
-				}
-				let percent = 0;
-				let i = 0;
-				for (let key in filesProgress) {
-					if (!filesProgress.hasOwnProperty(key)) {
-						continue;
-					}
-					percent += filesProgress[key]
-					i++;
-				}
-				const totalPercent = percent / i;
-				setProgressBar(totalPercent);
-				if (totalPercent < 100) {
-					return;
-				}
-				const go = new Go();
-				WebAssembly.instantiate(goRequest.response, go.importObject).then((result) => {
-					while (document.body.hasChildNodes()) {
-						document.body.removeChild(document.body.childNodes[0]);
-					}
-					go.run(result.instance);
-				});
-			}
-			function preloadFile(path) {
-				const preloadLink = document.createElement("link");
-				preloadLink.href = path;
-				preloadLink.rel = "preload";
-				preloadLink.as = "fetch";
-				preloadLink.type = "application/octet-stream";
-				preloadLink.setAttribute("crossorigin", "crossorigin");
-				filesProgress[path] = 0;
-				preloadLink.addEventListener("progress", function (e) {
-					if (e.lengthComputable) {
-						const percent = (e.loaded / e.total * 100 | 0);
-						filesProgress[path] = percent;
-						updateProgressBar();
-					}
-				});
-				preloadLink.addEventListener("load", function (e) {
-					filesProgress[path] = 100;
-					updateProgressBar();
-				});
-				document.head.appendChild(preloadLink);
-			}
-			function getBinary() {
-				let fullAssetName = "main.wasm";
-				filesProgress[fullAssetName] = 0;
-				let request = new XMLHttpRequest();
-				goRequest = request;
-				request.addEventListener("progress", function (e) {
-					if (e.lengthComputable) {
-						let percent = (e.loaded / e.total * 100 | 0);
-						filesProgress[fullAssetName] = percent;
-						updateProgressBar();
-					}
-				});
-				request.addEventListener("load", function () {
-					if (request.status !== 200) {
-						throw new Error(request.status + " " + request.statusText);
-					}
-					filesProgress[fullAssetName] = 100;
-					updateProgressBar();
-				});
-				request.responseType = "arraybuffer";
-				request.open("GET", fullAssetName);
-				request.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-				request.send();
-				return request;
-			}
-			function getManifest() {
-				let request = new XMLHttpRequest();
-				request.overrideMimeType("application/json");
-				request.open("GET", "asset/manifest.json");
-				request.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-				request.addEventListener("load", function() {
-					let jsonResponse = request.response;
-					let json = JSON.parse(jsonResponse);
-
-					getBinary();
-					for (let groupName in json) {
-						if (!json.hasOwnProperty(groupName)) {
-							continue;
-						}
-						let group = json[groupName];
-						for (let key in group) {
-							if (!group.hasOwnProperty(key)) {
-								continue;
-							}
-							let name = group[key];
-							let fullAssetName = "asset/" + groupName + "/" + name + ".data";
-							preloadFile(fullAssetName);
-						}
-					}
-				});
-				request.send();
-			}
-			getManifest();
-		</script>
-	</body>
-</html>
-`
 
 var (
 	arguments    Arguments
@@ -217,10 +56,6 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	}
 	dir := arguments.Directory
 	tags := arguments.Tags
-
-	if dir != "." {
-		panic("Specifying a custom directory is not currently supported.")
-	}
 
 	// Get path and package
 	upath := r.URL.Path[1:]
@@ -251,16 +86,12 @@ func handle(w http.ResponseWriter, r *http.Request) {
 
 	switch filepath.Base(fpath) {
 	case "index.html":
-		if _, err := os.Stat(fpath); os.IsNotExist(err) {
-			http.ServeContent(w, r, "index.html", time.Now(), bytes.NewReader([]byte(indexHTML)))
-			return
-		}
+		log.Print("serving index.html: " + indexHTMLPath)
+		http.ServeFile(w, r, indexHTMLPath)
 	case "wasm_exec.js":
-		if _, err := os.Stat(fpath); os.IsNotExist(err) {
-			f := filepath.Join(runtime.GOROOT(), "misc", "wasm", "wasm_exec.js")
-			http.ServeFile(w, r, f)
-			return
-		}
+		log.Print("serving index.html: " + wasmJSPath)
+		http.ServeFile(w, r, wasmJSPath)
+		return
 	case "main.wasm":
 		if _, err := os.Stat(fpath); os.IsNotExist(err) {
 			// go build
@@ -331,6 +162,7 @@ func run(cmd *base.Command, args []string) error {
 }
 
 func Run(args Arguments) error {
+	// Setup globals
 	if args.Port == "" {
 		args.Port = ":8080"
 	}
@@ -338,6 +170,27 @@ func Run(args Arguments) error {
 		args.Directory = "."
 	}
 	arguments = args
+
+	// Validation of settings
+	dir := args.Directory
+	if dir != "." {
+		panic("Specifying a custom directory is not currently supported.")
+	}
+
+	// Get default resources
+	var err error
+	wasmJSPath, err = shared.GetDefaultWasmJSPath(args.Directory)
+	if err != nil {
+		panic(err)
+	}
+	log.Printf("wasm_exec.js: %s\n", wasmJSPath)
+	indexHTMLPath, err = shared.GetDefaultIndexHTMLPath(args.Directory)
+	if err != nil {
+		panic(err)
+	}
+	log.Printf("index.html: %s\n", indexHTMLPath)
+
+	// Start server
 	log.Printf("listening on %q...", args.Port)
 	http.HandleFunc("/", handle)
 	shared.OpenBrowser("http://localhost" + args.Port)

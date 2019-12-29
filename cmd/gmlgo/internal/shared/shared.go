@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
@@ -64,12 +65,47 @@ func OpenBrowser(url string) {
 	}
 }
 
-func ReadDefaultIndexHTML(gameDir string) ([]byte, error) {
+func GetDefaultWasmJSPath(gameDir string) (string, error) {
+	const baseName = "wasm_exec.js"
+	// Look for user-override
+	{
+		dir := gameDir + "/html/" + baseName
+		if _, err := os.Stat(dir); !os.IsNotExist(err) {
+			return dir, nil
+		}
+	}
+	// Look for engine default
 	dir, err := computeCmdSourceDir(gameDir)
+	if err != nil {
+		return "", err
+	}
+	dir = dir + "/files/" + baseName
+	return dir, nil
+}
+
+func GetDefaultIndexHTMLPath(gameDir string) (string, error) {
+	const baseName = "index.html"
+	// Look for user-override
+	{
+		dir := gameDir + "/html/" + baseName
+		if _, err := os.Stat(dir); !os.IsNotExist(err) {
+			return dir, nil
+		}
+	}
+	// Look for engine default
+	dir, err := computeCmdSourceDir(gameDir)
+	if err != nil {
+		return "", err
+	}
+	dir = dir + "/files/" + baseName
+	return dir, nil
+}
+
+func ReadDefaultIndexHTML(gameDir string) ([]byte, error) {
+	dir, err := GetDefaultIndexHTMLPath(gameDir)
 	if err != nil {
 		return nil, err
 	}
-	dir = dir + "/files/index.html"
 	data, err := ioutil.ReadFile(dir)
 	if err != nil {
 		return nil, err
@@ -78,11 +114,10 @@ func ReadDefaultIndexHTML(gameDir string) ([]byte, error) {
 }
 
 func ReadDefaultWasmJS(gameDir string) ([]byte, error) {
-	dir, err := computeCmdSourceDir(gameDir)
+	dir, err := GetDefaultWasmJSPath(gameDir)
 	if err != nil {
 		return nil, err
 	}
-	dir = dir + "/files/wasm_exec.js"
 	data, err := ioutil.ReadFile(dir)
 	if err != nil {
 		return nil, err
