@@ -9,10 +9,12 @@ var (
 )
 
 func lazyLoad() {
-	var err error
-	node, err = snowflake.NewNode(0)
-	if err != nil {
-		panic("error creating NewNode: " + err.Error())
+	if node == nil {
+		var err error
+		node, err = snowflake.NewNode(0)
+		if err != nil {
+			panic("error creating NewNode: " + err.Error())
+		}
 	}
 }
 
