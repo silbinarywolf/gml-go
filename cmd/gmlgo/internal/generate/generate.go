@@ -69,7 +69,7 @@ func (g *Generator) Headerf(format string, args ...interface{}) {
 }
 
 type Parser struct {
-	pkg *Package // Package we are scanning.
+	pkgs []*Package // Package we are scanning.
 }
 
 // File holds a single parsed file and associated data.
@@ -79,7 +79,7 @@ type File struct {
 }
 
 type Package struct {
-	dir      string
+	path     string
 	name     string
 	defs     map[*ast.Ident]types.Object
 	files    []*File
@@ -132,15 +132,90 @@ func Run(args Arguments) (err error) {
 		// Generate assets
 		generateAssets(dir)
 
-		gameDir := filepath.Join(dir, "game")
+		// Parse packages
+		packageList := make([]*Package, 0, 10)
+		{
+			projectDir, err := filepath.Abs(dir)
+			if err != nil {
+				panic(err)
+			}
+			projectDir = filepath.Join(projectDir, "...")
+			cfg := &packages.Config{
+				Mode: packages.LoadFiles | packages.NeedImports | packages.LoadSyntax,
+				// NOTE(Jae): 2019-05-17
+				// Tests shouldn't have game objects in them, so set to false
+				Tests: false,
+				// NOTE(Jae): 2019-05-17
+				// Build tags probably don't matter for game object structure parsing.
+				//BuildFlags: []string{fmt.Sprintf("-tags=%s", strings.Join(tags, " "))},
+			}
+			pkgs, err := packages.Load(cfg, projectDir)
+			if err != nil {
+				log.Fatal(err)
+			}
+			for _, pkg := range pkgs {
+				//if len(pkg.Syntax) != len(pkg.GoFiles) {
+				//	panic("Unexpected error")
+				//}
+				if len(pkg.GoFiles) == 0 {
+					continue
+				}
+				pkgInfo := &Package{
+					path:     filepath.Dir(pkg.GoFiles[0]),
+					name:     pkg.Name,
+					defs:     pkg.TypesInfo.Defs,
+					typesPkg: pkg.Types,
+					fileSet:  pkg.Fset,
+					files:    make([]*File, len(pkg.Syntax)),
+				}
+				for i, file := range pkg.Syntax {
+					pkgInfo.files[i] = &File{
+						file: file,
+						pkg:  pkgInfo,
+						//trimPrefix:  p.trimPrefix,
+						//lineComment: p.lineComment,
+					}
+				}
+				packageList = append(packageList, pkgInfo)
+			}
+		}
 
-		// Run parser
-		p := new(Parser)
-		p.parseGamePackageDir(gameDir, []string{})
-		structsUsingObject := p.parseGameObjectStructs()
+		// Generation objects for each package (if any parsed)
+		for _, pkg := range packageList {
 
-		// Run generate
-		generateGameObject(gameDir, p.pkg.name, structsUsingObject)
+			structsUsingObject := inspectGameObjectStructs(pkg)
+			if len(structsUsingObject) == 0 {
+				continue
+			}
+			fmt.Printf("Path: %s\n", pkg.path)
+			// Run generate
+			generateGameObject(pkg.path, pkg.name, structsUsingObject)
+		}
+
+		/*{
+			gameDir := filepath.Join(dir, "game")
+
+			// Run parser
+			p := new(Parser)
+			p.parseGamePackageDir(gameDir, []string{})
+			structsUsingObject := p.parseGameObjectStructs()
+			if len(structsUsingObject) > 0 {
+				// Run generate
+				generateGameObject(gameDir, p.pkg.name, structsUsingObject)
+			}
+		}
+		{
+			gameDir := filepath.Join(dir, "game", "object")
+
+			// Run parser
+			p := new(Parser)
+			p.parseGamePackageDir(gameDir, []string{})
+			structsUsingObject := p.parseGameObjectStructs()
+			if len(structsUsingObject) > 0 {
+				// Run generate
+				generateGameObject(gameDir, p.pkg.name, structsUsingObject)
+			}
+		}*/
 	}
 	return
 }
@@ -158,55 +233,6 @@ func buildContext(tags []string) *build.Context {
 	ctx := build.Default
 	ctx.BuildTags = tags
 	return &ctx
-}
-
-// parseGamePackageDir parses the package residing in the directory.
-func (p *Parser) parseGamePackageDir(gameDir string, tags []string) {
-	gameDir, err := filepath.Abs(gameDir)
-	if err != nil {
-		panic(err)
-	}
-	cfg := &packages.Config{
-		Mode: packages.LoadFiles | packages.LoadSyntax,
-		// NOTE(Jake): 2019-05-17
-		// Tests shouldn't have game objects in them, so set to false
-		Tests: false,
-		// NOTE(Jake): 2019-05-17
-		// Build tags probably don't matter for game object structure parsing.
-		//BuildFlags: []string{fmt.Sprintf("-tags=%s", strings.Join(tags, " "))},
-	}
-	pkgs, err := packages.Load(cfg, gameDir) // packages.Load(cfg, patterns...)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if len(pkgs) == 0 {
-		log.Fatalf("error: no packages found")
-	}
-	if len(pkgs) != 1 {
-		log.Fatalf("error: %d packages found", len(pkgs))
-	}
-
-	pkg := pkgs[0]
-	if pkg.Name == "" {
-		panic("Cannot determine package name from directory: " + gameDir)
-	}
-
-	p.pkg = &Package{
-		name:     pkg.Name,
-		defs:     pkg.TypesInfo.Defs,
-		typesPkg: pkg.Types,
-		fileSet:  pkg.Fset,
-		files:    make([]*File, len(pkg.Syntax)),
-	}
-
-	for i, file := range pkg.Syntax {
-		p.pkg.files[i] = &File{
-			file: file,
-			pkg:  p.pkg,
-			//trimPrefix:  p.trimPrefix,
-			//lineComment: p.lineComment,
-		}
-	}
 }
 
 // prefixDirectory places the directory name on the beginning of each name in the list.
@@ -266,9 +292,9 @@ func hasEmbeddedObjectRecursive(structTypeInfo *types.Struct) bool {
 	return false
 }
 
-func (p *Parser) parseGameObjectStructs() []Struct {
+func inspectGameObjectStructs(pkg *Package) []Struct {
 	var structsUsingGMLObject []Struct
-	for _, file := range p.pkg.files {
+	for _, file := range pkg.files {
 		if file.file == nil {
 			continue
 		}
@@ -277,10 +303,10 @@ func (p *Parser) parseGameObjectStructs() []Struct {
 			// type XXXX struct
 			case *ast.TypeSpec:
 				structName := n.Name.Name
-				if p.pkg.typesPkg == nil {
+				if pkg.typesPkg == nil {
 					return false
 				}
-				typeName := p.pkg.typesPkg.Scope().Lookup(structName)
+				typeName := pkg.typesPkg.Scope().Lookup(structName)
 				if typeName == nil {
 					// Skip if cannot lookup struct name
 					return false
@@ -300,7 +326,7 @@ func (p *Parser) parseGameObjectStructs() []Struct {
 						Struct:  structTypeInfo,
 						ID:      typeInfo.Obj().Pkg().Path() + "." + typeInfo.Obj().Name(),
 						Node:    n,
-						FileSet: p.pkg.fileSet,
+						FileSet: pkg.fileSet,
 					})
 				}
 				return false
@@ -318,9 +344,9 @@ func (p *Parser) parseGameObjectStructs() []Struct {
 }
 
 // generate produces the code for object indexes
-func generateGameObject(gameDir string, packageName string, structsUsingGMLObject []Struct) {
+func generateGameObject(dir string, packageName string, structsUsingGMLObject []Struct) {
 	// get filename
-	outputName := filepath.Join(gameDir, genFile)
+	outputName := filepath.Join(dir, genFile)
 
 	// check existing file
 	var input []byte
@@ -447,7 +473,8 @@ func (g *Generator) generateSerialization(structsUsingGMLObject []Struct) {
 				}
 			}
 		}
-		if isSerializable {
+		if isSerializable &&
+			record.Struct.NumFields() > 0 {
 			g.Printf("func (self %s) UnsafeSnapshotMarshalBinaryRoot(buf *bytes.Buffer) error {", record.Name)
 			for i := 0; i < record.Struct.NumFields(); i++ {
 				field := record.Struct.Field(i)
