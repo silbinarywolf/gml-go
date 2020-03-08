@@ -28,7 +28,7 @@ func (context *DefaultContext) Update() {
 	gController.GamePostUpdate()
 
 	// Remove deleted entities at safe point
-	// ie. not while executign user-code / at the end of the frame
+	// ie. not while executing user-code / at the end of the frame
 	gState.removeDeletedEntities()
 
 	// NOTE: Jake: 2019-02-24

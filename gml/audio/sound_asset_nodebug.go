@@ -14,7 +14,6 @@ import (
 func debugLoadAndWriteSoundAsset(name string) *soundAsset {
 	// Load from file
 	path := file.AssetDirectory + "/" + SoundDirectoryBase + "/" + name + ".data"
-	file.OpenFile(path)
 	fileData, err := file.OpenFile(path)
 	if err != nil {
 		panic(errors.New("Unable to find sound asset: " + path))
