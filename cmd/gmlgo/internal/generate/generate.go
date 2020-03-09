@@ -81,7 +81,6 @@ type File struct {
 type Package struct {
 	path     string
 	name     string
-	defs     map[*ast.Ident]types.Object
 	files    []*File
 	fileSet  *token.FileSet
 	typesPkg *types.Package
@@ -141,7 +140,9 @@ func Run(args Arguments) (err error) {
 			}
 			projectDir = filepath.Join(projectDir, "...")
 			cfg := &packages.Config{
-				Mode: packages.LoadFiles | packages.NeedImports | packages.LoadSyntax,
+				Mode: packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles |
+					packages.NeedImports | packages.NeedDeps | packages.NeedExportsFile |
+					packages.NeedTypes | packages.NeedSyntax | packages.NeedTypesInfo | packages.NeedTypesSizes,
 				// NOTE(Jae): 2019-05-17
 				// Tests shouldn't have game objects in them, so set to false
 				Tests: false,
@@ -163,7 +164,6 @@ func Run(args Arguments) (err error) {
 				pkgInfo := &Package{
 					path:     filepath.Dir(pkg.GoFiles[0]),
 					name:     pkg.Name,
-					defs:     pkg.TypesInfo.Defs,
 					typesPkg: pkg.Types,
 					fileSet:  pkg.Fset,
 					files:    make([]*File, len(pkg.Syntax)),
@@ -172,8 +172,6 @@ func Run(args Arguments) (err error) {
 					pkgInfo.files[i] = &File{
 						file: file,
 						pkg:  pkgInfo,
-						//trimPrefix:  p.trimPrefix,
-						//lineComment: p.lineComment,
 					}
 				}
 				packageList = append(packageList, pkgInfo)
@@ -182,7 +180,6 @@ func Run(args Arguments) (err error) {
 
 		// Generation objects for each package (if any parsed)
 		for _, pkg := range packageList {
-
 			structsUsingObject := inspectGameObjectStructs(pkg)
 			if len(structsUsingObject) == 0 {
 				continue
@@ -298,8 +295,9 @@ func inspectGameObjectStructs(pkg *Package) []Struct {
 		if file.file == nil {
 			continue
 		}
-		ast.Inspect(file.file, func(n ast.Node) bool {
-			switch n := n.(type) {
+		//var prevNode ast.Node
+		ast.Inspect(file.file, func(node ast.Node) bool {
+			switch n := node.(type) {
 			// type XXXX struct
 			case *ast.TypeSpec:
 				structName := n.Name.Name
@@ -321,6 +319,18 @@ func inspectGameObjectStructs(pkg *Package) []Struct {
 					return false
 				}
 				if hasEmbeddedObjectRecursive(structTypeInfo) {
+					fmt.Printf("doc: %v\n", n.Doc.Text())
+					fmt.Printf("comment: %v\n", n.Comment.Text())
+					if typeInfo, ok := n.Type.(*ast.StructType); ok {
+						for _, field := range typeInfo.Fields.List {
+							fmt.Printf("field doc: %s\n", field.Doc.Text())
+							fmt.Printf("field comment: %s\n", field.Comment.Text())
+						}
+					}
+					/*if typeInfo, ok := prevNode.(*ast.GenDecl); ok {
+						fmt.Printf("gendec;: %v\n", typeInfo.Doc)
+					}*/
+					fmt.Printf("struct: %v -- %v -- %T\n", n.Name, n.Name.Obj, n.Type)
 					structsUsingGMLObject = append(structsUsingGMLObject, Struct{
 						Name:    structName,
 						Struct:  structTypeInfo,
@@ -329,11 +339,29 @@ func inspectGameObjectStructs(pkg *Package) []Struct {
 						FileSet: pkg.fileSet,
 					})
 				}
-				return false
+				return true
 			}
-
+			//prevNode = node
 			return true
 		})
+
+		/*if len(structsUsingGMLObject) > 0 {
+			// determine printer configuration
+			cfg := printer.Config{Tabwidth: 4}
+			//if mode&rawFormat != 0 {
+			cfg.Mode |= printer.RawFormat
+			//}
+
+			// print AST
+			var buf bytes.Buffer
+			if err := cfg.Fprint(&buf, file.pkg.fileSet, file.file); err != nil {
+				panic(fmt.Errorf("print: %s", err))
+			}
+
+			// make sure formatted output is syntactically correct
+			res := buf.Bytes()
+			fmt.Printf(string(res))
+		}*/
 	}
 
 	// Sort alphabetically

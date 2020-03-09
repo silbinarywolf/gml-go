@@ -16,10 +16,8 @@ require (
 	golang.org/x/exp v0.0.0-20191030013958-a1ab85dbe136 // indirect
 	golang.org/x/image v0.0.0-20191009234506-e7c1f5e7dbb8
 	golang.org/x/mobile v0.0.0-20191123054942-d9e324ca8c38 // indirect
-	golang.org/x/net v0.0.0-20191119073136-fc4aabc6c914 // indirect
-	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e // indirect
 	golang.org/x/sys v0.0.0-20191120155948-bd437916bb0e // indirect
 	golang.org/x/text v0.3.2 // indirect
-	golang.org/x/tools v0.0.0-20191124021906-f5828fc9a103
-	golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898
+	golang.org/x/tools v0.0.0-20200308013534-11ec41452d41
+	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543
 )
