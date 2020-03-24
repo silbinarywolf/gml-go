@@ -18,6 +18,8 @@ func lazyLoad() {
 	}
 }
 
+// NewID will generate a new unique distributed ID for an asset.
+// This should only be used by debug code.
 func NewID() uint64 {
 	lazyLoad()
 	return uint64(node.Generate())
