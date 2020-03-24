@@ -184,35 +184,9 @@ func Run(args Arguments) (err error) {
 			if len(structsUsingObject) == 0 {
 				continue
 			}
-			fmt.Printf("Path: %s\n", pkg.path)
 			// Run generate
 			generateGameObject(pkg.path, pkg.name, structsUsingObject)
 		}
-
-		/*{
-			gameDir := filepath.Join(dir, "game")
-
-			// Run parser
-			p := new(Parser)
-			p.parseGamePackageDir(gameDir, []string{})
-			structsUsingObject := p.parseGameObjectStructs()
-			if len(structsUsingObject) > 0 {
-				// Run generate
-				generateGameObject(gameDir, p.pkg.name, structsUsingObject)
-			}
-		}
-		{
-			gameDir := filepath.Join(dir, "game", "object")
-
-			// Run parser
-			p := new(Parser)
-			p.parseGamePackageDir(gameDir, []string{})
-			structsUsingObject := p.parseGameObjectStructs()
-			if len(structsUsingObject) > 0 {
-				// Run generate
-				generateGameObject(gameDir, p.pkg.name, structsUsingObject)
-			}
-		}*/
 	}
 	return
 }
@@ -245,9 +219,11 @@ func prefixDirectory(directory string, names []string) []string {
 }
 
 type Struct struct {
-	Name    string
-	Struct  *types.Struct
-	ID      string
+	Name   string
+	Struct *types.Struct
+	ID     string
+	// GmlUid is the non-zero unique ID of the struct (if set)
+	GmlUid  int
 	Node    *ast.TypeSpec
 	FileSet *token.FileSet
 }
@@ -291,13 +267,54 @@ func hasEmbeddedObjectRecursive(structTypeInfo *types.Struct) bool {
 
 func inspectGameObjectStructs(pkg *Package) []Struct {
 	var structsUsingGMLObject []Struct
+	structToUid := make(map[string]int)
 	for _, file := range pkg.files {
 		if file.file == nil {
 			continue
 		}
-		//var prevNode ast.Node
+		var prevNode *ast.GenDecl
 		ast.Inspect(file.file, func(node ast.Node) bool {
+			//fmt.Printf("node: %T\n", node)
 			switch n := node.(type) {
+			case *ast.GenDecl:
+				prevNode = n
+			case *ast.FuncDecl:
+				const methodName = "GmlUid"
+				if n.Recv == nil ||
+					len(n.Recv.List) != 1 ||
+					n.Name.String() != methodName {
+					return false
+				}
+				starExpr, ok := n.Recv.List[0].Type.(*ast.StarExpr)
+				if !ok {
+					return false
+				}
+				recvIdent, ok := starExpr.X.(*ast.Ident)
+				if !ok {
+					return false
+				}
+				if len(n.Body.List) != 1 {
+					panic("Expected " + methodName + " to be a simple return statement")
+				}
+				returnStmt, ok := n.Body.List[0].(*ast.ReturnStmt)
+				if !ok {
+					panic("Expected " + methodName + " to be a simple return statement")
+				}
+				if len(returnStmt.Results) != 1 {
+					panic("Expected " + methodName + " to be a simple return statement")
+				}
+				basitLit, ok := returnStmt.Results[0].(*ast.BasicLit)
+				if !ok {
+					panic("Expected " + methodName + " to be a simple return statement")
+				}
+				if basitLit.Kind != token.INT {
+					panic("Expected " + methodName + " to return an int")
+				}
+				value, err := strconv.Atoi(basitLit.Value)
+				if err != nil {
+					panic("Expected " + methodName + " to have parseable int value with strconv.Atoi")
+				}
+				structToUid[recvIdent.Name] = value
 			// type XXXX struct
 			case *ast.TypeSpec:
 				structName := n.Name.Name
@@ -319,7 +336,25 @@ func inspectGameObjectStructs(pkg *Package) []Struct {
 					return false
 				}
 				if hasEmbeddedObjectRecursive(structTypeInfo) {
-					fmt.Printf("doc: %v\n", n.Doc.Text())
+					/*for i := 0; i < typeInfo.NumMethods(); i++ {
+						meth := typeInfo.Method(i)
+						sig, ok := meth.Type().(*types.Signature)
+						if !ok {
+							continue
+						}
+						if meth.Name() != "GmlUid" {
+							continue
+						}
+						results := sig.Results()
+						if results.Len() != 1 {
+							panic(meth.Name() + " method must return uint64")
+						}
+						result := results.At(0)
+						fmt.Printf("M: %v -- %v\n", result, sig.Recv())
+						//fmt.Printf("Meth: %s -- %v -- %v\n", meth.Name(), result.Type(), prevNode)
+					}*/
+					//structTypeInfo.Field
+					/*fmt.Printf("doc: %v\n", n.Doc.Text())
 					fmt.Printf("comment: %v\n", n.Comment.Text())
 					if typeInfo, ok := n.Type.(*ast.StructType); ok {
 						for _, field := range typeInfo.Fields.List {
@@ -327,10 +362,10 @@ func inspectGameObjectStructs(pkg *Package) []Struct {
 							fmt.Printf("field comment: %s\n", field.Comment.Text())
 						}
 					}
-					/*if typeInfo, ok := prevNode.(*ast.GenDecl); ok {
-						fmt.Printf("gendec;: %v\n", typeInfo.Doc)
+					fmt.Printf("struct: %v -- %v -- %v\n", n.Name, n.Name.Obj, prevNode)*/
+					/*if prevNode != nil {
+						fmt.Printf("gendecl: %v\n", prevNode.Doc.Text())
 					}*/
-					fmt.Printf("struct: %v -- %v -- %T\n", n.Name, n.Name.Obj, n.Type)
 					structsUsingGMLObject = append(structsUsingGMLObject, Struct{
 						Name:    structName,
 						Struct:  structTypeInfo,
@@ -341,10 +376,10 @@ func inspectGameObjectStructs(pkg *Package) []Struct {
 				}
 				return true
 			}
-			//prevNode = node
 			return true
 		})
 
+		// DEBUG
 		/*if len(structsUsingGMLObject) > 0 {
 			// determine printer configuration
 			cfg := printer.Config{Tabwidth: 4}
@@ -363,6 +398,15 @@ func inspectGameObjectStructs(pkg *Package) []Struct {
 			fmt.Printf(string(res))
 		}*/
 	}
+
+	// Process struct to uid
+	for i := 0; i < len(structsUsingGMLObject); i++ {
+		s := &structsUsingGMLObject[i]
+		if uid, ok := structToUid[s.Name]; ok {
+			s.GmlUid = uid
+		}
+	}
+	structToUid = nil
 
 	// Sort alphabetically
 	sort.Slice(structsUsingGMLObject[:], func(i, j int) bool {
