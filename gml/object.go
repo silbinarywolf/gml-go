@@ -10,16 +10,7 @@ import (
 	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
 )
 
-/*func ObjectGetIndex(name string) (ObjectIndex, bool) {
-	res, ok := ObjectGetIndex(name)
-	return res, ok
-}*/
-
-type ObjectIndex int32
-
-//func (id ObjectIndex) Name() string {
-//	return gObjectManager.indexToName[id]
-//}
+type ObjectIndex uint64
 
 // new allocates a new struct for that object as data only
 func (id ObjectIndex) new() ObjectType {
@@ -112,7 +103,6 @@ func (inst *Object) SetSolid(isSolid bool) {
 
 func (inst *Object) Solid() bool                { return inst.internal.Solid }
 func (inst *Object) BaseObject() *Object        { return inst }
-func (inst *Object) ObjectName() string         { return gObjectManager.indexToName[inst.internal.ObjectIndex] }
 func (inst *Object) ObjectIndex() ObjectIndex   { return inst.internal.ObjectIndex }
 func (inst *Object) ImageAngleRadians() float64 { return inst.internal.ImageAngleRadians }
 func (inst *Object) ImageAngle() float64        { return inst.internal.ImageAngleRadians * (180 / math.Pi) }

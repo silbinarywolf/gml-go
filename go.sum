@@ -37,6 +37,7 @@ github.com/hajimehoshi/oto v0.3.3 h1:Wi7VVtxe9sF2rbDBIJtVXnpFWhRfK57hw0JY7tR2qXM
 github.com/hajimehoshi/oto v0.3.3/go.mod h1:e9eTLBB9iZto045HLbzfHJIc+jP3xaKrjZTghvb6fdM=
 github.com/hajimehoshi/oto v0.3.4 h1:FSlftYfESnZgI1ghi6WLMqVMjTrl9i8nRri3bL4Bdhs=
 github.com/hajimehoshi/oto v0.3.4/go.mod h1:PgjqsBJff0efqL2nlMJidJgVJywLn6M4y8PI4TfeWfA=
+github.com/hajimehoshi/oto v0.5.3 h1:IccIFFUkT0oAr/KdH3LH7USyvI1ZE84HXiGtuCjs3y0=
 github.com/hajimehoshi/oto v0.5.3/go.mod h1:0QXGEkbuJRohbJaxr7ZQSxnju7hEhseiPx2hrh6raOI=
 github.com/jakecoffman/cp v0.1.0/go.mod h1:a3xPx9N8RyFAACD644t2dj/nK4SuLg1v+jL61m2yVo4=
 github.com/jfreymuth/oggvorbis v1.0.0/go.mod h1:abe6F9QRjuU9l+2jek3gj46lu40N4qlYxh2grqkLEDM=
