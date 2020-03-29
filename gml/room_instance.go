@@ -97,6 +97,7 @@ func (roomInstanceIndex RoomInstanceIndex) InstanceCreate(x, y float64, objectIn
 	gState.instanceManager.instanceIndexToIndex[baseObj.internal.InstanceIndex] = slot
 	assert.DebugAssert(baseObj.internal.RoomInstanceIndex == 0, "Room Instance Index cannot be 0")
 
+	inst.Reset()
 	inst.Create()
 	return inst
 }

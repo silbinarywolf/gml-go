@@ -26,11 +26,10 @@ func InstanceRestore(oldInstanceIndex InstanceIndex, objectIndex ObjectIndex) Ob
 }
 
 func allocateNewInstance(objectIndex ObjectIndex) (ObjectType, int) {
-	inst := objectIndex.new()
+	inst := allocateRawInstance(objectIndex)
 	manager := &gState.instanceManager
 	manager.instances = append(manager.instances, inst)
 	slot := len(manager.instances) - 1
-	inst.BaseObject().internal.ObjectIndex = objectIndex
 	return inst, slot
 }
 

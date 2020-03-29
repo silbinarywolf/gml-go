@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"math"
-	"reflect"
 
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 	"github.com/silbinarywolf/gml-go/gml/internal/sprite"
@@ -12,23 +11,15 @@ import (
 
 type ObjectIndex uint64
 
-// new allocates a new struct for that object as data only
-func (id ObjectIndex) new() ObjectType {
-	valToCopy := gObjectManager.idToEntityData[id]
-	if valToCopy == nil {
-		panic("Invalid objectIndex given")
-	}
-	inst := reflect.New(reflect.ValueOf(valToCopy).Elem().Type()).Interface().(ObjectType)
-	baseObj := inst.BaseObject()
-	baseObj.reset()
-	baseObj.internal.ObjectIndex = id
-	return inst
-}
-
 type ObjectType interface {
 	BaseObject() *Object
 	ObjectIndex() ObjectIndex
 	ObjectName() string
+	// Reset is used to revert an instance back to its default values and is called
+	// before Create. This should be used for setting up default values over Create so that
+	// other tools like room editors can utilize the data
+	Reset()
+	// Create is called when an instance is created via InstanceCreate
 	Create()
 	Destroy()
 	Free()
@@ -59,6 +50,8 @@ type Object struct {
 	internal objectInternal
 	objectExternal
 }
+
+func (inst *Object) Reset() {}
 
 func (inst *Object) Create() {}
 

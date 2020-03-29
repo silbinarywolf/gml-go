@@ -1,5 +1,10 @@
 package gml
 
+import (
+	"reflect"
+	"sort"
+)
+
 var gObjectManager = &objectManager{
 	idToEntityData: make(map[ObjectIndex]ObjectType),
 }
@@ -10,8 +15,7 @@ type objectManager struct {
 
 // UnsafeAddObjectGeneratedData is used by code generation to tie the object index to the data
 func UnsafeAddObjectGeneratedData(objectIndex ObjectIndex, data ObjectType) {
-	manager := gObjectManager
-	manager.idToEntityData[objectIndex] = data
+	gObjectManager.idToEntityData[objectIndex] = data
 }
 
 // UnsafeObjectTypeList provides a copy of the list of object type definition data
@@ -22,9 +26,27 @@ func UnsafeObjectTypeList() []ObjectType {
 		panic("UnsafeObjectTypeList is not initialized yet")
 	}
 	r := make([]ObjectType, 0, len(gObjectManager.idToEntityData))
-	for id := 1; id < len(gObjectManager.idToEntityData); id++ {
-		inst := ObjectIndex(id).new()
+	for id, _ := range gObjectManager.idToEntityData {
+		inst := allocateRawInstance(id)
 		r = append(r, inst)
 	}
+	// Sort alphabetically
+	sort.Slice(r[:], func(i, j int) bool {
+		return r[i].ObjectName() < r[j].ObjectName()
+	})
 	return r
+}
+
+// allocateRawInstance is used by allocateNewInstance and UnsafeObjectTypeList
+func allocateRawInstance(objectIndex ObjectIndex) ObjectType {
+	var inst ObjectType
+	valToCopy := gObjectManager.idToEntityData[objectIndex]
+	if valToCopy == nil {
+		panic("Invalid objectIndex given")
+	}
+	inst = reflect.New(reflect.ValueOf(valToCopy).Elem().Type()).Interface().(ObjectType)
+	baseObj := inst.BaseObject()
+	baseObj.reset()
+	baseObj.internal.ObjectIndex = objectIndex
+	return inst
 }

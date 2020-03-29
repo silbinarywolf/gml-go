@@ -789,6 +789,7 @@ func (g *Generator) generateCodeGenHeader() {
 
 func getFilesRecursively(assetDir string, assetTypeDir string, assetNamesUsed map[string]string) []Asset {
 	rootDir := filepath.Clean(assetDir + "/" + assetTypeDir)
+	isSoundAsset := assetTypeDir == "sound"
 	filepathSet := make([]Asset, 0, 50)
 	dirs := make([]string, 0, 50)
 	dirs = append(dirs, rootDir)
@@ -812,8 +813,8 @@ func getFilesRecursively(assetDir string, assetTypeDir string, assetNamesUsed ma
 			// so each asset type has explicit rules (except for "custom", whose rule would be any non-folder file)
 			isAsset = isAsset ||
 				(len(name) >= 2 && name[0] == '0' && name[1] == '.') || // ie. "0.png"
-				name == "config.json" ||
-				name == "sound.mp3" || name == "sound.wav"
+				name == "config.json"
+			isAsset = isAsset || (isSoundAsset && (name == "sound.mp3" || name == "sound.wav"))
 		}
 		if isAsset {
 			name := filepath.Base(dir)
