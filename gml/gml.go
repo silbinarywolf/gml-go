@@ -60,12 +60,14 @@ func (context *DefaultContext) Draw() {
 			}
 			roomInst.draw()
 		} else {
-			// If no follower is configured, just render the first active room found
+			// If no follower is configured, just try render the first active room found
 			roomInst := roomLastCreated()
-			if roomInst == nil {
-				panic("No room exists, you must create a room")
+			if roomInst != nil {
+				// NOTE(Jae): 2020-03-29
+				// We used to throw an error if no room existed but doing that
+				// isn't great when you're not in a room, like a title screen
+				roomInst.draw()
 			}
-			roomInst.draw()
 		}
 
 		// Render camera onto OS-window

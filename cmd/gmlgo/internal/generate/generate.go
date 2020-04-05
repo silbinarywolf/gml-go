@@ -504,11 +504,19 @@ func generateGameObject(dir string, packageName string, structsUsingGMLObject []
 		}
 		g.Printf("}\n\n")
 
-		// Generate ObjectName()
+		// Generate methods
 		for _, record := range structsUsingGMLObject {
-			const comment = "// ObjectName will provide the name of the struct. This can be useful for debugging or custom tools."
 			assetName := record.Name
-			g.Printf(comment + "\nfunc (inst *" + assetName + ") ObjectName() string         { return \"" + assetName + "\" }\n")
+			// Generate ObjectName()
+			{
+				const comment = "// ObjectName will provide the name of the struct. This can be useful for debugging or custom tools."
+				g.Printf(comment + "\nfunc (inst *" + assetName + ") ObjectName() string         { return \"" + assetName + "\" }\n")
+			}
+			// Generate ObjectIndex()
+			//{
+			//	const comment = "// ObjectIndex will provide the uid of the struct. This can be used by tools to save a reference to the object type."
+			//	g.Printf(comment + "\nfunc (inst *" + assetName + ") ObjectIndex() gml.ObjectIndex         { return " + objectIdPrefix + assetName + " }\n")
+			//}
 		}
 		g.Printf("\n")
 
