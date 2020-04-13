@@ -33,14 +33,6 @@ func allocateNewInstance(objectIndex ObjectIndex) (ObjectType, int) {
 	return inst, slot
 }
 
-func (inst *Object) InstanceIndex() InstanceIndex {
-	return inst.internal.InstanceIndex
-}
-
-func (inst *Object) RoomInstanceIndex() RoomInstanceIndex {
-	return inst.internal.RoomInstanceIndex
-}
-
 // getBaseObject get the base object for an instance
 func (index InstanceIndex) getBaseObject() *Object {
 	if inst := index.Get(); inst != nil {

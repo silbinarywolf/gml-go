@@ -19,7 +19,8 @@ var (
 )
 
 func KeyboardCheck(key Key) bool {
-	return ebiten.IsKeyPressed(keyboardVkToEbiten[key])
+	return keyStateList[key] == keyPressed ||
+		keyStateList[key] == keyHeld
 }
 
 func KeyboardCheckPressed(key Key) bool {

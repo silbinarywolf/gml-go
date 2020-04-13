@@ -94,7 +94,7 @@ func GamepadAxisValue(id int, axis GamepadAxis) float64 {
 }
 
 func GamepadGetGUID(id int) string {
-	return ebiten.GamepadGUID(id)
+	return ebiten.GamepadSDLID(id)
 }
 
 func GamepadGetDescription(id int) string {

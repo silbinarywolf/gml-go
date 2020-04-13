@@ -94,11 +94,13 @@ func (inst *Object) SetSolid(isSolid bool) {
 	inst.internal.Solid = isSolid
 }
 
-func (inst *Object) Solid() bool                { return inst.internal.Solid }
-func (inst *Object) BaseObject() *Object        { return inst }
-func (inst *Object) ObjectIndex() ObjectIndex   { return inst.internal.ObjectIndex }
-func (inst *Object) ImageAngleRadians() float64 { return inst.internal.ImageAngleRadians }
-func (inst *Object) ImageAngle() float64        { return inst.internal.ImageAngleRadians * (180 / math.Pi) }
+func (inst *Object) InstanceIndex() InstanceIndex         { return inst.internal.InstanceIndex }
+func (inst *Object) RoomInstanceIndex() RoomInstanceIndex { return inst.internal.RoomInstanceIndex }
+func (inst *Object) Solid() bool                          { return inst.internal.Solid }
+func (inst *Object) BaseObject() *Object                  { return inst }
+func (inst *Object) ObjectIndex() ObjectIndex             { return inst.internal.ObjectIndex }
+func (inst *Object) ImageAngleRadians() float64           { return inst.internal.ImageAngleRadians }
+func (inst *Object) ImageAngle() float64                  { return inst.internal.ImageAngleRadians * (180 / math.Pi) }
 
 // Depth will get the draw order of the object
 func (inst *Object) Depth() int { return inst.internal.Depth }

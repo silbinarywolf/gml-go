@@ -141,6 +141,9 @@ func (roomInstanceIndex RoomInstanceIndex) Size() geom.Vec {
 
 // WithAll returns a list of instances in the same room as the provided object
 func (roomIndex RoomInstanceIndex) WithAll() []InstanceIndex {
+	if roomIndex == 0 {
+		return nil
+	}
 	roomInst := roomGetInstance(roomIndex)
 	if roomInst == nil {
 		panic("Cannot call WithAll() on room that doesn't exist")

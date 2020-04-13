@@ -3,6 +3,7 @@ package gml
 import (
 	"reflect"
 	"sort"
+	"strconv"
 )
 
 var gObjectManager = &objectManager{
@@ -42,7 +43,7 @@ func allocateRawInstance(objectIndex ObjectIndex) ObjectType {
 	var inst ObjectType
 	valToCopy := gObjectManager.idToEntityData[objectIndex]
 	if valToCopy == nil {
-		panic("Invalid objectIndex given")
+		panic("Invalid objectIndex given: " + strconv.Itoa(int(objectIndex)))
 	}
 	inst = reflect.New(reflect.ValueOf(valToCopy).Elem().Type()).Interface().(ObjectType)
 	baseObj := inst.BaseObject()
