@@ -81,6 +81,9 @@ func (roomInstanceIndex RoomInstanceIndex) InstanceChangeRoom(baseObj *Object) {
 
 // InstanceCreate will create a new instance in the room and call its Create() event.
 func (roomInstanceIndex RoomInstanceIndex) InstanceCreate(x, y float64, objectIndex ObjectIndex) ObjectType {
+	if roomInstanceIndex == 0 {
+		panic("Invalid room instance id: 0, you are currently not referencing a room.")
+	}
 	inst, slot := allocateNewInstance(objectIndex)
 	baseObj := inst.BaseObject()
 

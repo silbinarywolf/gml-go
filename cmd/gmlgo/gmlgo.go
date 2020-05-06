@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"sort"
 	"strings"
 	"text/tabwriter"
@@ -58,7 +59,17 @@ The commands are:
 	for _, cmd := range cmds {
 		if cmd.Name() == os.Args[1] {
 			if err := cmd.Run(cmd, args); err != nil {
-				panic(err.Error())
+				switch err := err.(type) {
+				case *exec.ExitError:
+					// NOTE(Jae): 2020-05-06
+					// Return error code from "go build" or similar commands if we got
+					// an error from those.
+					os.Exit(err.ExitCode())
+				default:
+					panic(err.Error())
+					// DEBUG:
+					// panic(fmt.Sprintf("Error Type: %T, %s", err, err.Error()))
+				}
 			}
 			return
 		}

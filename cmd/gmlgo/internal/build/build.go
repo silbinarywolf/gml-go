@@ -85,11 +85,17 @@ func Build(dir string, args []string, envVars []string) error {
 	if err != nil {
 		return xerrors.Errorf("%w", err)
 	}
+
 	errOutput, _ := ioutil.ReadAll(cmdErr)
 	stdOutput, _ := ioutil.ReadAll(cmdOut)
-	if len(errOutput) > 0 {
-		return xerrors.Errorf("%s", errOutput)
-	}
+
 	fmt.Printf("%s", stdOutput)
+	fmt.Printf("%s", errOutput)
+
+	// NOTE(Jae): 2020-05-06
+	// Wait for command to finish and possibly get an *exec.ExitError error.
+	if err := cmd.Wait(); err != nil {
+		return err
+	}
 	return nil
 }
