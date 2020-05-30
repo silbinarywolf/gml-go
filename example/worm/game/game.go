@@ -163,7 +163,7 @@ func (*GameController) GameReset() {
 
 func (*GameController) GamePostDraw() {
 	// Draw frame usage
-	gml.DrawText(8, 8, gml.FrameUsage(), color.White)
+	gml.DrawText(8, 8, gml.DebugFrameUsage(), color.White)
 
 	// Draw score
 	if playerInst, ok := Global.Player.Get().(*Worm); ok {

@@ -28,11 +28,15 @@ func InitAssetDir() {
 	if ProgramDirectory == "" {
 		ProgramDirectory = computeProgramDirectory()
 	}
-	if AssetDirectory == assetDirectoryUnset {
-		AssetDirectory = ProgramDirectory + "/" + AssetDirectoryBase
-	}
+	AssetDirectory = ProgramDirectory + "/" + AssetDirectoryBase
 }
 
+// SetAssetDir allows the engine to override the default behaviour
+// of
 func SetAssetDir(dir string) {
 	AssetDirectory = dir
+}
+
+func IsAssetDirSet() bool {
+	return AssetDirectory != assetDirectoryUnset
 }

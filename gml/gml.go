@@ -2,7 +2,6 @@ package gml
 
 import (
 	"errors"
-	"os"
 	"path/filepath"
 	"runtime"
 
@@ -127,7 +126,6 @@ func setup(controller gameController, gameSettings *GameSettings) {
 	gGameSettings = *gameSettings
 
 	// Initialize
-	file.InitAssetDir()
 	gCameraManager.reset()
 	initDraw()
 
@@ -186,25 +184,43 @@ func DeltaTime() float64 {
 	return dt.DeltaTime()
 }
 
+// testInitAssetDir is designed to be called from a gmlgo generated method inside the game projects "asset"
+// directory, this allows us to determine where asset directory exists when running in circumstances
+// where the executables location is nowhere near the assets. (ie. "go test")
+func testInitAssetDir() {
+	if !file.IsAssetDirSet() {
+		_, filename, _, _ := runtime.Caller(2)
+		dir := filepath.Clean(filepath.Dir(filename))
+		// NOTE(Jae): 2020-05-30
+		// In release builds, this logic would fail because the folder
+		// being referenced would be where the code was built on the machine
+		// that compiled it.
+		// We might want to make this logic still work for debug mode or something
+		// so we can catch dev. mistakes if/when this logic needs to change.
+		//if _, err := os.Stat(dir); os.IsNotExist(err) {
+		//	panic("Cannot find asset directory: " + dir + ", integration tests must go inside \"{project}/test\"")
+		//}
+		file.SetAssetDir(dir)
+	}
+}
+
 // TestBootstrap the game to give control over continuing / stopping execution per-frame
 // this method is for additional control when testing
 func TestBootstrap(controller gameController, gameSettings GameSettings, testSettings TestSettings) {
-	// Set asset directory relative to the test code file path
-	// for `go test` support
-	_, filename, _, _ := runtime.Caller(1)
-	dir := filepath.Clean(filepath.Dir(filename) + "/../" + file.AssetDirectoryBase)
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		panic("Cannot find asset directory: " + dir + ", integration tests must go inside \"{project}/test\"")
-	}
-	file.SetAssetDir(dir)
-
 	setup(controller, &gameSettings)
 	runTest(gameSettings, testSettings)
 }
 
 // Run
 func Run(controller gameController, gameSettings GameSettings) {
-	// Setup defaults
+	// NOTE(Jae): 2020-05-30
+	// We setup the asset directory here. For tests this program would've already
+	// executed "testInitAssetDir()" to determine the asset directory
+	// to support other execution modes like "go test".
+	// However, that folder location would be incorrect for release builds
+	// and we want it to be relative to the executables location.
+	file.InitAssetDir()
+
 	setup(controller, &gameSettings)
 	run(gameSettings)
 }
