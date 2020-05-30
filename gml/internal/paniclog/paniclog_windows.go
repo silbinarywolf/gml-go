@@ -1,6 +1,6 @@
 // +build windows
 
-package paniccatch
+package paniclog
 
 import (
 	"log"

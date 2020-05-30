@@ -1,6 +1,6 @@
 // +build darwin linux
 
-package paniccatch
+package paniclog
 
 import (
 	"log"

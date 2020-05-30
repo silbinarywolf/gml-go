@@ -9,7 +9,7 @@ import (
 	"github.com/silbinarywolf/gml-go/gml/internal/dt"
 	"github.com/silbinarywolf/gml-go/gml/internal/file"
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
-	_ "github.com/silbinarywolf/gml-go/gml/internal/paniccatch"
+	"github.com/silbinarywolf/gml-go/gml/internal/paniclog"
 )
 
 type DefaultContext struct{}
@@ -213,6 +213,15 @@ func TestBootstrap(controller gameController, gameSettings GameSettings, testSet
 
 // Run
 func Run(controller gameController, gameSettings GameSettings) {
+	// We only want panic/crashes to be redirected to log files for release
+	// builds. By placing the logic here, other commands like "go test" wont end
+	// up logging relative to the current working directory or similar.
+	//
+	// A small concern is that with this approach, if a crash occurs during bootup
+	// it wont be caught. (ie. in a Golang init() function) but I think I can live
+	// with that.
+	paniclog.Init()
+
 	// NOTE(Jae): 2020-05-30
 	// We setup the asset directory here. For tests this program would've already
 	// executed "testInitAssetDir()" to determine the asset directory

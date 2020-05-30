@@ -1,13 +1,13 @@
-// +build !js
+// +build !js,!debug
 
-package paniccatch
+package paniclog
 
 import (
 	"log"
 	"os"
 )
 
-func maybeRedirectPanicToLog() {
+func initPanicCatch() {
 	// NOTE(Jae): 2019-12-21
 	// We dont utilize file.ProgramDirectory here as it won't
 	// be computed yet, so we just log to the relative "logs"
