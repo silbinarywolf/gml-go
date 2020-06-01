@@ -1,6 +1,6 @@
 module github.com/silbinarywolf/gml-go
 
-go 1.12
+go 1.14
 
 require (
 	github.com/bwmarrin/snowflake v0.3.0
