@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/silbinarywolf/gml-go/gml/internal/dt"
+	"github.com/silbinarywolf/gml-go/gml/monotime"
 )
 
 // SetMaxTPS sets the maximum TPS (ticks per second), that represents how many updating function is called per second. The initial value is 60.
@@ -25,9 +26,12 @@ func run(gameSettings GameSettings) {
 	for {
 		select {
 		case <-tick:
+			frameStartTime := monotime.Now()
 			if err := update(); err != nil {
 				return
 			}
+			gGameGlobals.frameUpdateBudgetNanosecondsUsed = monotime.Now() - frameStartTime
+			gGameGlobals.tickCount++
 			// todo(Jake): 2018-07-10
 			//
 			// Should improve this to be more robust!

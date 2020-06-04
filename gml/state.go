@@ -24,7 +24,7 @@ type gameGlobals struct {
 	frameCount int
 	// tickCount is how many update ticks have executed since
 	// the application started
-	tickCount int
+	tickCount uint64
 	// frameUpdateBudgetNanosecondsUsed is used to calc a percentage
 	// of how much time was spent updating and rendering the frame
 	// out of how much time or budget you have
@@ -48,7 +48,7 @@ func DebugFrameUsage() string {
 }
 
 // DebugTickCount is incremented by 1 per update() call
-func DebugTickCount() int {
+func DebugTickCount() uint64 {
 	return gGameGlobals.tickCount
 }
 
