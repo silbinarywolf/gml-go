@@ -10,6 +10,7 @@ import (
 	"github.com/silbinarywolf/gml-go/gml/internal/file"
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 	"github.com/silbinarywolf/gml-go/gml/internal/paniclog"
+	"github.com/silbinarywolf/gml-go/gml/monotime"
 )
 
 type DefaultContext struct{}
@@ -277,6 +278,11 @@ func ContextUpdatePush(context contextUpdateLoop) {
 	}
 	context.Open()
 	gUpdateContextStack = append(gUpdateContextStack, context)
+}
+
+func updateFrameTimerAndTickCount(frameStartTime int64) {
+	gGameGlobals.frameUpdateBudgetNanosecondsUsed = monotime.Now() - frameStartTime
+	gGameGlobals.tickCount++
 }
 
 func update() error {

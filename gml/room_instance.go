@@ -3,7 +3,6 @@ package gml
 import (
 	"sort"
 
-	"github.com/silbinarywolf/gml-go/gml/internal/assert"
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 )
 
@@ -96,9 +95,13 @@ func (roomInstanceIndex RoomInstanceIndex) InstanceCreate(x, y float64, objectIn
 	roomInst := &roomInstanceState.roomInstances[roomInstanceIndex]
 	roomInst.instances = append(roomInst.instances, baseObj.InstanceIndex())
 
-	assert.DebugAssert(baseObj.internal.InstanceIndex == 0, "Instance index cannot be 0")
+	if baseObj.internal.InstanceIndex == 0 {
+		panic("Instance index cannot be 0")
+	}
 	gState.instanceManager.instanceIndexToIndex[baseObj.internal.InstanceIndex] = slot
-	assert.DebugAssert(baseObj.internal.RoomInstanceIndex == 0, "Room Instance Index cannot be 0")
+	if baseObj.internal.RoomInstanceIndex == 0 {
+		panic("Room Index cannot be 0")
+	}
 
 	inst.Reset()
 	inst.Create()

@@ -31,8 +31,7 @@ func updateAndDrawEbiten(s *ebiten.Image) error {
 		draw()
 	}
 
-	gGameGlobals.frameUpdateBudgetNanosecondsUsed = monotime.Now() - frameStartTime
-	gGameGlobals.tickCount++
+	updateFrameTimerAndTickCount(frameStartTime)
 	return err
 }
 

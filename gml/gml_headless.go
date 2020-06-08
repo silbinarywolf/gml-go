@@ -30,8 +30,7 @@ func run(gameSettings GameSettings) {
 			if err := update(); err != nil {
 				return
 			}
-			gGameGlobals.frameUpdateBudgetNanosecondsUsed = monotime.Now() - frameStartTime
-			gGameGlobals.tickCount++
+			updateFrameTimerAndTickCount(frameStartTime)
 			// todo(Jake): 2018-07-10
 			//
 			// Should improve this to be more robust!

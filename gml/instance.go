@@ -21,7 +21,9 @@ func InstanceRestore(oldInstanceIndex InstanceIndex, objectIndex ObjectIndex) Ob
 	baseObj := inst.BaseObject()
 	baseObj.internal.InstanceIndex = oldInstanceIndex
 	gState.instanceManager.instanceIndexToIndex[baseObj.internal.InstanceIndex] = slot
-	//assert.DebugAssert(baseObj.internal.RoomInstanceIndex == 0, "Room Instance Index cannot be 0")
+	// NOTE(Jae): 2020-06-08
+	// Should this method fail to restore if the room no longer exists?
+	// How should we handle that case?
 	return inst
 }
 
