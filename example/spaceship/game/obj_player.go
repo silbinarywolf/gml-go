@@ -23,8 +23,8 @@ func (self *Player) Create() {
 func (self *Player) Update() {
 	if self.enemyCreateAlarm.Repeat(60) {
 		// Spawn enemies at the top of the frame, every 60 frames
-		roomSize := self.RoomInstanceIndex().Size()
-		self.RoomInstanceIndex().InstanceCreate(float64(rand.Intn(int(roomSize.X))), 0, ObjEnemyShip)
+		roomSize := self.RoomIndex().Size()
+		self.RoomIndex().InstanceCreate(float64(rand.Intn(int(roomSize.X))), 0, ObjEnemyShip)
 	}
 
 	if gml.KeyboardCheck(gml.VkLeft) {
@@ -40,7 +40,7 @@ func (self *Player) Update() {
 		self.Y += 8
 	}
 	if gml.KeyboardCheckPressed(gml.VkSpace) {
-		bullet := self.RoomInstanceIndex().InstanceCreate(self.X, self.Y, ObjBullet).(*Bullet)
+		bullet := self.RoomIndex().InstanceCreate(self.X, self.Y, ObjBullet).(*Bullet)
 		bullet.Owner = self.InstanceIndex()
 	}
 }

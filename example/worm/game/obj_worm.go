@@ -100,7 +100,7 @@ func (self *Worm) TriggerDeath() {
 
 		// Show game over menu
 		self.CalcMedals()
-		self.RoomInstanceIndex().InstanceCreate(0, 0, ObjMenuGameover)
+		self.RoomIndex().InstanceCreate(0, 0, ObjMenuGameover)
 
 		// Leap into air at death
 		self.Speed.Y = WormLeapPower
@@ -217,7 +217,7 @@ func (self *Worm) Draw() {
 
 func (self *Worm) Update() {
 	// Pre Begin Step
-	self.WallSpawner.Update(self.RoomInstanceIndex())
+	self.WallSpawner.Update(self.RoomIndex())
 
 	defer func() {
 		self.Physics.Update(&self.Object)
@@ -279,7 +279,7 @@ func (self *Worm) Update() {
 
 	if self.dirtCreateTimer.Repeat(2) {
 		if !self.InAir {
-			self.RoomInstanceIndex().InstanceCreate(self.X, self.Y, ObjWormHole)
+			self.RoomIndex().InstanceCreate(self.X, self.Y, ObjWormHole)
 		}
 	}
 

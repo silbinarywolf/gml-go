@@ -27,7 +27,7 @@ func (self *WallSpawner) Reset() {
 	self.WallList = append(self.WallList, wall.WallSetFlat...)
 }
 
-func (self *WallSpawner) Update(roomInstanceIndex gml.RoomInstanceIndex) {
+func (self *WallSpawner) Update(roomInstanceIndex gml.RoomIndex) {
 	if self.SpawnWallTimer.Tick() {
 		//if additional_spacing != WALL_TIME_EMPTY {
 		//	timer += additional_spacing

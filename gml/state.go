@@ -106,8 +106,8 @@ func (state *state) removeDeletedEntities() {
 
 		// Remove from room instance draw list
 		{
-			roomInstanceIndex := manager.instances[dataIndex].BaseObject().RoomInstanceIndex()
-			roomInst := roomGetInstance(roomInstanceIndex)
+			RoomIndex := manager.instances[dataIndex].BaseObject().RoomIndex()
+			roomInst := roomGetInstance(RoomIndex)
 			if roomInst != nil {
 				instances := roomInst.instances
 				if len(instances) == 1 {

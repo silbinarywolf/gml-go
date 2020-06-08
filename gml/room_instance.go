@@ -7,19 +7,19 @@ import (
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 )
 
-type RoomInstanceIndex int32
+type RoomIndex int32
 
-const roomUndefined RoomInstanceIndex = 0
+const roomUndefined RoomIndex = 0
 
 type roomInstanceStateManager struct {
 	roomInstances          []roomInstance
-	lastCreatedRoom        RoomInstanceIndex
+	lastCreatedRoom        RoomIndex
 	isCreatingRoomInstance bool
 }
 
 type roomInstance struct {
 	used  bool
-	index RoomInstanceIndex
+	index RoomIndex
 	//room  *room.Room // deprecate room data
 	geom.Rect
 
@@ -30,8 +30,8 @@ var roomInstanceState = roomInstanceStateManager{
 	roomInstances: make([]roomInstance, 1, 10),
 }
 
-// RoomInstanceNew create a new empty room instance programmatically
-func RoomInstanceNew() RoomInstanceIndex {
+// RoomInstanceNew create a new empty room programmatically
+func RoomInstanceNew() RoomIndex {
 	roomInstanceState.roomInstances = append(roomInstanceState.roomInstances, roomInstance{
 		used: true,
 	})
@@ -41,7 +41,7 @@ func RoomInstanceNew() RoomInstanceIndex {
 	}()
 	index := len(roomInstanceState.roomInstances) - 1
 	roomInst := &roomInstanceState.roomInstances[index]
-	roomInst.index = RoomInstanceIndex(index)
+	roomInst.index = RoomIndex(index)
 
 	// If creating room programmatically, default the room size
 	// to the size of the screen
@@ -52,18 +52,18 @@ func RoomInstanceNew() RoomInstanceIndex {
 	return roomInst.index
 }
 
-func (roomInstanceIndex RoomInstanceIndex) InstanceChangeRoom(baseObj *Object) {
-	roomInst := &roomInstanceState.roomInstances[roomInstanceIndex]
+func (RoomIndex RoomIndex) InstanceChangeRoom(baseObj *Object) {
+	roomInst := &roomInstanceState.roomInstances[RoomIndex]
 	if !roomInst.used {
 		return
 	}
-	oldRoomInstanceIndex := baseObj.RoomInstanceIndex()
-	if oldRoomInstanceIndex == 0 {
-		baseObj.internal.RoomInstanceIndex = roomInstanceIndex
+	oldRoomIndex := baseObj.RoomIndex()
+	if oldRoomIndex == 0 {
+		baseObj.internal.RoomIndex = RoomIndex
 		roomInst.instances = append(roomInst.instances, baseObj.InstanceIndex())
 		return
 	}
-	if oldRoomInstanceIndex == baseObj.internal.RoomInstanceIndex {
+	if oldRoomIndex == baseObj.internal.RoomIndex {
 		return
 	}
 	// NOTE(Jake): 2018-07-22
@@ -75,13 +75,13 @@ func (roomInstanceIndex RoomInstanceIndex) InstanceChangeRoom(baseObj *Object) {
 	panic("todo: Update this to remove instance index from one room instance list and add it to another")
 	// Move entity to new list
 	//index := len(manager.instances)
-	//moveInstance(inst, index, roomInstanceIndex, layerIndex)
+	//moveInstance(inst, index, RoomIndex, layerIndex)
 	//manager.instances = append(manager.instances, inst)
 }
 
 // InstanceCreate will create a new instance in the room and call its Create() event.
-func (roomInstanceIndex RoomInstanceIndex) InstanceCreate(x, y float64, objectIndex ObjectIndex) ObjectType {
-	if roomInstanceIndex == 0 {
+func (RoomIndex RoomIndex) InstanceCreate(x, y float64, objectIndex ObjectIndex) ObjectType {
+	if RoomIndex == 0 {
 		panic("Invalid room instance id: 0, you are currently not referencing a room.")
 	}
 	inst, slot := allocateNewInstance(objectIndex)
@@ -92,15 +92,15 @@ func (roomInstanceIndex RoomInstanceIndex) InstanceCreate(x, y float64, objectIn
 	baseObj.internal.InstanceIndex = gState.instanceManager.nextInstanceIndex
 	baseObj.Vec = geom.Vec{X: x, Y: y}
 
-	baseObj.internal.RoomInstanceIndex = roomInstanceIndex
-	roomInst := &roomInstanceState.roomInstances[roomInstanceIndex]
+	baseObj.internal.RoomIndex = RoomIndex
+	roomInst := &roomInstanceState.roomInstances[RoomIndex]
 	roomInst.instances = append(roomInst.instances, baseObj.InstanceIndex())
 
 	if baseObj.internal.InstanceIndex == 0 {
 		panic("Instance index cannot be 0")
 	}
 	gState.instanceManager.instanceIndexToIndex[baseObj.internal.InstanceIndex] = slot
-	if baseObj.internal.RoomInstanceIndex == 0 {
+	if baseObj.internal.RoomIndex == 0 {
 		panic("Room Index cannot be 0")
 	}
 
@@ -110,13 +110,13 @@ func (roomInstanceIndex RoomInstanceIndex) InstanceCreate(x, y float64, objectIn
 }
 
 // Destroy destroys a room instance
-func (roomInstanceIndex RoomInstanceIndex) Destroy() {
-	roomInst := roomGetInstance(roomInstanceIndex)
+func (RoomIndex RoomIndex) Destroy() {
+	roomInst := roomGetInstance(RoomIndex)
 	if roomInst == nil {
-		if roomInstanceIndex == 0 {
+		if RoomIndex == 0 {
 			panic("Room index 0. Cannot destroy room if not set.")
 		}
-		panic("Unable to find room index: " + strconv.Itoa(int(roomInstanceIndex)) + ". Cannot destroy a room if its already destroyed.")
+		panic("Unable to find room index: " + strconv.Itoa(int(RoomIndex)) + ". Cannot destroy a room if its already destroyed.")
 	}
 	for _, instanceIndex := range roomInst.instances {
 		if inst := instanceIndex.Get(); inst != nil {
@@ -132,25 +132,25 @@ func (roomInstanceIndex RoomInstanceIndex) Destroy() {
 	*roomInst = roomInstance{}
 }
 
-func (roomInstanceIndex RoomInstanceIndex) SetSize(width, height float64) {
-	if roomInst := roomGetInstance(roomInstanceIndex); roomInst != nil {
+func (RoomIndex RoomIndex) SetSize(width, height float64) {
+	if roomInst := roomGetInstance(RoomIndex); roomInst != nil {
 		roomInst.Size.X = width
 		roomInst.Size.Y = height
 		return
 	}
-	panic("Invalid roomInstanceIndex given")
+	panic("Invalid RoomIndex given")
 }
 
 // Size returns the size of the given room instance
-func (roomInstanceIndex RoomInstanceIndex) Size() geom.Vec {
-	if roomInst := roomGetInstance(roomInstanceIndex); roomInst != nil {
+func (RoomIndex RoomIndex) Size() geom.Vec {
+	if roomInst := roomGetInstance(RoomIndex); roomInst != nil {
 		return roomInst.Size
 	}
-	panic("Invalid roomInstanceIndex given")
+	panic("Invalid RoomIndex given")
 }
 
 // WithAll returns a list of instances in the same room as the provided object
-func (roomIndex RoomInstanceIndex) WithAll() []InstanceIndex {
+func (roomIndex RoomIndex) WithAll() []InstanceIndex {
 	if roomIndex == 0 {
 		return nil
 	}
@@ -172,8 +172,8 @@ func (roomIndex RoomInstanceIndex) WithAll() []InstanceIndex {
 	return list
 }
 
-func roomGetInstance(roomInstanceIndex RoomInstanceIndex) *roomInstance {
-	roomInst := &roomInstanceState.roomInstances[roomInstanceIndex]
+func roomGetInstance(RoomIndex RoomIndex) *roomInstance {
+	roomInst := &roomInstanceState.roomInstances[RoomIndex]
 	if !roomInst.used {
 		return nil
 	}

@@ -24,10 +24,7 @@ func (self *EnemyShip) Update() {
 	// todo(Jake): 2019-01-23
 	// Add some code here to destroy the player ship?
 
-	// todo(Jake): 2018-12-06 - #38
-	// Add function to get RoomSize from RoomInstanceIndex
-	// (once gml.RoomInstanceIndex is implemented)
-	if self.Y > self.RoomInstanceIndex().Size().Y {
+	if self.Y > self.RoomIndex().Size().Y {
 		gml.InstanceDestroy(self)
 		return
 	}

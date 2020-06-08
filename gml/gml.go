@@ -59,7 +59,7 @@ func (context *DefaultContext) Draw() {
 
 		if inst := view.follow.getBaseObject(); inst != nil {
 			// Render instances in same room as instance following
-			roomInst := roomGetInstance(inst.RoomInstanceIndex())
+			roomInst := roomGetInstance(inst.RoomIndex())
 			if roomInst == nil {
 				panic("draw: RoomInstance this object belongs to has been destroyed")
 			}

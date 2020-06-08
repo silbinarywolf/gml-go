@@ -180,7 +180,7 @@ func cameraHasMultipleEnabled() bool {
 func (view *camera) cameraFitToRoomDimensions() {
 	// If we're following an object, snap the camera to fit to the room
 	if inst := view.follow.Get(); inst != nil {
-		roomInst := roomGetInstance(inst.BaseObject().RoomInstanceIndex())
+		roomInst := roomGetInstance(inst.BaseObject().RoomIndex())
 		if roomInst != nil {
 			var left, right, top, bottom float64
 			left = roomInst.Left()

@@ -140,7 +140,7 @@ func (*GameController) GameReset() {
 
 	// Make walls from previous playthrough become disabled
 	screenSize := gml.CameraGetViewSize(0)
-	for _, id := range inst.RoomInstanceIndex().WithAll() {
+	for _, id := range inst.RoomIndex().WithAll() {
 		inst := id.Get()
 		switch inst := inst.(type) {
 		case *Wall:

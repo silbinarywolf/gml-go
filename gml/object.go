@@ -36,11 +36,12 @@ type objectExternal struct {
 }
 
 type objectInternal struct {
-	IsDestroyed       bool
-	Solid             bool
-	BboxOffset        geom.Vec
-	InstanceIndex     InstanceIndex     // global uuid
-	RoomInstanceIndex RoomInstanceIndex // Room Instance Index belongs to
+	IsDestroyed   bool
+	Solid         bool
+	BboxOffset    geom.Vec
+	InstanceIndex InstanceIndex // global uuid
+	// RoomIndex is the id that the object belongs to
+	RoomIndex         RoomIndex
 	ObjectIndex       ObjectIndex
 	Depth             int
 	ImageAngleRadians float64 // Image Angle
@@ -94,13 +95,13 @@ func (inst *Object) SetSolid(isSolid bool) {
 	inst.internal.Solid = isSolid
 }
 
-func (inst *Object) InstanceIndex() InstanceIndex         { return inst.internal.InstanceIndex }
-func (inst *Object) RoomInstanceIndex() RoomInstanceIndex { return inst.internal.RoomInstanceIndex }
-func (inst *Object) Solid() bool                          { return inst.internal.Solid }
-func (inst *Object) BaseObject() *Object                  { return inst }
-func (inst *Object) ObjectIndex() ObjectIndex             { return inst.internal.ObjectIndex }
-func (inst *Object) ImageAngleRadians() float64           { return inst.internal.ImageAngleRadians }
-func (inst *Object) ImageAngle() float64                  { return inst.internal.ImageAngleRadians * (180 / math.Pi) }
+func (inst *Object) InstanceIndex() InstanceIndex { return inst.internal.InstanceIndex }
+func (inst *Object) RoomIndex() RoomIndex         { return inst.internal.RoomIndex }
+func (inst *Object) Solid() bool                  { return inst.internal.Solid }
+func (inst *Object) BaseObject() *Object          { return inst }
+func (inst *Object) ObjectIndex() ObjectIndex     { return inst.internal.ObjectIndex }
+func (inst *Object) ImageAngleRadians() float64   { return inst.internal.ImageAngleRadians }
+func (inst *Object) ImageAngle() float64          { return inst.internal.ImageAngleRadians * (180 / math.Pi) }
 
 // Depth will get the draw order of the object
 func (inst *Object) Depth() int { return inst.internal.Depth }
@@ -139,8 +140,8 @@ func (inst *Object) SetImageAngleRadians(angleInRadians float64) {
 }
 
 func (inst Object) UnsafeSnapshotMarshalBinary(buf *bytes.Buffer) error {
-	if inst.internal.RoomInstanceIndex == 0 {
-		panic("RoomInstanceIndex cannot be 0")
+	if inst.internal.RoomIndex == 0 {
+		panic("RoomIndex cannot be 0")
 	}
 	if err := binary.Write(buf, binary.LittleEndian, inst.internal.InstanceIndex); err != nil {
 		return err
@@ -148,7 +149,7 @@ func (inst Object) UnsafeSnapshotMarshalBinary(buf *bytes.Buffer) error {
 	if err := binary.Write(buf, binary.LittleEndian, inst.internal.ObjectIndex); err != nil {
 		return err
 	}
-	if err := binary.Write(buf, binary.LittleEndian, inst.internal.RoomInstanceIndex); err != nil {
+	if err := binary.Write(buf, binary.LittleEndian, inst.internal.RoomIndex); err != nil {
 		return err
 	}
 	if err := binary.Write(buf, binary.LittleEndian, inst.objectExternal.Rect); err != nil {
@@ -182,11 +183,11 @@ func (inst *Object) UnsafeSnapshotUnmarshalBinary(buf *bytes.Buffer) error {
 	if err := binary.Read(buf, binary.LittleEndian, &inst.internal.ObjectIndex); err != nil {
 		return err
 	}
-	var roomInstanceIndex RoomInstanceIndex
-	if err := binary.Read(buf, binary.LittleEndian, &roomInstanceIndex); err != nil {
+	var RoomIndex RoomIndex
+	if err := binary.Read(buf, binary.LittleEndian, &RoomIndex); err != nil {
 		return err
 	}
-	roomInstanceIndex.InstanceChangeRoom(inst)
+	RoomIndex.InstanceChangeRoom(inst)
 	if err := binary.Read(buf, binary.LittleEndian, &inst.objectExternal.Rect); err != nil {
 		return err
 	}

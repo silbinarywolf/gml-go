@@ -12,7 +12,7 @@ type collisionObject interface {
 
 func CollisionRectList(instType collisionObject, x, y float64) []InstanceIndex {
 	inst := instType.BaseObject()
-	room := roomGetInstance(inst.BaseObject().RoomInstanceIndex())
+	room := roomGetInstance(inst.BaseObject().RoomIndex())
 	if room == nil {
 		panic("RoomInstance this object belongs to has been destroyed")
 	}
@@ -45,7 +45,7 @@ func CollisionRectList(instType collisionObject, x, y float64) []InstanceIndex {
 
 func PlaceFree(instType collisionObject, x, y float64) bool {
 	inst := instType.BaseObject()
-	room := roomGetInstance(inst.BaseObject().RoomInstanceIndex())
+	room := roomGetInstance(inst.BaseObject().RoomIndex())
 	if room == nil {
 		panic("RoomInstance this object belongs to has been destroyed")
 	}
