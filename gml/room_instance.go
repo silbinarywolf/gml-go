@@ -2,6 +2,7 @@ package gml
 
 import (
 	"sort"
+	"strconv"
 
 	"github.com/silbinarywolf/gml-go/gml/internal/geom"
 )
@@ -110,22 +111,25 @@ func (roomInstanceIndex RoomInstanceIndex) InstanceCreate(x, y float64, objectIn
 
 // Destroy destroys a room instance
 func (roomInstanceIndex RoomInstanceIndex) Destroy() {
-	if roomInst := roomGetInstance(roomInstanceIndex); roomInst != nil {
-		for _, instanceIndex := range roomInst.instances {
-			if inst := instanceIndex.Get(); inst != nil {
-				fastInstanceFree(inst)
-			}
+	roomInst := roomGetInstance(roomInstanceIndex)
+	if roomInst == nil {
+		if roomInstanceIndex == 0 {
+			panic("Room index 0. Cannot destroy room if not set.")
 		}
-		if roomInstanceState.lastCreatedRoom == roomInst.index {
-			roomInstanceState.lastCreatedRoom = 0
-		}
-		roomInst.instances = nil
-		roomInst.used = false
-		gState.instancesMarkedForDelete = gState.instancesMarkedForDelete[:0]
-		*roomInst = roomInstance{}
-		return
+		panic("Unable to find room index: " + strconv.Itoa(int(roomInstanceIndex)) + ". Cannot destroy a room if its already destroyed.")
 	}
-	panic("Invalid roomInstanceIndex given")
+	for _, instanceIndex := range roomInst.instances {
+		if inst := instanceIndex.Get(); inst != nil {
+			fastInstanceFree(inst)
+		}
+	}
+	if roomInstanceState.lastCreatedRoom == roomInst.index {
+		roomInstanceState.lastCreatedRoom = 0
+	}
+	roomInst.instances = nil
+	roomInst.used = false
+	gState.instancesMarkedForDelete = gState.instancesMarkedForDelete[:0]
+	*roomInst = roomInstance{}
 }
 
 func (roomInstanceIndex RoomInstanceIndex) SetSize(width, height float64) {
@@ -170,12 +174,13 @@ func (roomIndex RoomInstanceIndex) WithAll() []InstanceIndex {
 
 func roomGetInstance(roomInstanceIndex RoomInstanceIndex) *roomInstance {
 	roomInst := &roomInstanceState.roomInstances[roomInstanceIndex]
-	if roomInst.used {
-		return roomInst
+	if !roomInst.used {
+		return nil
 	}
-	return nil
+	return roomInst
 }
 
+// roomLastCreated gets the index of the last room that was initialized.
 func roomLastCreated() *roomInstance {
 	if roomInstanceState.lastCreatedRoom == 0 {
 		return nil
@@ -196,12 +201,11 @@ func (roomInst *roomInstance) draw() {
 		}
 		return a.Depth() > b.Depth()
 	})
-	//log.Printf("Stable sort count: %d, cap: %d\n", len(layer.instances), cap(layer.instances))
 
 	for _, instanceIndex := range roomInst.instances {
 		inst := instanceIndex.Get()
 		if inst == nil {
-			panic("instance index not removed from draw list when destroyed")
+			panic("Unexpected error. Instance index was not removed from draw list when destroyed and it should have been.")
 		}
 		inst.Draw()
 	}

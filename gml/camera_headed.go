@@ -18,7 +18,7 @@ func cameraClearSurface(index int) {
 	}
 }
 
-func cameraPreDraw(index int) {
+func cameraMaybeAllocSurface(index int) {
 	// NOTE(Jake): 2019-01-26
 	// We don't render an offscreen image to the screen if
 	// only 1 camera is enabled.

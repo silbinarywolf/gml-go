@@ -9,7 +9,7 @@ type cameraSurface struct {
 func cameraClearSurface(index int) {
 }
 
-func cameraPreDraw(index int) {
+func cameraMaybeAllocSurface(index int) {
 }
 
 func cameraDraw(index int) {

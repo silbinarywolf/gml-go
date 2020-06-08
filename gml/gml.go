@@ -39,6 +39,11 @@ func (context *DefaultContext) Update() {
 }
 
 func (context *DefaultContext) Draw() {
+	// NOTE(Jake): 2020-06-08
+	// Default to first camera for level editors / animation editor
+	// etc.
+	cameraSetActive(0)
+
 	// PreDraw
 	gController.GamePreDraw()
 
@@ -49,7 +54,7 @@ func (context *DefaultContext) Draw() {
 			continue
 		}
 		cameraSetActive(i)
-		cameraPreDraw(i)
+		cameraMaybeAllocSurface(i)
 		cameraClearSurface(i)
 
 		if inst := view.follow.getBaseObject(); inst != nil {
@@ -73,7 +78,7 @@ func (context *DefaultContext) Draw() {
 		// Render camera onto OS-window
 		cameraDraw(i)
 	}
-	//cameraClearActive()
+
 	// NOTE(Jake): 2019-04-15
 	// Default to first camera for level editors / animation editor
 	// etc.
@@ -81,6 +86,10 @@ func (context *DefaultContext) Draw() {
 
 	// PostDraw
 	gController.GamePostDraw()
+
+	// Clear the camera so that calls to CameraGetActive() will cause
+	// a panic. (ie. not allowed!)
+	cameraClearActive()
 }
 
 type GameSettings struct {
@@ -281,7 +290,13 @@ func ContextUpdatePush(context contextUpdateLoop) {
 }
 
 func updateFrameTimerAndTickCount(frameStartTime int64) {
-	gGameGlobals.frameUpdateBudgetNanosecondsUsed = monotime.Now() - frameStartTime
+	timeTaken := monotime.Now() - frameStartTime
+	if gGameGlobals.frameUpdateBudgetNanosecondsUsed == 0 {
+		gGameGlobals.frameUpdateBudgetNanosecondsUsed = timeTaken
+	} else {
+		// Exponentially smoothed moving average
+		gGameGlobals.frameUpdateBudgetNanosecondsUsed = int64(float64(gGameGlobals.frameUpdateBudgetNanosecondsUsed) + (0.10 * float64(timeTaken-gGameGlobals.frameUpdateBudgetNanosecondsUsed)))
+	}
 	gGameGlobals.tickCount++
 }
 
