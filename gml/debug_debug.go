@@ -24,7 +24,7 @@ func debugUpdate() {
 
 	if KeyboardCheck(VkControl) {
 		if KeyboardCheckPressed(VkA) {
-			if contextUpdate() != animationEditor {
+			if contextCurrent() != animationEditor {
 				ContextUpdatePush(animationEditor)
 			} else {
 				ContextUpdatePop(animationEditor)

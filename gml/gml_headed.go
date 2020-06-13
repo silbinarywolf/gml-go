@@ -37,8 +37,15 @@ func updateAndDrawEbiten(s *ebiten.Image) error {
 
 func draw() {
 	if !ebiten.IsDrawingSkipped() {
-		context := contextUpdate()
+		context := contextCurrent()
+		// Set default camera for room editors / animation editor / etc.
+		cameraSetActive(0)
+		cameraMaybeAllocSurface(0)
+		cameraClearSurface(0)
 		context.Draw()
+		// Clear the camera so that calls to CameraGetActive() will cause
+		// a panic. (ie. not allowed!)
+		cameraClearActive()
 		gGameGlobals.frameCount++
 	}
 }

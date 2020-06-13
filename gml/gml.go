@@ -42,7 +42,12 @@ func (context *DefaultContext) Draw() {
 	// NOTE(Jake): 2020-06-08
 	// Default to first camera for level editors / animation editor
 	// etc.
+	// This is to support older code that didn't utilize the context
+	// system. Leave it be for now, but we probably want to move
+	// GamePreDraw() calls to inside the cameras loop.
 	cameraSetActive(0)
+	cameraMaybeAllocSurface(0)
+	cameraClearSurface(0)
 
 	// PreDraw
 	gController.GamePreDraw()
@@ -262,9 +267,9 @@ type contextUpdateLoopItem struct {
 	WindowScale         geom.Vec
 }
 
-// UpdateContext is the current context being utilized by the game
+// contextCurrent is the current context being utilized by the game
 // ie. game state mode, animation editor mode, map editor mode
-func contextUpdate() contextUpdateLoop {
+func contextCurrent() contextUpdateLoop {
 	current := gUpdateContextStack[len(gUpdateContextStack)-1]
 	return current
 }
@@ -313,7 +318,7 @@ func update() error {
 
 	// run game loop, or debug animation editor or other update-loop context
 	// depending on the stack
-	context := contextUpdate()
+	context := contextCurrent()
 	context.Update()
 
 	if gGameGlobals.hasGameEnded {
