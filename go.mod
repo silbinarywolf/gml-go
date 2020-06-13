@@ -12,6 +12,6 @@ require (
 	golang.org/x/image v0.0.0-20200430140353-33d19683fad8
 	golang.org/x/mobile v0.0.0-20200329125638-4c31acba0007 // indirect
 	golang.org/x/sys v0.0.0-20200523222454-059865788121 // indirect
-	golang.org/x/tools v0.0.0-20200207183749-b753a1ba74fa
-	golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898
+	golang.org/x/tools v0.0.0-20200612220849-54c614fe050c
+	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543
 )

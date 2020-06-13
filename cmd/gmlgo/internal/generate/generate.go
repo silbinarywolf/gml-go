@@ -15,12 +15,14 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"time"
 	"strconv"
 	"strings"
 	"unicode"
 
 	"github.com/silbinarywolf/gml-go/cmd/gmlgo/internal/base"
 	"github.com/silbinarywolf/gml-go/gml/assetidgen"
+	"github.com/silbinarywolf/gml-go/gml/monotime"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -36,10 +38,14 @@ var tags *string
 
 var verbose bool
 
+// profile is a flag to see how long each generate action is taking
+var profile bool
+
 func init() {
 	tags = Cmd.Flag.String("tags", "", "a list of build tags to consider satisfied during the build")
 	Cmd.Flag.BoolVar(&verbose, "v", false, "verbose")
 	Cmd.Flag.BoolVar(&verbose, "verbose", false, "verbose")
+	Cmd.Flag.BoolVar(&profile, "profile", false, "profile")
 }
 
 const (
@@ -135,19 +141,30 @@ func Run(args Arguments) (err error) {
 
 	for _, dir := range dirs {
 		// Generate assets
-		generateAssets(dir)
+		var assetGenTime int64
+		{
+			startTime := monotime.Now()
+			generateAssets(dir)
+			assetGenTime = monotime.Now() - startTime
+		}
 
 		// Parse packages
+		var packageParseGenTime int64
 		packageList := make([]*Package, 0, 10)
 		{
+			startTime := monotime.Now()
 			projectDir, err := filepath.Abs(dir)
 			if err != nil {
 				panic(err)
 			}
 			projectDir = filepath.Join(projectDir, "...")
 			cfg := &packages.Config{
+				// NOTE(Jae): 2020-06-13
+				// Removed "packags.NeedDeps" and it made parsing go from 1500ms to 300ms.
+				// I checked to ensure the amount of structs parsed was the same and tried shaving
+				// off these various settings.
 				Mode: packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles |
-					packages.NeedImports | packages.NeedDeps | packages.NeedExportsFile |
+					packages.NeedImports | packages.NeedExportsFile |
 					packages.NeedTypes | packages.NeedSyntax | packages.NeedTypesInfo | packages.NeedTypesSizes,
 				// NOTE(Jae): 2019-05-17
 				// Tests shouldn't have game objects in them, so set to false
@@ -161,9 +178,6 @@ func Run(args Arguments) (err error) {
 				log.Fatal(err)
 			}
 			for _, pkg := range pkgs {
-				//if len(pkg.Syntax) != len(pkg.GoFiles) {
-				//	panic("Unexpected error")
-				//}
 				if len(pkg.GoFiles) == 0 {
 					continue
 				}
@@ -181,16 +195,32 @@ func Run(args Arguments) (err error) {
 				}
 				packageList = append(packageList, pkgInfo)
 			}
+			packageParseGenTime = monotime.Now() - startTime
 		}
 
 		// Generation objects for each package (if any parsed)
+		var inspectTime int64
+		var generateTime int64
 		for _, pkg := range packageList {
+			inspectStartTime := monotime.Now()
 			structsUsingObject := inspectGameObjectStructs(pkg)
+			inspectTime += monotime.Now() - inspectStartTime
 			if len(structsUsingObject) == 0 {
 				continue
 			}
+
+			// NOTE(Jae): 2020-06-13
+			// Used this to debug and ensure inspection of structs
+			// worked
+			//fmt.Printf("Structs: %v\n", len(structsUsingObject))
+
 			// Run generate
+			generateStartTime := monotime.Now()
 			generateGameObject(pkg.path, pkg.name, structsUsingObject)
+			generateTime += monotime.Now() - generateStartTime
+		}
+		if profile {
+			fmt.Printf("Asset Gen. Time: %v\nPackage Parse Time: %v\nInspect AST time: %v\nGenerate time: %v\n", time.Duration(assetGenTime), time.Duration(packageParseGenTime), time.Duration(inspectTime), time.Duration(generateTime))
 		}
 	}
 	return
