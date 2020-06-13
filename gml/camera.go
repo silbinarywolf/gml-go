@@ -14,6 +14,10 @@ var (
 const (
 	// todo(Jake): 2019-12-13
 	// Change all camera code so that 0 = inactive camera
+	// This is super low priority and while it *feels* nice to make
+	// everything zero-initialized, camera code wouldn't benefit much
+	// this change. Also, consider how much of a pain-in-the-ass refactoring
+	// the example games and the puzzle game would be for this minor tweak.
 	cameraNone = -1
 )
 
