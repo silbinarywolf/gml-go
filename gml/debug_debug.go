@@ -22,7 +22,10 @@ func debugConfigPath(name string) string {
 func debugUpdate() {
 	sprite.DebugWatch()
 
-	if KeyboardCheck(VkControl) {
+	// NOTE(Jae): 2020-06-16
+	// Commented out the animation editor as it currently causes
+	// a crash anyway. Need to re-work it.
+	/*if KeyboardCheck(VkControl) {
 		if KeyboardCheckPressed(VkA) {
 			if contextCurrent() != animationEditor {
 				ContextUpdatePush(animationEditor)
@@ -34,7 +37,7 @@ func debugUpdate() {
 				CameraSetViewTarget(0, Noone)
 			}
 		}
-	}
+	}*/
 }
 
 func debugDrawIsMouseOver(pos geom.Vec, size geom.Vec) bool {
